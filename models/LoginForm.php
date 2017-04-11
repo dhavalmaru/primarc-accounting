@@ -1,81 +1,43 @@
 <?php
 
-namespace app\models;
+/*
+ * This file is part of the Dektrium project.
+ *
+ * (c) Dektrium project <http://github.com/dektrium/>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
+namespace app\models;
+use dektrium\user\models\LoginForm as BaseLoginForm;
 use Yii;
-use yii\base\Model;
 
 /**
- * LoginForm is the model behind the login form.
+ * LoginForm get user's login and password, validates them and logs the user in. If user has been blocked, it adds
+ * an error to login form.
  *
- * @property User|null $user This property is read-only.
- *
+ * @author Dmitry Erofeev <dmeroff@gmail.com>
  */
-class LoginForm extends Model
+class LoginForm extends BaseLoginForm
 {
-    public $username;
-    public $password;
-    public $rememberMe = true;
-
-    private $_user = false;
+    
+    public $company_id;
 
 
+   
     /**
-     * @return array the validation rules.
-     */
-    public function rules()
-    {
-        return [
-            // username and password are both required
-            [['username', 'password'], 'required'],
-            // rememberMe must be a boolean value
-            ['rememberMe', 'boolean'],
-            // password is validated by validatePassword()
-            ['password', 'validatePassword'],
-        ];
-    }
-
-    /**
-     * Validates the password.
-     * This method serves as the inline validation for password.
+     * Validates form and logs the user in.
      *
-     * @param string $attribute the attribute currently being validated
-     * @param array $params the additional name-value pairs given in the rule
-     */
-    public function validatePassword($attribute, $params)
-    {
-        if (!$this->hasErrors()) {
-            $user = $this->getUser();
-
-            if (!$user || !$user->validatePassword($this->password)) {
-                $this->addError($attribute, 'Incorrect username or password.');
-            }
-        }
-    }
-
-    /**
-     * Logs in a user using the provided username and password.
      * @return bool whether the user is logged in successfully
      */
     public function login()
     {
         if ($this->validate()) {
-            return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600*24*30 : 0);
+           return Yii::$app->getUser()->login($this->user, $this->rememberMe ? $this->module->rememberFor : 0);
+        } else {
+            return false;
         }
-        return false;
     }
-
-    /**
-     * Finds user by [[username]]
-     *
-     * @return User|null
-     */
-    public function getUser()
-    {
-        if ($this->_user === false) {
-            $this->_user = User::findByUsername($this->username);
-        }
-
-        return $this->_user;
-    }
+   
 }

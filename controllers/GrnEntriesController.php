@@ -12,7 +12,7 @@ use yii\filters\VerbFilter;
 /**
  * GrnEntriesController implements the CRUD actions for GrnEntries model.
  */
-class GrnEntriesController extends Controller
+class GrnentriesController extends Controller
 {
     /**
      * @inheritdoc

@@ -222,35 +222,86 @@ class Grn extends \yii\db\ActiveRecord
     }
 
 
-    public function getGrnDetails($id){
-        $sql = "select * from grn where grn_id = '5386'";
-        // $sql = "select * from grn where grn_id = '".$id."'";
+    // public function getGrnDetails($id){
+    //     $sql = "select * from grn where grn_id = '$id'";
+    //     // $sql = "select * from grn where grn_id = '".$id."'";
+    //     $command = Yii::$app->db->createCommand($sql);
+    //     $reader = $command->query();
+    //     return $reader->readAll();
+    // }
+
+    public function getGrnDetails(){
+        $sql = "select * from 
+                (select A.*, B.grn_id as b_grn_id from 
+                (select * from grn where status = 'approved') A 
+                left join 
+                (select distinct grn_id from grn_acc_entries) B 
+                on (A.grn_id = B.grn_id)) C 
+                where b_grn_id is null";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
+    public function getPendingGrnDetails(){
+        $sql = "select B.*, C.grn_no, C.vendor_name, C.category_name, C.po_no from 
+                (select grn_id, inv_nos, (taxable_amt+tax_amt+other_amt) as net_amt, (shortage_amt+expiry_amt+damaged_amt+magrin_diff_amt) as ded_amt from 
+                (select grn_id, GROUP_CONCAT(distinct invoice_no) as inv_nos, sum(case when particular='Taxable Amount' then edited_val else 0 end) as taxable_amt, 
+                        sum(case when particular='Tax' then edited_val else 0 end) as tax_amt, 
+                        sum(case when particular='Other Charges' then edited_val else 0 end) as other_amt, 
+                        sum(case when particular='Shortage Amount' then edited_val else 0 end) as shortage_amt, 
+                        sum(case when particular='Expiry Amount' then edited_val else 0 end) as expiry_amt, 
+                        sum(case when particular='Damaged Amount' then edited_val else 0 end) as damaged_amt, 
+                        sum(case when particular='Margin Diff Amount' then edited_val else 0 end) as magrin_diff_amt 
+                from grn_acc_entries where status = 'pending' group by grn_id) A) B 
+                left join 
+                (select * from grn where status = 'approved') C 
+                on (B.grn_id = C.grn_id)";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
+    public function getApprovedGrnDetails(){
+        $sql = "select B.*, C.grn_no, C.vendor_name, C.category_name, C.po_no from 
+                (select grn_id, inv_nos, (taxable_amt+tax_amt+other_amt) as net_amt, (shortage_amt+expiry_amt+damaged_amt+magrin_diff_amt) as ded_amt from 
+                (select grn_id, GROUP_CONCAT(distinct invoice_no) as inv_nos, sum(case when particular='Taxable Amount' then edited_val else 0 end) as taxable_amt, 
+                        sum(case when particular='Tax' then edited_val else 0 end) as tax_amt, 
+                        sum(case when particular='Other Charges' then edited_val else 0 end) as other_amt, 
+                        sum(case when particular='Shortage Amount' then edited_val else 0 end) as shortage_amt, 
+                        sum(case when particular='Expiry Amount' then edited_val else 0 end) as expiry_amt, 
+                        sum(case when particular='Damaged Amount' then edited_val else 0 end) as damaged_amt, 
+                        sum(case when particular='Margin Diff Amount' then edited_val else 0 end) as magrin_diff_amt 
+                from grn_acc_entries where status = 'approved' group by grn_id) A) B 
+                left join 
+                (select * from grn where status = 'approved') C 
+                on (B.grn_id = C.grn_id)";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
     }
 
     public function getTotalValue($id){
-        $sql = "select sum(total_cost) as total_cost, sum(total_tax) as total_tax, sum(total_amount) as total_amount, 
+        $sql = "select sum(total_cost) as total_cost, sum(total_tax) as total_tax, 0 as other_charges, sum(total_amount) as total_amount, 
                 sum(excess_amount) as excess_amount, sum(shortage_amount) as shortage_amount, sum(expiry_amount) as expiry_amount, 
-                sum(damaged_amount) as damaged_amount, sum(mrp_issue_amount) as mrp_issue_amount, sum(total_deduction) as total_deduction, 
+                sum(damaged_amount) as damaged_amount, sum(margin_diff_amount) as margin_diff_amount, sum(total_deduction) as total_deduction, 
                 sum(total_payable_amount) as total_payable_amount from 
                 (select invoice_no, total_cost, total_tax, total_amount, excess_amount, shortage_amount, expiry_amount, damaged_amount, 
-                    mrp_issue_amount, total_deduction, (total_amount-total_deduction) as total_payable_amount from 
+                    margin_diff_amount, total_deduction, (total_amount-total_deduction) as total_payable_amount from 
                 (select invoice_no, total_cost, total_tax, (total_cost+total_tax) as total_amount, excess_amount, shortage_amount, expiry_amount, 
-                    damaged_amount, mrp_issue_amount, (shortage_amount+expiry_amount+damaged_amount+mrp_issue_amount) as total_deduction from 
-                (select invoice_no, (total_cost+shortage_cost+expiry_cost+damaged_cost+mrp_issue_cost-excess_cost) as total_cost, 
-                    (total_tax+shortage_tax+expiry_tax+damaged_tax+mrp_issue_tax-excess_tax) as total_tax, 
+                    damaged_amount, margin_diff_amount, (shortage_amount+expiry_amount+damaged_amount+margin_diff_amount) as total_deduction from 
+                (select invoice_no, (total_cost+shortage_cost+expiry_cost+damaged_cost+margin_diff_cost-excess_cost) as total_cost, 
+                    (total_tax+shortage_tax+expiry_tax+damaged_tax+margin_diff_tax-excess_tax) as total_tax, 
                     (excess_cost+excess_tax) as excess_amount, (shortage_cost+shortage_tax) as shortage_amount, 
                     (expiry_cost+expiry_tax) as expiry_amount, (damaged_cost+damaged_tax) as damaged_amount, 
-                    (mrp_issue_cost+mrp_issue_tax) as mrp_issue_amount from 
-                (select invoice_no, (total_qty*cost_excl_vat) as total_cost, (total_qty*cost_excl_vat*vat_percen)/100 as total_tax, 
-                    (excess_qty*cost_excl_vat) as excess_cost, (excess_qty*cost_excl_vat*vat_percen)/100 as excess_tax, 
-                    (shortage_qty*cost_excl_vat) as shortage_cost, (shortage_qty*cost_excl_vat*vat_percen)/100 as shortage_tax, 
-                    (expiry_qty*cost_excl_vat) as expiry_cost, (expiry_qty*cost_excl_vat*vat_percen)/100 as expiry_tax, 
-                    (damaged_qty*cost_excl_vat) as damaged_cost, (damaged_qty*cost_excl_vat*vat_percen)/100 as damaged_tax, 
-                    (mrp_issue_qty*cost_excl_vat) as mrp_issue_cost, (mrp_issue_qty*cost_excl_vat*vat_percen)/100 as mrp_issue_tax 
-                    from grn_entries where is_active = '1' and grn_id = '5386') A) B) C) D";
+                    (margin_diff_cost+margin_diff_tax) as margin_diff_amount from 
+                (select invoice_no, ifnull((total_qty*cost_excl_vat),0) as total_cost, ifnull((total_qty*cost_excl_vat*vat_percen)/100,0) as total_tax, 
+                    ifnull((excess_qty*cost_excl_vat),0) as excess_cost, ifnull((excess_qty*cost_excl_vat*vat_percen)/100,0) as excess_tax, 
+                    ifnull((shortage_qty*cost_excl_vat),0) as shortage_cost, ifnull((shortage_qty*cost_excl_vat*vat_percen)/100,0) as shortage_tax, 
+                    ifnull((expiry_qty*cost_excl_vat),0) as expiry_cost, ifnull((expiry_qty*cost_excl_vat*vat_percen)/100,0) as expiry_tax, 
+                    ifnull((damaged_qty*cost_excl_vat),0) as damaged_cost, ifnull((damaged_qty*cost_excl_vat*vat_percen)/100,0) as damaged_tax, 
+                    ifnull((0*cost_excl_vat),0) as margin_diff_cost, ifnull((0*cost_excl_vat*vat_percen)/100,0) as margin_diff_tax 
+                    from grn_entries where is_active = '1' and grn_id = '$id') A) B) C) D";
         // $sql = "select * from grn where grn_id = '".$id."'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
@@ -259,15 +310,15 @@ class Grn extends \yii\db\ActiveRecord
 
     public function getTotalTax($id){
         $sql = "select vat_cst, vat_percen, sum(total_tax) as total_tax from 
-                (select vat_cst, vat_percen, (total_tax+shortage_tax+expiry_tax+damaged_tax+mrp_issue_tax-excess_tax) as total_tax from 
-                (select vat_cst, vat_percen, (total_qty*cost_excl_vat*vat_percen)/100 as total_tax, 
-                    (excess_qty*cost_excl_vat*vat_percen)/100 as excess_tax, 
-                    (shortage_qty*cost_excl_vat*vat_percen)/100 as shortage_tax, 
-                    (expiry_qty*cost_excl_vat*vat_percen)/100 as expiry_tax, 
-                    (damaged_qty*cost_excl_vat*vat_percen)/100 as damaged_tax, 
-                    (mrp_issue_qty*cost_excl_vat*vat_percen)/100 as mrp_issue_tax from grn_entries 
-                where is_active = '1' and grn_id = '5386') A) B 
-                group by vat_cst, vat_percen";
+                (select vat_cst, vat_percen, (total_tax+shortage_tax+expiry_tax+damaged_tax+margin_diff_tax-excess_tax) as total_tax from 
+                (select vat_cst, vat_percen, ifnull((total_qty*cost_excl_vat*vat_percen)/100,0) as total_tax, 
+                    ifnull((excess_qty*cost_excl_vat*vat_percen)/100,0) as excess_tax, 
+                    ifnull((shortage_qty*cost_excl_vat*vat_percen)/100,0) as shortage_tax, 
+                    ifnull((expiry_qty*cost_excl_vat*vat_percen)/100,0) as expiry_tax, 
+                    ifnull((damaged_qty*cost_excl_vat*vat_percen)/100,0) as damaged_tax, 
+                    ifnull((0*cost_excl_vat*vat_percen)/100,0) as margin_diff_tax from grn_entries 
+                where is_active = '1' and grn_id = '$id' and vat_percen>0) A) B 
+                group by vat_cst, vat_percen order by vat_cst, vat_percen";
         // $sql = "select * from grn where grn_id = '".$id."'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
@@ -275,27 +326,37 @@ class Grn extends \yii\db\ActiveRecord
     }
 
     public function getInvoiceDetails($id){
-        $sql = "select invoice_no, sum(total_cost) as total_cost, sum(total_tax) as total_tax, sum(total_amount) as total_amount, 
+        $sql = "select invoice_no, total_cost as invoice_total_cost, total_tax as invoice_total_tax, total_amount as invoice_total_amount, 
+                excess_amount as invoice_excess_amount, shortage_amount as invoice_shortage_amount, expiry_amount as invoice_expiry_amount, 
+                damaged_amount as invoice_damaged_amount, margin_diff_amount as invoice_margin_diff_amount, total_deduction as invoice_total_deduction, 
+                total_payable_amount as invoice_total_payable_amount, total_cost as edited_total_cost, total_tax as edited_total_tax, total_amount as edited_total_amount, 
+                excess_amount as edited_excess_amount, shortage_amount as edited_shortage_amount, expiry_amount as edited_expiry_amount, 
+                damaged_amount as edited_damaged_amount, margin_diff_amount as edited_margin_diff_amount, total_deduction as edited_total_deduction, 
+                total_payable_amount as edited_total_payable_amount, 0 as diff_total_cost, 0 as diff_total_tax, 0 as diff_total_amount, 
+                0 as diff_excess_amount, 0 as diff_shortage_amount, 0 as diff_expiry_amount, 0 as diff_damaged_amount, 
+                0 as diff_margin_diff_amount, 0 as diff_total_deduction, 0 as diff_total_payable_amount, 
+                0 as invoice_other_charges, 0 as edited_other_charges, 0 as diff_other_charges from 
+                (select invoice_no, sum(total_cost) as total_cost, sum(total_tax) as total_tax, sum(total_amount) as total_amount, 
                 sum(excess_amount) as excess_amount, sum(shortage_amount) as shortage_amount, sum(expiry_amount) as expiry_amount, 
-                sum(damaged_amount) as damaged_amount, sum(mrp_issue_amount) as mrp_issue_amount, sum(total_deduction) as total_deduction, 
+                sum(damaged_amount) as damaged_amount, sum(margin_diff_amount) as margin_diff_amount, sum(total_deduction) as total_deduction, 
                 sum(total_payable_amount) as total_payable_amount from 
                 (select invoice_no, total_cost, total_tax, total_amount, excess_amount, shortage_amount, expiry_amount, damaged_amount, 
-                    mrp_issue_amount, total_deduction, (total_amount-total_deduction) as total_payable_amount from 
+                    margin_diff_amount, total_deduction, (total_amount-total_deduction) as total_payable_amount from 
                 (select invoice_no, total_cost, total_tax, (total_cost+total_tax) as total_amount, excess_amount, shortage_amount, expiry_amount, 
-                    damaged_amount, mrp_issue_amount, (shortage_amount+expiry_amount+damaged_amount+mrp_issue_amount) as total_deduction from 
-                (select invoice_no, (total_cost+shortage_cost+expiry_cost+damaged_cost+mrp_issue_cost-excess_cost) as total_cost, 
-                    (total_tax+shortage_tax+expiry_tax+damaged_tax+mrp_issue_tax-excess_tax) as total_tax, 
+                    damaged_amount, margin_diff_amount, (shortage_amount+expiry_amount+damaged_amount+margin_diff_amount) as total_deduction from 
+                (select invoice_no, (total_cost+shortage_cost+expiry_cost+damaged_cost+margin_diff_cost-excess_cost) as total_cost, 
+                    (total_tax+shortage_tax+expiry_tax+damaged_tax+margin_diff_tax-excess_tax) as total_tax, 
                     (excess_cost+excess_tax) as excess_amount, (shortage_cost+shortage_tax) as shortage_amount, 
                     (expiry_cost+expiry_tax) as expiry_amount, (damaged_cost+damaged_tax) as damaged_amount, 
-                    (mrp_issue_cost+mrp_issue_tax) as mrp_issue_amount from 
-                (select invoice_no, (total_qty*cost_excl_vat) as total_cost, (total_qty*cost_excl_vat*vat_percen)/100 as total_tax, 
-                    (excess_qty*cost_excl_vat) as excess_cost, (excess_qty*cost_excl_vat*vat_percen)/100 as excess_tax, 
-                    (shortage_qty*cost_excl_vat) as shortage_cost, (shortage_qty*cost_excl_vat*vat_percen)/100 as shortage_tax, 
-                    (expiry_qty*cost_excl_vat) as expiry_cost, (expiry_qty*cost_excl_vat*vat_percen)/100 as expiry_tax, 
-                    (damaged_qty*cost_excl_vat) as damaged_cost, (damaged_qty*cost_excl_vat*vat_percen)/100 as damaged_tax, 
-                    (mrp_issue_qty*cost_excl_vat) as mrp_issue_cost, (mrp_issue_qty*cost_excl_vat*vat_percen)/100 as mrp_issue_tax 
-                    from grn_entries where is_active = '1' and grn_id = '5386') A) B) C) D 
-                group by invoice_no order by invoice_no";
+                    (margin_diff_cost+margin_diff_tax) as margin_diff_amount from 
+                (select invoice_no, ifnull((total_qty*cost_excl_vat),0) as total_cost, ifnull((total_qty*cost_excl_vat*vat_percen)/100,0) as total_tax, 
+                    ifnull((excess_qty*cost_excl_vat),0) as excess_cost, ifnull((excess_qty*cost_excl_vat*vat_percen)/100,0) as excess_tax, 
+                    ifnull((shortage_qty*cost_excl_vat),0) as shortage_cost, ifnull((shortage_qty*cost_excl_vat*vat_percen)/100,0) as shortage_tax, 
+                    ifnull((expiry_qty*cost_excl_vat),0) as expiry_cost, ifnull((expiry_qty*cost_excl_vat*vat_percen)/100,0) as expiry_tax, 
+                    ifnull((damaged_qty*cost_excl_vat),0) as damaged_cost, ifnull((damaged_qty*cost_excl_vat*vat_percen)/100,0) as damaged_tax, 
+                    ifnull((0*cost_excl_vat),0) as margin_diff_cost, ifnull((0*cost_excl_vat*vat_percen)/100,0) as margin_diff_tax 
+                    from grn_entries where is_active = '1' and grn_id = '$id') A) B) C) D 
+                group by invoice_no) E order by invoice_no";
         // $sql = "select * from grn where grn_id = '".$id."'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
@@ -303,20 +364,52 @@ class Grn extends \yii\db\ActiveRecord
     }
 
     public function getInvoiceTax($id){
-        $sql = "select invoice_no, vat_cst, vat_percen, sum(total_tax) as total_tax from 
-                (select invoice_no, vat_cst, vat_percen, (total_tax+shortage_tax+expiry_tax+damaged_tax+mrp_issue_tax-excess_tax) as total_tax from 
-                (select invoice_no, vat_cst, vat_percen, (total_qty*cost_excl_vat*vat_percen)/100 as total_tax, 
-                    (excess_qty*cost_excl_vat*vat_percen)/100 as excess_tax, 
-                    (shortage_qty*cost_excl_vat*vat_percen)/100 as shortage_tax, 
-                    (expiry_qty*cost_excl_vat*vat_percen)/100 as expiry_tax, 
-                    (damaged_qty*cost_excl_vat*vat_percen)/100 as damaged_tax, 
-                    (mrp_issue_qty*cost_excl_vat*vat_percen)/100 as mrp_issue_tax from grn_entries 
-                where is_active = '1' and grn_id = '5386') A) B 
-                group by invoice_no, vat_cst, vat_percen 
+        $sql = "select invoice_no, vat_cst, vat_percen, total_tax as invoice_tax, total_tax as edited_tax, 0 as diff_tax from 
+                (select invoice_no, vat_cst, vat_percen, sum(total_tax) as total_tax from 
+                (select invoice_no, vat_cst, vat_percen, (total_tax+shortage_tax+expiry_tax+damaged_tax+margin_diff_tax-excess_tax) as total_tax from 
+                (select invoice_no, vat_cst, vat_percen, ifnull((total_qty*cost_excl_vat*vat_percen)/100,0) as total_tax, 
+                    ifnull((excess_qty*cost_excl_vat*vat_percen)/100,0) as excess_tax, 
+                    ifnull((shortage_qty*cost_excl_vat*vat_percen)/100,0) as shortage_tax, 
+                    ifnull((expiry_qty*cost_excl_vat*vat_percen)/100,0) as expiry_tax, 
+                    ifnull((damaged_qty*cost_excl_vat*vat_percen)/100,0) as damaged_tax, 
+                    ifnull((0*cost_excl_vat*vat_percen)/100,0) as margin_diff_tax from grn_entries 
+                where is_active = '1' and grn_id = '$id') A) B 
+                group by invoice_no, vat_cst, vat_percen) C 
                 order by invoice_no, vat_cst, vat_percen";
         // $sql = "select * from grn where grn_id = '".$id."'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
     }
+
+    public function getGrnAccEntries($id){
+        $sql = "select * from grn_acc_entries where grn_id = '$id' and status = 'pending' order by grn_id, invoice_no, vat_cst, vat_percen";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
+    public function getInvoiceDeductionDetails($id, $col_qty){
+        $sql = "select * from grn_entries where grn_id = '$id' and " . $col_qty . " > 0 order by invoice_no, vat_percen";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
+    public function getGrnAccSkuEntries($id, $ded_type){
+        $sql = "select invoice_no, ean, psku, product_title, vat_percen, box_price, cost_excl_vat_per_unit, tax_per_unit, 
+                total_per_unit, cost_excl_vat, tax, total, qty as ".$ded_type."_qty from grn_acc_sku_entries 
+                where grn_id = '$id' and ded_type = '$ded_type' order by invoice_no, vat_percen";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
+    public function getGrnAccLedgerEntries($id){
+        $sql = "select * from grn_acc_ledger_entries where grn_id = '$id' and status = 'pending' order by grn_id, invoice_no, id";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
 }
