@@ -2,7 +2,12 @@ html,
 body {
     height: 100%;
 }
-
+ 
+#w0 tbody td a{    float:left; width:25px; margin:4px 1px 2px 4px; text-align:center; background:#f1f1f1; color:#000;	}
+ 
+a [title = Delete] {
+    background:#f00;
+}
 .wrap {
     min-height: 100%;
     height: auto;

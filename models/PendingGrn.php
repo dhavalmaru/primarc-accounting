@@ -11,7 +11,7 @@ class PendingGrn extends Model
     public function getNewGrnDetails(){
         $sql = "select * from 
                 (select A.*, B.grn_id as b_grn_id from 
-                (select * from grn where is_active = '1' and status = 'approved') A 
+                (select * from grn where is_active = '1' and status = 'approved' and date(gi_date) > date('2017-03-15')) A 
                 left join 
                 (select distinct grn_id from grn_acc_entries) B 
                 on (A.grn_id = B.grn_id)) C 
@@ -24,7 +24,7 @@ class PendingGrn extends Model
     public function getAllGrnDetails(){
         $sql = "select * from 
                 (select A.*, B.status as grn_status from 
-                (select * from grn where is_active = '1' and status = 'approved') A 
+                (select * from grn where is_active = '1' and status = 'approved' and date(gi_date) > date('2017-03-15')) A 
                 left join 
                 (select distinct grn_id, status from grn_acc_entries) B 
                 on (A.grn_id = B.grn_id)) C";

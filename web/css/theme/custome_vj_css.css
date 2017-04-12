@@ -1,0 +1,71 @@
+.tile {padding: 0px;
+				   min-height: 77px;}
+
+.page-container .page-content .page-content-wrap {  margin:0px; width: auto!important; float: none;   }
+.dataTables_filter {/* border-bottom:0!important;*/ }
+.table tbody tr td:last-child  {border: 1px solid #E5E5E5!important;}
+.heading-h2 { background:#eee; line-height: 25px; padding:7px 15px;   text-transform: uppercase; font-weight: 600; display: flex;  margin-top: 61px;      font-size: 14px;}
+.heading-h2 a{  color: #444;     }
+/*.top-band { background:#eee; padding: 5px; clear: both; display: inline-table; 
+font-family: Montserrat-Black; font-weight: 100;float: left;     width: 45%;  
+  border-bottom: 1px solid rgba(0,0,0,0.1);                   }*/
+.nav-contacts {/* float: right; width: 55%;*/ }
+.main-wrapper { background: #E0E0E7; padding: 0; margin: 0; }
+.main-container {margin:20px 12px; display:block;  min-height:400px; width:auto;       } 
+h2 { font-weight:100!important;  font-size:18px!important; padding:0; }
+.col-md-12 { 
+background: #fff;
+/*padding: 15px;*/
+box-shadow: rgba(0, 0, 0, 0.2) 0px 6px 32px -4px;}
+.page-overflow { overflow:auto; }
+#approved{ font-weight: 800;/* border:1px solid #ccc; padding:2px 8px; border-radius:0px; background: #fff; */ color: #888;    }
+.table thead tr th { padding:8px 5px!important; font-weight:600; }
+b, strong { font-weight:500;}
+.panel { margin: 0; border:0px; }
+.panel-body {padding: 0!important;}
+.btn-container {  }
+.btn-top { margin-top: 5px!important; }
+.dataTables_empty { color:#e90404!important; font-size: 14px!important;  }
+ .row [class^='col-md-'], .row [class^='col-lg-'] {
+    min-height: 1px;
+    padding-left:0px;
+    padding-right:0px;
+}
+
+
+
+.u-borderBottom .container{ padding-right:0;}
+.m-nav>li a, .m-nav--linetriangle>li a { font-size:14px;}
+.inside-width { padding:25px; ;}
+.table { margin-bottom:0;}
+.table-responsive { margin-bottom:0;  }
+.btn-cntnr { margin-bottom:10px }
+.dataTable { margin-bottom:5px;}
+.btn-cntr { margin-bottom: 10px!important; }
+
+.btn-delete{font-size:20px;     color: #333; margin:0 5px; display: inline-block; font-weight: 600;}
+.btn-delete:hover {color: #e90404;}
+
+.btn-editt{font-size:17px;     color: #333; margin:0 5px; display: inline-block; font-weight: 600;}
+.btn-editt:hover {color: #95b75d;}
+
+  @media screen and (max-width:767px) {  
+.custom-padding{}
+  .custom-padding .control-label{ padding:0;}
+  .custom-padding .rspns-pdng, .custom-padding .col-md-7, .custom-padding .col-md-8, .custom-padding .col-md-9{ padding:0;}
+ .row [class^='col-xs-'], [class^='col-sm-'], [class^='col-md-'], [class^='col-lg-'] {
+    margin-bottom: 5px;
+}
+.custom-padding .form-group   { padding:10px; padding-bottom:0;}
+.full-width { padding:15px;}
+  
+  .table-responsive { margin:0; padding:0;}
+  .custom-padding .col-md-2{ padding:0 10px!important;}
+  .custom-padding .sr { text-align:left; margin-top:10px;}
+  .custom-padding .col-md-4 { text-align:left!important; }
+  .custom-padding .col-md-10{ padding-top:0!important;}
+  }
+
+     @media only screen and  (min-width:280px)  and (max-width:1020px) { 
+   .heading-h2{ display:inline-block!important; width:100%;}
+    .custom-padding .rspns-pdng, .custom-padding .col-md-7, .custom-padding .col-md-8, .custom-padding .col-md-9{ padding:0;}

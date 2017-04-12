@@ -9,6 +9,6 @@
         )
     ),
     'request' => array(
-            'baseUrl' => 'http://localhost:8081/primarc-pecan/web/'
+            'baseUrl' => 'http://localhost:8081/primarc_pecan/web/'
     )
 );

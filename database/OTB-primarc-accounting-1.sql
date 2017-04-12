@@ -370,6 +370,28 @@ CREATE TABLE IF NOT EXISTS `series_master` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
+
+CREATE TABLE IF NOT EXISTS `grn_debit_notes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `grn_id` int(11) DEFAULT NULL,
+  `vendor_id` bigint(11) DEFAULT NULL,
+  `invoice_no` varchar(255) DEFAULT NULL,
+  `invoice_date` date DEFAULT NULL,
+  `ded_type` varchar(255) DEFAULT NULL,
+  `total_qty` double DEFAULT NULL,
+  `total_deduction` double DEFAULT NULL,
+  `status` varchar(45) DEFAULT NULL,
+  `created_by` bigint(11) DEFAULT NULL,
+  `updated_by` bigint(11) DEFAULT NULL,
+  `created_date` datetime DEFAULT NULL,
+  `updated_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `approver_comments` varchar(250) DEFAULT NULL,
+  `approved_by` bigint(11) DEFAULT NULL,
+  `approved_date` datetime DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

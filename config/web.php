@@ -10,7 +10,7 @@ $config = [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'xNWti-kuzjHZcozK0We7OwddZad6bGYl',
-            'baseUrl' => 'http://localhost:8081/primarc-pecan/web/'
+            'baseUrl' => 'http://localhost:8081/primarc_pecan/web/'
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -47,7 +47,30 @@ $config = [
             ],
         ],
         */
+
+        'mycomponent' => [
+            'class' => 'app\components\MyComponent'
+        ],
+
+        // 'assetManager' => [
+        //     'bundles' => [
+        //         'yii\web\JqueryAsset' => false,
+        //     ],
+        // ],
+
+        // 'assetManager' => [
+        //     'bundles' => [
+        //         'yii\web\JqueryAsset' => [
+        //             'sourcePath' => null,   // do not publish the bundle
+        //             'js' => [
+        //                 // '//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js',
+        //                 'js/jquery/jquery.min.js',
+        //             ]
+        //         ],
+        //     ],
+        // ],
     ],
+    'defaultRoute' => 'login/index',
     'params' => $params,
 ];
 
