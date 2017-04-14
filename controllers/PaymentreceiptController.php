@@ -89,9 +89,7 @@ class PaymentreceiptController extends Controller
                 if($data[$i]['is_paid']=="1"){
                     if($data[$i]['type']=="Debit"){
                         $paying_debit_amt = $paying_debit_amt + $data[$i]['amount'];
-                        $paying_credit_amt = 0;
                     } else {
-                        $paying_debit_amt = 0;
                         $paying_credit_amt = $paying_credit_amt + $data[$i]['amount'];
                     }
                 }
@@ -135,6 +133,14 @@ class PaymentreceiptController extends Controller
             $net_debit_amt = $total_debit_amt - $paying_debit_amt;
             $net_credit_amt = $total_credit_amt - $paying_credit_amt;
 
+            if(($paying_credit_amt-$paying_debit_amt)>=0){
+                $payable_credit_amt = $paying_credit_amt-$paying_debit_amt;
+                $payable_debit_amt = 0;
+            } else {
+                $payable_debit_amt = ($paying_credit_amt-$paying_debit_amt)*-1;
+                $payable_credit_amt = 0;
+            }
+
             $tbody = $tbody . '<tr class="bold-text">
                                     <td class="text-center"></td>
                                     <td class="text-center"></td>
@@ -175,6 +181,20 @@ class PaymentreceiptController extends Controller
                                     </td>
                                     <td class="text-right">
                                         <input type="text" class="form-control text-right" id="net_credit_amt" name="net_credit_amt" value="'.$mycomponent->format_money($net_credit_amt,2).'" readonly />
+                                    </td> 
+                                </tr>
+                                <tr class="bold-text">
+                                    <td class="text-center"></td>
+                                    <td class="text-center"></td>
+                                    <td class="text-center"></td>
+                                    <td class="text-center"></td>
+                                    <td class="text-center"></td>
+                                    <td class="text-right">Payable Amount</td>
+                                    <td class="text-right">
+                                        <input type="text" class="form-control text-right" id="payable_debit_amt" name="payable_debit_amt" value="'.$mycomponent->format_money($payable_debit_amt,2).'" readonly />
+                                    </td>
+                                    <td class="text-right">
+                                        <input type="text" class="form-control text-right" id="payable_credit_amt" name="payable_credit_amt" value="'.$mycomponent->format_money($payable_credit_amt,2).'" readonly />
                                     </td> 
                                 </tr>';
 

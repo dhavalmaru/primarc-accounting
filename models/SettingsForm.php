@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace backend\models;
+namespace app\models;
 
-use dektrium\user\models\SettingsForm as BaseSettingsForm;
-use dektrium\user\helpers\ModuleTrait;
 use dektrium\user\helpers\Password;
+use dektrium\user\Mailer;
 use dektrium\user\Module;
+use dektrium\user\traits\ModuleTrait;
+use Yii;
 use yii\base\Model;
-use yii\base\NotSupportedException;
 
 /**
  * SettingsForm gets user's username, email and password and changes them.
@@ -25,8 +25,8 @@ use yii\base\NotSupportedException;
  *
  * @author Dmitry Erofeev <dmeroff@gmail.com>
  */
-class SettingsForm extends BaseSettingsForm {
-
+class SettingsForm extends Model
+{
     use ModuleTrait;
 
     /** @var string */
@@ -41,68 +41,71 @@ class SettingsForm extends BaseSettingsForm {
     /** @var string */
     public $current_password;
 
+    /** @var Mailer */
+    protected $mailer;
+
     /** @var User */
     private $_user;
 
     /** @return User */
-    public function getUser() {
+    public function getUser()
+    {
         if ($this->_user == null) {
-            $this->_user = \Yii::$app->user->identity;
+            $this->_user = Yii::$app->user->identity;
         }
 
         return $this->_user;
     }
 
     /** @inheritdoc */
-    public function rules() {
-        return [
-            [['username', 'email', 'current_password'], 'required'],
-            [['username', 'email'], 'filter', 'filter' => 'trim'],
-            ['username', 'match', 'pattern' => '/^[a-zA-Z]\w+$/'],
-            ['username', 'string', 'min' => 3, 'max' => 20],
-            ['email', 'email'],
-            [['email', 'username'], 'unique', 'when' => function ($model, $attribute) {
-            return $this->user->$attribute != $model->$attribute;
-        }, 'targetClass' => $this->module->manager->userClass],
-            ['new_password', 'string', 'min' => 6],
-            ['current_password', function ($attr) {
-            if (!Password::validate($this->$attr, $this->user->password_hash)) {
-                $this->addError($attr, \Yii::t('user', 'Current password is not valid'));
-            }
-        }]
-        ];
-    }
-
-    /** @return User */
-    public function getUserInfo($id) {
-
-        $this->_user = User::findIdentity($id);
-
-
-        return $this->_user;
-    }
-
-    /** @inheritdoc */
-    public function init() {
+    public function __construct(Mailer $mailer, $config = [])
+    {
+        $this->mailer = $mailer;
         $this->setAttributes([
             'username' => $this->user->username,
-            'email' => $this->user->unconfirmed_email ? : $this->user->email
-        ]);
-        parent::init();
+            'email'    => $this->user->unconfirmed_email ?: $this->user->email,
+        ], false);
+        parent::__construct($config);
     }
 
     /** @inheritdoc */
-    public function attributeLabels() {
+    public function rules()
+    {
         return [
-            'email' => \Yii::t('user', 'Email'),
-            'username' => \Yii::t('user', 'Username'),
-            'new_password' => \Yii::t('user', 'New password'),
-            'current_password' => \Yii::t('user', 'Current password')
+            'usernameTrim' => ['username', 'trim'],
+            'usernameRequired' => ['username', 'required'],
+            'usernameLength'   => ['username', 'string', 'min' => 3, 'max' => 255],
+            'usernamePattern' => ['username', 'match', 'pattern' => '/^[-a-zA-Z0-9_\.@]+$/'],
+            'emailTrim' => ['email', 'trim'],
+            'emailRequired' => ['email', 'required'],
+            'emailPattern' => ['email', 'email'],
+            'emailUsernameUnique' => [['email', 'username'], 'unique', 'when' => function ($model, $attribute) {
+                return $this->user->$attribute != $model->$attribute;
+            }, 'targetClass' => $this->module->modelMap['User']],
+            'newPasswordLength' => ['new_password', 'string', 'max' => 72, 'min' => 6],
+            'currentPasswordRequired' => ['current_password', 'required'],
+            'currentPasswordValidate' => ['current_password', function ($attr) {
+                if (!Password::validate($this->$attr, $this->user->password_hash)) {
+                    $this->addError($attr, Yii::t('user', 'Current password is not valid'));
+                }
+            }],
         ];
     }
 
     /** @inheritdoc */
-    public function formName() {
+    public function attributeLabels()
+    {
+        return [
+            'email'            => Yii::t('user', 'Email'),
+            'username'         => Yii::t('user', 'Username'),
+            'new_password'     => Yii::t('user', 'New password'),
+            'current_password' => Yii::t('user', 'Current password'),
+        ];
+    }
+
+    /** @inheritdoc */
+    public function formName()
+    {
         return 'settings-form';
     }
 
@@ -111,19 +114,15 @@ class SettingsForm extends BaseSettingsForm {
      *
      * @return bool
      */
-    public function save() {
-
+    public function save()
+    {
         if ($this->validate()) {
             $this->user->scenario = 'settings';
-            // change username
             $this->user->username = $this->username;
-            // change password
             $this->user->password = $this->new_password;
-            // change email
             if ($this->email == $this->user->email && $this->user->unconfirmed_email != null) {
                 $this->user->unconfirmed_email = null;
-                \Yii::$app->session->setFlash('info', \Yii::t('user', 'You have successfully cancelled email changing process'));
-            } else if ($this->email != $this->user->email) {
+            } elseif ($this->email != $this->user->email) {
                 switch ($this->module->emailChangeStrategy) {
                     case Module::STRATEGY_INSECURE:
                         $this->insecureEmailChange();
@@ -138,6 +137,7 @@ class SettingsForm extends BaseSettingsForm {
                         throw new \OutOfBoundsException('Invalid email changing strategy');
                 }
             }
+
             return $this->user->save();
         }
 
@@ -147,27 +147,60 @@ class SettingsForm extends BaseSettingsForm {
     /**
      * Changes user's email address to given without any confirmation.
      */
-    protected function insecureEmailChange() {
+    protected function insecureEmailChange()
+    {
         $this->user->email = $this->email;
-        \Yii::$app->session->setFlash('success', \Yii::t('user', 'Your email address has been successfully changed'));
+        Yii::$app->session->setFlash('success', Yii::t('user', 'Your email address has been changed'));
     }
 
     /**
      * Sends a confirmation message to user's email address with link to confirm changing of email.
      */
-    protected function defaultEmailChange() {
+    protected function defaultEmailChange()
+    {
         $this->user->unconfirmed_email = $this->email;
-        $token = $this->module->manager->createToken([
+        /** @var Token $token */
+        $token = Yii::createObject([
+            'class'   => Token::className(),
             'user_id' => $this->user->id,
-            'type' => Token::TYPE_CONFIRM_NEW_EMAIL
+            'type'    => Token::TYPE_CONFIRM_NEW_EMAIL,
         ]);
         $token->save(false);
-        $this->module->mailer->sendReconfirmationMessage($this->user, $token);
-        \Yii::$app->session->setFlash('info', \Yii::t('user', 'Confirmation message has been sent to your new email address'));
+        $this->mailer->sendReconfirmationMessage($this->user, $token);
+        Yii::$app->session->setFlash(
+            'info',
+            Yii::t('user', 'A confirmation message has been sent to your new email address')
+        );
     }
 
-    protected function secureEmailChange() {
-        throw new NotSupportedException('Secure email changing strategy is not yet implemented');
-    }
+    /**
+     * Sends a confirmation message to both old and new email addresses with link to confirm changing of email.
+     *
+     * @throws \yii\base\InvalidConfigException
+     */
+    protected function secureEmailChange()
+    {
+        $this->defaultEmailChange();
+        /** @var Token $token */
+        $token = Yii::createObject([
+            'class'   => Token::className(),
+            'user_id' => $this->user->id,
+            'type'    => Token::TYPE_CONFIRM_OLD_EMAIL,
+        ]);
+        $token->save(false);
+        $this->mailer->sendReconfirmationMessage($this->user, $token);
 
+        // unset flags if they exist
+        $this->user->flags &= ~User::NEW_EMAIL_CONFIRMED;
+        $this->user->flags &= ~User::OLD_EMAIL_CONFIRMED;
+        $this->user->save(false);
+
+        Yii::$app->session->setFlash(
+            'info',
+            Yii::t(
+                'user',
+                'We have sent confirmation links to both old and new email addresses. You must click both links to complete your request'
+            )
+        );
+    }
 }

@@ -162,10 +162,10 @@ class PaymentReceipt extends Model
                         $count = $command->execute();
 
                         if($mycomponent->format_number($debit_amt[$i],2)>0){
-                            $type = 'Debit';
+                            $type = 'Credit';
                             $amount = $mycomponent->format_number($debit_amt[$i],2);
                         } else {
-                            $type = 'Credit';
+                            $type = 'Debit';
                             $amount = $mycomponent->format_number($credit_amt[$i],2);
                         }
 

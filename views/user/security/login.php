@@ -18,8 +18,7 @@ use yii\widgets\ActiveForm;
  * @var dektrium\user\Module           $module
  */
 
-// $this->title = Yii::t('user', 'Sign in');
-$this->title = "aa";
+$this->title = Yii::t('user', 'Sign in');
 $this->params['breadcrumbs'][] = $this->title;
 
 
@@ -74,3 +73,14 @@ $this->params['breadcrumbs'][] = $this->title;
 localStorage.removeItem("userPermission");
 
 </script>
+<script type="text/javascript">
+    //var BASE_URL="<?php echo Url::base(); ?>";
+</script>
+
+
+<?php 
+    // $this->registerJsFile(
+    //     '@web/js/jquery-ui-1.11.2/jquery-ui.min.js',
+    //     ['depends' => [\yii\web\JqueryAsset::className()]]
+    // );
+?>

@@ -479,6 +479,32 @@ $("#form_purchase_details").validate({
         } else {
             error.insertAfter(element);
         }
+    },
+
+    invalidHandler: function(e,validator) {
+        var errors="";
+        if ($('#shortage_modal').find("input.error, select.error").length>0) {
+            errors=errors+"Please Clear errors in Shortage details. <br/>";
+        }
+        if ($('#expiry_modal').find("input.error, select.error").length>0) {
+            errors=errors+"Please Clear errors in Expiry Details. <br/>";
+        }
+        if ($('#damaged_modal').find("input.error, select.error").length>0) {
+            errors=errors+"Please Clear errors in Damaged Details. <br/>";
+        }
+        if ($('#margin_diff_modal').find("input.error, select.error").length>0) {
+            errors=errors+"Please Clear errors in Margin Difference Details. <br/>";
+        }
+
+        $('#form_errors').html(errors);
+
+        if(errors!=""){
+            $('#form_errors_group').show();
+            $('#form_errors').show();
+        } else {
+            $('#form_errors_group').hide();
+            $('#form_errors').hide();
+        }
     }
 });
 
@@ -529,25 +555,25 @@ $('#form_purchase_details').submit(function() {
         return false;
     } else {
         removeMultiInputNamingRules('#form_purchase_details', 'select[alt="invoice_cost_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="invoice_cost_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="invoice_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="invoice_tax_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_cost_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="shortage_cost_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_cost_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="expiry_cost_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_cost_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="damaged_cost_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margin_diff_cost_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="margin_diff_cost_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="shortage_tax_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="expiry_tax_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="damaged_tax_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margin_diff_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="margin_diff_tax_ledger_code[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="invoice_cost_ledger_code[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="invoice_tax_acc_id[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="invoice_tax_ledger_code[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_cost_acc_id[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="shortage_cost_ledger_code[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_cost_acc_id[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="expiry_cost_ledger_code[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_cost_acc_id[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="damaged_cost_ledger_code[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margin_diff_cost_acc_id[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="margin_diff_cost_ledger_code[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_tax_acc_id[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="shortage_tax_ledger_code[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_tax_acc_id[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="expiry_tax_ledger_code[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_tax_acc_id[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="damaged_tax_ledger_code[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margin_diff_tax_acc_id[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="margin_diff_tax_ledger_code[]"]');
         
         return true;
     }

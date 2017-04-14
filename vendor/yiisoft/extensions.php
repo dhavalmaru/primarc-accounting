@@ -103,4 +103,13 @@ return array (
     ),
     'bootstrap' => 'dektrium\\user\\Bootstrap',
   ),
+  'yii2tech/html2pdf' => 
+  array (
+    'name' => 'yii2tech/html2pdf',
+    'version' => '9999999-dev',
+    'alias' => 
+    array (
+      '@yii2tech/html2pdf' => $vendorDir . '/yii2tech/html2pdf',
+    ),
+  ),
 );

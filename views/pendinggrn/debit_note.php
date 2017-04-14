@@ -20,7 +20,8 @@
         .table-bordered { font-size:12px;  border-collapse:collapse; width:100%;}
         .table {   border-collapse:collapse; width:100%;}
         .table-bordered tr th{ border:1px solid #999; padding:3px 7px; border-collapse:collapse;  }
-        .modal-body-inside {  background:#f9f9f9; padding:10px; }
+        .modal-body-inside { padding:10px; }
+        /*.modal-body-inside table { font-size: 14px; }*/
     </style>
 </head>
 
@@ -64,8 +65,8 @@
             <td style="border:none;">&nbsp;</td>
         </tr>
         <tr valign="top">
-            <td  width="17%" style="border:none;"><p>Party's Name</p></td>
-            <td  width="3%" style="border:none; vertical-align:top">:</td>
+            <td  width="17%" style="border:none; vertical-align:top;"><p>Party's Name</p></td>
+            <td  width="3%" style="border:none; vertical-align:top;">:</td>
             <td colspan="4" style="border:none;">
                 <p>
                     <b> <?php if(isset($vendor_details[0]['account_holder_name'])) echo $vendor_details[0]['account_holder_name']; ?> </b> <br> 
@@ -93,18 +94,21 @@
                     Qty - <?php if(isset($debit_note[0]['total_qty'])) echo $debit_note[0]['total_qty']; ?> Nos
                 </p>
             </td>
-            <td colspan="3" rowspan="3" align="center" style="border-right:none;"><p><b>Rs.<?php if(isset($debit_note[0]['total_deduction'])) echo $mycomponent->format_money($debit_note[0]['total_deduction'],0); ?></b></p></td>
+            <td colspan="3" align="center" valign="top" style="border-right:none;"><p><b>Rs.<?php if(isset($debit_note[0]['total_deduction'])) echo $mycomponent->format_money($debit_note[0]['total_deduction'],0); ?></b></p></td>
         </tr>
         <tr>
-            <td  style="border:none;" colspan="3"><p><b> Amount (in words) </b></p></td>
+            <td  style="border:none; border-right:1px solid #999;" colspan="3"><p><b> Amount (in words) </b></p></td>
+            <td colspan="3" style="border:none; border-left:1px solid #999;"></td>
         </tr>
-        <tr valign="top">
-            <td height="70" colspan="3"  style="border:none; border-bottom:1px solid #999;"> 
+        <tr>
+            <td height="70" colspan="3" valign="top" style="border:none; border-bottom:1px solid #999; border-right:1px solid #999;"> 
                 <p><?php if(isset($debit_note[0]['total_deduction'])) echo $mycomponent->convert_number_to_words(round($debit_note[0]['total_deduction'],0)); ?></p>
             </td>
+            <td colspan="3" style="border:none; border-left:1px solid #999; border-bottom:1px solid #999;"></td>
         </tr>
         <tr valign="bottom" >
             <td colspan="6" style="border:none;">&nbsp;   </td>
+            <td colspan="3" style="border:none;"></td>
         </tr>
         <tr valign="bottom" >
             <td colspan="3" style="border:none;">&nbsp;  </td>
@@ -160,18 +164,20 @@
                     <td>' . $deduction_details[$i]['total_per_unit'] . '</td>
                     <td>' . $deduction_details[$i]['cost_excl_vat'] . '</td>
                     <td>' . $deduction_details[$i]['tax'] . '</td>
-                    <td>' . $deduction_details[$i]['total'] . '</td>
-                    <td style="'.$expiry_style.'">' . 
+                    <td>' . $deduction_details[$i]['total'] . '</td>' . 
+                    (($ded_type=='expiry')?
+                    '<td style="'.$expiry_style.'">' . 
                                 (($deduction_details[$i]['expiry_date']!=null && $deduction_details[$i]['expiry_date']!='')?
                                 date('d/m/Y',strtotime($deduction_details[$i]['expiry_date'])):'') . '
                     </td>
                     <td style="'.$expiry_style.'">' . 
                                 (($deduction_details[$i]['earliest_expected_date']!=null && $deduction_details[$i]['earliest_expected_date']!='')?
                                 date('d/m/Y',strtotime($deduction_details[$i]['earliest_expected_date'])):'') . '
-                    </td>
-                    <td style="'.$margin_diff_style.'"></td>
-                    <td style="'.$margin_diff_style.'"></td>
-                    <td></td>
+                    </td>':'') . 
+                    (($ded_type=='margin_diff')?
+                    '<td style="'.$margin_diff_style.'"></td>
+                    <td style="'.$margin_diff_style.'"></td>':'') . 
+                    '<td></td>
                 </tr>';
 
         $result = $result . $row;
@@ -195,10 +201,12 @@
                                     <th colspan="3" style="text-align:center;">Purchase Ledger</th>
                                     <th colspan="2" style="text-align:center;">Quantity Deducted</th>
                                     <th colspan="3" style="text-align:center;">Amount Deducted (Per Unit)</th>
-                                    <th colspan="3" style="text-align:center;">Amount Deducted (Total)</th>
-                                    <th colspan="2" style="'.$expiry_style.'text-align:center;">For Expiry Only</th>
-                                    <th colspan="2" style="'.$margin_diff_style.'text-align:center;">For Margin Difference (Per Unit)</th>
-                                    <th rowspan="2">Remarks</th>
+                                    <th colspan="3" style="text-align:center;">Amount Deducted (Total)</th>' . 
+                                    (($ded_type=='expiry')?
+                                    '<th colspan="2" style="'.$expiry_style.'text-align:center;">For Expiry Only</th>':'') . 
+                                    (($ded_type=='margin_diff')?
+                                    '<th colspan="2" style="'.$margin_diff_style.'text-align:center;">For Margin Difference (Per Unit)</th>':'') . 
+                                    '<th rowspan="2">Remarks</th>
                                 </tr>
                                 <tr>
                                     <th style="text-align:center;"> Sr. No.</th>
@@ -217,12 +225,14 @@
                                     <th>Total</th>
                                     <th>Cost Excl Tax</th>
                                     <th>Tax</th>
-                                    <th>Total</th>
-                                    <th style="'.$expiry_style.'">Date Received</th>
-                                    <th style="'.$expiry_style.'">Earliest Expected Date</th>
-                                    <th style="'.$margin_diff_style.'">Difference in Cost Excl Tax</th>
-                                    <th style="'.$margin_diff_style.'">Difference in Tax</th>
-                                </tr>
+                                    <th>Total</th>' . 
+                                    (($ded_type=='expiry')?
+                                    '<th style="'.$expiry_style.'">Date Received</th>
+                                    <th style="'.$expiry_style.'">Earliest Expected Date</th>':'') . 
+                                    (($ded_type=='margin_diff')?
+                                    '<th style="'.$margin_diff_style.'">Difference in Cost Excl Tax</th>
+                                    <th style="'.$margin_diff_style.'">Difference in Tax</th>':'') . 
+                                '</tr>
                             </thead>
                             <tbody>' . $result . '</tbody>
                         </table>   

@@ -10,7 +10,7 @@ $config = [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'xNWti-kuzjHZcozK0We7OwddZad6bGYl',
-            'baseUrl' => 'http://localhost:8081/primarc_pecan/web/'
+            'baseUrl' => 'http://localhost/primarc_pecan/web/'
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -27,7 +27,22 @@ $config = [
             // send all mails to a file by default. You have to set
             // 'useFileTransport' to false and configure a transport
             // for the mailer to send real emails.
-            'useFileTransport' => true,
+            'useFileTransport' => false,
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                // 'host' => 'mail.eatanytime.in',
+                // 'username' => 'vaibhav.desai@eatanytime.in',
+                // 'password' => 'Vaibhav@12345',
+                // 'port' => '587',
+
+                'host' => 'smtp.rediffmailpro.com',
+                'username' => 'dhaval.maru@otbconsulting.co.in',
+                'password' => '55921721dNM@',
+                'port' => '465',
+                'encryption' => 'ssl',
+
+               // 'encryption' => 'tls',
+            ],
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
@@ -52,6 +67,12 @@ $config = [
             'class' => 'app\components\MyComponent'
         ],
 
+        'html2pdf' => [
+            'class' => 'yii2tech\html2pdf\Manager',
+            'viewPath' => '@app/pdf',
+            'converter' => 'wkhtmltopdf',
+        ],
+
         // 'assetManager' => [
         //     'bundles' => [
         //         'yii\web\JqueryAsset' => false,
@@ -70,7 +91,17 @@ $config = [
         //     ],
         // ],
     ],
-    'defaultRoute' => 'login/index',
+    'modules' => [
+        'user' => [
+            'class' => 'dektrium\user\Module',
+        ],
+    ],
+
+    // 'defaultRoute' => 'login/index',
+    // 'controllerNamespace' => 'app\\backend\\controllers',
+    // 'defaultRoute' => 'backend/controllers/user/security/login',
+    // 'defaultRoute' => 'user/security/login',
+    'defaultRoute' => 'security/login',
     'params' => $params,
 ];
 
@@ -89,6 +120,22 @@ if (YII_ENV_DEV) {
         // uncomment the following to add your IP if you are not connecting from localhost.
         //'allowedIPs' => ['127.0.0.1', '::1'],
     ];
+
+    // $config['modules']['user'] = [
+    //     'class' => 'dektrium\user\Module',
+    //     // 'enableUnconfirmedLogin' => true,
+    //     // 'confirmWithin' => 21600,
+    //     // 'cost' => 12,
+    //     // 'admins' => ['admin'],
+    //     // 'controllerMap' => [
+    //     //     'admin' => [
+    //     //         'class'  => 'dektrium\user\controllers\AdminController',
+    //     //         'layout' => false,
+    //     //     ],
+    //     // ],
+    //     // uncomment the following to add your IP if you are not connecting from localhost.
+    //     //'allowedIPs' => ['127.0.0.1', '::1'],
+    // ];
 }
 
 return $config;

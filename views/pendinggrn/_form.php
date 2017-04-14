@@ -671,6 +671,7 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
 
         <?php if(isset($debit_note)) { if(count($debit_note)>0) { ?>
         <div class="table-container">
+        <h4>Debit Notes</h4>
         <table id="debit_note" class="table table-bordered">
             <tr class="table-head">
                 <th>Sr. No.</th>
@@ -678,6 +679,8 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                 <th>Invoice Date</th>
                 <th>Total Deduction</th>
                 <th>View</th>
+                <th>Download</th>
+                <th>Email</th>
             </tr>
             <?php for($i=0; $i<count($debit_note); $i++) { ?>
             <tr>
@@ -687,6 +690,8 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                                 date('d/m/Y',strtotime($debit_note[0]['invoice_date'])):''); ?></td>
                 <td><?php echo $mycomponent->format_money($debit_note[$i]['total_deduction'],2); ?></td>
                 <td><a href="<?php echo Url::base(); ?>index.php?r=pendinggrn%2Fviewdebitnote&invoice_id=<?php echo $debit_note[$i]['gi_go_invoice_id']; ?>" target="_blank">View</a></td>
+                <td><a href="<?php echo Url::base(); ?>index.php?r=pendinggrn%2Fdownload&invoice_id=<?php echo $debit_note[$i]['gi_go_invoice_id']; ?>" target="_blank">Download</a></td>
+                <td><a href="<?php echo Url::base(); ?>index.php?r=pendinggrn%2Femaildebitnote&invoice_id=<?php echo $debit_note[$i]['gi_go_invoice_id']; ?>">Email</a></td>
             </tr>
             <?php } ?>
         </table>

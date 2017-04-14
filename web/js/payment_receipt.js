@@ -155,10 +155,20 @@ function getLedgerTotal(){
     net_debit_amt = total_debit_amt - paying_debit_amt;
     net_credit_amt = total_credit_amt - paying_credit_amt;
 
+    if((paying_credit_amt-paying_debit_amt)>=0){
+        payable_credit_amt = paying_credit_amt-paying_debit_amt;
+        payable_debit_amt = 0;
+    } else {
+        payable_debit_amt = (paying_credit_amt-paying_debit_amt)*-1;
+        payable_credit_amt = 0;
+    }
+
     $("#total_debit_amt").val(format_money(total_debit_amt,2));
     $("#total_credit_amt").val(format_money(total_credit_amt,2));
     $("#paying_debit_amt").val(format_money(paying_debit_amt,2));
     $("#paying_credit_amt").val(format_money(paying_credit_amt,2));
     $("#net_debit_amt").val(format_money(net_debit_amt,2));
     $("#net_credit_amt").val(format_money(net_credit_amt,2));
+    $("#payable_debit_amt").val(format_money(payable_debit_amt,2));
+    $("#payable_credit_amt").val(format_money(payable_credit_amt,2));
 }

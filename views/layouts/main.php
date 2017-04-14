@@ -65,7 +65,7 @@ $session = Yii::$app->session;
                                 <a href="#" class="btn btn-default btn-flat">Profile</a>
                             </div>
                             <div class="pull-right">
-                                <a href="#" class="btn btn-default btn-flat">Sign out</a>
+                                <a href="<?php echo Url::base(); ?>index.php?r=security%2Flogout" class="btn btn-default btn-flat" data-method="post">Sign out</a>
                             </div>
                         </li>
                     </ul>

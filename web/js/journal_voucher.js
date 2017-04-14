@@ -24,9 +24,19 @@ $("#repeat_row").click(function(){
 	$trNew.find('#trans_'+index).attr('id', 'trans_'+newIndex).val("");
 	$trNew.find('#debit_amt_'+index).attr('id', 'debit_amt_'+newIndex).val("");
 	$trNew.find('#credit_amt_'+index).attr('id', 'credit_amt_'+newIndex).val("");
+    $trNew.find('#delete_row_'+index).attr('id', 'delete_row_'+newIndex).val("");
 
 	$trLast.after($trNew);
 })
+
+function delete_row(elem){
+    var id = elem.id;
+    var index = id.substr(id.lastIndexOf('_')+1);
+
+    if(index!=0){
+        $('#row_'+index).remove();
+    }
+}
 
 function get_acc_details(elem){
 	var acc_id = elem.value;
@@ -65,16 +75,16 @@ function get_total(){
     var credit_amt = 0;
     jQuery('input[name="debit_amt[]"]').each(function() {
         debit_amt = debit_amt + get_number(this.value,2);
-        console.log(debit_amt);
+        // console.log(debit_amt);
     });
     jQuery('input[name="credit_amt[]"]').each(function() {
         credit_amt = credit_amt + get_number(this.value,2);
-        console.log(credit_amt);
+        // console.log(credit_amt);
     });
     $('#total_debit_amt').val(format_money(debit_amt,2));
     $('#total_credit_amt').val(format_money(credit_amt,2));
     var diff_amt = debit_amt - credit_amt;
-    console.log(diff_amt);
+    // console.log(diff_amt);
     $('#diff_amt').val(format_money(diff_amt,2));
 }
 
