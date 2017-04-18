@@ -1,262 +1,358 @@
 <?php
 
-/*
- * This file is part of the Dektrium project.
- *
- * (c) Dektrium project <http://github.com/dektrium/>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace app\models;
 
-use dektrium\user\Finder;
-use dektrium\user\helpers\Password;
-use dektrium\user\Mailer;
-use dektrium\user\Module;
-use dektrium\user\traits\ModuleTrait;
+use dektrium\user\models\User as BaseUser;
+use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
-use yii\web\Application as WebApplication;
+use yii\log\Logger;
 use yii\web\IdentityInterface;
-use yii\helpers\ArrayHelper;
+use dektrium\user\helpers\ModuleTrait;
+use dektrium\user\helpers\Password;
+use app\models\Mailer;
 
 
-/**
- * User ActiveRecord model.
- *
- * @property bool    $isAdmin
- * @property bool    $isBlocked
- * @property bool    $isConfirmed
- *
- * Database fields:
- * @property integer $id
- * @property string  $username
- * @property string  $email
- * @property string  $unconfirmed_email
- * @property string  $password_hash
- * @property string  $auth_key
- * @property string  $registration_ip
- * @property integer $confirmed_at
- * @property integer $blocked_at
- * @property integer $created_at
- * @property integer $updated_at
- * @property integer $last_login_at
- * @property integer $flags
- *
- * Defined relations:
- * @property Account[] $accounts
- * @property Profile   $profile
- *
- * Dependencies:
- * @property-read Finder $finder
- * @property-read Module $module
- * @property-read Mailer $mailer
- *
- * @author Dmitry Erofeev <dmeroff@gmail.com>
- */
-class User extends ActiveRecord implements IdentityInterface
-{
-    use ModuleTrait;
-
-    const BEFORE_CREATE   = 'beforeCreate';
-    const AFTER_CREATE    = 'afterCreate';
-    const BEFORE_REGISTER = 'beforeRegister';
-    const AFTER_REGISTER  = 'afterRegister';
-    const BEFORE_CONFIRM  = 'beforeConfirm';
-    const AFTER_CONFIRM   = 'afterConfirm';
-
-    // following constants are used on secured email changing process
-    const OLD_EMAIL_CONFIRMED = 0b1;
-    const NEW_EMAIL_CONFIRMED = 0b10;
-
-    /** @var string Plain password. Used for model validation. */
-    public $password;
-
-    /** @var Profile|null */
-    private $_profile;
-
-    /** @var string Default username regexp */
-    public static $usernameRegexp = '/^[-a-zA-Z0-9_\.@]+$/';
-
+class User extends BaseUser {
     /**
-     * @return Finder
-     * @throws \yii\base\InvalidConfigException
+     * This method is used to register new user account. If Module::enableConfirmation is set true, this method
+     * will generate new confirmation token and use mailer to send it to the user. Otherwise it will log the user in.
+     * If Module::enableGeneratingPassword is set true, this method will generate new 8-char password. After saving user
+     * to database, this method uses mailer component to send credentials (username and password) to user via email.
+     *
+     * @return bool
      */
-    protected function getFinder()
-    {
-        return \Yii::$container->get(Finder::className());
-    }
-
-    /**
-     * @return Mailer
-     * @throws \yii\base\InvalidConfigException
-     */
-    protected function getMailer()
-    {
-        return \Yii::$container->get(Mailer::className());
-    }
 
     /**
      * @return bool Whether the user is confirmed or not.
      */
-    public function getIsConfirmed()
-    {
-        return $this->confirmed_at != null;
-    }
+    /** @inheritdoc */
+     public $role_id;
+     public $company_id;
+     public $name;
+     
+    /** @var string Default password regexp */
+    public static $passwordRegexp = "/(?=^.{8,}$)(?=.*\d)(?=.*[!@#$%^&*]+)(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/";
 
-    /**
-     * @return bool Whether the user is blocked or not.
+     public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        // add field to scenarios
+        $scenarios['create'][]   = 'name';
+        $scenarios['create'][]   = 'password';
+        //$scenarios['update'][]   = 'name';
+       // $scenarios['register'][] = 'field';
+        return $scenarios;
+    }
+    
+ /**
+     * @return Mailer
+     * @throws \yii\base\InvalidConfigException
      */
-    public function getIsBlocked()
-    {
-        return $this->blocked_at != null;
+    protected function getMailer() {
+        return Yii::$container->get(Mailer::className());
     }
 
-    /**
-     * @return bool Whether the user is an admin or not.
+    /** Validation rules for user
+ 
      */
-    public function getIsAdmin()
+    public function rules()
     {
-        return
-            (\Yii::$app->getAuthManager() && $this->module->adminPermission ?
-                \Yii::$app->user->can($this->module->adminPermission) : false)
-            || in_array($this->username, $this->module->admins);
-    }
+        $rules = parent::rules();
+        // add some rules
+        $rules['nameRequired'] = ['name', 'required', 'on' => 'create'];
+        $rules['passwordRequired'] = ['password', 'required', 'on' => ['register', 'create']];
+        $rules['passwordLength'] = ['password', 'string', 'min' => 8, 'on' => ['register', 'create']];
+        $rules['passwordMatch'] = ['password', 'match', 'pattern' => self::$passwordRegexp, 'message' => Yii::t('user', 'Password is invalid. Password should be of minimum 8 characters and should contain atleast 1 uppercase letter, 1 lowercase letter, 1 numeric value, 1 special character.')];
+      //  $rules['fieldLength']   = ['field', 'string', 'max' => 10];
 
+        return $rules;
+    }
+    /** databse table name for user
+ 
+     */
+    public static function tableName()
+    {
+        return '{{%user}}';
+    }
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getProfile()
     {
-        return $this->hasOne($this->module->modelMap['Profile'], ['user_id' => 'id']);
+        return $this->hasOne('\backend\models\Profile', ['user_id' => 'id']);
     }
-
-    /**
-     * @param Profile $profile
+    
+    /** User list 
+     * @return \yii\db\ActiveQuery
      */
-    public function setProfile(Profile $profile)
+
+    public function getUserList() 
     {
-        $this->_profile = $profile;
+        
+        $connection = \Yii::$app->db;
+
+        $command = $connection->createCommand("select distinct(u.id),u.username,u.email,u.created_at,u.blocked_at,r.role_name from user as u left join user_roles as ur on ur.user_id=u.id left join roles as r on r.id=ur.role_id");
+
+        $dataReader = $command->queryAll();
+        return $dataReader;
     }
-
-    /**
-     * @return Account[] Connected accounts ($provider => $account)
+    
+    /** get the alertnate and primary email for the user
+     * 
+     * @return array $email email of given user.
      */
-    public function getAccounts()
-    {
-        $connected = [];
-        $accounts  = $this->hasMany($this->module->modelMap['Account'], ['user_id' => 'id'])->all();
+    
+    public function getUserPrimaryAlternateEmail($userName){
+        $emails=array();
+        $connection = \Yii::$app->db;
 
-        /** @var Account $account */
-        foreach ($accounts as $account) {
-            $connected[$account->provider] = $account;
+        $command = $connection->createCommand("select u.email,pr.public_email from users u "
+                . "inner join profile pr on pr.user_id=u.id where u.username='".$userName."'");
+
+        $dataReader = $command->queryAll();
+        foreach($dataReader as $row){
+            $emails[]=$row['email'];
+            $emails[]=$row['public_email'];
         }
 
-        return $connected;
+        return $emails;
     }
-
-    /**
-     * Returns connected account by provider.
-     * @param  string $provider
-     * @return Account|null
+    
+    /** check if username exists
+     * @param string $userName
+     * 
+     * @return mixed if exist return user_id otherwise null.
      */
-    public function getAccountByProvider($provider)
-    {
-        $accounts = $this->getAccounts();
-        return isset($accounts[$provider])
-            ? $accounts[$provider]
-            : null;
+ 
+    public function getUserByName($userName){
+        //$emails=array();
+        $connection = \Yii::$app->db;
+
+        $command = $connection->createCommand("select u.id from users u where u.username='".$userName."'");
+
+        $dataReader = $command->queryOne();
+        
+        if(isset($dataReader['id'])){
+            return $dataReader['id'];
+        }
+        else {
+            return NULL; 
+        }
+       
     }
-
-    /** @inheritdoc */
-    public function getId()
+    
+    /** return current user role name if set otherwise return "-"  
+     * 
+     * @return mixed if exist return role_name otherwise "-".
+     */
+    
+    public function getRoleName()
     {
-        return $this->getAttribute('id');
+       
+        if($this->id)
+        {
+           // echo $this->id;die;
+        $role= UserRoles::find()->select('roles.*')->leftJoin('roles', 'user_roles.role_id=roles.id')->where(['user_roles.user_id'=>$this->id])->asArray()->one();
+        //var_dump($role);die;
+      return  $role['role_name'];
+        }else{
+            
+            return "-";
+        }
+        
     }
-
-    /** @inheritdoc */
-    public function getAuthKey()
+    
+    /** return  user roles for given id
+     *  @param integer $id
+     * 
+     * @return mixed if exist return user roles. 
+     */
+    
+    public function getUserRole($id)
     {
-        return $this->getAttribute('auth_key');
-    }
+        
+           $connection = \Yii::$app->db;
 
-    /** @inheritdoc */
-    public function attributeLabels()
+           $command = $connection->createCommand("select group_concat(role_id) as roles from user_roles  where user_id=".$id." group by user_id"
+            );
+
+            $dataReader = $command->queryAll();
+
+           return $dataReader[0]['roles'];
+        
+    }
+    
+    /** delete the user role 
+     *  @param integer $id
+     *    
+     */
+    public function deleteuserrole($id)
     {
-        return [
-            'username'          => \Yii::t('user', 'Username'),
-            'email'             => \Yii::t('user', 'Email'),
-            'registration_ip'   => \Yii::t('user', 'Registration ip'),
-            'unconfirmed_email' => \Yii::t('user', 'New email'),
-            'password'          => \Yii::t('user', 'Password'),
-            'created_at'        => \Yii::t('user', 'Registration time'),
-            'last_login_at'     => \Yii::t('user', 'Last login'),
-            'confirmed_at'      => \Yii::t('user', 'Confirmation time'),
-        ];
-    }
+        $connection = \Yii::$app->db;
 
-    /** @inheritdoc */
-    public function behaviors()
+        $command = $connection->createCommand("delete from user_roles where user_id=".$id );
+
+        $dataReader = $command->execute();
+        
+    }
+    
+    /** update the user company 
+     *  @param integer $user_id
+     *  @param integer $company_id
+     * 
+     */
+    
+    public function updateUserCompany($user_id,$company_id)
     {
-        return [
-            TimestampBehavior::className(),
-        ];
-    }
+        $connection = \Yii::$app->db;
 
-    /** @inheritdoc */
-    public function scenarios()
+        $command = $connection->createCommand("update user_company_rel set company_id='".$company_id."' where user_id='".$user_id."'" );
+
+        $dataReader = $command->execute();
+        
+        
+    }
+    
+    /** get user company
+     *  @param integer $user_id
+     *   
+     *  @return intger company id if exist otherwise 0.
+     */
+    
+    public function getUserCompany($user_id)
     {
-        $scenarios = parent::scenarios();
-        return ArrayHelper::merge($scenarios, [
-            'register' => ['username', 'email', 'password'],
-            'connect'  => ['username', 'email'],
-            'create'   => ['username', 'email', 'password'],
-            'update'   => ['username', 'email', 'password'],
-            'settings' => ['username', 'email', 'password'],
-        ]);
+        $connection = \Yii::$app->db;
+        $usercompany=  UserCompanyRel::find()->where(["user_id"=>$user_id])->asArray()->one();
+        
+        if($usercompany)
+        {
+            return $usercompany['company_id'];
+            
+        }else{
+            
+            return 0;
+        }
+        
+        
     }
-
-    /** @inheritdoc */
-    public function rules()
+    
+     /** Assign user role permission
+     *  @param integer $user_id
+     *  @param array $roleArray  role id array
+    
+     */
+    
+    public function AssignRolePermission($user_id,$roleArray)
     {
-        return [
-            // username rules
-            'usernameTrim'     => ['username', 'trim'],
-            'usernameRequired' => ['username', 'required', 'on' => ['register', 'create', 'connect', 'update']],
-            'usernameMatch'    => ['username', 'match', 'pattern' => static::$usernameRegexp],
-            'usernameLength'   => ['username', 'string', 'min' => 3, 'max' => 255],
-            'usernameUnique'   => [
-                'username',
-                'unique',
-                'message' => \Yii::t('user', 'This username has already been taken')
-            ],
-
-            // email rules
-            'emailTrim'     => ['email', 'trim'],
-            'emailRequired' => ['email', 'required', 'on' => ['register', 'connect', 'create', 'update']],
-            'emailPattern'  => ['email', 'email'],
-            'emailLength'   => ['email', 'string', 'max' => 255],
-            'emailUnique'   => [
-                'email',
-                'unique',
-                'message' => \Yii::t('user', 'This email address has already been taken')
-            ],
-
-            // password rules
-            'passwordRequired' => ['password', 'required', 'on' => ['register']],
-            'passwordLength'   => ['password', 'string', 'min' => 6, 'max' => 72, 'on' => ['register', 'create']],
-        ];
+        
+         $session = Yii::$app->session;
+        $company=$session->get('user.company');
+        
+        $roleObj=  Roles::find()->where(['id'=>$roleArray])->where(["company_id"=>$company['id']])->asArray()->all();   
+       
+        if($roleObj)
+        {
+            
+              $auth = Yii::$app->authManager;
+              
+              foreach($roleObj as $role)
+              {
+                  try{
+                $r=$auth->createRole($role['role_code']) ;
+               // $auth->add($r);
+                $auth->assign($r, $user_id);
+                  }catch(\yii\db\Exception $e){
+                         Yii::warning("role allready assign");
+                    }
+              }
+            
+             
+        }
+        
     }
-
-    /** @inheritdoc */
-    public function validateAuthKey($authKey)
+    
+     /** Update user role permission
+     *  @param integer $user_id
+     *  @param array $roleArray  role id array
+     *  @param array $userdbrole  updated role id array   
+     */
+    
+    public function UpdateRolePermission($user_id,$roleArray,$userdbrole)
     {
-        return $this->getAttribute('auth_key') === $authKey;
+        
+         $session = Yii::$app->session;
+        $company=$session->get('user.company');
+        
+        $roleObj=  Roles::find()->where(['id'=>$roleArray])->where(["company_id"=>$company['id']])->asArray()->all();       
+        
+        $userdbroleArray=explode(",",$userdbrole);
+        
+        if($roleObj)
+        {
+            
+              $auth = Yii::$app->authManager;
+              
+              //assign user role
+              foreach($roleObj as $role)
+              {
+                if(!in_array($role['id'],$userdbroleArray)) 
+                {
+                     try{
+                    $r=$auth->createRole($role['role_code']) ;
+                   // $auth->add($r);
+                    $auth->assign($r, $user_id);
+                     }catch(\yii\db\Exception $e){
+                         Yii::warning("role allready assign");
+                    }
+                }
+                
+              }
+              
+               //revoke user roles
+              foreach($userdbroleArray as $dbrole)
+              {
+                 
+                if(!in_array($dbrole,$roleArray)) 
+                {
+                    $r1=  Roles::find()->where(['id'=>$dbrole])->asArray()->one(); 
+                     try{
+                    $r=$auth->createRole($r1['role_code']) ;
+                    $auth->revoke($r, $user_id);
+                     }catch(\yii\db\Exception $e){
+                         Yii::warning("role allready remove");
+                    }
+                  
+                }
+              }
+        }
+        
     }
+    
+    /** get db role 
+     *  @param integer $user_id  
+     *  @return  mixed  $user_id if exist otherwise false  
+     */
+    
+    public function getDBRole($user_id)
+    {
+         $connection = \Yii::$app->db;
 
+        $command = $connection->createCommand("select group_concat(ur.role_id) as role_id from user_roles as ur left join roles as r on ur.role_id=r.id where ur.user_id=".$user_id." group by ur.user_id");
+       
+        $dataReader = $command->queryAll();  
+        
+        if($dataReader)
+        {
+            return $dataReader[0]['role_id'];
+        }else{
+            
+            return false;
+        }
+        
+    }
+    
     /**
      * Creates new user account. It generates password if it is not provided by user.
      *
@@ -268,300 +364,24 @@ class User extends ActiveRecord implements IdentityInterface
             throw new \RuntimeException('Calling "' . __CLASS__ . '::' . __METHOD__ . '" on existing user');
         }
 
-        $transaction = $this->getDb()->beginTransaction();
+        $this->confirmed_at = time();
+        $this->password = $this->password == null ? Password::generate(8) : $this->password;
 
-        try {
-            $this->password = $this->password == null ? Password::generate(8) : $this->password;
+        $this->trigger(self::BEFORE_CREATE);
 
-            $this->trigger(self::BEFORE_CREATE);
-
-            if (!$this->save()) {
-                $transaction->rollBack();
-                return false;
-            }
-
-            $this->confirm();
-
-            $this->mailer->sendWelcomeMessage($this, null, true);
-            $this->trigger(self::AFTER_CREATE);
-
-            $transaction->commit();
-
-            return true;
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            \Yii::warning($e->getMessage());
-            throw $e;
+        if (!$this->save()) {
+            return false;
         }
+       // $mailer=new Mailer()
+
+        $this->mailer->sendWelcomeMessage($this, null, true);
+        $this->trigger(self::AFTER_CREATE);
+
+        return true;
     }
+   
 
-    /**
-     * This method is used to register new user account. If Module::enableConfirmation is set true, this method
-     * will generate new confirmation token and use mailer to send it to the user.
-     *
-     * @return bool
-     */
-    public function register()
-    {
-        if ($this->getIsNewRecord() == false) {
-            throw new \RuntimeException('Calling "' . __CLASS__ . '::' . __METHOD__ . '" on existing user');
-        }
-
-        $transaction = $this->getDb()->beginTransaction();
-
-        try {
-            $this->confirmed_at = $this->module->enableConfirmation ? null : time();
-            $this->password     = $this->module->enableGeneratingPassword ? Password::generate(8) : $this->password;
-
-            $this->trigger(self::BEFORE_REGISTER);
-
-            if (!$this->save()) {
-                $transaction->rollBack();
-                return false;
-            }
-
-            if ($this->module->enableConfirmation) {
-                /** @var Token $token */
-                $token = \Yii::createObject(['class' => Token::className(), 'type' => Token::TYPE_CONFIRMATION]);
-                $token->link('user', $this);
-            }
-
-            $this->mailer->sendWelcomeMessage($this, isset($token) ? $token : null);
-            $this->trigger(self::AFTER_REGISTER);
-
-            $transaction->commit();
-
-            return true;
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            \Yii::warning($e->getMessage());
-            throw $e;
-        }
-    }
-
-    /**
-     * Attempts user confirmation.
-     *
-     * @param string $code Confirmation code.
-     *
-     * @return boolean
-     */
-    public function attemptConfirmation($code)
-    {
-        $token = $this->finder->findTokenByParams($this->id, $code, Token::TYPE_CONFIRMATION);
-
-        if ($token instanceof Token && !$token->isExpired) {
-            $token->delete();
-            if (($success = $this->confirm())) {
-                \Yii::$app->user->login($this, $this->module->rememberFor);
-                $message = \Yii::t('user', 'Thank you, registration is now complete.');
-            } else {
-                $message = \Yii::t('user', 'Something went wrong and your account has not been confirmed.');
-            }
-        } else {
-            $success = false;
-            $message = \Yii::t('user', 'The confirmation link is invalid or expired. Please try requesting a new one.');
-        }
-
-        \Yii::$app->session->setFlash($success ? 'success' : 'danger', $message);
-
-        return $success;
-    }
-
-    /**
-     * Generates a new password and sends it to the user.
-     *
-     * @param string $code Confirmation code.
-     *
-     * @return boolean
-     */
-    public function resendPassword()
-    {
-        $this->password = Password::generate(8);
-        $this->save(false, ['password_hash']);
-
-        return $this->mailer->sendGeneratedPassword($this, $this->password);
-    }
-
-    /**
-     * This method attempts changing user email. If user's "unconfirmed_email" field is empty is returns false, else if
-     * somebody already has email that equals user's "unconfirmed_email" it returns false, otherwise returns true and
-     * updates user's password.
-     *
-     * @param string $code
-     *
-     * @return bool
-     * @throws \Exception
-     */
-    public function attemptEmailChange($code)
-    {
-        // TODO refactor method
-
-        /** @var Token $token */
-        $token = $this->finder->findToken([
-            'user_id' => $this->id,
-            'code'    => $code,
-        ])->andWhere(['in', 'type', [Token::TYPE_CONFIRM_NEW_EMAIL, Token::TYPE_CONFIRM_OLD_EMAIL]])->one();
-
-        if (empty($this->unconfirmed_email) || $token === null || $token->isExpired) {
-            \Yii::$app->session->setFlash('danger', \Yii::t('user', 'Your confirmation token is invalid or expired'));
-        } else {
-            $token->delete();
-
-            if (empty($this->unconfirmed_email)) {
-                \Yii::$app->session->setFlash('danger', \Yii::t('user', 'An error occurred processing your request'));
-            } elseif ($this->finder->findUser(['email' => $this->unconfirmed_email])->exists() == false) {
-                if ($this->module->emailChangeStrategy == Module::STRATEGY_SECURE) {
-                    switch ($token->type) {
-                        case Token::TYPE_CONFIRM_NEW_EMAIL:
-                            $this->flags |= self::NEW_EMAIL_CONFIRMED;
-                            \Yii::$app->session->setFlash(
-                                'success',
-                                \Yii::t(
-                                    'user',
-                                    'Awesome, almost there. Now you need to click the confirmation link sent to your old email address'
-                                )
-                            );
-                            break;
-                        case Token::TYPE_CONFIRM_OLD_EMAIL:
-                            $this->flags |= self::OLD_EMAIL_CONFIRMED;
-                            \Yii::$app->session->setFlash(
-                                'success',
-                                \Yii::t(
-                                    'user',
-                                    'Awesome, almost there. Now you need to click the confirmation link sent to your new email address'
-                                )
-                            );
-                            break;
-                    }
-                }
-                if ($this->module->emailChangeStrategy == Module::STRATEGY_DEFAULT
-                    || ($this->flags & self::NEW_EMAIL_CONFIRMED && $this->flags & self::OLD_EMAIL_CONFIRMED)) {
-                    $this->email = $this->unconfirmed_email;
-                    $this->unconfirmed_email = null;
-                    \Yii::$app->session->setFlash('success', \Yii::t('user', 'Your email address has been changed'));
-                }
-                $this->save(false);
-            }
-        }
-    }
-
-    /**
-     * Confirms the user by setting 'confirmed_at' field to current time.
-     */
-    public function confirm()
-    {
-        $this->trigger(self::BEFORE_CONFIRM);
-        $result = (bool) $this->updateAttributes(['confirmed_at' => time()]);
-        $this->trigger(self::AFTER_CONFIRM);
-        return $result;
-    }
-
-    /**
-     * Resets password.
-     *
-     * @param string $password
-     *
-     * @return bool
-     */
-    public function resetPassword($password)
-    {
-        return (bool)$this->updateAttributes(['password_hash' => Password::hash($password)]);
-    }
-
-    /**
-     * Blocks the user by setting 'blocked_at' field to current time and regenerates auth_key.
-     */
-    public function block()
-    {
-        return (bool)$this->updateAttributes([
-            'blocked_at' => time(),
-            'auth_key'   => \Yii::$app->security->generateRandomString(),
-        ]);
-    }
-
-    /**
-     * UnBlocks the user by setting 'blocked_at' field to null.
-     */
-    public function unblock()
-    {
-        return (bool)$this->updateAttributes(['blocked_at' => null]);
-    }
-
-    /**
-     * Generates new username based on email address, or creates new username
-     * like "emailuser1".
-     */
-    public function generateUsername()
-    {
-        // try to use name part of email
-        $username = explode('@', $this->email)[0];
-        $this->username = $username;
-        if ($this->validate(['username'])) {
-            return $this->username;
-        }
-
-        // valid email addresses are less restricitve than our
-        // valid username regexp so fallback to 'user123' if needed:
-        if (!preg_match(self::$usernameRegexp, $username)) {
-            $username = 'user';
-        }
-        $this->username = $username;
-
-        $max = $this->finder->userQuery->max('id');
-
-        // generate username like "user1", "user2", etc...
-        do {
-            $this->username = $username . ++$max;
-        } while (!$this->validate(['username']));
-
-        return $this->username;
-    }
-
-    /** @inheritdoc */
-    public function beforeSave($insert)
-    {
-        if ($insert) {
-            $this->setAttribute('auth_key', \Yii::$app->security->generateRandomString());
-            if (\Yii::$app instanceof WebApplication) {
-                $this->setAttribute('registration_ip', \Yii::$app->request->userIP);
-            }
-        }
-
-        if (!empty($this->password)) {
-            $this->setAttribute('password_hash', Password::hash($this->password));
-        }
-
-        return parent::beforeSave($insert);
-    }
-
-    /** @inheritdoc */
-    public function afterSave($insert, $changedAttributes)
-    {
-        parent::afterSave($insert, $changedAttributes);
-        if ($insert) {
-            if ($this->_profile == null) {
-                $this->_profile = \Yii::createObject(Profile::className());
-            }
-            $this->_profile->link('user', $this);
-        }
-    }
-
-    /** @inheritdoc */
-    public static function tableName()
-    {
-        return '{{%user}}';
-    }
-
-    /** @inheritdoc */
-    public static function findIdentity($id)
-    {
-        return static::findOne($id);
-    }
-
-    /** @inheritdoc */
-    public static function findIdentityByAccessToken($token, $type = null)
-    {
-        throw new NotSupportedException('Method "' . __CLASS__ . '::' . __METHOD__ . '" is not implemented.');
-    }
+    
+   
+    
 }

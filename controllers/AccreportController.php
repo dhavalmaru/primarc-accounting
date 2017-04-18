@@ -10,7 +10,43 @@ use yii\filters\VerbFilter;
 use yii\helpers\Url;
 
 class AccreportController extends Controller
-{
+{   
+    public function actionExcel(){
+        $objPHPExcel = new \PHPExcel();
+ 
+         $sheet=0;
+          
+         $objPHPExcel->setActiveSheetIndex($sheet);
+         
+        foreach ($foos as $foo) {  
+                
+            $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+                
+            $objPHPExcel->getActiveSheet()->setTitle($foo->bar)
+                
+             ->setCellValue('A1', 'Firstname')
+             ->setCellValue('B1', 'Lastname');
+                 
+                 $row=2;
+                        
+            $objPHPExcel->getActiveSheet()->setCellValue('A'.$row,$foo->firstname); 
+            $objPHPExcel->getActiveSheet()->setCellValue('A'.$row,$foo->lastname);
+                        $row++ ;
+                        }
+                
+                header('Content-Type: application/vnd.ms-excel');
+                $filename = "MyExcelReport_".date("d-m-Y-His").".xls";
+                header('Content-Disposition: attachment;filename='.$filename .' ');
+                header('Cache-Control: max-age=0');
+                $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+                $objWriter->save('php://output');       
+    }
+
+    // public function actionGenerate(){
+
+    // }
+
     public function actionLedgerreport()
     {
         $report = new AccReport();

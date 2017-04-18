@@ -19,6 +19,7 @@ if($transaction == "Create") {
 $this->params['breadcrumbs'][] = ['label' => 'Payment Receipt', 'url' => ['index']];
 // $this->params['breadcrumbs'][] = ['label' => $grn_details[0]['grn_id'], 'url' => ['update', 'id' => $grn_details[0]['grn_id']]];
 $this->params['breadcrumbs'][] = $transaction;
+$mycomponent = Yii::$app->mycomponent;
 ?>
 
 <style>
@@ -74,11 +75,11 @@ $this->params['breadcrumbs'][] = $transaction;
 						</div>
 					</div>
 				</div>
-				<div class="col-md-3 col-sm-12 col-xs-12 ad_hock">
+				<div class="col-md-3 col-sm-12 col-xs-12">
 					<label class="control-label">Account Code</label>
 					<div class="">
 						<div class="">  
-							<input id="acc_code" name="acc_code" class="form-control" type="text" value="<?php if(isset($data[0])) echo $data[0]['account_code']; ?>" />
+							<input id="acc_code" name="acc_code" class="form-control" type="text" value="<?php if(isset($data[0])) echo $data[0]['account_code']; ?>" readonly />
 						</div>
 					</div>
 				</div>
@@ -138,6 +139,8 @@ $this->params['breadcrumbs'][] = $transaction;
 				</div>
 			</div>
 
+			<br/>
+
 			<div id="knock_off">
 				<div class="table-container "> 
 					<table class="stripe table table-bordered" id="tab_logic">
@@ -192,10 +195,7 @@ $this->params['breadcrumbs'][] = $transaction;
 						</tbody>
 					</table>
 				</div>
-				<br/>
 			</div>
-
-		 
 
 			<!-- Button -->
 			<div class="btn-container "> 
@@ -206,10 +206,35 @@ $this->params['breadcrumbs'][] = $transaction;
 				</div>
 			</div>
 		</form>
-				 
 
+		<?php if(isset($data[0])) { ?>
+        <div class="table-container">
+        <h4>Payment Advice</h4>
+        <table id="debit_note" class="table table-bordered">
+            <tr class="table-head">
+                <th>Sr. No.</th>
+                <th>Account Name</th>
+                <th>Bank Name</th>
+                <th>Payment Type</th>
+                <th>Amount</th>
+                <th>View</th>
+                <th>Download</th>
+                <th>Email</th>
+            </tr>
+            <tr>
+                <td><?php echo 1; ?></td>
+                <td><?php echo $data[0]['account_name']; ?></td>
+                <td><?php echo $data[0]['bank_name']; ?></td>
+                <td><?php echo $data[0]['payment_type']; ?></td>
+                <td><?php echo $mycomponent->format_money($data[0]['amount'],2); ?></td>
+                <td><a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Fviewpaymentadvice&id=<?php echo $data[0]['id']; ?>" target="_blank">View</a></td>
+                <td><a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Fdownload&id=<?php echo $data[0]['id']; ?>" target="_blank">Download</a></td>
+                <td><a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Femailpaymentadvice&id=<?php echo $data[0]['id']; ?>">Email</a></td>
+            </tr>
+        </table>
+        </div>
+        <?php } ?>
 	</div>
-
 </div>  
 
 <script type="text/javascript">

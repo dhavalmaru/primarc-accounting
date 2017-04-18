@@ -28,31 +28,6 @@ class PendinggrnController extends Controller
         ]);
     }
 
-    public function actionDownloaddebitnote(){
-        // $html = '<<<HTML
-        //         <html xmlns="http://www.w3.org/1999/xhtml">
-        //         <head>
-        //             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        //         </head>
-        //         <body>
-        //         <p>Simple Content</p>
-        //         </body>
-        //         </html>
-        //         HTML';
-
-        // // create PDF file from HTML content :
-        // Yii::$app->html2pdf
-        //     ->convert($html)
-        //     ->saveAs('output.pdf');
-
-
-        require_once Yii::$app->basePath.'/vendor/autoload.php';
-
-        $mpdf = new \Mpdf\Mpdf();
-        $mpdf->WriteHTML('<h1>Hello world!</h1>');
-        $mpdf->Output();
-    }
-
     public function actionViewdebitnote($invoice_id){
         $model = new PendingGrn();
         $data = $model->getDebitNoteDetails($invoice_id);
@@ -124,11 +99,6 @@ class PendinggrnController extends Controller
         $message->setTextBody($body);
         // $message->setHtmlBody($body);
         $message->attach($attachment);
-
-        // $message->useFileTransport = false;
-
-        // echo $message->send();
-        // echo 'Done';
 
         $response = $message->send();
         if($response=='1'){

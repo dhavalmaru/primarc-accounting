@@ -715,12 +715,14 @@ function check_payment_receipt_details() {
     var validator = $("#payment_receipt").validate();
     var valid = true;
 
-    if (parseFloat(get_number($('#paying_debit_amt').val(),2))==0 && parseFloat(get_number($('#paying_credit_amt').val(),2))==0) {
-        var errors = {};
-        var name = "paying_debit_amt";
-        errors[name] = "Please select atleast one payment.";
-        validator.showErrors(errors);
-        valid = false;
+    if($("#payment_type").val()=="Knock off"){
+        if (parseFloat(get_number($('#paying_debit_amt').val(),2))==0 && parseFloat(get_number($('#paying_credit_amt').val(),2))==0) {
+            var errors = {};
+            var name = "paying_debit_amt";
+            errors[name] = "Please select atleast one payment.";
+            validator.showErrors(errors);
+            valid = false;
+        }
     }
 
     return valid;

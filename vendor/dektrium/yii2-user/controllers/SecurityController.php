@@ -158,15 +158,8 @@ class SecurityController extends Controller
 
         if ($model->load(\Yii::$app->getRequest()->post()) && $model->login()) {
             $this->trigger(self::EVENT_AFTER_LOGIN, $event);
-            // return $this->goBack();
-
-            return $this->render('welcome');
+            return $this->goBack();
         }
-
-        // $this->redirect(array('login', [
-        //     'model'  => $model,
-        //     'module' => $this->module,
-        // ]));
 
         return $this->render('login', [
             'model'  => $model,

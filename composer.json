@@ -20,9 +20,10 @@
         "yiisoft/yii2-swiftmailer": "~2.0.0",
         "yiisoft/yii2-jui": "^2.0",
         "kartik-v/yii2-widget-datepicker": "@dev",
-        "dektrium/yii2-user": "^0.9.10",
+        "dektrium/yii2-user": "^0.9.12",
         "yii2tech/html2pdf": "^1.0",
-        "mpdf/mpdf": "^6.1"
+        "mpdf/mpdf": "^6.1",
+        "phpoffice/phpexcel": "dev-develop"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

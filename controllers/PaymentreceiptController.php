@@ -51,6 +51,7 @@ class PaymentreceiptController extends Controller
         $transaction = "Update";
         $acc_details = $payment_receipt->getAccountDetails();
         $bank = $payment_receipt->getBanks();
+
         return $this->render('payment_receipt_details', ['transaction'=>$transaction, 'data' => $data, 'acc_details' => $acc_details, 'bank' => $bank]);
     }
 
@@ -98,12 +99,13 @@ class PaymentreceiptController extends Controller
                                         <td class="text-center"> 
                                             <div class="checkbox"> 
                                                 <input type="checkbox" class="check" id="chk_'.$i.'" value="1" '.(($data[$i]['is_paid']=="1")?"checked":"").' onChange="getLedgerTotal();" /> 
-                                                <input type="hidden" class="form-control" name="chk[]" id="chk_val_'.$i.'" value="0" />
+                                                <input type="hidden" class="form-control" name="chk[]" id="chk_val_'.$i.'" value="'.(($data[$i]['is_paid']=="1")?"1":"0").'" />
                                             </div> 
                                         </td>
                                         <td>
                                             <input type="hidden" class="form-control" id="ledger_id_'.$i.'" name="ledger_id[]" value="'.$data[$i]['id'].'" />
                                             <input type="hidden" class="form-control" id="ledger_type_'.$i.'" name="ledger_type[]" value="'.$data[$i]['ledger_type'].'" />
+                                            <input type="hidden" class="form-control" id="vendor_id_'.$i.'" name="vendor_id[]" value="'.$data[$i]['vendor_id'].'" />
                                             <input type="text" class="form-control" id="account_name_'.$i.'" name="account_name[]" value="'.$data[$i]['account_name'].'" readonly />
                                         </td>
                                         <td> 
@@ -224,5 +226,91 @@ class PaymentreceiptController extends Controller
         $payment_receipt = new PaymentReceipt();
         $transaction_id = $payment_receipt->save();
         $this->redirect(array('paymentreceipt/index'));
+    }
+
+    public function actionViewpaymentadvice($id){
+        $model = new PaymentReceipt();
+        $data = $model->getPaymentAdviceDetails($id);
+        
+        $this->layout = false;
+        return $this->render('payment_advice', [
+            'payment_details' => $data['payment_details'],
+            'entry_details' => $data['entry_details'],
+            'vendor_details' => $data['vendor_details']
+        ]);
+    }
+
+    public function actionDownload($id){
+        $model = new PaymentReceipt();
+        $data = $model->getPaymentAdviceDetails($id);
+        $file = "";
+
+        if(isset($data['payment_advice'])){
+            if(count($data['payment_advice'])>0){
+                $payment_advice = $data['payment_advice'];
+                $file = $payment_advice[0]['payment_advice_path'];
+            }
+        }
+
+        if( file_exists( $file ) ){
+            Yii::$app->response->sendFile($file);
+        } else {
+            echo $file;
+        }
+    }
+
+    public function actionEmailpaymentadvice($id){
+        $model = new PaymentReceipt();
+        $data = $model->getPaymentAdviceDetails($id);
+        $file = "";
+
+        return $this->render('email', [
+            'payment_details' => $data['payment_details'],
+            'entry_details' => $data['entry_details'],
+            'vendor_details' => $data['vendor_details'],
+            'payment_advice' => $data['payment_advice']
+        ]);
+    }
+
+    public function actionEmail(){
+        $request = Yii::$app->request;
+        $mycomponent = Yii::$app->mycomponent;
+        $session = Yii::$app->session;
+
+        $id = $request->post('id');
+        $payment_id = $request->post('payment_id');
+        // $from = $request->post('from');
+        $from = 'dhaval.maru@otbconsulting.co.in';
+        $to = $request->post('to');
+        // $to = 'prasad.bhisale@otbconsulting.co.in';
+        $subject = $request->post('subject');
+        $attachment = $request->post('attachment');
+        $body = $request->post('body');
+
+        // $grn_id = '28';
+        // $from = 'dhaval.maru@otbconsulting.co.in';
+        // $to = 'prasad.bhisale@otbconsulting.co.in';
+        // $subject = 'Test Email';
+        // $attachment = 'uploads/debit_notes/28/debit_note_invoice_90.pdf';
+        // $body = 'Testing';
+
+        $message = Yii::$app->mailer->compose();
+        $message->setFrom($from);
+        $message->setTo($to);
+        $message->setSubject($subject);
+        $message->setTextBody($body);
+        // $message->setHtmlBody($body);
+        $message->attach($attachment);
+
+        $response = $message->send();
+        if($response=='1'){
+            $data['response'] = 'Mail Sent.';
+        } else {
+            $data['response'] = 'Mail Sending Failed.';
+        }
+        $data['id'] = $id;
+        $data['payment_id'] = $payment_id;
+
+        return $this->render('email_response', ['data' => $data]);
     }
 }

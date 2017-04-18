@@ -686,8 +686,8 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
             <tr>
                 <td><?php echo $i+1; ?></td>
                 <td><?php echo $debit_note[$i]['invoice_no']; ?></td>
-                <td><?php echo (($debit_note[0]['invoice_date']!=null && $debit_note[0]['invoice_date']!='')?
-                                date('d/m/Y',strtotime($debit_note[0]['invoice_date'])):''); ?></td>
+                <td><?php echo (($debit_note[$i]['invoice_date']!=null && $debit_note[$i]['invoice_date']!='')?
+                                date('d/m/Y',strtotime($debit_note[$i]['invoice_date'])):''); ?></td>
                 <td><?php echo $mycomponent->format_money($debit_note[$i]['total_deduction'],2); ?></td>
                 <td><a href="<?php echo Url::base(); ?>index.php?r=pendinggrn%2Fviewdebitnote&invoice_id=<?php echo $debit_note[$i]['gi_go_invoice_id']; ?>" target="_blank">View</a></td>
                 <td><a href="<?php echo Url::base(); ?>index.php?r=pendinggrn%2Fdownload&invoice_id=<?php echo $debit_note[$i]['gi_go_invoice_id']; ?>" target="_blank">Download</a></td>
