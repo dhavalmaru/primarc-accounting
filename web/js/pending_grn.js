@@ -253,7 +253,7 @@ function get_sku_details(elem){
                     var tax = qty*tax_per_unit;
                     var total = cost_excl_tax + tax;
 
-                    console.log(state);
+                    // console.log(state);
 
                     $('#'+ded_type+'_product_title_'+index_val).val(data[0].product_type);
                     $('#'+ded_type+'_ean_'+index_val).val(data[0].ean);

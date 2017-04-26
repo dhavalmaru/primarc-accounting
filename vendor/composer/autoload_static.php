@@ -33,6 +33,10 @@ class ComposerStaticInit5fba56359105555c87afc9eb9d88a54a
         array (
             'phpDocumentor\\Reflection\\' => 25,
         ),
+        'm' => 
+        array (
+            'moonland\\phpexcel\\' => 18,
+        ),
         'k' => 
         array (
             'kartik\\date\\' => 12,
@@ -137,6 +141,10 @@ class ComposerStaticInit5fba56359105555c87afc9eb9d88a54a
             0 => __DIR__ . '/..' . '/phpdocumentor/reflection-common/src',
             1 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
             2 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
+        ),
+        'moonland\\phpexcel\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/moonlandsoft/yii2-phpexcel',
         ),
         'kartik\\date\\' => 
         array (

@@ -18,6 +18,7 @@ return array(
     'yii\\' => array($vendorDir . '/yiisoft/yii2'),
     'yii2tech\\html2pdf\\' => array($vendorDir . '/yii2tech/html2pdf'),
     'phpDocumentor\\Reflection\\' => array($vendorDir . '/phpdocumentor/reflection-common/src', $vendorDir . '/phpdocumentor/type-resolver/src', $vendorDir . '/phpdocumentor/reflection-docblock/src'),
+    'moonland\\phpexcel\\' => array($vendorDir . '/moonlandsoft/yii2-phpexcel'),
     'kartik\\date\\' => array($vendorDir . '/kartik-v/yii2-widget-datepicker'),
     'kartik\\base\\' => array($vendorDir . '/kartik-v/yii2-krajee-base'),
     'dektrium\\user\\' => array($vendorDir . '/dektrium/yii2-user'),

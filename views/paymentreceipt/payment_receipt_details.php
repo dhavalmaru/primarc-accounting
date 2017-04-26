@@ -46,6 +46,8 @@ $mycomponent = Yii::$app->mycomponent;
 					<label class="control-label">Transaction Type</label>
 					<div class=""> 
 						<input type="hidden" id="id" name="id" value="<?php if(isset($data[0])) echo $data[0]['id']; ?>" />
+						<input type="hidden" id="voucher_id" name="voucher_id" value="<?php if(isset($data[0])) echo $data[0]['voucher_id']; ?>" />
+						<input type="hidden" id="ledger_type" name="ledger_type" value="<?php if(isset($data[0])) echo $data[0]['ledger_type']; ?>" />
 						<select id="trans_type" class="form-control" name="trans_type">
 							<option value="">Select</option>
 							<option value="Receipt" <?php if(isset($data[0])) { if($data[0]['trans_type']=="Receipt") echo "selected"; } ?>>Receipt</option>

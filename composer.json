@@ -23,7 +23,7 @@
         "dektrium/yii2-user": "^0.9.12",
         "yii2tech/html2pdf": "^1.0",
         "mpdf/mpdf": "^6.1",
-        "phpoffice/phpexcel": "dev-develop"
+        "moonlandsoft/yii2-phpexcel": "*"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

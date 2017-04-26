@@ -3525,5 +3525,52 @@
             "yii2",
             "yii2-user"
         ]
+    },
+    {
+        "name": "moonlandsoft/yii2-phpexcel",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/moonlandsoft/yii2-phpexcel.git",
+            "reference": "b79fc4c7996da9ba0ff844d7dd70ab042a9aac7b"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/moonlandsoft/yii2-phpexcel/zipball/b79fc4c7996da9ba0ff844d7dd70ab042a9aac7b",
+            "reference": "b79fc4c7996da9ba0ff844d7dd70ab042a9aac7b",
+            "shasum": ""
+        },
+        "require": {
+            "phpoffice/phpexcel": "*",
+            "yiisoft/yii2": "*"
+        },
+        "time": "2016-09-03T12:33:44+00:00",
+        "type": "yii2-extension",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "moonland\\phpexcel\\": ""
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Moh Khoirul Anam",
+                "email": "moh.khoirul.anaam@gmail.com"
+            }
+        ],
+        "description": "Exporting PHP to Excel or Importing Excel to PHP",
+        "keywords": [
+            "excel",
+            "export",
+            "extension",
+            "import",
+            "xls",
+            "yii2"
+        ]
     }
 ]

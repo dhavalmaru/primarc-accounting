@@ -84,7 +84,8 @@ $("#account_master").validate({
             required: true
         },
         legal_name: {
-            required: true
+            required: true,
+            check_legal_name_availablity: true
         },
         code: {
             required: true
@@ -284,9 +285,70 @@ $('#account_master').submit(function() {
     if (!$("#account_master").valid()) {
         return false;
     } else {
+
+        // var result = 1;
+
+        // $.ajax({
+        //     url: BASE_URL+'index.php?r=accountmaster%2Fchecklegalnameavailablity',
+        //     type: 'post',
+        //     data: $("#account_master").serialize(),
+        //     dataType: 'html',
+        //     success: function (data) {
+        //         result = parseInt(data);
+        //     },
+        //     error: function (xhr, ajaxOptions, thrownError) {
+        //         alert(xhr.status);
+        //         alert(thrownError);
+        //     }
+        // });
+
+        // console.log(result);
+        // if (result) {
+        //     var errors = {};
+        //     var validator = $("#account_master").validate();
+        //     errors['legal_name'] = "Legal Name already in use.";
+        //     validator.showErrors(errors);
+        //     return false;
+        // } else {
+        //     return true;
+        // }
         return true;
     }
 });
+
+$.validator.addMethod("check_legal_name_availablity", function (value, element) {
+    var validator = $("#account_master").validate();
+    var result = 1;
+
+    $.ajax({
+        url: BASE_URL+'index.php?r=accountmaster%2Fchecklegalnameavailablity',
+        type: 'post',
+        data: $("#account_master").serialize(),
+        dataType: 'html',
+        global: false,
+        async: false,
+        success: function (data) {
+            // console.log(data);
+            // result = parseInt(data);
+            result = data;
+            // console.log(result);
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status);
+            alert(thrownError);
+        }
+    });
+
+            // console.log(result);
+    if (result==1) {
+        // console.log('false');
+        return false;
+    } else {
+        // console.log('true');
+        return true;
+    }
+}, 'Legal Name already in use.');
+
 
 
 

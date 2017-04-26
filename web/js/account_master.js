@@ -50,7 +50,6 @@ $("#type").change(function(){
     $("#category_1").val("");
     $("#category_2").val("");
     $("#category_3").val("");
-    $("#category_4").val("");
 
     $("#type_val").val($("#type").val());
     get_code();

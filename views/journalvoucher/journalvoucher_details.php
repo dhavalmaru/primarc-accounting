@@ -44,6 +44,8 @@ table tr td { border: 1px solid #eee!important; }
 				<div class=" ">
 					<div class=" ">
 						<input type="hidden" name="id" value="<?php if(isset($data)) echo $data[0]['id']; ?>" />
+						<input type="hidden" name="voucher_id" value="<?php if(isset($data)) echo $data[0]['voucher_id']; ?>" />
+						<input type="hidden" name="ledger_type" value="<?php if(isset($data)) echo $data[0]['ledger_type']; ?>" />
 						<table class="table table-bordered" id="journal_voucher_details">
 							<thead>
 								<tr>

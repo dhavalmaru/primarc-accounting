@@ -78,11 +78,33 @@ class AccReport extends Model
         //             id != '$opening_bal_id') B 
         //         on (A.id = B.jv_id)) AA where AA.amount is not null order by AA.updated_date";
 
-        $sql = "select * from ledger_entries where acc_id = '$acc_id' and status = '$status' and is_active = '1' and 
-                    date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date')";
+        $sql = "select * from 
+                (select * from ledger_entries where acc_id = '$acc_id' and status = '$status' and is_active = '1' and 
+                    date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and ref_type != 'purchase' 
+                union all 
+                select * from ledger_entries where status = '$status' and is_active = '1' and 
+                    date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and 
+                    ref_type = 'purchase' and ledger_type = 'Sub Entry' and 
+                    voucher_id in (select distinct voucher_id from ledger_entries where acc_id = '$acc_id' and status = '$status' and is_active = '1' and 
+                        date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and 
+                        ref_type = 'purchase' and ledger_type = 'Main Entry')) A order by id";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
+
+        // $sql = "select * from ledger_entries where status = '$status' and is_active = '1' and 
+        //             date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and 
+        //             ref_type = 'purchase' and ledger_type = 'Sub Entry' and 
+        //             voucher_id in (select distinct voucher_id from ledger_entries where status = '$status' and is_active = '1' and 
+        //                 date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and 
+        //                 ref_type = 'purchase' and ledger_type = 'Main Entry')";
+        // $command = Yii::$app->db->createCommand($sql);
+        // $reader = $command->query();
+        // $data2 = $reader->readAll();
+
+        // $data = array_merge($data, $data2);
+
+        return $data;
     }
 
     public function getTrialBalance($from_date, $to_date){

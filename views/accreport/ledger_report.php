@@ -140,16 +140,18 @@ table tr td { border: 1px solid #eee!important; }
 									<table class="table table-bordered table-hover" id="tab_report">
 										<thead>
 											<tr>
-												<th class="text-center">  Transaction id </th>
+												<th class="text-center"> Sr No </th>
+												<th class="text-center"> Ref ID (Voucher No) </th>
 												<th class="text-center"> Date </th>
 												<th class="text-center">  Ledger Code </th>
 												<th class="text-center"> Ledger Name </th>
-												<th class="text-center"> Ref ID </th>
-												<th class="text-center"> DB/CR </th>
+												<th class="text-center"> Ref 1 </th>
+												<th class="text-center"> Ref 2 </th>
+												<th class="text-center" style="display: none;"> DB/CR </th>
 												<th class="text-center"> Debit </th>
 												<th class="text-center"> Credit </th>
 												<th class="text-center"> Balance </th>
-												<th class="text-center"> Dr/Cr </th>
+												<th class="text-center"> DB/CR </th>
 												<th class="text-center"> Knock Off Ref </th>
 												<th class="text-center show_narration"> Narration </th>
 											</tr>

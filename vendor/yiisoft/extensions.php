@@ -112,4 +112,13 @@ return array (
       '@yii2tech/html2pdf' => $vendorDir . '/yii2tech/html2pdf',
     ),
   ),
+  'moonlandsoft/yii2-phpexcel' => 
+  array (
+    'name' => 'moonlandsoft/yii2-phpexcel',
+    'version' => '9999999-dev',
+    'alias' => 
+    array (
+      '@moonland/phpexcel' => $vendorDir . '/moonlandsoft/yii2-phpexcel',
+    ),
+  ),
 );

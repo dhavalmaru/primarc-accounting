@@ -56,6 +56,8 @@ class JournalVoucher extends Model
         $session = Yii::$app->session;
 
         $id = $request->post('id');
+        $voucher_id = $request->post('voucher_id');
+        $ledger_type = $request->post('ledger_type');
         $entry_id = $request->post('entry_id');
         $acc_id = $request->post('acc_id');
         $legal_name = $request->post('legal_name');
@@ -86,7 +88,33 @@ class JournalVoucher extends Model
             $credit_acc = substr($credit_acc, 0, strrpos($credit_acc, ', '));
         }
 
-        $array = array('reference' => $reference, 
+        if(!isset($voucher_id) || $voucher_id==''){
+            $series = 1;
+            $sql = "select * from series_master where type = 'Voucher'";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $data = $reader->readAll();
+            if (count($data)>0){
+                $series = intval($data[0]['series']) + 1;
+
+                $sql = "update series_master set series = '$series' where type = 'Voucher'";
+                $command = Yii::$app->db->createCommand($sql);
+                $count = $command->execute();
+            } else {
+                $series = 1;
+
+                $sql = "insert into series_master (type, series) values ('Voucher', '".$series."')";
+                $command = Yii::$app->db->createCommand($sql);
+                $count = $command->execute();
+            }
+
+            $voucher_id = $series;
+            $ledger_type = 'Main Entry';
+        }
+        
+        $array = array('voucher_id' => $voucher_id, 
+                        'ledger_type' => $ledger_type, 
+                        'reference' => $reference, 
                         'narration' => $narration, 
                         'debit_acc' => $debit_acc, 
                         'credit_acc' => $credit_acc, 
@@ -152,8 +180,11 @@ class JournalVoucher extends Model
                                 'ref_id'=>$id,
                                 'sub_ref_id'=>$entry_id[$i],
                                 'ref_type'=>'journal_voucher',
+                                'entry_type'=>'Journal Voucher',
                                 // 'invoice_no'=>$invoice_no_val[$i],
                                 // 'vendor_id'=>$vendor_id,
+                                'voucher_id' => $voucher_id, 
+                                'ledger_type' => $ledger_type, 
                                 'acc_id'=>$acc_id[$i],
                                 'ledger_name'=>$legal_name[$i],
                                 'ledger_code'=>$acc_code[$i],

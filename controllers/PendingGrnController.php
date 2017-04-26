@@ -190,6 +190,8 @@ class PendinggrnController extends Controller
                                     $invoice_tax[$k]['invoice_cost_acc_id'] = $grn_acc_entries[$i]['acc_id'];
                                     $invoice_tax[$k]['invoice_cost_ledger_name'] = $grn_acc_entries[$i]['ledger_name'];
                                     $invoice_tax[$k]['invoice_cost_ledger_code'] = $grn_acc_entries[$i]['ledger_code'];
+                                    // $invoice_tax[$k]['invoice_cost_voucher_id'] = $grn_acc_entries[$i]['voucher_id'];
+                                    // $invoice_tax[$k]['invoice_cost_ledger_type'] = $grn_acc_entries[$i]['ledger_type'];
                                     $invoice_tax[$k]['invoice_cost'] = $grn_acc_entries[$i]['invoice_val'];
                                     $invoice_tax[$k]['edited_cost'] = $grn_acc_entries[$i]['edited_val'];
                                     $invoice_tax[$k]['diff_cost'] = $grn_acc_entries[$i]['difference_val'];
@@ -198,6 +200,8 @@ class PendinggrnController extends Controller
                                     $invoice_tax[$k]['invoice_tax_acc_id'] = $grn_acc_entries[$i]['acc_id'];
                                     $invoice_tax[$k]['invoice_tax_ledger_name'] = $grn_acc_entries[$i]['ledger_name'];
                                     $invoice_tax[$k]['invoice_tax_ledger_code'] = $grn_acc_entries[$i]['ledger_code'];
+                                    // $invoice_tax[$k]['invoice_tax_voucher_id'] = $grn_acc_entries[$i]['voucher_id'];
+                                    // $invoice_tax[$k]['invoice_tax_ledger_type'] = $grn_acc_entries[$i]['ledger_type'];
                                     $invoice_tax[$k]['invoice_tax'] = $grn_acc_entries[$i]['invoice_val'];
                                     $invoice_tax[$k]['edited_tax'] = $grn_acc_entries[$i]['edited_val'];
                                     $invoice_tax[$k]['diff_tax'] = $grn_acc_entries[$i]['difference_val'];
@@ -222,6 +226,8 @@ class PendinggrnController extends Controller
                             $invoice_tax[$tax_num]['invoice_cost_acc_id'] = $grn_acc_entries[$i]['acc_id'];
                             $invoice_tax[$tax_num]['invoice_cost_ledger_name'] = $grn_acc_entries[$i]['ledger_name'];
                             $invoice_tax[$tax_num]['invoice_cost_ledger_code'] = $grn_acc_entries[$i]['ledger_code'];
+                            // $invoice_tax[$tax_num]['invoice_cost_voucher_id'] = $grn_acc_entries[$i]['voucher_id'];
+                            // $invoice_tax[$tax_num]['invoice_cost_ledger_type'] = $grn_acc_entries[$i]['ledger_type'];
                             $invoice_tax[$tax_num]['invoice_cost'] = $grn_acc_entries[$i]['invoice_val'];
                             $invoice_tax[$tax_num]['edited_cost'] = $grn_acc_entries[$i]['edited_val'];
                             $invoice_tax[$tax_num]['diff_cost'] = $grn_acc_entries[$i]['difference_val'];
@@ -230,6 +236,8 @@ class PendinggrnController extends Controller
                             $invoice_tax[$tax_num]['invoice_tax_acc_id'] = $grn_acc_entries[$i]['acc_id'];
                             $invoice_tax[$tax_num]['invoice_tax_ledger_name'] = $grn_acc_entries[$i]['ledger_name'];
                             $invoice_tax[$tax_num]['invoice_tax_ledger_code'] = $grn_acc_entries[$i]['ledger_code'];
+                            // $invoice_tax[$tax_num]['invoice_tax_voucher_id'] = $grn_acc_entries[$i]['voucher_id'];
+                            // $invoice_tax[$tax_num]['invoice_tax_ledger_type'] = $grn_acc_entries[$i]['ledger_type'];
                             $invoice_tax[$tax_num]['invoice_tax'] = $grn_acc_entries[$i]['invoice_val'];
                             $invoice_tax[$tax_num]['edited_tax'] = $grn_acc_entries[$i]['edited_val'];
                             $invoice_tax[$tax_num]['diff_tax'] = $grn_acc_entries[$i]['difference_val'];
@@ -259,6 +267,8 @@ class PendinggrnController extends Controller
                     $acc['other_charges_acc_id'] = $grn_acc_entries[$i]['acc_id'];
                     $acc['other_charges_ledger_name'] = $grn_acc_entries[$i]['ledger_name'];
                     $acc['other_charges_ledger_code'] = $grn_acc_entries[$i]['ledger_code'];
+                    // $acc['other_charges_voucher_id'] = $grn_acc_entries[$i]['voucher_id'];
+                    // $acc['other_charges_ledger_type'] = $grn_acc_entries[$i]['ledger_type'];
                     $invoice_details[$num]['invoice_other_charges'] = $grn_acc_entries[$i]['invoice_val'];
                     $invoice_details[$num]['edited_other_charges'] = $grn_acc_entries[$i]['edited_val'];
                     $invoice_details[$num]['diff_other_charges'] = $grn_acc_entries[$i]['difference_val'];
@@ -272,6 +282,8 @@ class PendinggrnController extends Controller
                     $invoice_details[$num]['invoice_total_amount'] = $grn_acc_entries[$i]['invoice_val'];
                     $invoice_details[$num]['edited_total_amount'] = $grn_acc_entries[$i]['edited_val'];
                     $invoice_details[$num]['diff_total_amount'] = $grn_acc_entries[$i]['difference_val'];
+                    $invoice_details[$num]['total_amount_voucher_id'] = $grn_acc_entries[$i]['voucher_id'];
+                    $invoice_details[$num]['total_amount_ledger_type'] = $grn_acc_entries[$i]['ledger_type'];
                     $narration['narration_total_amount'] = $grn_acc_entries[$i]['narration'];
                 }
 
@@ -310,6 +322,8 @@ class PendinggrnController extends Controller
                     $invoice_details[$num]['invoice_total_deduction'] = $grn_acc_entries[$i]['invoice_val'];
                     $invoice_details[$num]['edited_total_deduction'] = $grn_acc_entries[$i]['edited_val'];
                     $invoice_details[$num]['diff_total_deduction'] = $grn_acc_entries[$i]['difference_val'];
+                    $invoice_details[$num]['total_deduction_voucher_id'] = $grn_acc_entries[$i]['voucher_id'];
+                    $invoice_details[$num]['total_deduction_ledger_type'] = $grn_acc_entries[$i]['ledger_type'];
                     $narration['narration_total_deduction'] = $grn_acc_entries[$i]['narration'];
                 }
             }
@@ -332,24 +346,49 @@ class PendinggrnController extends Controller
             // $invoice_tax = $model->getInvoiceTax($id);
             $invoice_tax = $model->getInvoiceTaxDetails($id);
 
-            // echo count($total_val);
-            // echo '<br/>';
-            // echo count($invoice_details);
-            // echo '<br/>';
-            // echo count($invoice_tax);
-            // echo '<br/>';
-            // echo $total_val[0]['total_cost'];
-            // echo '<br/>';
+            for($i=0; $i<count($invoice_details); $i++) {
+                $series = 2;
+                $sql = "select * from series_master where type = 'Voucher'";
+                $command = Yii::$app->db->createCommand($sql);
+                $reader = $command->query();
+                $data = $reader->readAll();
+                if (count($data)>0){
+                    $series = intval($data[0]['series']) + 2;
+
+                    $sql = "update series_master set series = '$series' where type = 'Voucher'";
+                    $command = Yii::$app->db->createCommand($sql);
+                    $count = $command->execute();
+                } else {
+                    $series = 2;
+
+                    $sql = "insert into series_master (type, series) values ('Voucher', '".$series."')";
+                    $command = Yii::$app->db->createCommand($sql);
+                    $count = $command->execute();
+                }
+
+                // $code = $code . str_pad($series, 4, "0", STR_PAD_LEFT);
+
+                $invoice_details[$i]['total_amount_voucher_id'] = $series-1;
+                $invoice_details[$i]['total_amount_ledger_type'] = 'Main Entry';
+                $invoice_details[$i]['total_deduction_voucher_id'] = $series;
+                $invoice_details[$i]['total_deduction_ledger_type'] = 'Main Entry';
+            }
 
             $acc['other_charges_acc_id'] = "";
             $acc['other_charges_ledger_name'] = "";
             $acc['other_charges_ledger_code'] = "";
+            // $acc['other_charges_voucher_id'] = "";
+            // $acc['other_charges_ledger_type'] = "";
             $acc['total_amount_acc_id'] = "";
             $acc['total_amount_ledger_name'] = "";
             $acc['total_amount_ledger_code'] = "";
+            // $acc['total_amount_voucher_id'] = "";
+            // $acc['total_amount_ledger_type'] = "";
             $acc['total_deduction_acc_id'] = "";
             $acc['total_deduction_ledger_name'] = "";
             $acc['total_deduction_ledger_code'] = "";
+            // $acc['total_deduction_voucher_id'] = "";
+            // $acc['total_deduction_ledger_type'] = "";
 
             $narration['narration_taxable_amount'] = "";
             $narration['narration_total_tax'] = "";
@@ -417,6 +456,7 @@ class PendinggrnController extends Controller
         for($i=0; $i<count($grn_acc_ledger_entries); $i++) {
             $rows = $rows . '<tr>
                                 <td>' . ($sr_no++) . '</td>
+                                <td>' . $grn_acc_ledger_entries[$i]["voucher_id"] . '</td>
                                 <td>' . $grn_acc_ledger_entries[$i]["ledger_name"] . '</td>
                                 <td>' . $grn_acc_ledger_entries[$i]["ledger_code"] . '</td>';
 
@@ -449,10 +489,10 @@ class PendinggrnController extends Controller
                 }
 
                 $rows = $rows . '<tr class="bold-text text-right">
-                                    <td colspan="3" style="text-align:right;">'.$particular.'</td>
+                                    <td colspan="4" style="text-align:right;">'.$particular.'</td>
                                     <td class="bold-text text-right">'.$mycomponent->format_money($total_debit_amt,2).'</td>
                                     <td class="bold-text text-right">'.$mycomponent->format_money($total_credit_amt,2).'</td>';
-                $rows = $rows . '<tr><td colspan="5"></td></tr>';
+                $rows = $rows . '<tr><td colspan="6"></td></tr>';
 
                 $total_debit_amt = 0;
                 $total_credit_amt = 0;
@@ -460,7 +500,7 @@ class PendinggrnController extends Controller
 
                 if($grn_acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
                     $rows = $rows . '<tr class="bold-text text-right">
-                                        <td colspan="5" style="text-align:left;">Deduction Entry</td>
+                                        <td colspan="6" style="text-align:left;">Deduction Entry</td>
                                     </tr>';
                 }
             }
@@ -474,13 +514,14 @@ class PendinggrnController extends Controller
 
             if($blFlag == true){
                 $rows = '<tr class="bold-text text-right">
-                            <td colspan="5" style="text-align:left;">Purchase Entry</td>
+                            <td colspan="6" style="text-align:left;">Purchase Entry</td>
                         </tr>' . $rows;
 
                 $table = '<div class="diversion"><h4 class=" ">Invoice No: ' . $grn_acc_ledger_entries[$i]["invoice_no"] . '</h4>
                         <table class="table table-bordered">
                             <tr class="table-head">
                                 <th>Sr. No.</th>
+                                <th>Voucher No</th>
                                 <th>Ledger Name</th>
                                 <th>Ledger Code</th>
                                 <th>Debit</th>
@@ -488,7 +529,7 @@ class PendinggrnController extends Controller
                             </tr>
                             ' . $rows . '
                             <tr class="bold-text text-right">
-                                <td colspan="3" style="text-align:right;">Total Amount</td>
+                                <td colspan="4" style="text-align:right;">Total Amount</td>
                                 <td>' . $mycomponent->format_money($debit_amt,2) . '</td>
                                 <td>' . $mycomponent->format_money($credit_amt,2) . '</td>
                             </tr>
@@ -530,8 +571,9 @@ class PendinggrnController extends Controller
             Yii::$app->db->createCommand($sql)->execute();
 
             $columnNameArray=['grn_id','vendor_id','particular','sub_particular','acc_id','ledger_name','ledger_code',
-                                'vat_cst','vat_percen','invoice_no','total_val','invoice_val','edited_val','difference_val',
-                                'narration','status','is_active','updated_by','updated_date'];
+                                'voucher_id','ledger_type','vat_cst','vat_percen','invoice_no','total_val',
+                                'invoice_val','edited_val','difference_val','narration','status','is_active',
+                                'updated_by','updated_date'];
             // below line insert all your record and return number of rows inserted
             $tableName = "grn_acc_entries";
             $insertCount = Yii::$app->db->createCommand()
@@ -549,8 +591,8 @@ class PendinggrnController extends Controller
             $sql = "delete from ledger_entries where ref_id = '$gi_id' and ref_type='purchase'";
             Yii::$app->db->createCommand($sql)->execute();
 
-            $columnNameArray=['ref_id','ref_type','entry_type','invoice_no','vendor_id','acc_id','ledger_name','ledger_code','type',
-                                'amount','status','is_active','updated_by','updated_date'];
+            $columnNameArray=['ref_id','ref_type','entry_type','invoice_no','vendor_id','acc_id','ledger_name','ledger_code',
+                                'voucher_id','ledger_type','type','amount','status','is_active','updated_by','updated_date'];
             // below line insert all your record and return number of rows inserted
             $tableName = "ledger_entries";
             $insertCount = Yii::$app->db->createCommand()
@@ -747,6 +789,15 @@ class PendinggrnController extends Controller
             for($i=0; $i<count($rows); $i++){
                 $invoice_no = $rows[$i]["invoice_no"];
 
+                $voucher_id = '';
+                $ledger_type = 'Sub Entry';
+
+                // for($k=0; $k<count($invoice_details); $k++) { 
+                //     if($invoice_details[$k]['invoice_no']==$invoice_no) {
+                //         $voucher_id = $invoice_details[$k]['total_deduction_voucher_id'];
+                //     }
+                // }
+
                 $data = $model->getGrnSkues($gi_id);
                 $sku_list = '<option value="">Select</option>';
                 for($k=0; $k<count($data); $k++){
@@ -819,11 +870,15 @@ class PendinggrnController extends Controller
                             <td>
                                 <select id="'.$ded_type.'cost_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_cost_acc_id[]" onChange="get_acc_details(this)">'.$cost_acc_list.'</select>
                                 <input type="hidden" id="'.$ded_type.'cost_ledger_name_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_name[]" value="'.$rows[$i]["cost_ledger_name"].'" />
+                                <input type="hidden" id="'.$ded_type.'cost_voucher_id_'.$sr_no.'" name="'.$ded_type.'_cost_voucher_id[]" value="'.$voucher_id.'" />
+                                <input type="hidden" id="'.$ded_type.'cost_ledger_type_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_type[]" value="'.$ledger_type.'" />
                             </td>
                             <td><input type="text" id="'.$ded_type.'cost_ledger_code_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_code[]" value="'.$rows[$i]["cost_ledger_code"].'" readonly /></td>
                             <td>
                                 <select id="'.$ded_type.'tax_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_tax_acc_id[]" onChange="get_acc_details(this)">'.$tax_acc_list.'</select>
                                 <input type="hidden" id="'.$ded_type.'tax_ledger_name_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_name[]" value="'.$rows[$i]["tax_ledger_name"].'" />
+                                <input type="hidden" id="'.$ded_type.'tax_voucher_id_'.$sr_no.'" name="'.$ded_type.'_tax_voucher_id[]" value="'.$voucher_id.'" />
+                                <input type="hidden" id="'.$ded_type.'tax_ledger_type_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_type[]" value="'.$ledger_type.'" />
                             </td>
                             <td><input type="text" id="'.$ded_type.'tax_ledger_code_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_code[]" value="'.$rows[$i]["tax_ledger_code"].'" readonly /></td>
                             <td>
@@ -835,7 +890,7 @@ class PendinggrnController extends Controller
                             <td><input type="text" class="'.$ded_type.'_vat_percen_'.$sr_no.'" id="'.$ded_type.'_vat_percen_'.$i.'" name="'.$ded_type.'_vat_percen[]" value="'.$mycomponent->format_money($vat_percen,2).'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_qty_'.$sr_no.'" id="'.$ded_type.'_qty_'.$i.'" name="'.$ded_type.'_qty[]" value="' . $mycomponent->format_money($qty,2) . '" onChange="set_sku_details(this)" /></td>
                             <td><input type="text" class="'.$ded_type.'_box_price_'.$sr_no.'" id="'.$ded_type.'_box_price_'.$i.'" name="'.$ded_type.'_box_price[]" value="'.$mycomponent->format_money($rows[$i]["box_price"],2).'" readonly /></td>
-                            <td><input type="text" class="'.$ded_type.'_cost_excl_tax_per_unit_'.$sr_no.'" id="'.$ded_type.'_cost_excl_tax_per_unit_'.$i.'" name="'.$ded_type.'_cost_excl_tax_per_unit[]" value="'.$mycomponent->format_money($cost_excl_tax_per_unit,2).'" onChange="set_sku_details(this)" /></td>
+                            <td><input type="text" class="'.$ded_type.'_cost_excl_tax_per_unit_'.$sr_no.'" id="'.$ded_type.'_cost_excl_tax_per_unit_'.$i.'" name="'.$ded_type.'_cost_excl_tax_per_unit[]" value="'.$mycomponent->format_money($cost_excl_tax_per_unit,2).'" onChange="set_sku_details(this)" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_tax_per_unit_'.$sr_no.'" id="'.$ded_type.'_tax_per_unit_'.$i.'" name="'.$ded_type.'_tax_per_unit[]" value="'.$mycomponent->format_money($tax_per_unit,2).'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_total_per_unit_'.$sr_no.'" id="'.$ded_type.'_total_per_unit_'.$i.'" name="'.$ded_type.'_total_per_unit[]" value="'.$mycomponent->format_money($total_per_unit,2).'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_cost_excl_tax_'.$sr_no.'" id="'.$ded_type.'_cost_excl_tax_'.$i.'" name="'.$ded_type.'_cost_excl_tax[]" value="'.$mycomponent->format_money($cost_excl_tax,2).'" readonly /></td>
@@ -1102,7 +1157,7 @@ class PendinggrnController extends Controller
                     <td><input type="text" class="'.$ded_type.'_vat_percen_'.$sr_no.'" id="'.$ded_type.'_vat_percen_'.$i.'" name="'.$ded_type.'_vat_percen[]" value="'.$mycomponent->format_money($vat_percen,2).'" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_qty_'.$sr_no.'" id="'.$ded_type.'_qty_'.$i.'" name="'.$ded_type.'_qty[]" value="' . $mycomponent->format_money($qty,2) . '" onChange="set_sku_details(this);" /></td>
                     <td><input type="text" class="'.$ded_type.'_box_price_'.$sr_no.'" id="'.$ded_type.'_box_price_'.$i.'" name="'.$ded_type.'_box_price[]" value="" readonly /></td>
-                    <td><input type="text" class="'.$ded_type.'_cost_excl_tax_per_unit_'.$sr_no.'" id="'.$ded_type.'_cost_excl_tax_per_unit_'.$i.'" name="'.$ded_type.'_cost_excl_tax_per_unit[]" value="'.$mycomponent->format_money($cost_excl_tax_per_unit,2).'" onChange="set_sku_details(this);" /></td>
+                    <td><input type="text" class="'.$ded_type.'_cost_excl_tax_per_unit_'.$sr_no.'" id="'.$ded_type.'_cost_excl_tax_per_unit_'.$i.'" name="'.$ded_type.'_cost_excl_tax_per_unit[]" value="'.$mycomponent->format_money($cost_excl_tax_per_unit,2).'" onChange="set_sku_details(this);" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_tax_per_unit_'.$sr_no.'" id="'.$ded_type.'_tax_per_unit_'.$i.'" name="'.$ded_type.'_tax_per_unit[]" value="'.$mycomponent->format_money($tax_per_unit,2).'" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_total_per_unit_'.$sr_no.'" id="'.$ded_type.'_total_per_unit_'.$i.'" name="'.$ded_type.'_total_per_unit[]" value="'.$mycomponent->format_money($total_per_unit,2).'" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_cost_excl_tax_'.$sr_no.'" id="'.$ded_type.'_cost_excl_tax_'.$i.'" name="'.$ded_type.'_cost_excl_tax[]" value="'.$mycomponent->format_money($cost_excl_tax,2).'" readonly /></td>
@@ -1294,5 +1349,12 @@ class PendinggrnController extends Controller
         }
 
         echo $result;
+    }
+
+    public function actionGetgrnparticulars(){
+        $grn = new PendingGrn();
+        $data = $grn->getGrnParticulars();
+
+        echo json_encode($data);
     }
 }

@@ -121,4 +121,10 @@ class AccountmasterController extends Controller
         $data = $acc_master->getVendorDetails();
         echo json_encode($data);
     }
+
+    public function actionChecklegalnameavailablity(){
+        $acc_master = new AccountMaster();
+        $result = $acc_master->checkLegalNameAvailablity();
+        echo $result;
+    }
 }

@@ -75,10 +75,10 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
 .modal-dialog { margin:10px;}
 .modal-content { border-radius:0;}
 .modal-body  { padding:0;}
-.modal-body-inside { max-width:1310px; overflow-y:hidden!important; margin:20px auto; }
+.modal-body-inside { /*max-width:1310px;*/ overflow-y:hidden!important; margin:20px auto; }
 .modal-header { background:#f1f1f1;}
 .modal-footer { background:#f1f1f1;}
-.modal-body .table {  width:3200px; }
+/*.modal-body .table {  width:3200px; }*/
 .close { outline:none;}
 
 
@@ -230,6 +230,8 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
 
                                     $td = '<td>
                                                 <input type="text" class="text-right" id="invoice_'.$k.'_cost_'.$j.'" name="invoice_cost_'.$j.'[]" value="'.$mycomponent->format_money($invoice_tax[$i]['invoice_cost'], 2).'" readonly />
+                                                <input type="hidden" id="invoice_'.$k.'_cost_voucher_id_'.$j.'" name="invoice_cost_voucher_id_'.$j.'[]" value="" />
+                                                <input type="hidden" id="invoice_'.$k.'_cost_ledger_type_'.$j.'" name="invoice_cost_ledger_type_'.$j.'[]" value="Sub Entry" />
                                             </td>
                                             <td>
                                                 <input type="text" class="text-right edit-text" id="edited_'.$k.'_cost_'.$j.'" name="edited_cost_'.$j.'[]" value="'.$mycomponent->format_money($invoice_tax[$i]['edited_cost'], 2).'" onChange="getDifference(this);" />
@@ -241,6 +243,8 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
 
                                     $td = '<td>
                                                 <input type="text" class="text-right" id="invoice_'.$k.'_tax_'.$j.'" name="invoice_tax_'.$j.'[]" value="'.$mycomponent->format_money($invoice_tax[$i]['invoice_tax'], 2).'" readonly />
+                                                <input type="hidden" id="invoice_'.$k.'_tax_voucher_id_'.$j.'" name="invoice_tax_voucher_id_'.$j.'[]" value="" />
+                                                <input type="hidden" id="invoice_'.$k.'_tax_ledger_type_'.$j.'" name="invoice_tax_ledger_type_'.$j.'[]" value="Sub Entry" />
                                             </td>
                                             <td>
                                                 <input type="text" class="text-right edit-text" id="edited_'.$k.'_tax_'.$j.'" name="edited_tax_'.$j.'[]" value="'.$mycomponent->format_money($invoice_tax[$i]['edited_tax'], 2).'" onChange="getDifference(this);" />
@@ -257,6 +261,8 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                             if($bl_invoice==false) {
                                 $td = '<td>
                                             <input type="text" class="text-right" id="invoice_'.$inv_num.'_cost_'.$j.'" name="invoice_cost_'.$j.'[]" value="0.00" readonly />
+                                            <input type="hidden" id="invoice_'.$k.'_cost_voucher_id_'.$j.'" name="invoice_cost_voucher_id_'.$j.'[]" value="" />
+                                            <input type="hidden" id="invoice_'.$k.'_cost_ledger_type_'.$j.'" name="invoice_cost_ledger_type_'.$j.'[]" value="Sub Entry" />
                                         </td>
                                         <td>
                                             <input type="text" class="text-right edit-text" id="edited_'.$inv_num.'_cost_'.$j.'" name="edited_cost_'.$j.'[]" value="0.00" onChange="getDifference(this);" />
@@ -268,6 +274,8 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
 
                                 $td = '<td>
                                             <input type="text" class="text-right" id="invoice_'.$inv_num.'_tax_'.$j.'" name="invoice_tax_'.$j.'[]" value="0.00" readonly />
+                                            <input type="hidden" id="invoice_'.$k.'_tax_voucher_id_'.$j.'" name="invoice_tax_voucher_id_'.$j.'[]" value="" />
+                                            <input type="hidden" id="invoice_'.$k.'_tax_ledger_type_'.$j.'" name="invoice_tax_ledger_type_'.$j.'[]" value="Sub Entry" />
                                         </td>
                                         <td>
                                             <input type="text" class="text-right edit-text" id="edited_'.$inv_num.'_tax_'.$j.'" name="edited_tax_'.$j.'[]" value="0.00" onChange="getDifference(this);" />
@@ -355,7 +363,9 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                         </select>
                         <input type="hidden" id="othercharges_ledger_name_0" name="other_charges_ledger_name" value="<?php echo $acc['other_charges_ledger_name']; ?>" />
                     </td>
-                    <td><input type="text" id="othercharges_ledger_code_0" name="other_charges_ledger_code" value="<?php echo $acc['other_charges_ledger_code']; ?>" readonly /></td>
+                    <td>
+                        <input type="text" id="othercharges_ledger_code_0" name="other_charges_ledger_code" value="<?php echo $acc['other_charges_ledger_code']; ?>" readonly />
+                    </td>
                     <td></td>
                     <td>
                         <input type="text" class="text-right" id="other_charges" name="other_charges" value="<?php echo $mycomponent->format_money($total_val[0]['other_charges'], 2); ?>" readonly />
@@ -395,9 +405,11 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                     <?php for($i=0; $i<count($invoice_details); $i++) { ?>
                         <td>
                             <input type="text" class="text-right" id="invoice_total_amount_<?php echo $i;?>" name="invoice_total_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['invoice_total_amount'], 2); ?>" readonly />
+                            <input type="hidden" id="total_amount_voucher_id_<?php echo $i;?>" name="total_amount_voucher_id[]" value="<?php echo $invoice_details[$i]['total_amount_voucher_id']; ?>" />
+                            <input type="hidden" id="total_amount_ledger_type_<?php echo $i;?>" name="total_amount_ledger_type[]" value="<?php echo $invoice_details[$i]['total_amount_ledger_type']; ?>" />
                         </td>
                         <td>
-                            <input type="text" class="text-right edit-text" id="edited_total_amount_<?php echo $i;?>" name="edited_total_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['edited_total_amount'], 2); ?>" onChange="getDifference(this);" />
+                            <input type="text" class="text-right" id="edited_total_amount_<?php echo $i;?>" name="edited_total_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['edited_total_amount'], 2); ?>" onChange="getDifference(this);" readonly />
                         </td>
                         <td>
                             <input type="text" class="text-right" id="diff_total_amount_<?php echo $i;?>" name="diff_total_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['diff_total_amount'], 2); ?>" readonly />
@@ -422,7 +434,7 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                             <input type="text" class="text-right" id="invoice_shortage_amount_<?php echo $i;?>" name="invoice_shortage_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['invoice_shortage_amount'], 2); ?>" readonly />
                         </td>
                         <td>
-                            <input type="text" class="text-right edit-text" id="edited_shortage_amount_<?php echo $i;?>" name="edited_shortage_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['edited_shortage_amount'], 2); ?>" onChange="getDifference(this);" />
+                            <input type="text" class="text-right" id="edited_shortage_amount_<?php echo $i;?>" name="edited_shortage_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['edited_shortage_amount'], 2); ?>" onChange="getDifference(this);" readonly />
                         </td>
                         <td>
                             <input type="text" class="text-right" id="diff_shortage_amount_<?php echo $i;?>" name="diff_shortage_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['diff_shortage_amount'], 2); ?>" readonly />
@@ -446,7 +458,7 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                             <input type="text" class="text-right" id="invoice_expiry_amount_<?php echo $i;?>" name="invoice_expiry_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['invoice_expiry_amount'], 2); ?>" readonly />
                         </td>
                         <td>
-                            <input type="text" class="text-right edit-text" id="edited_expiry_amount_<?php echo $i;?>" name="edited_expiry_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['edited_expiry_amount'], 2); ?>" onChange="getDifference(this);" />
+                            <input type="text" class="text-right" id="edited_expiry_amount_<?php echo $i;?>" name="edited_expiry_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['edited_expiry_amount'], 2); ?>" onChange="getDifference(this);" readonly />
                         </td>
                         <td>
                             <input type="text" class="text-right" id="diff_expiry_amount_<?php echo $i;?>" name="diff_expiry_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['diff_expiry_amount'], 2); ?>" readonly />
@@ -470,7 +482,7 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                             <input type="text" class="text-right" id="invoice_damaged_amount_<?php echo $i;?>" name="invoice_damaged_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['invoice_damaged_amount'], 2); ?>" readonly />
                         </td>
                         <td>
-                            <input type="text" class="text-right edit-text" id="edited_damaged_amount_<?php echo $i;?>" name="edited_damaged_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['edited_damaged_amount'], 2); ?>" onChange="getDifference(this);" />
+                            <input type="text" class="text-right" id="edited_damaged_amount_<?php echo $i;?>" name="edited_damaged_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['edited_damaged_amount'], 2); ?>" onChange="getDifference(this);" readonly />
                         </td>
                         <td>
                             <input type="text" class="text-right" id="diff_damaged_amount_<?php echo $i;?>" name="diff_damaged_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['diff_damaged_amount'], 2); ?>" readonly />
@@ -494,7 +506,7 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                             <input type="text" class="text-right" id="invoice_margin_diff_amount_<?php echo $i;?>" name="invoice_margin_diff_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['invoice_margin_diff_amount'], 2); ?>" readonly />
                         </td>
                         <td>
-                            <input type="text" class="text-right edit-text" id="edited_margin_diff_amount_<?php echo $i;?>" name="edited_margin_diff_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['edited_margin_diff_amount'], 2); ?>" onChange="getDifference(this);" />
+                            <input type="text" class="text-right" id="edited_margin_diff_amount_<?php echo $i;?>" name="edited_margin_diff_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['edited_margin_diff_amount'], 2); ?>" onChange="getDifference(this);" readonly />
                         </td>
                         <td>
                             <input type="text" class="text-right" id="diff_margin_diff_amount_<?php echo $i;?>" name="diff_margin_diff_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['diff_margin_diff_amount'], 2); ?>" readonly />
@@ -525,9 +537,11 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                     <?php for($i=0; $i<count($invoice_details); $i++) { ?>
                         <td>
                             <input type="text" class="text-right" id="invoice_total_deduction_<?php echo $i;?>" name="invoice_total_deduction[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['invoice_total_deduction'], 2); ?>" readonly />
+                            <input type="hidden" id="total_deduction_voucher_id_<?php echo $i;?>" name="total_deduction_voucher_id[]" value="<?php echo $invoice_details[$i]['total_deduction_voucher_id']; ?>" />
+                            <input type="hidden" id="total_deduction_ledger_type_<?php echo $i;?>" name="total_deduction_ledger_type[]" value="<?php echo $invoice_details[$i]['total_deduction_ledger_type']; ?>" />
                         </td>
                         <td>
-                            <input type="text" class="text-right edit-text" id="edited_total_deduction_<?php echo $i;?>" name="edited_total_deduction[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['edited_total_deduction'], 2); ?>" onChange="getDifference(this);" />
+                            <input type="text" class="text-right" id="edited_total_deduction_<?php echo $i;?>" name="edited_total_deduction[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['edited_total_deduction'], 2); ?>" onChange="getDifference(this);" readonly />
                         </td>
                         <td>
                             <input type="text" class="text-right" id="diff_total_deduction_<?php echo $i;?>" name="diff_total_deduction[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['diff_total_deduction'], 2); ?>" readonly />

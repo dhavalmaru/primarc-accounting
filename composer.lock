@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "5ba6621fa2b12ce4bb61b1cb882b220e",
+    "content-hash": "e587d936087205c923c8fa665f3e9af8",
     "packages": [
         {
             "name": "bower-asset/bootstrap",
@@ -492,6 +492,51 @@
                 "yii2"
             ],
             "time": "2016-11-11T15:42:04+00:00"
+        },
+        {
+            "name": "moonlandsoft/yii2-phpexcel",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/moonlandsoft/yii2-phpexcel.git",
+                "reference": "b79fc4c7996da9ba0ff844d7dd70ab042a9aac7b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/moonlandsoft/yii2-phpexcel/zipball/b79fc4c7996da9ba0ff844d7dd70ab042a9aac7b",
+                "reference": "b79fc4c7996da9ba0ff844d7dd70ab042a9aac7b",
+                "shasum": ""
+            },
+            "require": {
+                "phpoffice/phpexcel": "*",
+                "yiisoft/yii2": "*"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "moonland\\phpexcel\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Moh Khoirul Anam",
+                    "email": "moh.khoirul.anaam@gmail.com"
+                }
+            ],
+            "description": "Exporting PHP to Excel or Importing Excel to PHP",
+            "keywords": [
+                "excel",
+                "export",
+                "extension",
+                "import",
+                "xls",
+                "yii2"
+            ],
+            "time": "2016-09-03T12:33:44+00:00"
         },
         {
             "name": "mpdf/mpdf",
@@ -3407,8 +3452,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "kartik-v/yii2-widget-datepicker": 20,
-        "phpoffice/phpexcel": 20
+        "kartik-v/yii2-widget-datepicker": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

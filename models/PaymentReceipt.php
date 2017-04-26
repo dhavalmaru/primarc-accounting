@@ -52,7 +52,7 @@ class PaymentReceipt extends Model
         //         order by ledger_type desc, type desc, id";
 
         $sql = "select * from 
-                (select A.id, A.invoice_no, A.vendor_id, A.acc_id as account_id, A.ledger_name as account_name, A.ledger_code as account_code, 
+                (select A.id, A.invoice_no, A.vendor_id, A.acc_id as account_id, A.entry_type as account_name, A.ledger_code as account_code, 
                     A.type, A.amount, A.is_paid, A.payment_ref, A.ref_type as ledger_type, 
                     B.gi_date, C.invoice_date, D.due_date from ledger_entries A 
                 left join grn B on(A.ref_id = B.grn_id and A.ref_type = 'purchase') 
@@ -92,6 +92,8 @@ class PaymentReceipt extends Model
         $session = Yii::$app->session;
 
         $id = $request->post('id');
+        $voucher_id = $request->post('voucher_id');
+        $ledger_type = $request->post('ledger_type');
         $trans_type = $request->post('trans_type');
         $acc_id = $request->post('acc_id');
         $legal_name = $request->post('legal_name');
@@ -101,6 +103,7 @@ class PaymentReceipt extends Model
         $payment_type = $request->post('payment_type');
         $narration = $request->post('narration');
 
+        $amount = 0;
         if($payment_type == "Adhoc"){
             $amount = $mycomponent->format_number($request->post('amount'),2);
             $ref_no = $request->post('ref_no');
@@ -120,8 +123,33 @@ class PaymentReceipt extends Model
         $tableName = "payment_receipt_details";
         $transaction_id = "";
 
+        if(!isset($voucher_id) || $voucher_id==''){
+            $series = 1;
+            $sql = "select * from series_master where type = 'Voucher'";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $data = $reader->readAll();
+            if (count($data)>0){
+                $series = intval($data[0]['series']) + 1;
+
+                $sql = "update series_master set series = '$series' where type = 'Voucher'";
+                $command = Yii::$app->db->createCommand($sql);
+                $count = $command->execute();
+            } else {
+                $series = 1;
+
+                $sql = "insert into series_master (type, series) values ('Voucher', '".$series."')";
+                $command = Yii::$app->db->createCommand($sql);
+                $count = $command->execute();
+            }
+
+            $voucher_id = $series;
+        }
+        
         $array=[
                 'trans_type'=>$trans_type,
+                'voucher_id' => $voucher_id, 
+                'ledger_type' => 'Main Entry', 
                 'account_id'=>$acc_id,
                 'account_name'=>$legal_name,
                 'account_code'=>$acc_code,
@@ -174,10 +202,10 @@ class PaymentReceipt extends Model
 
                         if($mycomponent->format_number($debit_amt[$i],2)>0){
                             $type = 'Credit';
-                            $amount = $mycomponent->format_number($debit_amt[$i],2);
+                            $amt = $mycomponent->format_number($debit_amt[$i],2);
                         } else {
                             $type = 'Debit';
-                            $amount = $mycomponent->format_number($credit_amt[$i],2);
+                            $amt = $mycomponent->format_number($credit_amt[$i],2);
                         }
 
                         $ledgerArray=[
@@ -187,11 +215,13 @@ class PaymentReceipt extends Model
                                             'entry_type'=>$ledger_type[$i],
                                             'invoice_no'=>$invoice_no[$i],
                                             'vendor_id'=>$vendor_id[$i],
+                                            'voucher_id' => $voucher_id, 
+                                            'ledger_type' => 'Main Entry', 
                                             'acc_id'=>$acc_id,
                                             'ledger_name'=>$legal_name,
                                             'ledger_code'=>$acc_code,
                                             'type'=>$type,
-                                            'amount'=>$amount,
+                                            'amount'=>$amt,
                                             'status'=>'pending',
                                             'is_active'=>'1',
                                             'updated_by'=>$session['session_id'],
@@ -217,9 +247,52 @@ class PaymentReceipt extends Model
                                     ->delete("ledger_entries", "ref_id = '".$id."' and sub_ref_id = '".$ledger_id[$i]."' and ref_type = 'payment_receipt'")
                                     ->execute();
                     }
-
-                    
                 }
+            }
+
+            $data = $this->getAccountDetails($bank_id);
+            if(count($data)>0){
+                $bank_legal_name = $data[0]['legal_name'];
+                $bank_acc_code = $data[0]['code'];
+            } else {
+                $bank_legal_name = '';
+                $bank_acc_code = '';
+            }
+            if($amount>0){
+                $type = 'Credit';
+                $amount = $amount;
+            } else {
+                $type = 'Debit';
+                $amount = $amount*-1;
+            }
+            $ledgerArray=[
+                            'ref_id'=>$id,
+                            'sub_ref_id'=>null,
+                            'ref_type'=>'payment_receipt',
+                            'entry_type'=>'Bank Entry',
+                            'invoice_no'=>null,
+                            'vendor_id'=>null,
+                            'voucher_id' => $voucher_id, 
+                            'ledger_type' => 'Main Entry', 
+                            'acc_id'=>$bank_id,
+                            'ledger_name'=>$bank_legal_name,
+                            'ledger_code'=>$bank_acc_code,
+                            'type'=>$type,
+                            'amount'=>$amount,
+                            'status'=>'pending',
+                            'is_active'=>'1',
+                            'updated_by'=>$session['session_id'],
+                            'updated_date'=>date('Y-m-d h:i:s')
+                        ];
+
+            $count = Yii::$app->db->createCommand()
+                        ->update("ledger_entries", $ledgerArray, "ref_id = '".$id."' and ref_type = 'payment_receipt' and entry_type = 'Bank Entry'")
+                        ->execute();
+
+            if ($count==0){
+                $count = Yii::$app->db->createCommand()
+                            ->insert("ledger_entries", $ledgerArray)
+                            ->execute();
             }
         }
         

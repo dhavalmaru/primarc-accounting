@@ -14,3 +14,4 @@ CREATE TABLE IF NOT EXISTS `payment_advices` (
   `is_active` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+

@@ -8,6 +8,8 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\helpers\Url;
+// use moonlandsoft\phpexcel\Excel;
+use phpoffice\phpexcel\Excel;
 
 class AccreportController extends Controller
 {   
@@ -18,29 +20,79 @@ class AccreportController extends Controller
           
          $objPHPExcel->setActiveSheetIndex($sheet);
          
-        foreach ($foos as $foo) {  
+        // foreach ($foos as $foo) {  
                 
             $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(20);
             $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(20);
                 
-            $objPHPExcel->getActiveSheet()->setTitle($foo->bar)
+            // $objPHPExcel->getActiveSheet()->setTitle($foo->bar)
+                
+            $objPHPExcel->getActiveSheet()->setTitle('bar')
                 
              ->setCellValue('A1', 'Firstname')
              ->setCellValue('B1', 'Lastname');
                  
                  $row=2;
                         
-            $objPHPExcel->getActiveSheet()->setCellValue('A'.$row,$foo->firstname); 
-            $objPHPExcel->getActiveSheet()->setCellValue('A'.$row,$foo->lastname);
-                        $row++ ;
-                        }
+            // $objPHPExcel->getActiveSheet()->setCellValue('A'.$row,$foo->firstname); 
+            // $objPHPExcel->getActiveSheet()->setCellValue('A'.$row,$foo->lastname);
+            //             $row++ ;
+            //             }
                 
-                header('Content-Type: application/vnd.ms-excel');
-                $filename = "MyExcelReport_".date("d-m-Y-His").".xls";
-                header('Content-Disposition: attachment;filename='.$filename .' ');
-                header('Cache-Control: max-age=0');
-                $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-                $objWriter->save('php://output');       
+                // echo 'hii';
+
+
+                // $filename='Sale_Invoice_Report.xls';
+
+                // header('Content-Type: application/vnd.ms-excel');
+                // header('Content-Disposition: attachment;filename="data.xls"');
+                // header('Cache-Control: max-age=0');
+                // $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+                // $objWriter->save('php://output');
+
+
+                $filename='Sale_Invoice_Report.xls';
+                header("Pragma: public");
+                header("Expires: 0");
+                header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+                header("Content-Type: application/force-download");
+                header("Content-Type: application/octet-stream");
+                header("Content-Type: application/download");;
+                // header("Content-Disposition: attachment;filename=$filename");
+                header("Content-Transfer-Encoding: binary ");
+
+                $filename='Sale_Invoice_Report.xls';
+                // $objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel);
+                // $objWriter->save($filename);
+
+                $objPHPExcel->saveExcel2007($objPHPExcel,$filename);
+
+
+
+                // header("Content-Disposition: attachment; filename='data.csv' ");
+                // header('Cache-Control: max-age=0');
+                // $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'CSV');
+                // $objWriter->save('php://output');
+
+                // header('Content-Type: application/vnd.ms-excel');
+                // header('Content-Disposition: attachment;filename="'.$filename.'"');
+                // header('Cache-Control: max-age=0');
+                // $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+                // $objWriter->save('php://output');
+
+                // header('Content-Type: application/vnd.ms-excel');
+                // $filename = "MyExcelReport_".date("d-m-Y-His").".xls";
+                // header('Content-Disposition: attachment;filename='.$filename .' ');
+                // header('Cache-Control: max-age=0');
+                // $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+                // echo $objWriter->save('php://output');
+
+                // echo 'hii22';
+
+                // $report = new AccReport();
+                // $acc_details = $report->getAccountDetails();
+
+                // return $this->render('ledger_report', ['acc_details' => $acc_details]);
     }
 
     // public function actionGenerate(){
@@ -184,10 +236,12 @@ class AccreportController extends Controller
                     <td style="text-align:right;">'.$mycomponent->format_money($opening_bal,2).'</td>
                     <td>'.$opening_bal_type.'</td>
                     <td></td>
+                    <td></td>
                     <td class="show_narration"></td>
                   </tr>
                   <tr>
                     <td>&nbsp;</td>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -230,11 +284,13 @@ class AccreportController extends Controller
                 }
                 $tbody = $tbody . '<tr>
                                     <td>'.($i+1).'</td>
+                                    <td>'.$data[$i]['voucher_id'].'</td>
                                     <td>'.(($data[$i]['updated_date']!=null && $data[$i]['updated_date']!="")?date("d/m/Y",strtotime($data[$i]['updated_date'])):"").'</td>
                                     <td>'.$data[$i]['ledger_code'].'</td>
                                     <td>'.$data[$i]['ledger_name'].'</td>
                                     <td>'.$data[$i]['ref_id'].'</td>
-                                    <td>'.$entry_type.'</td>
+                                    <td>'.$data[$i]['invoice_no'].'</td>
+                                    <td style="display: none;">'.$entry_type.'</td>
                                     <td style="text-align:right;">'.$mycomponent->format_money($debit_amt,2).'</td>
                                     <td style="text-align:right;">'.$mycomponent->format_money($credit_amt,2).'</td>
                                     <td style="text-align:right;">'.$mycomponent->format_money($balance_val,2).'</td>
@@ -273,6 +329,7 @@ class AccreportController extends Controller
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td></td>
                             <td class="show_narration"></td>
                           </tr>
                           <tr>
@@ -287,10 +344,12 @@ class AccreportController extends Controller
                             <td style="text-align:right;">'.$mycomponent->format_money($balance_val,2).'</td>
                             <td>'.$balance_type.'</td>
                             <td></td>
+                            <td></td>
                             <td class="show_narration"></td>
                           </tr>
                           <tr>
                             <td>&nbsp;</td>
+                            <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -315,6 +374,7 @@ class AccreportController extends Controller
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td></td>
                             <td class="show_narration"></td>
                           </tr>
                           <tr>
@@ -329,6 +389,7 @@ class AccreportController extends Controller
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td></td>
                             <td class="show_narration"></td>
                           </tr>
                           <tr>
@@ -340,6 +401,7 @@ class AccreportController extends Controller
                             <td>'.$balance_type.'</td>
                             <td style="text-align:right;">'.(($balance < 0)?$mycomponent->format_money($balance_val,2):"0.00").'</td>
                             <td style="text-align:right;">'.(($balance >= 0)?$mycomponent->format_money($balance_val,2):"0.00").'</td>
+                            <td></td>
                             <td></td>
                             <td></td>
                             <td></td>

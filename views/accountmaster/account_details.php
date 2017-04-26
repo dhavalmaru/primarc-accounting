@@ -38,7 +38,7 @@ select {
 				<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Type</label>
 					<input type="hidden" id="action" name="action" value="<?php if(isset($action)) echo $action; ?>">
-					<input type="hidden" name="id" value="<?php if(isset($data)) echo $data[0]['id']; ?>" />
+					<input type="hidden" id="id" name="id" value="<?php if(isset($data)) echo $data[0]['id']; ?>" />
 					<input type="hidden" id="type_val" name="type_val" value="<?php if(isset($data)) echo $data[0]['type']; ?>" />
 					<select class="form-control" id="type" name="type" <?php if(isset($data)) echo 'disabled'; ?>>
 						<option value="">Select</option>
@@ -300,19 +300,19 @@ select {
 			<div class="form-group">
 				<div class=" col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Category 1</label>
-					<select class="form-control" id="category_1" name="category_1">
+					<select class="form-control" id="category_1" name="ac_category_1">
 						<option value="">Select</option>
 					</select>
 				</div>
 				<div class=" col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Category 2</label>
-					<select class="form-control" id="category_2" name="category_2">
+					<select class="form-control" id="category_2" name="ac_category_2">
 						<option value="">Select</option>
 					</select>
 				</div>
 				<div class=" col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Category 3</label>
-					<select class="form-control" id="category_3" name="category_3">
+					<select class="form-control" id="category_3" name="ac_category_3">
 						<option value="">Select</option>
 					</select>
 				</div>

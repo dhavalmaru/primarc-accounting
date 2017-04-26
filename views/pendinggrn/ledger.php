@@ -76,6 +76,7 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
         for($i=0; $i<count($grn_acc_ledger_entries); $i++) {
             $rows = $rows . '<tr>
                                 <td>' . ($sr_no++) . '</td>
+                                <td>' . $grn_acc_ledger_entries[$i]["voucher_id"] . '</td>
                                 <td>' . $grn_acc_ledger_entries[$i]["ledger_name"] . '</td>
                                 <td>' . $grn_acc_ledger_entries[$i]["ledger_code"] . '</td>';
 
@@ -108,10 +109,10 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                 }
 
                 $rows = $rows . '<tr class="bold-text text-right">
-                                    <td colspan="3" style="text-align:right;">'.$particular.'</td>
+                                    <td colspan="4" style="text-align:right;">'.$particular.'</td>
                                     <td class="bold-text text-right">'.$mycomponent->format_money($total_debit_amt,2).'</td>
                                     <td class="bold-text text-right">'.$mycomponent->format_money($total_credit_amt,2).'</td>';
-                $rows = $rows . '<tr><td colspan="5"></td></tr>';
+                $rows = $rows . '<tr><td colspan="6"></td></tr>';
 
                 $total_debit_amt = 0;
                 $total_credit_amt = 0;
@@ -119,7 +120,7 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
 
                 if($grn_acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
                     $rows = $rows . '<tr class="bold-text text-right">
-                                        <td colspan="5" style="text-align:left;">Deduction Entry</td>
+                                        <td colspan="6" style="text-align:left;">Deduction Entry</td>
                                     </tr>';
                 }
             }
@@ -133,13 +134,14 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
 
             if($blFlag == true){
                 $rows = '<tr class="bold-text text-right">
-                            <td colspan="5" style="text-align:left;">Purchase Entry</td>
+                            <td colspan="6" style="text-align:left;">Purchase Entry</td>
                         </tr>' . $rows;
 
                 $table = '<div class="diversion"><h4 class=" ">Invoice No: ' . $grn_acc_ledger_entries[$i]["invoice_no"] . '</h4>
                         <table class="table table-bordered">
                             <tr class="table-head">
                                 <th>Sr. No.</th>
+                                <th>Voucher No</th>
                                 <th>Ledger Name</th>
                                 <th>Ledger Code</th>
                                 <th>Debit</th>
@@ -147,7 +149,7 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                             </tr>
                             ' . $rows . '
                             <tr class="bold-text text-right">
-                                <td colspan="3" style="text-align:right;">Total Amount</td>
+                                <td colspan="4" style="text-align:right;">Total Amount</td>
                                 <td>' . $mycomponent->format_money($debit_amt,2) . '</td>
                                 <td>' . $mycomponent->format_money($credit_amt,2) . '</td>
                             </tr>

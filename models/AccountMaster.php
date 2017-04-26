@@ -214,9 +214,9 @@ class AccountMaster extends Model
         $code = $request->post('code');
         $account_type = $request->post('account_type');
         $details = $request->post('details');
-        $category_1 = $request->post('category_1');
-        $category_2 = $request->post('category_2');
-        $category_3 = $request->post('category_3');
+        $category_1 = $request->post('ac_category_1');
+        $category_2 = $request->post('ac_category_2');
+        $category_3 = $request->post('ac_category_3');
         $department = $request->post('department');
 
         $vendor_id = "";
@@ -518,5 +518,30 @@ class AccountMaster extends Model
         }
         
         return true;
+    }
+
+    public function checkLegalNameAvailablity(){
+        $request = Yii::$app->request;
+
+        $id = $request->post('id');
+        $legal_name = $request->post('legal_name');
+
+        // $id='';
+        // $legal_name='Tax_KA_VAT_15.50';
+
+        // echo $id;
+        // echo '<br/>';
+        // echo $legal_name;
+        // echo '<br/>';
+
+        $sql = "SELECT * FROM acc_master WHERE id!='".$id."' and legal_name='".$legal_name."'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if (count($data)>0){
+            return 1;
+        } else {
+            return 0;
+        }
     }
 }

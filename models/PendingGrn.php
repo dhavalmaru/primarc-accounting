@@ -105,7 +105,9 @@ class PendingGrn extends Model
                 total_payable_amount as edited_total_payable_amount, 0 as diff_total_cost, 0 as diff_total_tax, 0 as diff_total_amount, 
                 0 as diff_excess_amount, 0 as diff_shortage_amount, 0 as diff_expiry_amount, 0 as diff_damaged_amount, 
                 0 as diff_margin_diff_amount, 0 as diff_total_deduction, 0 as diff_total_payable_amount, 
-                0 as invoice_other_charges, 0 as edited_other_charges, 0 as diff_other_charges from 
+                0 as invoice_other_charges, 0 as edited_other_charges, 0 as diff_other_charges, 
+                null as total_amount_voucher_id, null as total_amount_ledger_type, 
+                null as total_deduction_voucher_id, null as total_deduction_ledger_type from 
                 (select invoice_no, sum(total_cost) as total_cost, sum(total_tax) as total_tax, sum(total_amount) as total_amount, 
                 sum(excess_amount) as excess_amount, sum(shortage_amount) as shortage_amount, sum(expiry_amount) as expiry_amount, 
                 sum(damaged_amount) as damaged_amount, sum(margin_diff_amount) as margin_diff_amount, sum(total_deduction) as total_deduction, 
@@ -195,7 +197,9 @@ class PendingGrn extends Model
                 (select grn_id, invoice_no, vat_cst, vat_percen, total_cost as invoice_cost, total_tax as invoice_tax, 
                     total_cost as edited_cost, total_tax as edited_tax, 0 as diff_cost, 0 as diff_tax, 
                     null as invoice_cost_acc_id, null as invoice_cost_ledger_name, null as invoice_cost_ledger_code, 
-                    null as invoice_tax_acc_id, null as invoice_tax_ledger_name, null as invoice_tax_ledger_code from 
+                    null as invoice_cost_voucher_id, null as invoice_cost_ledger_type, 
+                    null as invoice_tax_acc_id, null as invoice_tax_ledger_name, null as invoice_tax_ledger_code, 
+                    null as invoice_tax_voucher_id, null as invoice_tax_ledger_type from 
                 (select grn_id, invoice_no, vat_cst, vat_percen, sum(total_cost) as total_cost, sum(total_tax) as total_tax from 
                 (select grn_id, invoice_no, vat_cst, vat_percen, (total_cost+shortage_cost+expiry_cost+damaged_cost+margin_diff_cost-excess_cost) as total_cost, 
                     (total_tax+shortage_tax+expiry_tax+damaged_tax+margin_diff_tax-excess_tax) as total_tax from 
@@ -359,9 +363,13 @@ class PendingGrn extends Model
         $invoice_cost_acc_id = $request->post('invoice_cost_acc_id');
         $invoice_cost_ledger_name = $request->post('invoice_cost_ledger_name');
         $invoice_cost_ledger_code = $request->post('invoice_cost_ledger_code');
+        // $invoice_cost_voucher_id = $request->post('invoice_cost_voucher_id');
+        // $invoice_cost_ledger_type = $request->post('invoice_cost_ledger_type');
         $invoice_tax_acc_id = $request->post('invoice_tax_acc_id');
         $invoice_tax_ledger_name = $request->post('invoice_tax_ledger_name');
         $invoice_tax_ledger_code = $request->post('invoice_tax_ledger_code');
+        // $invoice_tax_voucher_id = $request->post('invoice_tax_voucher_id');
+        // $invoice_tax_ledger_type = $request->post('invoice_tax_ledger_type');
 
         for($i=0; $i<count($vat_cst); $i++){
             $total_cost[$i] = $request->post('total_cost_'.$i);
@@ -380,6 +388,8 @@ class PendingGrn extends Model
         $other_charges_acc_id = $request->post('other_charges_acc_id');
         $other_charges_ledger_name = $request->post('other_charges_ledger_name');
         $other_charges_ledger_code = $request->post('other_charges_ledger_code');
+        // $other_charges_voucher_id = $request->post('other_charges_voucher_id');
+        // $other_charges_ledger_type = $request->post('other_charges_ledger_type');
         $other_charges = $request->post('other_charges');
         $invoice_other_charges = $request->post('invoice_other_charges');
         $edited_other_charges = $request->post('edited_other_charges');
@@ -389,6 +399,8 @@ class PendingGrn extends Model
         $total_amount_acc_id = $request->post('total_amount_acc_id');
         $total_amount_ledger_name = $request->post('total_amount_ledger_name');
         $total_amount_ledger_code = $request->post('total_amount_ledger_code');
+        $total_amount_voucher_id = $request->post('total_amount_voucher_id');
+        $total_amount_ledger_type = $request->post('total_amount_ledger_type');
         $total_amount = $request->post('total_amount');
         $invoice_total_amount = $request->post('invoice_total_amount');
         $edited_total_amount = $request->post('edited_total_amount');
@@ -419,6 +431,8 @@ class PendingGrn extends Model
         $total_deduction_acc_id = $request->post('total_deduction_acc_id');
         $total_deduction_ledger_name = $request->post('total_deduction_ledger_name');
         $total_deduction_ledger_code = $request->post('total_deduction_ledger_code');
+        $total_deduction_voucher_id = $request->post('total_deduction_voucher_id');
+        $total_deduction_ledger_type = $request->post('total_deduction_ledger_type');
         $total_deduction = $request->post('total_deduction');
         $invoice_total_deduction = $request->post('invoice_total_deduction');
         $edited_total_deduction = $request->post('edited_total_deduction');
@@ -463,6 +477,8 @@ class PendingGrn extends Model
                     $acc_id[$num] = $invoice_cost_acc_id[$j];
                     $ledger_name[$num] = $invoice_cost_ledger_name[$j];
                     $ledger_code[$num] = $invoice_cost_ledger_code[$j];
+                    $voucher_id[$num] = $total_amount_voucher_id[$i];
+                    $ledger_type[$num] = 'Sub Entry';
                     $vat_cst_val[$num] = $vat_cst[$j];
                     $vat_percen_val[$num] = $vat_percen[$j];
                     $invoice_no_val[$num] = $invoice_no[$i];
@@ -478,6 +494,8 @@ class PendingGrn extends Model
                     $acc_id[$num] = $invoice_tax_acc_id[$j];
                     $ledger_name[$num] = $invoice_tax_ledger_name[$j];
                     $ledger_code[$num] = $invoice_tax_ledger_code[$j];
+                    $voucher_id[$num] = $total_amount_voucher_id[$i];
+                    $ledger_type[$num] = 'Sub Entry';
                     $vat_cst_val[$num] = $vat_cst[$j];
                     $vat_percen_val[$num] = $vat_percen[$j];
                     $invoice_no_val[$num] = $invoice_no[$i];
@@ -495,6 +513,8 @@ class PendingGrn extends Model
             $acc_id[$num] = $other_charges_acc_id;
             $ledger_name[$num] = $other_charges_ledger_name;
             $ledger_code[$num] = $other_charges_ledger_code;
+            $voucher_id[$num] = $total_amount_voucher_id[$i];
+            $ledger_type[$num] = 'Sub Entry';
             $vat_cst_val[$num] = null;
             $vat_percen_val[$num] = null;
             $invoice_no_val[$num] = $invoice_no[$i];
@@ -510,6 +530,8 @@ class PendingGrn extends Model
             $acc_id[$num] = $total_amount_acc_id;
             $ledger_name[$num] = $total_amount_ledger_name;
             $ledger_code[$num] = $total_amount_ledger_code;
+            $voucher_id[$num] = $total_amount_voucher_id[$i];
+            $ledger_type[$num] = 'Main Entry';
             $vat_cst_val[$num] = null;
             $vat_percen_val[$num] = null;
             $invoice_no_val[$num] = $invoice_no[$i];
@@ -525,6 +547,8 @@ class PendingGrn extends Model
             $acc_id[$num] = null;
             $ledger_name[$num] = null;
             $ledger_code[$num] = null;
+            $voucher_id[$num] = null;
+            $ledger_type[$num] = null;
             $vat_cst_val[$num] = null;
             $vat_percen_val[$num] = null;
             $invoice_no_val[$num] = $invoice_no[$i];
@@ -540,6 +564,8 @@ class PendingGrn extends Model
             $acc_id[$num] = null;
             $ledger_name[$num] = null;
             $ledger_code[$num] = null;
+            $voucher_id[$num] = null;
+            $ledger_type[$num] = null;
             $vat_cst_val[$num] = null;
             $vat_percen_val[$num] = null;
             $invoice_no_val[$num] = $invoice_no[$i];
@@ -555,6 +581,8 @@ class PendingGrn extends Model
             $acc_id[$num] = null;
             $ledger_name[$num] = null;
             $ledger_code[$num] = null;
+            $voucher_id[$num] = null;
+            $ledger_type[$num] = null;
             $vat_cst_val[$num] = null;
             $vat_percen_val[$num] = null;
             $invoice_no_val[$num] = $invoice_no[$i];
@@ -570,6 +598,8 @@ class PendingGrn extends Model
             $acc_id[$num] = null;
             $ledger_name[$num] = null;
             $ledger_code[$num] = null;
+            $voucher_id[$num] = null;
+            $ledger_type[$num] = null;
             $vat_cst_val[$num] = null;
             $vat_percen_val[$num] = null;
             $invoice_no_val[$num] = $invoice_no[$i];
@@ -585,6 +615,8 @@ class PendingGrn extends Model
             $acc_id[$num] = $total_deduction_acc_id;
             $ledger_name[$num] = $total_deduction_ledger_name;
             $ledger_code[$num] = $total_deduction_ledger_code;
+            $voucher_id[$num] = $total_deduction_voucher_id[$i];
+            $ledger_type[$num] = 'Main Entry';
             $vat_cst_val[$num] = null;
             $vat_percen_val[$num] = null;
             $invoice_no_val[$num] = $invoice_no[$i];
@@ -626,6 +658,8 @@ class PendingGrn extends Model
                 'acc_id'=>$acc_id[$i],
                 'ledger_name'=>$ledger_name[$i],
                 'ledger_code'=>$ledger_code[$i],
+                'voucher_id'=>$voucher_id[$i],
+                'ledger_type'=>$ledger_type[$i],
                 'vat_cst'=>$vat_cst_val[$i],
                 'vat_percen'=>$mycomponent->format_number($vat_percen_val[$i],2),
                 'invoice_no'=>$invoice_no_val[$i],
@@ -669,23 +703,216 @@ class PendingGrn extends Model
                 // $legal_name = $vendor_name;
                 // $code = $vendor_code;
                 // $ledg_particular = "Total Payable Amount - " . $vendor_name;
-
                 
-                $result = $this->getSkuEntries($gi_id, $request, $invoice_no_val[$i], 'shortage');
+                $result = $this->getSkuEntries($gi_id, $request, $invoice_no_val[$i], 'shortage', $voucher_id[$i]);
                 $grnAccEntries = array_merge($grnAccEntries, $result['bulkInsertArray']);
-                $ledgerArray = array_merge($ledgerArray, $result['ledgerArray']);
+                // $ledgerArray = array_merge($ledgerArray, $result['ledgerArray']);
+                $bl_flag = true;
+                // echo json_encode($result['ledgerArray']);
+                // echo '<br/>';
+                // echo count($result['ledgerArray']);
+                // echo '<br/>';
+                // echo json_encode($ledgerArray);
+                // echo '<br/>';
+                // echo count($ledgerArray);
+                // echo '<br/>';
 
-                $result = $this->getSkuEntries($gi_id, $request, $invoice_no_val[$i], 'expiry');
-                $grnAccEntries = array_merge($grnAccEntries, $result['bulkInsertArray']);
-                $ledgerArray = array_merge($ledgerArray, $result['ledgerArray']);
+                // echo $ledgerArray[3]['ref_id'];
+                // echo '<br/>';
 
-                $result = $this->getSkuEntries($gi_id, $request, $invoice_no_val[$i], 'damaged');
-                $grnAccEntries = array_merge($grnAccEntries, $result['bulkInsertArray']);
-                $ledgerArray = array_merge($ledgerArray, $result['ledgerArray']);
+                for($l=0; $l<count($result['ledgerArray']); $l++){
+                    for($m=0; $m<count($ledgerArray); $m++){
+                        // echo count($ledgerArray);
+                        // echo '<br/>';
+                        // echo $m;
 
-                $result = $this->getSkuEntries($gi_id, $request, $invoice_no_val[$i], 'margin_diff');
+                        // echo $ledgerArray[$m]['ref_id'];
+                        // echo '<br/>';
+                        // echo $result['ledgerArray'][$l]['ref_id'];
+                        // echo '<br/>';
+
+                        if($ledgerArray[$m]['ref_id']==$result['ledgerArray'][$l]['ref_id'] && 
+                            $ledgerArray[$m]['ref_type']==$result['ledgerArray'][$l]['ref_type'] && 
+                            // $ledgerArray[$m]['entry_type']==$result['ledgerArray'][$l]['entry_type'] && 
+                            $ledgerArray[$m]['invoice_no']==$result['ledgerArray'][$l]['invoice_no'] && 
+                            $ledgerArray[$m]['vendor_id']==$result['ledgerArray'][$l]['vendor_id'] && 
+                            $ledgerArray[$m]['acc_id']==$result['ledgerArray'][$l]['acc_id'] && 
+                            $ledgerArray[$m]['voucher_id']==$result['ledgerArray'][$l]['voucher_id'] && 
+                            $ledgerArray[$m]['ledger_type']==$result['ledgerArray'][$l]['ledger_type']){
+
+                                $bl_flag = false;
+                                $tot_amount = floatval($ledgerArray[$m]['amount']);
+                                $amount = floatval($result['ledgerArray'][$l]['amount']);
+                                if($ledgerArray[$m]['type']=="Debit"){
+                                    $tot_amount = $tot_amount * -1;
+                                }
+                                if($result['ledgerArray'][$l]['type']=="Debit"){
+                                    $amount = $amount * -1;
+                                }
+                                $tot_amount = $tot_amount + $amount;
+
+                                if($tot_amount<0){
+                                    $ledgerArray[$m]['type'] = "Debit";
+                                    $tot_amount = $tot_amount * -1;
+                                } else {
+                                    $ledgerArray[$m]['type'] = "Credit";
+                                }
+
+                                $ledgerArray[$m]['amount'] = $tot_amount;
+                        }
+                    }
+
+                    if($bl_flag == true){
+                        // echo json_encode($result['ledgerArray'][$l]);
+                        // echo '<br/>';
+                        $temp_array[0]=$result['ledgerArray'][$l];
+                        $ledgerArray = array_merge($ledgerArray, $temp_array);
+                        // echo json_encode($ledgerArray);
+                        // echo '<br/>';
+                    }
+                }
+                
+
+                $result = $this->getSkuEntries($gi_id, $request, $invoice_no_val[$i], 'expiry', $voucher_id[$i]);
                 $grnAccEntries = array_merge($grnAccEntries, $result['bulkInsertArray']);
-                $ledgerArray = array_merge($ledgerArray, $result['ledgerArray']);
+                // $ledgerArray = array_merge($ledgerArray, $result['ledgerArray']);
+                $bl_flag = true;
+                // echo json_encode($result['ledgerArray']);
+                // echo '<br/>';
+                // echo count($result['ledgerArray']);
+                // echo '<br/>';
+                // echo json_encode($ledgerArray);
+                // echo '<br/>';
+                // echo count($ledgerArray);
+                // echo '<br/>';
+
+                for($l=0; $l<count($result['ledgerArray']); $l++){
+                    for($m=0; $m<count($ledgerArray); $m++){
+                        if($ledgerArray[$m]['ref_id']==$result['ledgerArray'][$l]['ref_id'] && 
+                            $ledgerArray[$m]['ref_type']==$result['ledgerArray'][$l]['ref_type'] && 
+                            // $ledgerArray[$m]['entry_type']==$result['ledgerArray'][$l]['entry_type'] && 
+                            $ledgerArray[$m]['invoice_no']==$result['ledgerArray'][$l]['invoice_no'] && 
+                            $ledgerArray[$m]['vendor_id']==$result['ledgerArray'][$l]['vendor_id'] && 
+                            $ledgerArray[$m]['acc_id']==$result['ledgerArray'][$l]['acc_id'] && 
+                            $ledgerArray[$m]['voucher_id']==$result['ledgerArray'][$l]['voucher_id'] && 
+                            $ledgerArray[$m]['ledger_type']==$result['ledgerArray'][$l]['ledger_type']){
+
+                                $bl_flag = false;
+                                $tot_amount = floatval($ledgerArray[$m]['amount']);
+                                $amount = floatval($result['ledgerArray'][$l]['amount']);
+                                if($ledgerArray[$m]['type']=="Debit"){
+                                    $tot_amount = $tot_amount * -1;
+                                }
+                                if($result['ledgerArray'][$l]['type']=="Debit"){
+                                    $amount = $amount * -1;
+                                }
+                                $tot_amount = $tot_amount + $amount;
+
+                                if($tot_amount<0){
+                                    $ledgerArray[$m]['type'] = "Debit";
+                                    $tot_amount = $tot_amount * -1;
+                                } else {
+                                    $ledgerArray[$m]['type'] = "Credit";
+                                }
+
+                                $ledgerArray[$m]['amount'] = $tot_amount;
+                        }
+                    }
+
+                    if($bl_flag == true){
+                        // $ledgerArray = array_merge($ledgerArray, $result['ledgerArray'][$l]);
+                        $temp_array[0]=$result['ledgerArray'][$l];
+                        $ledgerArray = array_merge($ledgerArray, $temp_array);
+                    }
+                }
+
+                $result = $this->getSkuEntries($gi_id, $request, $invoice_no_val[$i], 'damaged', $voucher_id[$i]);
+                $grnAccEntries = array_merge($grnAccEntries, $result['bulkInsertArray']);
+                // $ledgerArray = array_merge($ledgerArray, $result['ledgerArray']);
+                $bl_flag = true;
+                for($l=0; $l<count($result['ledgerArray']); $l++){
+                    for($m=0; $m<count($ledgerArray); $m++){
+                        if($ledgerArray[$m]['ref_id']==$result['ledgerArray'][$l]['ref_id'] && 
+                            $ledgerArray[$m]['ref_type']==$result['ledgerArray'][$l]['ref_type'] && 
+                            // $ledgerArray[$m]['entry_type']==$result['ledgerArray'][$l]['entry_type'] && 
+                            $ledgerArray[$m]['invoice_no']==$result['ledgerArray'][$l]['invoice_no'] && 
+                            $ledgerArray[$m]['vendor_id']==$result['ledgerArray'][$l]['vendor_id'] && 
+                            $ledgerArray[$m]['acc_id']==$result['ledgerArray'][$l]['acc_id'] && 
+                            $ledgerArray[$m]['voucher_id']==$result['ledgerArray'][$l]['voucher_id'] && 
+                            $ledgerArray[$m]['ledger_type']==$result['ledgerArray'][$l]['ledger_type']){
+
+                                $bl_flag = false;
+                                $tot_amount = floatval($ledgerArray[$m]['amount']);
+                                $amount = floatval($result['ledgerArray'][$l]['amount']);
+                                if($ledgerArray[$m]['type']=="Debit"){
+                                    $tot_amount = $tot_amount * -1;
+                                }
+                                if($result['ledgerArray'][$l]['type']=="Debit"){
+                                    $amount = $amount * -1;
+                                }
+                                $tot_amount = $tot_amount + $amount;
+
+                                if($tot_amount<0){
+                                    $ledgerArray[$m]['type'] = "Debit";
+                                    $tot_amount = $tot_amount * -1;
+                                } else {
+                                    $ledgerArray[$m]['type'] = "Credit";
+                                }
+
+                                $ledgerArray[$m]['amount'] = $tot_amount;
+                        }
+                    }
+
+                    if($bl_flag == true){
+                        // $ledgerArray = array_merge($ledgerArray, $result['ledgerArray'][$l]);
+                        $temp_array[0]=$result['ledgerArray'][$l];
+                        $ledgerArray = array_merge($ledgerArray, $temp_array);
+                    }
+                }
+
+                $result = $this->getSkuEntries($gi_id, $request, $invoice_no_val[$i], 'margin_diff', $voucher_id[$i]);
+                $grnAccEntries = array_merge($grnAccEntries, $result['bulkInsertArray']);
+                // $ledgerArray = array_merge($ledgerArray, $result['ledgerArray']);
+                $bl_flag = true;
+                for($l=0; $l<count($result['ledgerArray']); $l++){
+                    for($m=0; $m<count($ledgerArray); $m++){
+                        if($ledgerArray[$m]['ref_id']==$result['ledgerArray'][$l]['ref_id'] && 
+                            $ledgerArray[$m]['ref_type']==$result['ledgerArray'][$l]['ref_type'] && 
+                            // $ledgerArray[$m]['entry_type']==$result['ledgerArray'][$l]['entry_type'] && 
+                            $ledgerArray[$m]['invoice_no']==$result['ledgerArray'][$l]['invoice_no'] && 
+                            $ledgerArray[$m]['vendor_id']==$result['ledgerArray'][$l]['vendor_id'] && 
+                            $ledgerArray[$m]['acc_id']==$result['ledgerArray'][$l]['acc_id'] && 
+                            $ledgerArray[$m]['voucher_id']==$result['ledgerArray'][$l]['voucher_id'] && 
+                            $ledgerArray[$m]['ledger_type']==$result['ledgerArray'][$l]['ledger_type']){
+
+                                $bl_flag = false;
+                                $tot_amount = floatval($ledgerArray[$m]['amount']);
+                                $amount = floatval($result['ledgerArray'][$l]['amount']);
+                                if($ledgerArray[$m]['type']=="Debit"){
+                                    $tot_amount = $tot_amount * -1;
+                                }
+                                if($result['ledgerArray'][$l]['type']=="Debit"){
+                                    $amount = $amount * -1;
+                                }
+                                $tot_amount = $tot_amount + $amount;
+
+                                if($tot_amount<0){
+                                    $ledgerArray[$m]['type'] = "Debit";
+                                    $tot_amount = $tot_amount * -1;
+                                } else {
+                                    $ledgerArray[$m]['type'] = "Credit";
+                                }
+
+                                $ledgerArray[$m]['amount'] = $tot_amount;
+                        }
+                    }
+
+                    if($bl_flag == true){
+                        // $ledgerArray = array_merge($ledgerArray, $result['ledgerArray'][$l]);
+                        $temp_array[0]=$result['ledgerArray'][$l];
+                        $ledgerArray = array_merge($ledgerArray, $temp_array);
+                    }
+                }
 
                 $k = count($ledgerArray);
             } else {
@@ -696,7 +923,41 @@ class PendingGrn extends Model
             }
 
             if($ledg_type!=""){
-                $ledgerArray[$k]=[
+                $bl_flag = true;
+                for($m=0; $m<count($ledgerArray); $m++){
+                    if($ledgerArray[$m]['ref_id']==$gi_id && 
+                        $ledgerArray[$m]['ref_type']=='purchase' && 
+                        $ledgerArray[$m]['entry_type']==$particular[$i] && 
+                        $ledgerArray[$m]['invoice_no']==$invoice_no_val[$i] && 
+                        $ledgerArray[$m]['vendor_id']==$vendor_id && 
+                        $ledgerArray[$m]['acc_id']==$acc_id[$i] && 
+                        $ledgerArray[$m]['voucher_id']==$voucher_id[$i] && 
+                        $ledgerArray[$m]['ledger_type']==$ledger_type[$i]){
+
+                            $bl_flag = false;
+                            $tot_amount = floatval($ledgerArray[$m]['amount']);
+                            $amount = floatval($result['ledgerArray'][$l]['amount']);
+                            if($ledgerArray[$m]['type']=="Debit"){
+                                $tot_amount = $tot_amount * -1;
+                            }
+                            if($result['ledgerArray'][$l]['type']=="Debit"){
+                                $amount = $amount * -1;
+                            }
+                            $tot_amount = $tot_amount + $amount;
+
+                            if($tot_amount<0){
+                                $ledgerArray[$m]['type'] = "Debit";
+                                $tot_amount = $tot_amount * -1;
+                            } else {
+                                $ledgerArray[$m]['type'] = "Credit";
+                            }
+
+                            $ledgerArray[$m]['amount'] = $tot_amount;
+                    }
+                }
+
+                if($bl_flag == true){
+                    $ledgerArray[$k]=[
                                 'ref_id'=>$gi_id,
                                 'ref_type'=>'purchase',
                                 'entry_type'=>$particular[$i],
@@ -705,6 +966,8 @@ class PendingGrn extends Model
                                 'acc_id'=>$acc_id[$i],
                                 'ledger_name'=>$ledger_name[$i],
                                 'ledger_code'=>$ledger_code[$i],
+                                'voucher_id'=>$voucher_id[$i],
+                                'ledger_type'=>$ledger_type[$i],
                                 'type'=>$ledg_type,
                                 'amount'=>$mycomponent->format_number($edited_val[$i],2),
                                 'status'=>'pending',
@@ -713,8 +976,9 @@ class PendingGrn extends Model
                                 'updated_date'=>date('Y-m-d h:i:s')
                             ];
 
-                $k = $k + 1;
-
+                    $k = $k + 1;
+                }
+                
                 // if($type == "Vendor Goods"){
                 //     $this->setAccCode($type, $legal_name, $code, $vendor_id);
                 // } else {
@@ -730,14 +994,18 @@ class PendingGrn extends Model
         return $data;
     }
 
-    public function getSkuEntries($gi_id, $request, $invoice_no_val, $ded_type){
+    public function getSkuEntries($gi_id, $request, $invoice_no_val, $ded_type, $voucher_id){
         $vendor_id = $request->post('vendor_id');
         $cost_acc_id = $request->post($ded_type.'_cost_acc_id');
         $cost_ledger_name = $request->post($ded_type.'_cost_ledger_name');
         $cost_ledger_code = $request->post($ded_type.'_cost_ledger_code');
+        // $cost_voucher_id = $request->post($ded_type.'_cost_voucher_id');
+        // $cost_ledger_type = $request->post($ded_type.'_cost_ledger_type');
         $tax_acc_id = $request->post($ded_type.'_tax_acc_id');
         $tax_ledger_name = $request->post($ded_type.'_tax_ledger_name');
         $tax_ledger_code = $request->post($ded_type.'_tax_ledger_code');
+        // $tax_voucher_id = $request->post($ded_type.'_tax_voucher_id');
+        // $tax_ledger_type = $request->post($ded_type.'_tax_ledger_type');
         $invoice_no = $request->post($ded_type.'_invoice_no');
         $state = $request->post($ded_type.'_state');
         $vat_cst = $request->post($ded_type.'_vat_cst');
@@ -755,6 +1023,10 @@ class PendingGrn extends Model
         $total = $request->post($ded_type.'_total');
         $expiry_date = $request->post($ded_type.'_expiry_date');
         $earliest_expected_date = $request->post($ded_type.'_earliest_expected_date');
+
+        $total_deduction_invoice_no = $request->post('invoice_no');
+        $total_deduction_voucher_id = $request->post('total_deduction_voucher_id');
+        $total_deduction_ledger_type = $request->post('total_deduction_ledger_type');
 
         $bulkInsertArray = array();
         $ledgerArray = array();
@@ -788,9 +1060,13 @@ class PendingGrn extends Model
                             'cost_acc_id'=>$cost_acc_id[$i],
                             'cost_ledger_name'=>$cost_ledger_name[$i],
                             'cost_ledger_code'=>$cost_ledger_code[$i],
+                            // 'cost_voucher_id'=>$voucher_id,
+                            // 'cost_ledger_type'=>'Sub Entry',
                             'tax_acc_id'=>$tax_acc_id[$i],
                             'tax_ledger_name'=>$tax_ledger_name[$i],
                             'tax_ledger_code'=>$tax_ledger_code[$i],
+                            // 'tax_voucher_id'=>$voucher_id,
+                            // 'tax_ledger_type'=>'Sub Entry',
                             'invoice_no'=>$invoice_no[$i],
                             'state'=>$state[$i],
                             'vat_cst'=>$vat_cst[$i],
@@ -822,6 +1098,8 @@ class PendingGrn extends Model
                                 'acc_id'=>$cost_acc_id[$i],
                                 'ledger_name'=>$cost_ledger_name[$i],
                                 'ledger_code'=>$cost_ledger_code[$i],
+                                'voucher_id'=>$voucher_id,
+                                'ledger_type'=>'Sub Entry',
                                 'type'=>$ledg_type,
                                 'amount'=>$mycomponent->format_number($cost_excl_tax[$i],2),
                                 'status'=>'pending',
@@ -856,6 +1134,8 @@ class PendingGrn extends Model
                                 'acc_id'=>$tax_acc_id[$i],
                                 'ledger_name'=>$tax_ledger_name[$i],
                                 'ledger_code'=>$tax_ledger_code[$i],
+                                'voucher_id'=>$voucher_id,
+                                'ledger_type'=>'Sub Entry',
                                 'type'=>$ledg_type,
                                 'amount'=>$mycomponent->format_number($tax[$i],2),
                                 'status'=>'pending',
