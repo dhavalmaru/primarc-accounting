@@ -79,15 +79,26 @@ class AccReport extends Model
         //         on (A.id = B.jv_id)) AA where AA.amount is not null order by AA.updated_date";
 
         $sql = "select * from 
-                (select * from ledger_entries where acc_id = '$acc_id' and status = '$status' and is_active = '1' and 
+                (select id, ref_id, sub_ref_id, ref_type, entry_type, invoice_no, vendor_id, acc_id, ledger_name, ledger_code, 
+                    type, amount, status, created_by, updated_by, created_date, updated_date, is_paid, payment_ref, voucher_id, 
+                    ledger_type from ledger_entries where acc_id = '$acc_id' and status = '$status' and is_active = '1' and 
                     date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and ref_type != 'purchase' 
                 union all 
-                select * from ledger_entries where status = '$status' and is_active = '1' and 
+                select id, ref_id, sub_ref_id, ref_type, entry_type, invoice_no, vendor_id, acc_id, ledger_name, ledger_code, 
+                    case when type = 'Debit' then 'Credit' else 'Debit' end as type, amount, status, created_by, updated_by, 
+                    created_date, updated_date, is_paid, payment_ref, voucher_id, 
+                    ledger_type from ledger_entries where acc_id != '$acc_id' and status = '$status' and is_active = '1' and 
                     date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and 
                     ref_type = 'purchase' and ledger_type = 'Sub Entry' and 
                     voucher_id in (select distinct voucher_id from ledger_entries where acc_id = '$acc_id' and status = '$status' and is_active = '1' and 
                         date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and 
-                        ref_type = 'purchase' and ledger_type = 'Main Entry')) A order by id";
+                        ref_type = 'purchase' and ledger_type = 'Main Entry') 
+                union all 
+                select id, ref_id, sub_ref_id, ref_type, entry_type, invoice_no, vendor_id, acc_id, ledger_name, ledger_code, 
+                    type, amount, status, created_by, updated_by, created_date, updated_date, is_paid, payment_ref, voucher_id, 
+                    ledger_type from ledger_entries where acc_id = '$acc_id' and status = '$status' and is_active = '1' and 
+                    date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and 
+                    ref_type = 'purchase' and ledger_type = 'Sub Entry') A order by A.id";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
