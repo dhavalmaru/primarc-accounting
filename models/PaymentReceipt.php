@@ -66,7 +66,7 @@ class PaymentReceipt extends Model
                     'payment_entry' as ledger_type, null as gi_date, null as invoice_date, null as due_date
                 from payment_receipt_details where account_id = '$account_id' and payment_type = 'Adhoc' and 
                     (is_paid is null or is_paid!='1' or payment_ref='$id') and is_active='1') A 
-                order by ledger_type desc, type desc, id";
+                order by invoice_no desc, ledger_type desc, type desc, id";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -149,7 +149,7 @@ class PaymentReceipt extends Model
         $array=[
                 'trans_type'=>$trans_type,
                 'voucher_id' => $voucher_id, 
-                'ledger_type' => 'Main Entry', 
+                'ledger_type' => 'Sub Entry', 
                 'account_id'=>$acc_id,
                 'account_name'=>$legal_name,
                 'account_code'=>$acc_code,
@@ -216,12 +216,13 @@ class PaymentReceipt extends Model
                                             'invoice_no'=>$invoice_no[$i],
                                             'vendor_id'=>$vendor_id[$i],
                                             'voucher_id' => $voucher_id, 
-                                            'ledger_type' => 'Main Entry', 
+                                            'ledger_type' => 'Sub Entry', 
                                             'acc_id'=>$acc_id,
                                             'ledger_name'=>$legal_name,
                                             'ledger_code'=>$acc_code,
                                             'type'=>$type,
                                             'amount'=>$amt,
+                                            'narration'=>$narration,
                                             'status'=>'pending',
                                             'is_active'=>'1',
                                             'updated_by'=>$session['session_id'],
@@ -279,6 +280,7 @@ class PaymentReceipt extends Model
                             'ledger_code'=>$bank_acc_code,
                             'type'=>$type,
                             'amount'=>$amount,
+                            'narration'=>$narration,
                             'status'=>'pending',
                             'is_active'=>'1',
                             'updated_by'=>$session['session_id'],

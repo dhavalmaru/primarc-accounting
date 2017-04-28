@@ -309,10 +309,10 @@ class PendinggrnController extends Controller
                 }
 
                 if($grn_acc_entries[$i]['particular']=="Margin Diff Amount"){
-                    $invoice_details[$num]['invoice_margin_diff_amount'] = $grn_acc_entries[$i]['invoice_val'];
-                    $invoice_details[$num]['edited_margin_diff_amount'] = $grn_acc_entries[$i]['edited_val'];
-                    $invoice_details[$num]['diff_margin_diff_amount'] = $grn_acc_entries[$i]['difference_val'];
-                    $narration['narration_margin_diff_amount'] = $grn_acc_entries[$i]['narration'];
+                    $invoice_details[$num]['invoice_margindiff_amount'] = $grn_acc_entries[$i]['invoice_val'];
+                    $invoice_details[$num]['edited_margindiff_amount'] = $grn_acc_entries[$i]['edited_val'];
+                    $invoice_details[$num]['diff_margindiff_amount'] = $grn_acc_entries[$i]['difference_val'];
+                    $narration['narration_margindiff_amount'] = $grn_acc_entries[$i]['narration'];
                 }
 
                 if($grn_acc_entries[$i]['particular']=="Total Deduction"){
@@ -397,7 +397,7 @@ class PendinggrnController extends Controller
             $narration['narration_shortage_amount'] = "";
             $narration['narration_expiry_amount'] = "";
             $narration['narration_damaged_amount'] = "";
-            $narration['narration_margin_diff_amount'] = "";
+            $narration['narration_margindiff_amount'] = "";
             $narration['narration_total_deduction'] = "";
 
             for($i=0; $i<count($total_tax); $i++){
@@ -412,7 +412,7 @@ class PendinggrnController extends Controller
         $deductions['shortage'] = $this->actionGetinvoicedeductiondetails($id, "shortage");
         $deductions['expiry'] = $this->actionGetinvoicedeductiondetails($id, "expiry");
         $deductions['damaged'] = $this->actionGetinvoicedeductiondetails($id, "damaged");
-        $deductions['margin_diff'] = $this->actionGetinvoicedeductiondetails($id, "margin_diff");
+        $deductions['margindiff'] = $this->actionGetinvoicedeductiondetails($id, "margindiff");
 
         if (count($grn_details)>0) {
             return $this->render('update', ['grn_details' => $grn_details, 'total_val' => $total_val, 'total_tax' => $total_tax, 
@@ -452,8 +452,14 @@ class PendinggrnController extends Controller
         $rows = ""; $new_invoice_no = ""; $invoice_no = ""; $debit_amt=0; $credit_amt=0; $sr_no=1;
         $total_debit_amt=0; $total_credit_amt=0; 
         $table_arr = array(); $table_cnt = 0;
+        $bl_deduction = false;
+        $row_deduction = '';
 
         for($i=0; $i<count($grn_acc_ledger_entries); $i++) {
+            if ($bl_deduction==true){
+                $rows = $rows . $row_deduction;
+                $bl_deduction = false;
+            }
             $rows = $rows . '<tr>
                                 <td>' . ($sr_no++) . '</td>
                                 <td>' . $grn_acc_ledger_entries[$i]["voucher_id"] . '</td>
@@ -499,9 +505,14 @@ class PendinggrnController extends Controller
                 $sr_no=1;
 
                 if($grn_acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
-                    $rows = $rows . '<tr class="bold-text text-right">
+                    // $rows = $rows . '<tr class="bold-text text-right">
+                    //                     <td colspan="6" style="text-align:left;">Deduction Entry</td>
+                    //                 </tr>';
+                    $row_deduction = '<tr class="bold-text text-right">
                                         <td colspan="6" style="text-align:left;">Deduction Entry</td>
                                     </tr>';
+
+                    $bl_deduction = true;
                 }
             }
 
@@ -592,7 +603,8 @@ class PendinggrnController extends Controller
             Yii::$app->db->createCommand($sql)->execute();
 
             $columnNameArray=['ref_id','ref_type','entry_type','invoice_no','vendor_id','acc_id','ledger_name','ledger_code',
-                                'voucher_id','ledger_type','type','amount','status','is_active','updated_by','updated_date'];
+                                'voucher_id','ledger_type','type','amount','narration','status','is_active',
+                                'updated_by','updated_date'];
             // below line insert all your record and return number of rows inserted
             $tableName = "ledger_entries";
             $insertCount = Yii::$app->db->createCommand()
@@ -609,7 +621,7 @@ class PendinggrnController extends Controller
         // $this->actionSaveskudetails($gi_id, $request, "shortage");
         // $this->actionSaveskudetails($gi_id, $request, "expiry");
         // $this->actionSaveskudetails($gi_id, $request, "damaged");
-        // $this->actionSaveskudetails($gi_id, $request, "margin_diff");
+        // $this->actionSaveskudetails($gi_id, $request, "margindiff");
 
         if(count($grnAccEntries)>0){
             $sql = "delete from grn_acc_sku_entries where grn_id = '$gi_id'";
@@ -743,7 +755,7 @@ class PendinggrnController extends Controller
         // $col_qty = "invoice_qty";
 
         $expiry_style = 'display: none;';
-        $margin_diff_style = 'display: none;';
+        $margindiff_style = 'display: none;';
 
         if($ded_type=="shortage"){
             $col_qty = "shortage_qty";
@@ -752,9 +764,9 @@ class PendinggrnController extends Controller
             $expiry_style = '';
         } else if($ded_type=="damaged"){
             $col_qty = "damaged_qty";
-        } else if($ded_type=="margin_diff"){
+        } else if($ded_type=="margindiff"){
             $col_qty = "mrp_issue_qty";
-            $margin_diff_style = '';
+            $margindiff_style = '';
         }
 
         // if($col_qty==""){   
@@ -898,8 +910,8 @@ class PendinggrnController extends Controller
                             <td><input type="text" class="'.$ded_type.'_total_'.$sr_no.'" id="'.$ded_type.'_total_'.$i.'" name="'.$ded_type.'_total[]" value="'.$mycomponent->format_money($total,2).'" readonly /></td>
                             <td style="'.$expiry_style.'"><input type="text" class="'.$ded_type.'_expiry_date_'.$sr_no.'" id="'.$ded_type.'_expiry_date_'.$i.'" name="'.$ded_type.'_expiry_date[]" value="'.$rows[$i]["expiry_date"].'" readonly /></td>
                             <td style="'.$expiry_style.'"><input type="text" class="'.$ded_type.'_earliest_expected_date_'.$sr_no.'" id="'.$ded_type.'_earliest_expected_date_'.$i.'" name="'.$ded_type.'_earliest_expected_date[]" value="'.$rows[$i]["earliest_expected_date"].'" readonly /></td>
-                            <td style="'.$margin_diff_style.'"></td>
-                            <td style="'.$margin_diff_style.'"></td>
+                            <td style="'.$margindiff_style.'"></td>
+                            <td style="'.$margindiff_style.'"></td>
                             <td></td>
                         </tr>';
 
@@ -977,8 +989,8 @@ class PendinggrnController extends Controller
                     <td id="'.$ded_type.'_grand_total">' . $mycomponent->format_money($grand_total,2) . '</td>
                     <td style="'.$expiry_style.'"></td>
                     <td style="'.$expiry_style.'"></td>
-                    <td style="'.$margin_diff_style.'"></td>
-                    <td style="'.$margin_diff_style.'"></td>
+                    <td style="'.$margindiff_style.'"></td>
+                    <td style="'.$margindiff_style.'"></td>
                     <td></td>
                 </tr>';
 
@@ -995,7 +1007,7 @@ class PendinggrnController extends Controller
                             <th colspan="3">Amount Deducted (Per Unit)</th>
                             <th colspan="3">Amount Deducted (Total)</th>
                             <th colspan="2" style="'.$expiry_style.'">For Expiry Only</th>
-                            <th colspan="2" style="'.$margin_diff_style.'">For Margin Difference (Per Unit)</th>
+                            <th colspan="2" style="'.$margindiff_style.'">For Margin Difference (Per Unit)</th>
                             <th rowspan="2">Remarks</th>
                         </tr>
                         <tr>
@@ -1022,8 +1034,8 @@ class PendinggrnController extends Controller
                             <th>Total</th>
                             <th style="'.$expiry_style.'">Date Received</th>
                             <th style="'.$expiry_style.'">Earliest Expected Date</th>
-                            <th style="'.$margin_diff_style.'">Difference in Cost Excl Tax</th>
-                            <th style="'.$margin_diff_style.'">Difference in Tax</th>
+                            <th style="'.$margindiff_style.'">Difference in Cost Excl Tax</th>
+                            <th style="'.$margindiff_style.'">Difference in Tax</th>
                         </tr>
                     </thead>
                     <tbody id="deduction_data">
@@ -1062,7 +1074,7 @@ class PendinggrnController extends Controller
         // $col_qty = "invoice_qty";
 
         $expiry_style = 'display: none;';
-        $margin_diff_style = 'display: none;';
+        $margindiff_style = 'display: none;';
 
         if($ded_type=="shortage"){
             $col_qty = "shortage_qty";
@@ -1071,9 +1083,9 @@ class PendinggrnController extends Controller
             $expiry_style = '';
         } else if($ded_type=="damaged"){
             $col_qty = "damaged_qty";
-        } else if($ded_type=="margin_diff"){
+        } else if($ded_type=="margindiff"){
             $col_qty = "mrp_issue_qty";
-            $margin_diff_style = '';
+            $margindiff_style = '';
         }
 
         // if($col_qty==""){   
@@ -1165,8 +1177,8 @@ class PendinggrnController extends Controller
                     <td><input type="text" class="'.$ded_type.'_total_'.$sr_no.'" id="'.$ded_type.'_total_'.$i.'" name="'.$ded_type.'_total[]" value="'.$mycomponent->format_money($total,2).'" readonly /></td>
                     <td style="'.$expiry_style.'"><input type="text" class="'.$ded_type.'_expiry_date_'.$sr_no.'" id="'.$ded_type.'_expiry_date_'.$i.'" name="'.$ded_type.'_expiry_date[]" value="" readonly /></td>
                     <td style="'.$expiry_style.'"><input type="text" class="'.$ded_type.'_earliest_expected_date_'.$sr_no.'" id="'.$ded_type.'_earliest_expected_date_'.$i.'" name="'.$ded_type.'_earliest_expected_date[]" value="" readonly /></td>
-                    <td style="'.$margin_diff_style.'"></td>
-                    <td style="'.$margin_diff_style.'"></td>
+                    <td style="'.$margindiff_style.'"></td>
+                    <td style="'.$margindiff_style.'"></td>
                     <td></td>
                 </tr>';
 

@@ -226,9 +226,9 @@ class AccreportController extends Controller
         }
         $tbody = '<tr>
                     <td></td>
+                    <td></td>
                     <td>Start Date</td>
                     <td>Opening Balance</td>
-                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -260,8 +260,12 @@ class AccreportController extends Controller
         $debit_amt = 0;
         $credit_amt = 0;
         $cur_total = 0;
+        
         if(count($data)>0){
             for($i=0; $i<count($data); $i++){
+                $ledger_code = '';
+                $ledger_name = '';
+
                 if($data[$i]['type']=='Debit'){
                     $entry_type = 'Dr';
                     $debit_amt = floatval($data[$i]['amount']);
@@ -282,12 +286,23 @@ class AccreportController extends Controller
                     $balance_type = 'Cr';
                     $balance_val = $balance;
                 }
+                if(isset($data[$i]['cp_acc_id'])){
+                    if($data[$i]['cp_acc_id']!=$acc_id){
+                        $ledger_code = $data[$i]['cp_ledger_code'];
+                        $ledger_name = $data[$i]['cp_ledger_name'];
+                    }
+                }
+                if($ledger_code == ''){
+                    $ledger_code = $data[$i]['ledger_code'];
+                    $ledger_name = $data[$i]['ledger_name'];
+                }
+
                 $tbody = $tbody . '<tr>
                                     <td>'.($i+1).'</td>
                                     <td>'.$data[$i]['voucher_id'].'</td>
                                     <td>'.(($data[$i]['updated_date']!=null && $data[$i]['updated_date']!="")?date("d/m/Y",strtotime($data[$i]['updated_date'])):"").'</td>
-                                    <td>'.$data[$i]['ledger_code'].'</td>
-                                    <td>'.$data[$i]['ledger_name'].'</td>
+                                    <td>'.$ledger_code.'</td>
+                                    <td>'.$ledger_name.'</td>
                                     <td>'.$data[$i]['ref_id'].'</td>
                                     <td>'.$data[$i]['invoice_no'].'</td>
                                     <td style="display: none;">'.$entry_type.'</td>
@@ -296,7 +311,7 @@ class AccreportController extends Controller
                                     <td style="text-align:right;">'.$mycomponent->format_money($balance_val,2).'</td>
                                     <td>'.$balance_type.'</td>
                                     <td>'.$data[$i]['payment_ref'].'</td>
-                                    <td class="show_narration"></td>
+                                    <td class="show_narration">'.$data[$i]['narration'].'</td>
                                   </tr>';
             }
         }
@@ -334,9 +349,9 @@ class AccreportController extends Controller
                           </tr>
                           <tr>
                             <td></td>
+                            <td></td>
                             <td>End Date</td>
                             <td>Closing Balance</td>
-                            <td></td>
                             <td></td>
                             <td></td>
                             <td></td>

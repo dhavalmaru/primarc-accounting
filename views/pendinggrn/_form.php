@@ -39,9 +39,9 @@ $mycomponent = Yii::$app->mycomponent;
 
 /*----------------------*/
 
-#margin_diff_sku_details tr td input { border: none; outline: none; }
-#margin_diff_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
-#margin_diff_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
+#margindiff_sku_details tr td input { border: none; outline: none; }
+#margindiff_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
+#margindiff_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
 
 /*----------------------*/
 #ledger_details .modal-body .table   {  }
@@ -133,12 +133,14 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
 	/*.table-container { width:100%; overflow-x:scroll;}*/
 	.table-container table{   } 
 }
+.diversion {margin-left: 10px;}
 .diversion table{max-width: 1300px;}
 .table-container {overflow: auto;}
 </style>
 <div class="grn-form">
   <div class=" col-md-12">  
         <form id="form_purchase_details" action="<?php echo Url::base(); ?>index.php?r=pendinggrn%2Fsave" method="post">
+        <!-- <form id="form_purchase_details" action="<?php //echo Url::base(); ?>index.php?r=pendinggrn%2Fgetgrnparticulars" method="post"> -->
     
         <input type="hidden" name="_csrf" value="<?=Yii::$app->request->getCsrfToken()?>" />
 
@@ -495,25 +497,25 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                 <tr>
                     <td>7</td>
                     <td>Less Amount - Margin Diff</td>
-                    <td align="center"><button type="button" class="btn btn-info btn-xs " id="get_margin_diff_qty">Edit</button></td>
+                    <td align="center"><button type="button" class="btn btn-info btn-xs " id="get_margindiff_qty">Edit</button></td>
                     <td></td>
                     <td></td>
                     <td>
-                        <input type="text" class="text-right" id="margin_diff_amount" name="margin_diff_amount" value="<?php echo $mycomponent->format_money($total_val[0]['margin_diff_amount'], 2); ?>" readonly />
+                        <input type="text" class="text-right" id="margindiff_amount" name="margindiff_amount" value="<?php echo $mycomponent->format_money($total_val[0]['margindiff_amount'], 2); ?>" readonly />
                     </td>
                     <?php for($i=0; $i<count($invoice_details); $i++) { ?>
                         <td>
-                            <input type="text" class="text-right" id="invoice_margin_diff_amount_<?php echo $i;?>" name="invoice_margin_diff_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['invoice_margin_diff_amount'], 2); ?>" readonly />
+                            <input type="text" class="text-right" id="invoice_margindiff_amount_<?php echo $i;?>" name="invoice_margindiff_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['invoice_margindiff_amount'], 2); ?>" readonly />
                         </td>
                         <td>
-                            <input type="text" class="text-right" id="edited_margin_diff_amount_<?php echo $i;?>" name="edited_margin_diff_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['edited_margin_diff_amount'], 2); ?>" onChange="getDifference(this);" readonly />
+                            <input type="text" class="text-right" id="edited_margindiff_amount_<?php echo $i;?>" name="edited_margindiff_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['edited_margindiff_amount'], 2); ?>" onChange="getDifference(this);" readonly />
                         </td>
                         <td>
-                            <input type="text" class="text-right" id="diff_margin_diff_amount_<?php echo $i;?>" name="diff_margin_diff_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['diff_margin_diff_amount'], 2); ?>" readonly />
+                            <input type="text" class="text-right" id="diff_margindiff_amount_<?php echo $i;?>" name="diff_margindiff_amount[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['diff_margindiff_amount'], 2); ?>" readonly />
                         </td>
                     <?php } ?>
                     <td>
-                        <input type="text" id="narration_margin_diff_amount" name="narration_margin_diff_amount" value="<?php echo $narration['narration_margin_diff_amount']; ?>" />
+                        <input type="text" id="narration_margindiff_amount" name="narration_margindiff_amount" value="<?php echo $narration['narration_margindiff_amount']; ?>" />
                     </td>
                 </tr>
          
@@ -637,7 +639,7 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
         </div>
 
         <!-- Margin Diff Modal -->
-        <div class="modal fade" id="margin_diff_modal" role="dialog">
+        <div class="modal fade" id="margindiff_modal" role="dialog">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -646,7 +648,7 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                     </div>
                     <div class="modal-body"  >
     				  <div class="modal-body-inside"  >
-                        <?php echo $deductions['margin_diff']; ?>
+                        <?php echo $deductions['margindiff']; ?>
     					</div>
                     </div>
                     <div class="modal-footer">

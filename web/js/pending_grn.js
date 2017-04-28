@@ -34,8 +34,8 @@ function getTotal(ded_type){
     var shortage_amount = get_number($("#shortage_amount").val(),2);
     var expiry_amount = get_number($("#expiry_amount").val(),2);
     var damaged_amount = get_number($("#damaged_amount").val(),2);
-    var margin_diff_amount = get_number($("#margin_diff_amount").val(),2);
-    var total_deduction = shortage_amount + expiry_amount + damaged_amount + margin_diff_amount;
+    var margindiff_amount = get_number($("#margindiff_amount").val(),2);
+    var total_deduction = shortage_amount + expiry_amount + damaged_amount + margindiff_amount;
     $("#total_deduction").val(format_money(total_deduction,2));
 
     var total_payable_amount = total_amount - total_deduction;
@@ -59,8 +59,8 @@ function getTotal(ded_type){
         shortage_amount = get_number($("#invoice_shortage_amount_"+i).val(),2);
         expiry_amount = get_number($("#invoice_expiry_amount_"+i).val(),2);
         damaged_amount = get_number($("#invoice_damaged_amount_"+i).val(),2);
-        margin_diff_amount = get_number($("#invoice_margin_diff_amount_"+i).val(),2);
-        total_deduction = shortage_amount + expiry_amount + damaged_amount + margin_diff_amount;
+        margindiff_amount = get_number($("#invoice_margindiff_amount_"+i).val(),2);
+        total_deduction = shortage_amount + expiry_amount + damaged_amount + margindiff_amount;
         $("#invoice_total_deduction_"+i).val(format_money(total_deduction,2));
 
         total_payable_amount = total_amount - total_deduction;
@@ -81,8 +81,8 @@ function getTotal(ded_type){
         shortage_amount = get_number($("#edited_shortage_amount_"+i).val(),2);
         expiry_amount = get_number($("#edited_expiry_amount_"+i).val(),2);
         damaged_amount = get_number($("#edited_damaged_amount_"+i).val(),2);
-        margin_diff_amount = get_number($("#edited_margin_diff_amount_"+i).val(),2);
-        total_deduction = shortage_amount + expiry_amount + damaged_amount + margin_diff_amount;
+        margindiff_amount = get_number($("#edited_margindiff_amount_"+i).val(),2);
+        total_deduction = shortage_amount + expiry_amount + damaged_amount + margindiff_amount;
         $("#edited_total_deduction_"+i).val(format_money(total_deduction,2));
 
         total_payable_amount = total_amount - total_deduction;
@@ -103,8 +103,8 @@ function getTotal(ded_type){
         shortage_amount = get_number($("#diff_shortage_amount_"+i).val(),2);
         expiry_amount = get_number($("#diff_expiry_amount_"+i).val(),2);
         damaged_amount = get_number($("#diff_damaged_amount_"+i).val(),2);
-        margin_diff_amount = get_number($("#diff_margin_diff_amount_"+i).val(),2);
-        total_deduction = shortage_amount + expiry_amount + damaged_amount + margin_diff_amount;
+        margindiff_amount = get_number($("#diff_margindiff_amount_"+i).val(),2);
+        total_deduction = shortage_amount + expiry_amount + damaged_amount + margindiff_amount;
         $("#diff_total_deduction_"+i).val(format_money(total_deduction,2));
 
         total_payable_amount = total_amount - total_deduction;
@@ -121,8 +121,8 @@ $("#get_expiry_qty").click(function(){
 $("#get_damaged_qty").click(function(){
     $("#damaged_modal").modal('show');
 });
-$("#get_margin_diff_qty").click(function(){
-    $("#margin_diff_modal").modal('show');
+$("#get_margindiff_qty").click(function(){
+    $("#margindiff_modal").modal('show');
 });
 
 $("#get_ledger").click(function(){
@@ -225,7 +225,7 @@ function get_sku_details(elem){
             col_qty = "expiry_qty";
         } else if(ded_type=="damaged"){
             col_qty = "damaged_qty";
-        } else if(ded_type=="margin_diff"){
+        } else if(ded_type=="margindiff"){
             col_qty = "mrp_issue_qty";
         }
 

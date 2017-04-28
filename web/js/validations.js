@@ -524,10 +524,10 @@ $("#form_purchase_details").validate({
         damaged_ledger_code: {
             required: true
         },
-        margin_diff_acc_id: {
+        margindiff_acc_id: {
             required: true
         },
-        margin_diff_ledger_code: {
+        margindiff_ledger_code: {
             required: true
         }
     },
@@ -554,7 +554,7 @@ $("#form_purchase_details").validate({
         if ($('#damaged_modal').find("input.error, select.error").length>0) {
             errors=errors+"Please Clear errors in Damaged Details. <br/>";
         }
-        if ($('#margin_diff_modal').find("input.error, select.error").length>0) {
+        if ($('#margindiff_modal').find("input.error, select.error").length>0) {
             errors=errors+"Please Clear errors in Margin Difference Details. <br/>";
         }
 
@@ -581,16 +581,16 @@ $('#form_purchase_details').submit(function() {
     removeMultiInputNamingRules('#form_purchase_details', 'input[alt="expiry_cost_ledger_code[]"]');
     removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_cost_acc_id[]"]');
     removeMultiInputNamingRules('#form_purchase_details', 'input[alt="damaged_cost_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margin_diff_cost_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="margin_diff_cost_ledger_code[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_cost_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="margindiff_cost_ledger_code[]"]');
     removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_tax_acc_id[]"]');
     removeMultiInputNamingRules('#form_purchase_details', 'input[alt="shortage_tax_ledger_code[]"]');
     removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_tax_acc_id[]"]');
     removeMultiInputNamingRules('#form_purchase_details', 'input[alt="expiry_tax_ledger_code[]"]');
     removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_tax_acc_id[]"]');
     removeMultiInputNamingRules('#form_purchase_details', 'input[alt="damaged_tax_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margin_diff_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="margin_diff_tax_ledger_code[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="margindiff_tax_ledger_code[]"]');
 
     addMultiInputNamingRules('#form_purchase_details', 'select[name="invoice_cost_acc_id[]"]', { required: true });
     addMultiInputNamingRules('#form_purchase_details', 'input[name="invoice_cost_ledger_code[]"]', { required: true });
@@ -602,16 +602,16 @@ $('#form_purchase_details').submit(function() {
     addMultiInputNamingRules('#form_purchase_details', 'input[name="expiry_cost_ledger_code[]"]', { required: true });
     addMultiInputNamingRules('#form_purchase_details', 'select[name="damaged_cost_acc_id[]"]', { required: true });
     addMultiInputNamingRules('#form_purchase_details', 'input[name="damaged_cost_ledger_code[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'select[name="margin_diff_cost_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'input[name="margin_diff_cost_ledger_code[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="margindiff_cost_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'input[name="margindiff_cost_ledger_code[]"]', { required: true });
     addMultiInputNamingRules('#form_purchase_details', 'select[name="shortage_tax_acc_id[]"]', { required: true });
     addMultiInputNamingRules('#form_purchase_details', 'input[name="shortage_tax_ledger_code[]"]', { required: true });
     addMultiInputNamingRules('#form_purchase_details', 'select[name="expiry_tax_acc_id[]"]', { required: true });
     addMultiInputNamingRules('#form_purchase_details', 'input[name="expiry_tax_ledger_code[]"]', { required: true });
     addMultiInputNamingRules('#form_purchase_details', 'select[name="damaged_tax_acc_id[]"]', { required: true });
     addMultiInputNamingRules('#form_purchase_details', 'input[name="damaged_tax_ledger_code[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'select[name="margin_diff_tax_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'input[name="margin_diff_tax_ledger_code[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="margindiff_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'input[name="margindiff_tax_ledger_code[]"]', { required: true });
 
     if (!$("#form_purchase_details").valid()) {
         return false;
@@ -626,16 +626,16 @@ $('#form_purchase_details').submit(function() {
         removeMultiInputNamingRules('#form_purchase_details', 'input[alt="expiry_cost_ledger_code[]"]');
         removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_cost_acc_id[]"]');
         removeMultiInputNamingRules('#form_purchase_details', 'input[alt="damaged_cost_ledger_code[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margin_diff_cost_acc_id[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="margin_diff_cost_ledger_code[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_cost_acc_id[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="margindiff_cost_ledger_code[]"]');
         removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_tax_acc_id[]"]');
         removeMultiInputNamingRules('#form_purchase_details', 'input[alt="shortage_tax_ledger_code[]"]');
         removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_tax_acc_id[]"]');
         removeMultiInputNamingRules('#form_purchase_details', 'input[alt="expiry_tax_ledger_code[]"]');
         removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_tax_acc_id[]"]');
         removeMultiInputNamingRules('#form_purchase_details', 'input[alt="damaged_tax_ledger_code[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margin_diff_tax_acc_id[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="margin_diff_tax_ledger_code[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_tax_acc_id[]"]');
+        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="margindiff_tax_ledger_code[]"]');
         
         return true;
     }

@@ -78,27 +78,72 @@ class AccReport extends Model
         //             id != '$opening_bal_id') B 
         //         on (A.id = B.jv_id)) AA where AA.amount is not null order by AA.updated_date";
 
+        // $sql = "select * from 
+        //         (select id, ref_id, sub_ref_id, ref_type, entry_type, invoice_no, vendor_id, acc_id, ledger_name, ledger_code, 
+        //             type, amount, status, created_by, updated_by, created_date, updated_date, is_paid, payment_ref, voucher_id, 
+        //             ledger_type from ledger_entries where acc_id = '$acc_id' and status = '$status' and is_active = '1' and 
+        //             date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and 
+        //             ref_type != 'purchase' and entry_type = 'Journal Voucher' 
+        //         union all 
+        //         select id, ref_id, sub_ref_id, ref_type, entry_type, invoice_no, vendor_id, acc_id, ledger_name, ledger_code, 
+        //             case when type = 'Debit' then 'Credit' else 'Debit' end as type, amount, status, created_by, updated_by, 
+        //             created_date, updated_date, is_paid, payment_ref, voucher_id, 
+        //             ledger_type from ledger_entries where acc_id != '$acc_id' and status = '$status' and is_active = '1' and 
+        //             date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and 
+        //             ref_type = 'purchase' and ledger_type = 'Sub Entry' and 
+        //             voucher_id in (select distinct voucher_id from ledger_entries where acc_id = '$acc_id' and 
+        //                 status = '$status' and is_active = '1' and date(updated_date) >= date('$from_date') and 
+        //                 date(updated_date) <= date('$to_date') and ref_type = 'purchase' and ledger_type = 'Main Entry') 
+        //         union all 
+        //         select id, ref_id, sub_ref_id, ref_type, entry_type, invoice_no, vendor_id, acc_id, ledger_name, ledger_code, 
+        //             type, amount, status, created_by, updated_by, created_date, updated_date, is_paid, payment_ref, voucher_id, 
+        //             ledger_type from ledger_entries where acc_id = '$acc_id' and status = '$status' and is_active = '1' and 
+        //             date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and 
+        //             ref_type = 'purchase' and ledger_type = 'Sub Entry' 
+        //         union all 
+        //         select id, ref_id, sub_ref_id, ref_type, entry_type, invoice_no, vendor_id, acc_id, ledger_name, ledger_code, 
+        //             type, amount, status, created_by, updated_by, created_date, updated_date, is_paid, payment_ref, voucher_id, 
+        //             ledger_type from ledger_entries where status = '$status' and is_active = '1' and 
+        //             ref_type = 'payment_receipt' and ledger_type= 'Main Entry' and ref_id in 
+        //             (select distinct payment_ref from ledger_entries where acc_id = '$acc_id' and status = '$status' and 
+        //             is_active = '1' and is_paid = '1' and ref_type != 'payment_receipt' and payment_ref is not null)) A order by A.id";
+
         $sql = "select * from 
-                (select id, ref_id, sub_ref_id, ref_type, entry_type, invoice_no, vendor_id, acc_id, ledger_name, ledger_code, 
-                    type, amount, status, created_by, updated_by, created_date, updated_date, is_paid, payment_ref, voucher_id, 
-                    ledger_type from ledger_entries where acc_id = '$acc_id' and status = '$status' and is_active = '1' and 
-                    date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and ref_type != 'purchase' 
-                union all 
-                select id, ref_id, sub_ref_id, ref_type, entry_type, invoice_no, vendor_id, acc_id, ledger_name, ledger_code, 
-                    case when type = 'Debit' then 'Credit' else 'Debit' end as type, amount, status, created_by, updated_by, 
-                    created_date, updated_date, is_paid, payment_ref, voucher_id, 
-                    ledger_type from ledger_entries where acc_id != '$acc_id' and status = '$status' and is_active = '1' and 
+                (select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, A.type, A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select * from ledger_entries where status = '$status' and is_active = '1' and 
                     date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and 
-                    ref_type = 'purchase' and ledger_type = 'Sub Entry' and 
-                    voucher_id in (select distinct voucher_id from ledger_entries where acc_id = '$acc_id' and status = '$status' and is_active = '1' and 
-                        date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and 
-                        ref_type = 'purchase' and ledger_type = 'Main Entry') 
-                union all 
-                select id, ref_id, sub_ref_id, ref_type, entry_type, invoice_no, vendor_id, acc_id, ledger_name, ledger_code, 
-                    type, amount, status, created_by, updated_by, created_date, updated_date, is_paid, payment_ref, voucher_id, 
-                    ledger_type from ledger_entries where acc_id = '$acc_id' and status = '$status' and is_active = '1' and 
+                    ref_type = 'purchase' and ledger_type != 'Main Entry') A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from ledger_entries where status = '$status' and is_active = '1' and 
                     date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and 
-                    ref_type = 'purchase' and ledger_type = 'Sub Entry') A order by A.id";
+                    ref_type = 'purchase' and ledger_type = 'Main Entry') B 
+                on (A.voucher_id = B.cp_voucher_id) 
+                union all 
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, A.type, A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.acc_id as cp_acc_id, A.ledger_name as cp_ledger_name, 
+                    A.ledger_code as cp_ledger_code from 
+                (select * from ledger_entries where status = '$status' and is_active = '1' and 
+                    date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and 
+                    ref_type = 'journal_voucher') A 
+                union all 
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, A.type, A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select * from ledger_entries where status = '$status' and is_active = '1' and 
+                    date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and 
+                    ref_type = 'payment_receipt' and ledger_type = 'Main Entry') A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from ledger_entries where status = '$status' and is_active = '1' and 
+                    date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and 
+                    ref_type = 'payment_receipt' and ledger_type = 'Sub Entry') B 
+                on (A.voucher_id = B.cp_voucher_id)) AA 
+                where AA.acc_id = '$acc_id' or AA.cp_acc_id = '$acc_id' 
+                order by AA.id";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -182,12 +227,12 @@ class AccReport extends Model
                 on (A.id = B.acc_id)) C 
                 left join 
                 (select acc_id, sum(case when type='Debit' then amount*-1 else amount end) as opening_bal from ledger_entries 
-                where status = '$status' and is_active = '1' and ref_type!='payment_receipt' and date(updated_date) < date('$from_date') group by acc_id) D 
+                where status = '$status' and is_active = '1' and date(updated_date) < date('$from_date') group by acc_id) D 
                 on (C.id = D.acc_id)) E 
                 left join 
                 (select acc_id, sum(case when type='Debit' then amount else 0 end) as debit_amt, 
                         sum(case when type='Credit' then amount else 0 end) as credit_amt 
-                from ledger_entries where status = '$status' and is_active = '1' and ref_type!='payment_receipt' and 
+                from ledger_entries where status = '$status' and is_active = '1' and 
                     date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date')
                 group by acc_id) F 
                 on (E.id = F.acc_id) 
