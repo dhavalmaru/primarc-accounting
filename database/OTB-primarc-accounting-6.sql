@@ -1,0 +1,1 @@
+alter table payment_receipt_details add column payment_date date;
