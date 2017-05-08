@@ -1,3 +1,5 @@
+$('.datepicker').datepicker({changeMonth: true,changeYear: true});
+
 // $("#vendor_id").change(function(){
 //     $("#vendor_name").val($("#vendor_id option:selected").text());
 //     getLedger();
@@ -68,7 +70,7 @@ function getLedger(){
                 acc_id : $("#acc_id").val(),
                 id : $("#id").val(),
                 _csrf : csrfToken
-             },
+            },
         success: function (data) {
             if(data != null){
                 $("#ledger_details").html(data);

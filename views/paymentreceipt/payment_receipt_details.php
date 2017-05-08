@@ -36,15 +36,14 @@ $mycomponent = Yii::$app->mycomponent;
 .form-devident h4 { border-bottom: 1px dashed #ddd; padding-bottom: 10px; }
 </style>
 
-  <div class="grn-index"> 
-	 
-	<div class=" col-md-12 ">  
+<div class="grn-index">
+	<div class=" col-md-12 ">
 		<form id="payment_receipt" class="form-horizontal" action="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Fsave" method="post"> 
 			<input type="hidden" name="_csrf" value="<?=Yii::$app->request->getCsrfToken()?>" />
 			<div class="form-group">
 				<div class="col-md-3 col-sm-12 col-xs-12">
 					<label class="control-label">Transaction Type</label>
-					<div class=""> 
+					<div class="">
 						<input type="hidden" id="id" name="id" value="<?php if(isset($data[0])) echo $data[0]['id']; ?>" />
 						<input type="hidden" id="voucher_id" name="voucher_id" value="<?php if(isset($data[0])) echo $data[0]['voucher_id']; ?>" />
 						<input type="hidden" id="ledger_type" name="ledger_type" value="<?php if(isset($data[0])) echo $data[0]['ledger_type']; ?>" />
@@ -113,6 +112,14 @@ $mycomponent = Yii::$app->mycomponent;
 						</div>
 					</div>
 				</div>
+				<div class="col-md-3 col-sm-12 col-xs-12">
+					<label class="control-label">Payment Date</label>
+					<div class="">
+						<div class=""> 
+							<input class="form-control datepicker" type="text" id="payment_date" name="payment_date" value="<?php if(isset($data)) echo (($data[0]['payment_date']!=null && $data[0]['payment_date']!='')?date('d/m/Y',strtotime($data[0]['payment_date'])):date('d/m/Y')); else echo date('d/m/Y'); ?>" readonly />
+						</div>
+					</div>
+				</div>
 			</div>
 			<div class="form-group">
 				<div class="col-md-3 col-sm-12 col-xs-12 ad_hock">
@@ -123,8 +130,8 @@ $mycomponent = Yii::$app->mycomponent;
 						</div>
 					</div>
 				</div>
-				<div class="col-md-3 col-sm-12 col-xs-12 ad_hock">
-					<label class="control-label">Ref No</label>
+				<div class="col-md-3 col-sm-12 col-xs-12">
+					<label class="control-label">Ref No / Cheque No</label>
 					<div class="">
 						<div class="">  
 							<input name="ref_no" class="form-control" type="text" value="<?php if(isset($data[0])) echo $data[0]['ref_no']; ?>" />
@@ -202,8 +209,8 @@ $mycomponent = Yii::$app->mycomponent;
 			<!-- Button -->
 			<div class="btn-container "> 
 				<div class="col-md-12">
-					<button type="submit" class="btn btn-success btn-sm" >Submit For Approval  </button>
-					<a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Findex" class="btn btn-danger btn-sm" >Cancel</a>
+					<button type="submit" class="btn btn-success btn-sm">Submit For Approval</button>
+					<a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Findex" class="btn btn-danger btn-sm">Cancel</a>
 					<!-- <button type="submit" class="btn btn-danger btn-sm" >Cancel </button> -->
 				</div>
 			</div>
@@ -244,6 +251,10 @@ $mycomponent = Yii::$app->mycomponent;
 </script>
 
 <?php 
+    $this->registerJsFile(
+	    '@web/js/jquery-ui-1.11.2/jquery-ui.min.js',
+	    ['depends' => [\yii\web\JqueryAsset::className()]]
+	);
     $this->registerJsFile(
         '@web/js/payment_receipt.js',
         ['depends' => [\yii\web\JqueryAsset::className()]]

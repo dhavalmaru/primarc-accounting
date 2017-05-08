@@ -36,6 +36,7 @@ $mycomponent = Yii::$app->mycomponent;
 														<th>Account Name</th> 
 														<th>Bank Name</th> 
 														<th>Payment Type</th> 
+														<th>Payment Date</th> 
 														<th>Amount</th> 
 														<th>Status</th> 
 														<th>Updated By</th> 
@@ -51,6 +52,7 @@ $mycomponent = Yii::$app->mycomponent;
 														<td><?php echo $pending[$i]['account_name']; ?></td> 
 														<td><?php echo $pending[$i]['bank_name']; ?></td> 
 														<td><?php echo $pending[$i]['payment_type']; ?></td> 
+														<td><?php echo (($pending[$i]['payment_date']!=null && $pending[$i]['payment_date']!='')?date('d/m/Y',strtotime($pending[$i]['payment_date'])):''); ?></td> 
 														<td class="text-right"><?php echo $mycomponent->format_money($pending[$i]['amount'],2); ?></td> 
 														<td><?php echo $pending[$i]['status']; ?></td> 
 														<th><?php echo $pending[$i]['updated_by']; ?></th> 
@@ -87,6 +89,7 @@ $mycomponent = Yii::$app->mycomponent;
 														<td><?php echo $approved[$i]['account_name']; ?></td> 
 														<td><?php echo $approved[$i]['bank_name']; ?></td> 
 														<td><?php echo $approved[$i]['payment_type']; ?></td> 
+														<td><?php echo (($approved[$i]['payment_date']!=null && $approved[$i]['payment_date']!='')?date('d/m/Y',strtotime($approved[$i]['payment_date'])):''); ?></td> 
 														<td class="text-right"><?php echo $mycomponent->format_money($approved[$i]['amount'],2); ?></td> 
 														<td><?php echo $approved[$i]['status']; ?></td> 
 														<th><?php echo $approved[$i]['updated_by']; ?></th> 

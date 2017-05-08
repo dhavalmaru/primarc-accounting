@@ -738,13 +738,16 @@ $("#payment_receipt").validate({
         amount: {
             required: true
         },
-        ref_no: {
-            required: true
-        },
+        // ref_no: {
+        //     required: true
+        // },
         paying_debit_amt: {
             required: true
         },
         paying_credit_amt: {
+            required: true
+        },
+        payment_date: {
             required: true
         }
     },

@@ -135,12 +135,12 @@ class AccReport extends Model
                     A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
                 (select * from ledger_entries where status = '$status' and is_active = '1' and 
                     date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and 
-                    ref_type = 'payment_receipt' and ledger_type = 'Main Entry') A 
+                    ref_type = 'payment_receipt' and (ledger_type = 'Main Entry' or entry_type = 'payment_receipt')) A 
                 left join 
                 (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
                     ledger_code as cp_ledger_code from ledger_entries where status = '$status' and is_active = '1' and 
                     date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') and 
-                    ref_type = 'payment_receipt' and ledger_type = 'Sub Entry') B 
+                    ref_type = 'payment_receipt' and (ledger_type = 'Sub Entry' or entry_type = 'payment_receipt' or entry_type = 'Payment')) B 
                 on (A.voucher_id = B.cp_voucher_id)) AA 
                 where AA.acc_id = '$acc_id' or AA.cp_acc_id = '$acc_id' 
                 order by AA.id";
