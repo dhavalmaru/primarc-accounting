@@ -423,6 +423,8 @@ class PendinggrnController extends Controller
         // echo json_encode($invoice_details);
         // echo json_encode($total_tax);
         // echo json_encode($invoice_tax);
+        // echo json_encode($deductions['margindiff']);
+        // echo $deductions['shortage'];
     }
 
 
@@ -732,7 +734,7 @@ class PendinggrnController extends Controller
     }
 
     public function actionGetinvoicedeductiondetailstest(){
-        $this->actionGetinvoicedeductiondetails('28', 'shortage');
+        $this->actionGetinvoicedeductiondetails('5909', 'shortage');
     }
 
     public function actionGetinvoicedeductiondetails($gi_id, $ded_type)
@@ -782,8 +784,13 @@ class PendinggrnController extends Controller
         $grnAccSku = $model->getGrnAccSku($gi_id);
         if(count($grnAccSku)>0){
             $rows = $model->getGrnAccSkuEntries($gi_id, $ded_type);
+            if($ded_type=="margindiff"){
+                $col_qty = "margindiff_qty";
+            }
         } else {
-            $rows = $model->getInvoiceDeductionDetails($gi_id, $col_qty);
+            if($col_qty != "mrp_issue_qty"){
+                $rows = $model->getInvoiceDeductionDetails($gi_id, $col_qty);
+            }
         }
         
         $result = "";
@@ -848,12 +855,20 @@ class PendinggrnController extends Controller
                     }
                 }
 
+                // echo $col_qty;
+                // echo '<br/>';
+                // echo $rows[$i][$col_qty];
+                // echo '<br/>';
+
                 if(isset($rows[$i][$col_qty])){
                     $qty = $rows[$i][$col_qty];
                 } else {
                     $qty = 0;
                 }
                 
+                // echo $qty;
+                // echo '<br/>';
+
                 $state = $rows[$i]["tax_zone_code"];
                 $vat_cst = $rows[$i]["vat_cst"];
                 $vat_percen = floatval($rows[$i]["vat_percen"]);

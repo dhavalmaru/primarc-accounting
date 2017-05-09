@@ -283,8 +283,7 @@ class PendingGrn extends Model
     }
 
     public function getGrnAccSku($id){
-        $sql = "select * from grn_acc_sku_entries 
-                where grn_id = '$id' and is_active = '1' order by invoice_no, vat_percen";
+        $sql = "select * from grn_acc_sku_entries where grn_id = '$id' and is_active = '1' order by invoice_no, vat_percen";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -311,7 +310,7 @@ class PendingGrn extends Model
                 left join tax_zone_master D on (C.tax_zone_id = D.id) 
                 left join goods_inward_outward_invoices E on (A.gi_id = E.gi_go_ref_no and B.invoice_no = E.invoice_no) 
                 where A.grn_id = '$id' and B.grn_id = '$id' and A.is_active = '1' and B.is_active = '1' and 
-                    C.is_active = '1' and D.is_active = '1' and B.invoice_no is not null and B.ded_type = '$ded_type' > 0 
+                    C.is_active = '1' and D.is_active = '1' and B.invoice_no is not null and B.ded_type = '$ded_type' and B.qty > 0 
                 order by B.invoice_no, B.vat_percen";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
