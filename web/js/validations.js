@@ -186,6 +186,9 @@ $("#account_master").validate({
                         }
                     }
         },
+        ac_category_1: {
+            required: true
+        },
         // address_doc_file: {
         //     required: function(element) {
         //                 if($("#type").val()=="Employee" && $("#address_doc_path").val()==""){
@@ -282,36 +285,15 @@ $("#account_master").validate({
 });
 
 $('#account_master').submit(function() {
+    removeMultiInputNamingRules('#account_master', 'select[alt="bus_category[]"]');
+
+    addMultiInputNamingRules('#account_master', 'select[name="bus_category[]"]', { required: true });
+
     if (!$("#account_master").valid()) {
         return false;
     } else {
+        removeMultiInputNamingRules('#account_master', 'select[alt="bus_category[]"]');
 
-        // var result = 1;
-
-        // $.ajax({
-        //     url: BASE_URL+'index.php?r=accountmaster%2Fchecklegalnameavailablity',
-        //     type: 'post',
-        //     data: $("#account_master").serialize(),
-        //     dataType: 'html',
-        //     success: function (data) {
-        //         result = parseInt(data);
-        //     },
-        //     error: function (xhr, ajaxOptions, thrownError) {
-        //         alert(xhr.status);
-        //         alert(thrownError);
-        //     }
-        // });
-
-        // console.log(result);
-        // if (result) {
-        //     var errors = {};
-        //     var validator = $("#account_master").validate();
-        //     errors['legal_name'] = "Legal Name already in use.";
-        //     validator.showErrors(errors);
-        //     return false;
-        // } else {
-        //     return true;
-        // }
         return true;
     }
 });
@@ -328,10 +310,7 @@ $.validator.addMethod("check_legal_name_availablity", function (value, element) 
         global: false,
         async: false,
         success: function (data) {
-            // console.log(data);
-            // result = parseInt(data);
             result = data;
-            // console.log(result);
         },
         error: function (xhr, ajaxOptions, thrownError) {
             alert(xhr.status);
@@ -339,12 +318,9 @@ $.validator.addMethod("check_legal_name_availablity", function (value, element) 
         }
     });
 
-            // console.log(result);
     if (result==1) {
-        // console.log('false');
         return false;
     } else {
-        // console.log('true');
         return true;
     }
 }, 'Legal Name already in use.');
@@ -354,42 +330,42 @@ $.validator.addMethod("check_legal_name_availablity", function (value, element) 
 
 
 // ----------------- ACCOUNT CATEGORY MASTER FORM VALIDATION -------------------------------------
-// $("#account_category_master").validate({
-//     rules: {
+$("#account_category_master").validate({
+    rules: {
         
-//     },
+    },
 
-//     ignore: false,
+    ignore: false,
 
-//     errorPlacement: function (error, element) {
-//         var placement = $(element).data('error');
-//         if (placement) {
-//             $(placement).append(error);
-//         } else {
-//             error.insertAfter(element);
-//         }
-//     }
-// });
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
 
-// $('#account_category_master').submit(function() {
-//     removeMultiInputNamingRules('#account_category_master', 'input[alt="category_1[]"]');
-//     removeMultiInputNamingRules('#account_category_master', 'input[alt="category_2[]"]');
-//     removeMultiInputNamingRules('#account_category_master', 'input[alt="category_3[]"]');
+$('#account_category_master').submit(function() {
+    removeMultiInputNamingRules('#account_category_master', 'input[alt="category_1[]"]');
+    removeMultiInputNamingRules('#account_category_master', 'input[alt="category_2[]"]');
+    removeMultiInputNamingRules('#account_category_master', 'input[alt="category_3[]"]');
 
-//     addMultiInputNamingRules('#account_category_master', 'input[name="category_1[]"]', { required: true });
-//     addMultiInputNamingRules('#account_category_master', 'input[name="category_2[]"]', { required: true });
-//     addMultiInputNamingRules('#account_category_master', 'input[name="category_3[]"]', { required: true });
+    addMultiInputNamingRules('#account_category_master', 'input[name="category_1[]"]', { required: true });
+    addMultiInputNamingRules('#account_category_master', 'input[name="category_2[]"]', { required: true });
+    addMultiInputNamingRules('#account_category_master', 'input[name="category_3[]"]', { required: true });
 
-//     if (!$("#account_category_master").valid()) {
-//         return false;
-//     } else {
-//         removeMultiInputNamingRules('#account_category_master', 'input[alt="category_1[]"]');
-//         removeMultiInputNamingRules('#account_category_master', 'input[alt="category_2[]"]');
-//         removeMultiInputNamingRules('#account_category_master', 'input[alt="category_3[]"]');
+    if (!$("#account_category_master").valid()) {
+        return false;
+    } else {
+        removeMultiInputNamingRules('#account_category_master', 'input[alt="category_1[]"]');
+        removeMultiInputNamingRules('#account_category_master', 'input[alt="category_2[]"]');
+        removeMultiInputNamingRules('#account_category_master', 'input[alt="category_3[]"]');
 
-//         return true;
-//     }
-// });
+        return true;
+    }
+});
 
 
 
@@ -486,160 +462,283 @@ $('#bank_master').submit(function() {
 
 
 // ----------------- PURCHASE DETAILS FORM VALIDATION -------------------------------------
-$("#form_purchase_details").validate({
-    rules: {
-        other_charges_acc_id: {
-            required: true
-        },
-        other_charges_ledger_code: {
-            required: true
-        },
-        total_amount_acc_id: {
-            required: true
-        },
-        total_amount_ledger_code: {
-            required: true
-        },
-        total_deduction_acc_id: {
-            required: true
-        },
-        total_deduction_ledger_code: {
-            required: true
-        },
-        shortage_acc_id: {
-            required: true
-        },
-        shortage_ledger_code: {
-            required: true
-        },
-        expiry_acc_id: {
-            required: true
-        },
-        expiry_ledger_code: {
-            required: true
-        },
-        damaged_acc_id: {
-            required: true
-        },
-        damaged_ledger_code: {
-            required: true
-        },
-        margindiff_acc_id: {
-            required: true
-        },
-        margindiff_ledger_code: {
-            required: true
-        }
-    },
+$(function() {
+    $("#form_purchase_details").validate({
+        rules: {
+            other_charges_acc_id: {
+                required: function(){
+                    var blFlag = false;
+                    $('.edited_other_charges').each(function() {
+                        if($(this).val()!=""){
+                            if(parseFloat($(this).val())>0){
+                                blFlag = true;
+                            }
+                        }
+                    });
 
-    ignore: false,
+                    return blFlag;
+                }
+            }
+        },
 
-    errorPlacement: function (error, element) {
-        var placement = $(element).data('error');
-        if (placement) {
-            $(placement).append(error);
-        } else {
-            error.insertAfter(element);
-        }
-    },
+        ignore: false,
 
-    invalidHandler: function(e,validator) {
-        var errors="";
-        if ($('#shortage_modal').find("input.error, select.error").length>0) {
-            errors=errors+"Please Clear errors in Shortage details. <br/>";
-        }
-        if ($('#expiry_modal').find("input.error, select.error").length>0) {
-            errors=errors+"Please Clear errors in Expiry Details. <br/>";
-        }
-        if ($('#damaged_modal').find("input.error, select.error").length>0) {
-            errors=errors+"Please Clear errors in Damaged Details. <br/>";
-        }
-        if ($('#margindiff_modal').find("input.error, select.error").length>0) {
-            errors=errors+"Please Clear errors in Margin Difference Details. <br/>";
-        }
+        errorPlacement: function (error, element) {
+            var placement = $(element).data('error');
+            if (placement) {
+                $(placement).append(error);
+            } else {
+                error.insertAfter(element);
+            }
+        },
 
-        $('#form_errors').html(errors);
-
-        if(errors!=""){
-            $('#form_errors_group').show();
-            $('#form_errors').show();
-        } else {
-            $('#form_errors_group').hide();
-            $('#form_errors').hide();
+        invalidHandler: function(e,validator) {
+            purchase_invalid_handler();
         }
-    }
-});
+    });
+
+    addMultiInputNamingRules_form_purchase_details();
+})
+
+function addMultiInputNamingRules_form_purchase_details(){
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="invoice_cost_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="invoice_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="shortage_psku[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="shortage_invoice_no[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="shortage_cost_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="expiry_psku[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="expiry_invoice_no[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="expiry_cost_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="damaged_psku[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="damaged_invoice_no[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="damaged_cost_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="margindiff_psku[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="margindiff_invoice_no[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="margindiff_cost_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="shortage_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="expiry_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="damaged_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="margindiff_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'input[name="shortage_qty[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'input[name="expiry_qty[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'input[name="damaged_qty[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'input[name="margindiff_qty[]"]', { required: true });
+}
+function removeMultiInputNamingRules_form_purchase_details(){
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="invoice_cost_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="invoice_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_psku[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_invoice_no[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_cost_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_psku[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_invoice_no[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_cost_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_psku[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_invoice_no[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_cost_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_psku[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_invoice_no[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_cost_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="shortage_qty[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="expiry_qty[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="damaged_qty[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="margindiff_qty[]"]');
+}
 
 $('#form_purchase_details').submit(function() {
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="invoice_cost_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="invoice_cost_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="invoice_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="invoice_tax_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_cost_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="shortage_cost_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_cost_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="expiry_cost_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_cost_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="damaged_cost_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_cost_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="margindiff_cost_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="shortage_tax_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="expiry_tax_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="damaged_tax_ledger_code[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'input[alt="margindiff_tax_ledger_code[]"]');
-
-    addMultiInputNamingRules('#form_purchase_details', 'select[name="invoice_cost_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'input[name="invoice_cost_ledger_code[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'select[name="invoice_tax_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'input[name="invoice_tax_ledger_code[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'select[name="shortage_cost_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'input[name="shortage_cost_ledger_code[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'select[name="expiry_cost_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'input[name="expiry_cost_ledger_code[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'select[name="damaged_cost_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'input[name="damaged_cost_ledger_code[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'select[name="margindiff_cost_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'input[name="margindiff_cost_ledger_code[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'select[name="shortage_tax_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'input[name="shortage_tax_ledger_code[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'select[name="expiry_tax_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'input[name="expiry_tax_ledger_code[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'select[name="damaged_tax_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'input[name="damaged_tax_ledger_code[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'select[name="margindiff_tax_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'input[name="margindiff_tax_ledger_code[]"]', { required: true });
+    removeMultiInputNamingRules_form_purchase_details();
+    addMultiInputNamingRules_form_purchase_details();
 
     if (!$("#form_purchase_details").valid()) {
+        purchase_invalid_handler();
         return false;
     } else {
-        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="invoice_cost_acc_id[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="invoice_cost_ledger_code[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="invoice_tax_acc_id[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="invoice_tax_ledger_code[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_cost_acc_id[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="shortage_cost_ledger_code[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_cost_acc_id[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="expiry_cost_ledger_code[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_cost_acc_id[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="damaged_cost_ledger_code[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_cost_acc_id[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="margindiff_cost_ledger_code[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_tax_acc_id[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="shortage_tax_ledger_code[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_tax_acc_id[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="expiry_tax_ledger_code[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_tax_acc_id[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="damaged_tax_ledger_code[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_tax_acc_id[]"]');
-        removeMultiInputNamingRules('#form_purchase_details', 'input[alt="margindiff_tax_ledger_code[]"]');
-        
-        return true;
+        if (check_purchase_details()==false) {
+            purchase_invalid_handler();
+            return false;
+        } else {
+            removeMultiInputNamingRules_form_purchase_details();
+            
+            return true;
+        }
     }
 });
+function check_purchase_details() {
+    var validator = $("#form_purchase_details").validate();
+    var valid = true;
+    var purchase_acc_id = [];
+    var tax_acc_id = [];
+    var errors = {};
+
+    $("#form_purchase_details").find('select[alt="invoice_cost_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            purchase_acc_id.push($(this).val());
+        }
+    });
+
+    $("#form_purchase_details").find('select[alt="invoice_tax_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            tax_acc_id.push($(this).val());
+        }
+    });
+
+    $("#form_purchase_details").find('select[alt="shortage_cost_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), purchase_acc_id)==-1){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please select account id as per purchase.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+    $("#form_purchase_details").find('select[alt="shortage_tax_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), tax_acc_id)==-1){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please select account id as per purchase.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+    $("#form_purchase_details").find('input[alt="shortage_qty[]"]').each(function(index){
+        if(parseFloat($(this).val())==0){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please enter shortage qty.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+
+    $("#form_purchase_details").find('select[alt="expiry_cost_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), purchase_acc_id)==-1){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please select account id as per purchase.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+    $("#form_purchase_details").find('select[alt="expiry_tax_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), tax_acc_id)==-1){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please select account id as per purchase.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+    $("#form_purchase_details").find('input[alt="expiry_qty[]"]').each(function(index){
+        if(parseFloat($(this).val())==0){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please enter expiry qty.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+
+    $("#form_purchase_details").find('select[alt="damaged_cost_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), purchase_acc_id)==-1){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please select account id as per purchase.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+    $("#form_purchase_details").find('select[alt="damaged_tax_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), tax_acc_id)==-1){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please select account id as per purchase.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+    $("#form_purchase_details").find('input[alt="damaged_qty[]"]').each(function(index){
+        if(parseFloat($(this).val())==0){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please enter damaged qty.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+
+    $("#form_purchase_details").find('select[alt="margindiff_cost_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), purchase_acc_id)==-1){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please select account id as per purchase.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+    $("#form_purchase_details").find('select[alt="margindiff_tax_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), tax_acc_id)==-1){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please select account id as per purchase.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+    $("#form_purchase_details").find('input[alt="margindiff_qty[]"]').each(function(index){
+        if(parseFloat($(this).val())==0){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please enter margin difference qty.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+
+    validator.showErrors(errors);
+    return valid;
+}
+function purchase_invalid_handler(){
+    var errors="";
+    if ($('#shortage_modal').find("input.error, select.error").length>0) {
+        errors=errors+"<span>Please Clear errors in Shortage details.</span> <br/>";
+        $('#shortage_validation_icon').show();
+    } else {
+        $('#shortage_validation_icon').hide();
+    }
+    if ($('#expiry_modal').find("input.error, select.error").length>0) {
+        errors=errors+"<span>Please Clear errors in Expiry Details.</span> <br/>";
+        $('#expiry_validation_icon').show();
+    } else {
+        $('#expiry_validation_icon').hide();
+    }
+    if ($('#damaged_modal').find("input.error, select.error").length>0) {
+        errors=errors+"<span>Please Clear errors in Damaged Details.</span> <br/>";
+        $('#damaged_validation_icon').show();
+    } else {
+        $('#damaged_validation_icon').hide();
+    }
+    if ($('#margindiff_modal').find("input.error, select.error").length>0) {
+        errors=errors+"<span>Please Clear errors in Margin Difference Details.</span> <br/>";
+        $('#margindiff_validation_icon').show();
+    } else {
+        $('#margindiff_validation_icon').hide();
+    }
+
+    $('#form_errors').html(errors);
+
+    if(errors!=""){
+        $('#form_errors_group').show();
+        $('#form_errors').show();
+    } else {
+        $('#form_errors_group').hide();
+        $('#form_errors').hide();
+    }
+}
+
 
 
 
@@ -678,25 +777,20 @@ $('#journal_voucher').submit(function() {
     addMultiInputNamingRules('#journal_voucher', 'input[name="credit_amt[]"]', { required: true });
 
     if (!$("#journal_voucher").valid()) {
-        removeMultiInputNamingRules('#journal_voucher', 'select[alt="acc_id[]"]');
-        removeMultiInputNamingRules('#journal_voucher', 'input[alt="acc_code[]"]');
-        removeMultiInputNamingRules('#journal_voucher', 'select[alt="transaction[]"]');
-        removeMultiInputNamingRules('#journal_voucher', 'input[alt="debit_amt[]"]');
-        removeMultiInputNamingRules('#journal_voucher', 'input[alt="credit_amt[]"]');
 
         return false;
     } else {
         if (check_journal_voucher_details()==false) {
+            return false;
+        } else {
             removeMultiInputNamingRules('#journal_voucher', 'select[alt="acc_id[]"]');
             removeMultiInputNamingRules('#journal_voucher', 'input[alt="acc_code[]"]');
             removeMultiInputNamingRules('#journal_voucher', 'select[alt="transaction[]"]');
             removeMultiInputNamingRules('#journal_voucher', 'input[alt="debit_amt[]"]');
             removeMultiInputNamingRules('#journal_voucher', 'input[alt="credit_amt[]"]');
 
-            return false;
+            return true;
         }
-
-        return true;
     }
 });
 
@@ -788,7 +882,58 @@ function check_payment_receipt_details() {
             validator.showErrors(errors);
             valid = false;
         }
+        if($("#trans_type").val()=="Payment" && parseFloat(get_number($('#payable_credit_amt').val(),2))==0) {
+            var errors = {};
+            var name = "payable_credit_amt";
+            errors[name] = "Payable amount should be credit.";
+            validator.showErrors(errors);
+            valid = false;
+        }
+        if($("#trans_type").val()=="Receipt" && parseFloat(get_number($('#payable_debit_amt').val(),2))==0) {
+            var errors = {};
+            var name = "payable_debit_amt";
+            errors[name] = "Payable amount should be debit.";
+            validator.showErrors(errors);
+            valid = false;
+        }
     }
 
     return valid;
 }
+
+
+
+
+// ----------------- LEDGER REPORT FORM VALIDATION -------------------------------------
+$("#ledger_report").validate({
+    rules: {
+        from_date: {
+            required: true
+        },
+        to_date: {
+            required: true
+        },
+        account: {
+            required: true
+        }
+    },
+
+    ignore: false,
+
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
+
+$('#ledger_report').submit(function() {
+    if (!$("#ledger_report").valid()) {
+        return false;
+    } else {
+        return true;
+    }
+});

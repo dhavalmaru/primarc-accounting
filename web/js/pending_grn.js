@@ -1,5 +1,14 @@
+$('.datepicker').datepicker({changeMonth: true,changeYear: true});
+
 $(document).ready(function(){
     getTotal();
+    // $("#form_purchase_details").validate();
+
+    if($('#totalamount_acc_id_0').val()=="" || $('#totaldeduction_acc_id_0').val()==""){
+        alert('Vendor Account code does not exist. Please Create vendor account.');
+        window.location.href = BASE_URL + "index.php?r=pendinggrn%2Findex";
+    }
+
 });
 
 function getDifference(elem){
@@ -41,7 +50,8 @@ function getTotal(ded_type){
     var total_payable_amount = total_amount - total_deduction;
     $("#total_payable_amount").html(format_money(total_payable_amount,2));
 
-    // var invoices = <?php //echo count($invoice_details);?>
+    var invoices = $("#no_of_invoices").val();
+    // console.log(invoices);
 
     for(var i=0; i<invoices; i++){
         // taxable_amount = get_number($("#invoice_taxable_amount_"+i).val(),2);
@@ -125,37 +135,89 @@ $("#get_margindiff_qty").click(function(){
     $("#margindiff_modal").modal('show');
 });
 
+$("#close_shortage_modal").click(function(){
+    if($("#form_purchase_details").valid()){
+        check_purchase_details();
+    }
+    purchase_invalid_handler();
+    
+    if ($('#shortage_modal').find("input.error, select.error").length>0) {
+        return false;
+    } else {
+        $("#shortage_modal").modal('hide');
+    }
+});
+$("#close_expiry_modal").click(function(){
+    if($("#form_purchase_details").valid()){
+        check_purchase_details();
+    }
+    purchase_invalid_handler();
+    
+    if ($('#expiry_modal').find("input.error, select.error").length>0) {
+        return false;
+    } else {
+        $("#expiry_modal").modal('hide');
+    }
+});
+$("#close_damaged_modal").click(function(){
+    if($("#form_purchase_details").valid()){
+        check_purchase_details();
+    }
+    purchase_invalid_handler();
+    
+    if ($('#damaged_modal').find("input.error, select.error").length>0) {
+        return false;
+    } else {
+        $("#damaged_modal").modal('hide');
+    }
+});
+$("#close_margindiff_modal").click(function(){
+    if($("#form_purchase_details").valid()){
+        check_purchase_details();
+    }
+    purchase_invalid_handler();
+    
+    if ($('#margindiff_modal').find("input.error, select.error").length>0) {
+        return false;
+    } else {
+        $("#margindiff_modal").modal('hide');
+    }
+});
+
 $("#get_ledger").click(function(){
-    $.ajax({
-        url: BASE_URL+'index.php?r=pendinggrn%2Fgetledger',
-        type: 'post',
-        data: $("#form_purchase_details").serialize(),
-        dataType: 'json',
-        success: function (data) {
-            // if (parseInt(data)) {
-            //     $("#account_category_modal").modal('hide');
-            // }
-            // update_categories(data);
-            // $("#account_category_modal").modal('hide');
+    // $("#form_purchase_details").validate();
 
-            // console.log(data);
-            var result = '';
+    if (!$("#form_purchase_details").valid()) {
+        purchase_invalid_handler();
+        return false;
+    } else {
+        if (check_purchase_details()==false) {
+            purchase_invalid_handler();
+            return false;
+        } else {
+            $.ajax({
+                url: BASE_URL+'index.php?r=pendinggrn%2Fgetledger',
+                type: 'post',
+                data: $("#form_purchase_details").serialize(),
+                dataType: 'json',
+                success: function (data) {
+                    var result = '';
 
-            for(var i=0; i<data.length; i++){
-                result = result + data[i];
-            }
+                    for(var i=0; i<data.length; i++){
+                        result = result + data[i];
+                    }
 
-            // console.log(result);
-
-            $("#ledger_details").html(result);
-            
-            $("#ledger_modal").modal('show');
-        },
-        error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status);
-            alert(thrownError);
+                    $("#ledger_details").html(result);
+                    
+                    $("#ledger_modal").modal('show');
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(thrownError);
+                }
+            });
         }
-    });
+    }
 });
 
 function add_sku_details(elem){
@@ -175,29 +237,13 @@ function add_sku_details(elem){
                 },
         dataType: 'html',
         success: function (data) {
-
-            // console.log(data);
-
-            // if (parseInt(data)) {
-            //     $("#account_category_modal").modal('hide');
-            // }
-            // update_categories(data);
-            // $("#account_category_modal").modal('hide');
-
-            // console.log(data);
-            // var result = '';
-
-            // for(var i=0; i<data.length; i++){
-            //     result = result + data[i];
-            // }
-
-            // console.log(result);
-
-            // $("#ledger_details").html(result);
-            
-            // $("#ledger_modal").modal('show');
-
             $('#'+ded_type+'_sku_details tr:last').before(data);
+
+            $('.format_number').keyup(function(){
+                format_number(this);
+            });
+            removeMultiInputNamingRules_form_purchase_details();
+            addMultiInputNamingRules_form_purchase_details();
 
             $('#'+ded_type+'_total_rows').val(sr_no+1);
         },
@@ -255,7 +301,7 @@ function get_sku_details(elem){
 
                     // console.log(state);
 
-                    $('#'+ded_type+'_product_title_'+index_val).val(data[0].product_type);
+                    $('#'+ded_type+'_product_title_'+index_val).val(data[0].product_title);
                     $('#'+ded_type+'_ean_'+index_val).val(data[0].ean);
                     $('#'+ded_type+'_invoice_no_'+index_val).val(data[0].invoice_no);
                     $('#'+ded_type+'_state_'+index_val).val(state);
@@ -269,6 +315,8 @@ function get_sku_details(elem){
                     $('#'+ded_type+'_cost_excl_tax_'+index_val).val(format_money(cost_excl_tax,2));
                     $('#'+ded_type+'_tax_'+index_val).val(format_money(tax,2));
                     $('#'+ded_type+'_total_'+index_val).val(format_money(total,2));
+
+                    set_sku_details(document.getElementById(ded_type+'_qty_'+index_val));
                 }
                 // if(data != null){
                 //     $("#code").val(data);
@@ -290,9 +338,6 @@ function set_sku_details(elem){
         var index = elem_id.substr(elem_id.lastIndexOf("_")+1);
         var ded_type = elem_id.substr(0, elem_id.indexOf("_"));
 
-        // console.log(index);
-        // console.log(ded_type);
-
         var sku_qty = get_number($("#"+ded_type+"_qty_"+index).val(),2);
         var sku_per_unit_cost = get_number($("#"+ded_type+"_cost_excl_tax_per_unit_"+index).val(),2);
         var vat_percen = get_number($("#"+ded_type+"_vat_percen_"+index).val(),2);
@@ -300,10 +345,6 @@ function set_sku_details(elem){
         if (sku_qty==0) sku_qty=0;
         if (sku_per_unit_cost==0) sku_per_unit_cost=0;
         if (vat_percen==0) vat_percen=0;
-
-        // console.log(sku_qty);
-        // console.log(sku_per_unit_cost);
-        // console.log(vat_percen);
 
         var sku_per_unit_tax = (sku_per_unit_cost*vat_percen)/100;
         var sku_per_unit_total = sku_per_unit_cost + sku_per_unit_tax;
@@ -318,46 +359,54 @@ function set_sku_details(elem){
         $("#"+ded_type+"_tax_"+index).val(format_money(sku_tax,2));
         $("#"+ded_type+"_total_"+index).val(format_money(sku_total,2));
 
-        // var elem_class_name = elem.className;
-        // var index = elem_class_name.substr(elem_class_name.lastIndexOf("_")+1);
+        setDeductionTotal(ded_type);
 
-        // var sku_total_elem = document.getElementsByClassName(ded_type+"_total_"+index);
-        // var inv_total = 0;
-        // for(var i = 0; i < sku_total_elem.length; i++) {
-        //     inv_total = inv_total + parseFloat(get_number(sku_total_elem[i].value,2));
+        // var total_rows = $('#'+ded_type+'_total_rows').val();
+        // var grand_total = 0;
+        // var invoices = $("#no_of_invoices").val();
+        // for(var i=0; i<invoices; i++){
+        //     var invoice_no = $('#invoice_no_'+i).val();
+        //     var invoice_total = 0;
+        //     for(var j=0; j<total_rows; j++){
+        //         if(invoice_no==$('#'+ded_type+'_invoice_no_'+j).val()){
+        //             invoice_total = invoice_total + get_number($('#'+ded_type+'_total_'+j).val(),2);
+        //         }
+        //     }
+        //     grand_total = grand_total + invoice_total;
+        //     $('#edited_'+ded_type+'_amount_'+i).val(format_money(invoice_total,2));
+        //     getDifference(document.getElementById("edited_"+ded_type+"_amount_"+i));
         // }
-
-        // $("#"+ded_type+"_invoice_total_"+index).html(format_money(inv_total,2));
-        // $("#edited_"+ded_type+"_amount_"+(index-1)).val(format_money(inv_total,2));
-        // getDifference(document.getElementById("edited_"+ded_type+"_amount_"+(index-1)));
-
-        // console.log(ded_type);
-
-        var total_rows = $('#'+ded_type+'_total_rows').val();
-        var grand_total = 0;
-        for(var i=0; i<invoices; i++){
-            var invoice_no = $('#invoice_no_'+i).val();
-            var invoice_total = 0;
-            for(var j=0; j<total_rows; j++){
-                if(invoice_no==$('#'+ded_type+'_invoice_no_'+j).val()){
-                    invoice_total = invoice_total + get_number($('#'+ded_type+'_total_'+j).val(),2);
-                }
-            }
-            grand_total = grand_total + invoice_total;
-            $('#edited_'+ded_type+'_amount_'+i).val(format_money(invoice_total,2));
-            getDifference(document.getElementById("edited_"+ded_type+"_amount_"+i));
-        }
-        $('#'+ded_type+'_grand_total').html(format_money(grand_total,2));
+        // $('#'+ded_type+'_grand_total').html(format_money(grand_total,2));
     }
-    
-    // var no_of_invoices = $("#"+ded_type+"_total_no_of_invoice").val();
-    // var grand_total = 0;
-    // for(var i=1; i<=no_of_invoices; i++){
-    //     grand_total = grand_total + parseFloat(get_number($("#"+ded_type+"_invoice_total_"+i).html(),2));
-    // }
-    // $("#"+ded_type+"_grand_total").html(format_money(grand_total,2));
+}
 
-    // getTotal();
+function setDeductionTotal(ded_type){
+    var total_rows = $('#'+ded_type+'_total_rows').val();
+    var grand_total = 0;
+    var invoices = $("#no_of_invoices").val();
+    for(var i=0; i<invoices; i++){
+        var invoice_no = $('#invoice_no_'+i).val();
+        var invoice_total = 0;
+        for(var j=0; j<total_rows; j++){
+            if(invoice_no==$('#'+ded_type+'_invoice_no_'+j).val()){
+                invoice_total = invoice_total + get_number($('#'+ded_type+'_total_'+j).val(),2);
+            }
+        }
+        grand_total = grand_total + invoice_total;
+        $('#edited_'+ded_type+'_amount_'+i).val(format_money(invoice_total,2));
+        getDifference(document.getElementById("edited_"+ded_type+"_amount_"+i));
+    }
+    $('#'+ded_type+'_grand_total').html(format_money(grand_total,2));
+}
+
+function delete_row(elem){
+    var id = elem.id;
+    var index = id.substr(id.lastIndexOf('_')+1);
+    var ded_type = id.substr(0,id.indexOf('_'));
+
+    $('#'+ded_type+'_row_'+index).remove();
+    // console.log(ded_type);
+    setDeductionTotal(ded_type);
 }
 
 function get_acc_details(elem){
@@ -395,53 +444,3 @@ function get_acc_details(elem){
         });
     }
 }
-
-// jQuery(function(){
-//     var counter = $('.box').length;
-//     $('#repeat-box').click(function(event){
-//         event.preventDefault();
-//         var newRow = jQuery('<tr id="box_'+counter+'_row">'+
-//                                 '<td>'+
-//                                     '<select name="box[]" class="form-control box" id="box_'+counter+'">'+
-//                                         '<option value="">Select</option>'+
-//                                         '<?php if(isset($box)) { for ($k=0; $k < count($box) ; $k++) { ?>'+
-//                                                 '<option value="<?php echo $box[$k]->id; ?>"><?php echo $box[$k]->box_name; ?></option>'+
-//                                         '<?php }} ?>'+
-//                                     '</select>'+
-//                                 '</td>'+
-//                                 '<td>'+
-//                                     '<input type="text" class="form-control format_number qty" name="qty[]" id="qty_'+counter+'" placeholder="Qty" value=""/>'+
-//                                 '</td>'+
-//                                 '<td style="display:none;">'+
-//                                     '<input type="text" class="form-control format_number grams" name="grams[]" id="grams_'+counter+'" placeholder="Grams" value="" readonly />'+
-//                                     '<!-- <span id="grams_label_'+counter+'"></span> -->'+
-//                                 '</td>'+
-//                                 '<td style="display:none;">'+
-//                                     '<input type="text" class="form-control format_number rate" name="rate[]" id="rate_'+counter+'" placeholder="Rate" value="" readonly />'+
-//                                     '<!-- <span id="rate_label_'+counter+'"></span> -->'+
-//                                 '</td>'+
-//                                 '<td style="display:none;">'+
-//                                     '<input type="text" class="form-control format_number amount" name="amount[]" id="amount_'+counter+'" placeholder="Amount" value="" readonly />'+
-//                                     '<!-- <span id="amount_label_'+counter+'"></span> -->'+
-//                                 '</td>'+
-//                                 '  <td style="text-align:center;     vertical-align: middle;">'+
-//                                     '<a id="box_'+counter+'_row_delete" class="delete_row" href="#"><span class="fa trash fa-trash-o"  ></span></a>'+
-//                                 '</td>'+
-//                             '</tr>');
-//         $('#box_details').append(newRow);
-//         $('.format_number').keyup(function(){
-//             format_number(this);
-//         });
-//         $(".box").change(function(){
-//             get_box_details($(this));
-//         });
-//         $(".qty").blur(function(){
-//             get_amount($(this));
-//         });
-//         $('.delete_row').click(function(event){
-//             delete_row($(this));
-//             get_total();
-//         });
-//         counter++;
-//     });
-// });

@@ -116,14 +116,13 @@ class PendinggrnController extends Controller
     public function actionUpdate($id)
     {
         $model = new PendingGrn();
-        $account_master = new AccountMaster();
 
         $grn_acc_entries = $model->getGrnAccEntries($id);
         $grn_details = $model->getGrnDetails($id);
         $total_val = $model->getTotalValue($id);
         $total_tax = $model->getTotalTax($id);
 
-        $acc_master = $account_master->getAccountDetails('', 'pending');
+        $acc_master = $model->getAccountDetails('', 'pending');
 
         if (count($grn_acc_entries) > 0){
             // echo json_encode($grn_acc_entries);
@@ -586,7 +585,7 @@ class PendinggrnController extends Controller
             $columnNameArray=['grn_id','vendor_id','particular','sub_particular','acc_id','ledger_name','ledger_code',
                                 'voucher_id','ledger_type','vat_cst','vat_percen','invoice_no','total_val',
                                 'invoice_val','edited_val','difference_val','narration','status','is_active',
-                                'updated_by','updated_date'];
+                                'updated_by','updated_date', 'gi_date'];
             // below line insert all your record and return number of rows inserted
             $tableName = "grn_acc_entries";
             $insertCount = Yii::$app->db->createCommand()
@@ -606,7 +605,7 @@ class PendinggrnController extends Controller
 
             $columnNameArray=['ref_id','ref_type','entry_type','invoice_no','vendor_id','acc_id','ledger_name','ledger_code',
                                 'voucher_id','ledger_type','type','amount','narration','status','is_active',
-                                'updated_by','updated_date'];
+                                'updated_by','updated_date', 'ref_date'];
             // below line insert all your record and return number of rows inserted
             $tableName = "ledger_entries";
             $insertCount = Yii::$app->db->createCommand()
@@ -632,7 +631,7 @@ class PendinggrnController extends Controller
             $columnNameArray=['grn_id','vendor_id','ded_type','cost_acc_id','cost_ledger_name','cost_ledger_code','tax_acc_id','tax_ledger_name','tax_ledger_code','invoice_no','state',
                                 'vat_cst','vat_percen','ean','psku','product_title','qty','box_price','cost_excl_vat_per_unit',
                                 'tax_per_unit','total_per_unit','cost_excl_vat','tax','total','expiry_date','earliest_expected_date',
-                                'status','is_active'];
+                                'status','is_active', 'remarks'];
             // below line insert all your record and return number of rows inserted
             $tableName = "grn_acc_sku_entries";
             $insertCount = Yii::$app->db->createCommand()
@@ -778,8 +777,7 @@ class PendinggrnController extends Controller
 
         $model = new PendingGrn();
         $rows = array();
-        $account_master = new AccountMaster();
-        $acc_master = $account_master->getAccountDetails('', 'pending');
+        $acc_master = $model->getAccountDetails('', 'pending');
 
         $grnAccSku = $model->getGrnAccSku($gi_id);
         if(count($grnAccSku)>0){
@@ -838,20 +836,21 @@ class PendinggrnController extends Controller
                 }
 
                 $cost_acc_list = '<option value="">Select</option>';
-                for($k=0; $k<count($acc_master); $k++){
-                    if($rows[$i]["cost_acc_id"]==$acc_master[$k]['id']) {
-                        $cost_acc_list = $cost_acc_list . '<option value="'.$acc_master[$k]['id'].'" selected>'.$acc_master[$k]['legal_name'].'</option>';
-                    } else {
-                        $cost_acc_list = $cost_acc_list . '<option value="'.$acc_master[$k]['id'].'">'.$acc_master[$k]['legal_name'].'</option>'; 
-                    }
-                }
-
                 $tax_acc_list = '<option value="">Select</option>';
                 for($k=0; $k<count($acc_master); $k++){
-                    if($rows[$i]["tax_acc_id"]==$acc_master[$k]['id']) {
-                        $tax_acc_list = $tax_acc_list . '<option value="'.$acc_master[$k]['id'].'" selected>'.$acc_master[$k]['legal_name'].'</option>';
-                    } else {
-                        $tax_acc_list = $tax_acc_list . '<option value="'.$acc_master[$k]['id'].'">'.$acc_master[$k]['legal_name'].'</option>'; 
+                    if($acc_master[$k]['type']=="Goods Purchase") { 
+                        if($rows[$i]["cost_acc_id"]==$acc_master[$k]['id']) {
+                            $cost_acc_list = $cost_acc_list . '<option value="'.$acc_master[$k]['id'].'" selected>'.$acc_master[$k]['legal_name'].'</option>';
+                        } else {
+                            $cost_acc_list = $cost_acc_list . '<option value="'.$acc_master[$k]['id'].'">'.$acc_master[$k]['legal_name'].'</option>'; 
+                        }
+                    }
+                    if($acc_master[$k]['type']=="Tax") { 
+                        if($rows[$i]["tax_acc_id"]==$acc_master[$k]['id']) {
+                            $tax_acc_list = $tax_acc_list . '<option value="'.$acc_master[$k]['id'].'" selected>'.$acc_master[$k]['legal_name'].'</option>';
+                        } else {
+                            $tax_acc_list = $tax_acc_list . '<option value="'.$acc_master[$k]['id'].'">'.$acc_master[$k]['legal_name'].'</option>'; 
+                        }
                     }
                 }
 
@@ -887,35 +886,45 @@ class PendinggrnController extends Controller
                 $invoice_total = $invoice_total + $total;
                 $grand_total = $grand_total + $total;
 
-                $row = '<tr>
-                            <td>' . $sr_no . '</td>
+                $remarks = $rows[$i]["remarks"];
+
+                $row = '<tr id="'.$ded_type.'_row_'.$i.'">
+                            <td style="text-align: center;"><button type="button" class="btn btn-sm btn-success" id="'.$ded_type.'_delete_row_'.$i.'" onClick="delete_row(this);">-</button></td>
+                            <td style="display: none;">' . $sr_no . '</td>
                             <td>
-                                <select class="'.$ded_type.'_psku_'.$sr_no.'" id="'.$ded_type.'_psku_'.$i.'" name="'.$ded_type.'_psku[]" onChange="get_sku_details(this)">' . $sku_list . '</select>
+                                <select class="'.$ded_type.'_psku_'.$sr_no.'" id="'.$ded_type.'_psku_'.$i.'" name="'.$ded_type.'_psku[]" onChange="get_sku_details(this)" data-error="#'.$ded_type.'_psku_'.$i.'_error">' . $sku_list . '</select>
+                                <div id="'.$ded_type.'_psku_'.$i.'_error"></div>
                             </td>
                             <td><input type="text" class="'.$ded_type.'_product_title_'.$sr_no.'" id="'.$ded_type.'_product_title_'.$i.'" name="'.$ded_type.'_product_title[]" value="'.$rows[$i]["product_title"].'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_ean_'.$sr_no.'" id="'.$ded_type.'_ean_'.$i.'" name="'.$ded_type.'_ean[]" value="'.$rows[$i]["ean"].'" readonly /></td>
                             <td>
-                                <select id="'.$ded_type.'cost_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_cost_acc_id[]" onChange="get_acc_details(this)">'.$cost_acc_list.'</select>
+                                <select id="'.$ded_type.'cost_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_cost_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cost_acc_id_'.$sr_no.'_error">'.$cost_acc_list.'</select>
                                 <input type="hidden" id="'.$ded_type.'cost_ledger_name_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_name[]" value="'.$rows[$i]["cost_ledger_name"].'" />
                                 <input type="hidden" id="'.$ded_type.'cost_voucher_id_'.$sr_no.'" name="'.$ded_type.'_cost_voucher_id[]" value="'.$voucher_id.'" />
                                 <input type="hidden" id="'.$ded_type.'cost_ledger_type_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_type[]" value="'.$ledger_type.'" />
+                                <div id="'.$ded_type.'cost_acc_id_'.$sr_no.'_error"></div>
                             </td>
                             <td><input type="text" id="'.$ded_type.'cost_ledger_code_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_code[]" value="'.$rows[$i]["cost_ledger_code"].'" readonly /></td>
                             <td>
-                                <select id="'.$ded_type.'tax_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_tax_acc_id[]" onChange="get_acc_details(this)">'.$tax_acc_list.'</select>
+                                <select id="'.$ded_type.'tax_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_tax_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'tax_acc_id_'.$sr_no.'_error">'.$tax_acc_list.'</select>
                                 <input type="hidden" id="'.$ded_type.'tax_ledger_name_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_name[]" value="'.$rows[$i]["tax_ledger_name"].'" />
                                 <input type="hidden" id="'.$ded_type.'tax_voucher_id_'.$sr_no.'" name="'.$ded_type.'_tax_voucher_id[]" value="'.$voucher_id.'" />
                                 <input type="hidden" id="'.$ded_type.'tax_ledger_type_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_type[]" value="'.$ledger_type.'" />
+                                <div id="'.$ded_type.'tax_acc_id_'.$sr_no.'_error"></div>
                             </td>
                             <td><input type="text" id="'.$ded_type.'tax_ledger_code_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_code[]" value="'.$rows[$i]["tax_ledger_code"].'" readonly /></td>
                             <td>
-                                <select class="'.$ded_type.'_invoice_no_'.$sr_no.'" id="'.$ded_type.'_invoice_no_'.$i.'" name="'.$ded_type.'_invoice_no[]" onChange="set_sku_details(this)">' . $invoice_list . '</select>
+                                <select class="'.$ded_type.'_invoice_no_'.$sr_no.'" id="'.$ded_type.'_invoice_no_'.$i.'" name="'.$ded_type.'_invoice_no[]" onChange="set_sku_details(this)" data-error="'.$ded_type.'_invoice_no_'.$sr_no.'_error">' . $invoice_list . '</select>
+                                <div id="'.$ded_type.'_invoice_no_'.$sr_no.'_error"></div>
                             </td>
                             <td>'.$rows[$i]["invoice_date"].'</td>
                             <td><input type="text" class="'.$ded_type.'_state_'.$sr_no.'" id="'.$ded_type.'_state_'.$i.'" name="'.$ded_type.'_state[]" value="'.$state.'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_vat_cst_'.$sr_no.'" id="'.$ded_type.'_vat_cst_'.$i.'" name="'.$ded_type.'_vat_cst[]" value="'.$vat_cst.'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_vat_percen_'.$sr_no.'" id="'.$ded_type.'_vat_percen_'.$i.'" name="'.$ded_type.'_vat_percen[]" value="'.$mycomponent->format_money($vat_percen,2).'" readonly /></td>
-                            <td><input type="text" class="'.$ded_type.'_qty_'.$sr_no.'" id="'.$ded_type.'_qty_'.$i.'" name="'.$ded_type.'_qty[]" value="' . $mycomponent->format_money($qty,2) . '" onChange="set_sku_details(this)" /></td>
+                            <td>
+                                <input type="text" class="'.$ded_type.'_qty_'.$sr_no.' format_number" id="'.$ded_type.'_qty_'.$i.'" name="'.$ded_type.'_qty[]" value="' . $mycomponent->format_money($qty,2) . '" onChange="set_sku_details(this)" data-error="#'.$ded_type.'qty_'.$i.'_error" />
+                                <div id="'.$ded_type.'qty_'.$i.'_error"></div>
+                            </td>
                             <td><input type="text" class="'.$ded_type.'_box_price_'.$sr_no.'" id="'.$ded_type.'_box_price_'.$i.'" name="'.$ded_type.'_box_price[]" value="'.$mycomponent->format_money($rows[$i]["box_price"],2).'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_cost_excl_tax_per_unit_'.$sr_no.'" id="'.$ded_type.'_cost_excl_tax_per_unit_'.$i.'" name="'.$ded_type.'_cost_excl_tax_per_unit[]" value="'.$mycomponent->format_money($cost_excl_tax_per_unit,2).'" onChange="set_sku_details(this)" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_tax_per_unit_'.$sr_no.'" id="'.$ded_type.'_tax_per_unit_'.$i.'" name="'.$ded_type.'_tax_per_unit[]" value="'.$mycomponent->format_money($tax_per_unit,2).'" readonly /></td>
@@ -927,7 +936,7 @@ class PendinggrnController extends Controller
                             <td style="'.$expiry_style.'"><input type="text" class="'.$ded_type.'_earliest_expected_date_'.$sr_no.'" id="'.$ded_type.'_earliest_expected_date_'.$i.'" name="'.$ded_type.'_earliest_expected_date[]" value="'.$rows[$i]["earliest_expected_date"].'" readonly /></td>
                             <td style="'.$margindiff_style.'"></td>
                             <td style="'.$margindiff_style.'"></td>
-                            <td></td>
+                            <td><input type="text" class="'.$ded_type.'_remarks_'.$sr_no.'" id="'.$ded_type.'_remarks_'.$i.'" name="'.$ded_type.'_remarks[]" value="' . $remarks . '" maxlength="500" /></td>
                         </tr>';
 
                 // $sr_no_val = "";
@@ -982,6 +991,7 @@ class PendinggrnController extends Controller
                         <input type="hidden" name="'.$ded_type.'_total_rows" id="'.$ded_type.'_total_rows" value="'.$sr_no.'" />
                         <button type="button" class="btn btn-success" id="'.$ded_type.'_repeat_sku" onClick="add_sku_details(this)">+</button>
                     </td>
+                    <td style="display: none;"></td>
                     <td>GRN Total</td>
                     <td></td>
                     <td></td>
@@ -1026,7 +1036,8 @@ class PendinggrnController extends Controller
                             <th rowspan="2">Remarks</th>
                         </tr>
                         <tr>
-                            <th>Sr No</th>
+                            <th>Action</th>
+                            <th style="display: none;">Sr No</th>
                             <th>SKU Code</th>
                             <th>SKU Name</th>
                             <th>EAN Code</th>
@@ -1111,8 +1122,7 @@ class PendinggrnController extends Controller
         $model = new PendingGrn();
         // $rows = array();
         // $rows = $model->getInvoiceDeductionDetails($gi_id, $col_qty);
-        $account_master = new AccountMaster();
-        $acc_master = $account_master->getAccountDetails('', 'pending');
+        $acc_master = $model->getAccountDetails('', 'pending');
         
         $result = "";
         $table = "";
@@ -1135,9 +1145,15 @@ class PendinggrnController extends Controller
             $invoice_list = $invoice_list . '<option value="'.$data[$k]['invoice_no'].'">'.$data[$k]['invoice_no'].'</option>';
         }
 
-        $acc_list = '<option value="">Select</option>';
+        $purchase_acc_list = '<option value="">Select</option>';
+        $tax_acc_list = '<option value="">Select</option>';
         for($k=0; $k<count($acc_master); $k++){
-            $acc_list = $acc_list . '<option value="'.$acc_master[$k]['id'].'">'.$acc_master[$k]['legal_name'].'</option>';
+            if($acc_master[$k]['type']=="Goods Purchase") { 
+                $purchase_acc_list = $purchase_acc_list . '<option value="'.$acc_master[$k]['id'].'">'.$acc_master[$k]['legal_name'].'</option>';
+            }
+            if($acc_master[$k]['type']=="Tax") { 
+                $tax_acc_list = $tax_acc_list . '<option value="'.$acc_master[$k]['id'].'">'.$acc_master[$k]['legal_name'].'</option>';
+            }
         }
 
         $invoice_no = "";
@@ -1158,31 +1174,39 @@ class PendinggrnController extends Controller
 
         $i = $sr_no - 1;
 
-        $row = '<tr>
-                    <td>' . $sr_no . '</td>
+        $row = '<tr id="'.$ded_type.'_row_'.$i.'">
+                    <td style="text-align: center;"><button type="button" class="btn btn-sm btn-success" id="'.$ded_type.'_delete_row_'.$i.'" onClick="delete_row(this);">-</button></td>
+                    <td style="display: none;">' . $sr_no . '</td>
                     <td>
-                        <select class="'.$ded_type.'_psku_'.$sr_no.'" id="'.$ded_type.'_psku_'.$i.'" name="'.$ded_type.'_psku[]" onChange="get_sku_details(this)">' . $sku_list . '</select>
+                        <select class="'.$ded_type.'_psku_'.$sr_no.'" id="'.$ded_type.'_psku_'.$i.'" name="'.$ded_type.'_psku[]" onChange="get_sku_details(this)" data-error="#'.$ded_type.'_psku_'.$i.'_error">' . $sku_list . '</select>
+                        <div id="'.$ded_type.'_psku_'.$i.'_error"></div>
                     </td>
                     <td><input type="text" class="'.$ded_type.'_product_title_'.$sr_no.'" id="'.$ded_type.'_product_title_'.$i.'" name="'.$ded_type.'_product_title[]" value="" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_ean_'.$sr_no.'" id="'.$ded_type.'_ean_'.$i.'" name="'.$ded_type.'_ean[]" value="" readonly /></td>
                     <td>
-                        <select id="'.$ded_type.'cost_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_cost_acc_id[]" onChange="get_acc_details(this)">'.$acc_list.'</select>
+                        <select id="'.$ded_type.'cost_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_cost_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cost_acc_id_'.$sr_no.'_error">'.$purchase_acc_list.'</select>
                         <input type="hidden" id="'.$ded_type.'cost_ledger_name_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_name[]" value="" />
+                        <div id="'.$ded_type.'cost_acc_id_'.$sr_no.'_error"></div>
                     </td>
                     <td><input type="text" id="'.$ded_type.'cost_ledger_code_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_code[]" value="" readonly /></td>
                     <td>
-                        <select id="'.$ded_type.'tax_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_tax_acc_id[]" onChange="get_acc_details(this)">'.$acc_list.'</select>
+                        <select id="'.$ded_type.'tax_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_tax_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'tax_acc_id_'.$sr_no.'_error">'.$tax_acc_list.'</select>
                         <input type="hidden" id="'.$ded_type.'tax_ledger_name_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_name[]" value="" />
+                        <div id="'.$ded_type.'tax_acc_id_'.$sr_no.'_error"></div>
                     </td>
                     <td><input type="text" id="'.$ded_type.'tax_ledger_code_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_code[]" value="" readonly /></td>
                     <td>
-                        <select class="'.$ded_type.'_invoice_no_'.$sr_no.'" id="'.$ded_type.'_invoice_no_'.$i.'" name="'.$ded_type.'_invoice_no[]" onChange="set_sku_details(this)">' . $invoice_list . '</select>
+                        <select class="'.$ded_type.'_invoice_no_'.$sr_no.'" id="'.$ded_type.'_invoice_no_'.$i.'" name="'.$ded_type.'_invoice_no[]" onChange="set_sku_details(this)" data-error="#'.$ded_type.'_invoice_no_'.$sr_no.'_error">' . $invoice_list . '</select>
+                        <div id="'.$ded_type.'_invoice_no_'.$sr_no.'_error"></div>
                     </td>
                     <td></td>
                     <td><input type="text" class="'.$ded_type.'_state_'.$sr_no.'" id="'.$ded_type.'_state_'.$i.'" name="'.$ded_type.'_state[]" value="'.$state.'" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_vat_cst_'.$sr_no.'" id="'.$ded_type.'_vat_cst_'.$i.'" name="'.$ded_type.'_vat_cst[]" value="'.$vat_cst.'" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_vat_percen_'.$sr_no.'" id="'.$ded_type.'_vat_percen_'.$i.'" name="'.$ded_type.'_vat_percen[]" value="'.$mycomponent->format_money($vat_percen,2).'" readonly /></td>
-                    <td><input type="text" class="'.$ded_type.'_qty_'.$sr_no.'" id="'.$ded_type.'_qty_'.$i.'" name="'.$ded_type.'_qty[]" value="' . $mycomponent->format_money($qty,2) . '" onChange="set_sku_details(this);" /></td>
+                    <td>
+                        <input type="text" class="'.$ded_type.'_qty_'.$sr_no.' format_number" id="'.$ded_type.'_qty_'.$i.'" name="'.$ded_type.'_qty[]" value="' . $mycomponent->format_money($qty,2) . '" onChange="set_sku_details(this);" data-error="#'.$ded_type.'qty_'.$i.'_error" />
+                        <div id="'.$ded_type.'qty_'.$i.'_error"></div>
+                    </td>
                     <td><input type="text" class="'.$ded_type.'_box_price_'.$sr_no.'" id="'.$ded_type.'_box_price_'.$i.'" name="'.$ded_type.'_box_price[]" value="" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_cost_excl_tax_per_unit_'.$sr_no.'" id="'.$ded_type.'_cost_excl_tax_per_unit_'.$i.'" name="'.$ded_type.'_cost_excl_tax_per_unit[]" value="'.$mycomponent->format_money($cost_excl_tax_per_unit,2).'" onChange="set_sku_details(this);" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_tax_per_unit_'.$sr_no.'" id="'.$ded_type.'_tax_per_unit_'.$i.'" name="'.$ded_type.'_tax_per_unit[]" value="'.$mycomponent->format_money($tax_per_unit,2).'" readonly /></td>
@@ -1194,7 +1218,7 @@ class PendinggrnController extends Controller
                     <td style="'.$expiry_style.'"><input type="text" class="'.$ded_type.'_earliest_expected_date_'.$sr_no.'" id="'.$ded_type.'_earliest_expected_date_'.$i.'" name="'.$ded_type.'_earliest_expected_date[]" value="" readonly /></td>
                     <td style="'.$margindiff_style.'"></td>
                     <td style="'.$margindiff_style.'"></td>
-                    <td></td>
+                    <td><input type="text" class="'.$ded_type.'_remarks_'.$sr_no.'" id="'.$ded_type.'_remarks_'.$i.'" name="'.$ded_type.'_remarks[]" value="" maxlength="500" /></td>
                 </tr>';
 
         // $sr_no_val = "";

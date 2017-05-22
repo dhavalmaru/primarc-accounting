@@ -32,7 +32,7 @@ select {
 </style>
 <div class="grn-index">
 	<div class=" col-md-12">  
-		<form id="account_master" class="form-horizontal" action="<?php echo Url::base(); ?>index.php?r=accountmaster%2Fsave" method="post" enctype="multipart/form-data"> 
+		<form id="account_master" class="form-horizontal" action="<?php echo Url::base(); ?>index.php?r=accountmaster%2Fsave" method="post" enctype="multipart/form-data" onkeypress="return event.keyCode != 13;"> 
 			<input type="hidden" name="_csrf" value="<?=Yii::$app->request->getCsrfToken()?>" />
 			<div class="form-group">
 				<div class="col-md-3 col-sm-3 col-xs-6">
@@ -336,6 +336,7 @@ select {
 					<table class="table table-bordered" id="business_category">
                 		<thead>
                 			<tr>
+	                			<th width="55px;" style="text-align: center;">Action</th>
 	                			<th width="55px;" style="text-align: center;">Sr. No.</th>
 	                			<th width="250px;">Category</th>
                 			</tr>
@@ -344,6 +345,7 @@ select {
                 			<?php $blFlag = false; if(isset($acc_category)) { if(count($acc_category)>0) { $blFlag = true;
                 					for($i=0; $i<count($acc_category); $i++) { ?>
 		                				<tr id="cat_row_<?php echo $i; ?>">
+		                					<td style="text-align: center;"><button type="button" class="btn btn-sm btn-success" id="delete_row_<?php echo $i; ?>" onClick="delete_row(this);">-</button></td>
 				                			<td style="text-align: center;"><?php echo $i+1; ?></td>
 				                			<td>
 				                				<select id="cat_id_<?php echo $i; ?>" name="bus_category[]" onChange="set_bus_category(this);" class="form-control">
@@ -357,6 +359,7 @@ select {
 			                			</tr>
                 			<?php }}} if($blFlag == false) { ?>
                 						<tr id="cat_row_0">
+				                			<td style="text-align: center;"><button type="button" class="btn btn-sm btn-success" id="delete_row_0" onClick="delete_row(this);">-</button></td>
 				                			<td style="text-align: center;">1</td>
 				                			<td>
 				                				<select id="cat_id_0" name="bus_category[]" class="form-control" onChange="set_bus_category(this);">
@@ -373,7 +376,7 @@ select {
                 		<tfoot>
                 			<tr>
                 				<td style="text-align: center;"><button type="button" class="btn btn-success btn-sm" id="repeat_business_category">+</button></td>
-                				<td> </td>
+                				<td colspan="2"> </td>
                 			</tr>
                 		</tfoot>
                 	</table>
@@ -419,9 +422,7 @@ select {
 	                		<tfoot>
 	                			<tr>
 	                				<td style="text-align: center;"><button type="button" class="btn btn-sm btn-success" id="repeat_category">+</button></td>
-	                				<td></td>
-	                				<td></td>
-	                				<td></td>
+	                				<td colspan="3"></td>
 	                			</tr>
 	                		</tfoot>
 	                	</table>

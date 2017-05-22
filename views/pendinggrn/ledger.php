@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Grn */
@@ -64,10 +65,22 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
 	.table-container table{ width:1200px;   } 
 	.navbar-collapse.in { overflow:hidden!important;}
 	}
+
+@media print{#btn_close, #btn_print{ display : none }}
 </style>
 
 <div class="grn-view">  
     <div class=" col-md-12"> 
+        <a class="btn btn-sm btn-danger pull-left" id="btn_close" href="<?php echo Url::base(); ?>index.php?r=pendinggrn%2Findex">Close</a>
+        <button type="button" class="btn btn-sm btn-info pull-right" id="btn_print" onclick="javascript:window.print();">Print</button>
+        <h3 class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Primarc Pecan Retail Pvt. Ltd.</h3>
+        <h5 class="text-center">Mumbai</h5>
+        <h5 class="text-center">GRN Posting Voucher</h5>
+        <div>Vendor Name: <?php echo $grn_details[0]['vendor_name']; ?></div>
+        <div class="pull-left">Grn Id: <?php echo $grn_details[0]['grn_id']; ?></div>
+        <div class="pull-right">Posting Date: <?php if(isset($grn_acc_ledger_entries[0]["ref_date"])) echo (($grn_acc_ledger_entries[0]["ref_date"]!=null && $grn_acc_ledger_entries[0]["ref_date"]!='')?date('d/m/Y',strtotime($grn_acc_ledger_entries[0]["ref_date"])):date('d/m/Y')); else echo date('d/m/Y'); ?></div>
+        
+
     <?php //echo count($grn_acc_ledger_entries); ?> 
     <?php $rows = ""; $new_invoice_no = ""; $invoice_no = ""; $debit_amt=0; $credit_amt=0; $sr_no=1;
         $total_debit_amt=0; $total_credit_amt=0; 
@@ -137,23 +150,33 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                             <td colspan="6" style="text-align:left;">Purchase Entry</td>
                         </tr>' . $rows;
 
-                $table = '<div class="diversion"><h4 class=" ">Invoice No: ' . $grn_acc_ledger_entries[$i]["invoice_no"] . '</h4>
-                        <table class="table table-bordered">
-                            <tr class="table-head">
-                                <th>Sr. No.</th>
-                                <th>Voucher No</th>
-                                <th>Ledger Name</th>
-                                <th>Ledger Code</th>
-                                <th>Debit</th>
-                                <th>Credit</th>
-                            </tr>
-                            ' . $rows . '
-                            <tr class="bold-text text-right">
-                                <td colspan="4" style="text-align:right;">Total Amount</td>
-                                <td>' . $mycomponent->format_money($debit_amt,2) . '</td>
-                                <td>' . $mycomponent->format_money($credit_amt,2) . '</td>
-                            </tr>
-                        </table></div>';
+                $invoice_date = '';
+                if(isset($grn_acc_ledger_entries[0]["invoice_date"])) {
+                    if(($grn_acc_ledger_entries[0]["invoice_date"]!=null && $grn_acc_ledger_entries[0]["invoice_date"]!='')){
+                        $invoice_date = date('d/m/Y',strtotime($grn_acc_ledger_entries[0]["invoice_date"]));
+                    }
+                }
+                
+                $table = '<div class="diversion">
+                            <div class="pull-left">Invoice No: ' . $grn_acc_ledger_entries[$i]["invoice_no"] . '</div>
+                            <div class="pull-right">Invoice Date: ' . $invoice_date . '</div>
+                            <table class="table table-bordered">
+                                <tr class="table-head">
+                                    <th>Sr. No.</th>
+                                    <th>Voucher No</th>
+                                    <th>Ledger Name</th>
+                                    <th>Ledger Code</th>
+                                    <th>Debit</th>
+                                    <th>Credit</th>
+                                </tr>
+                                ' . $rows . '
+                                <tr class="bold-text text-right">
+                                    <td colspan="4" style="text-align:right;">Total Amount</td>
+                                    <td>' . $mycomponent->format_money($debit_amt,2) . '</td>
+                                    <td>' . $mycomponent->format_money($credit_amt,2) . '</td>
+                                </tr>
+                            </table>
+                        </div>';
 
                 echo $table;
                 $table_arr[$table_cnt] = $table;

@@ -9,14 +9,39 @@ use mPDF;
 
 class PendingGrn extends Model
 {
+    public function getAccountDetails($id="", $status=""){
+        $cond = "";
+        $cond2 = "";
+        if($id!=""){
+            $cond = " and id = '$id'";
+            $cond2 = " and acc_id = '$id'";
+        }
+
+        if($status!=""){
+            $cond = $cond . " and status = '$status'";
+        }
+
+        $sql = "select A.*, concat_ws(',', A.category_1, A.category_2, A.category_3) as acc_category, B.bus_category from 
+                (select * from acc_master where is_active = '1'" . $cond . ") A 
+                left join 
+                (select acc_id, GROUP_CONCAT(category_name) as bus_category from acc_categories where is_active = '1'" . $cond2 . " 
+                    group by acc_id) B 
+                on (A.id = B.acc_id) order by legal_name";
+
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
     public function getNewGrnDetails(){
         $sql = "select * from 
                 (select A.*, B.grn_id as b_grn_id from 
-                (select * from grn where is_active = '1' and status = 'approved' and date(gi_date) > date('2017-01-15')) A 
+                (select A.*, B.username from grn A left join user B on(A.updated_by = B.id) 
+                    where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-01-15')) A 
                 left join 
                 (select distinct grn_id from grn_acc_entries) B 
                 on (A.grn_id = B.grn_id)) C 
-                where b_grn_id is null";
+                where b_grn_id is null order by UNIX_TIMESTAMP(updated_date) desc";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -25,10 +50,11 @@ class PendingGrn extends Model
     public function getAllGrnDetails(){
         $sql = "select * from 
                 (select A.*, B.status as grn_status from 
-                (select * from grn where is_active = '1' and status = 'approved' and date(gi_date) > date('2017-01-15')) A 
+                (select A.*, B.username from grn A left join user B on(A.updated_by = B.id) 
+                    where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-01-15')) A 
                 left join 
                 (select distinct grn_id, status from grn_acc_entries) B 
-                on (A.grn_id = B.grn_id)) C";
+                on (A.grn_id = B.grn_id)) C order by UNIX_TIMESTAMP(updated_date) desc";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -47,22 +73,29 @@ class PendingGrn extends Model
         if($status!=""){
             $cond = " and status = '$status'";
         }
-        $sql = "select B.*, C.grn_no, C.vendor_name, C.category_name, C.po_no from 
+        $sql = "select D.*, E.username from 
+                (select B.*, C.grn_no, C.vendor_name, C.category_name, C.po_no from 
                 (select grn_id, inv_nos, (taxable_amt+tax_amt+other_amt) as net_amt, 
-                    (shortage_amt+expiry_amt+damaged_amt+magrin_diff_amt) as ded_amt, updated_by, approved_by from 
-                (select grn_id, GROUP_CONCAT(distinct invoice_no) as inv_nos, 
-                        sum(case when particular='Taxable Amount' then edited_val else 0 end) as taxable_amt, 
-                        sum(case when particular='Tax' then edited_val else 0 end) as tax_amt, 
-                        sum(case when particular='Other Charges' then edited_val else 0 end) as other_amt, 
-                        sum(case when particular='Shortage Amount' then edited_val else 0 end) as shortage_amt, 
-                        sum(case when particular='Expiry Amount' then edited_val else 0 end) as expiry_amt, 
-                        sum(case when particular='Damaged Amount' then edited_val else 0 end) as damaged_amt, 
-                        sum(case when particular='Margin Diff Amount' then edited_val else 0 end) as magrin_diff_amt, 
-                        max(updated_by) as updated_by, max(approved_by) as approved_by 
-                from grn_acc_entries where is_active = '1' ".$cond." group by grn_id) A) B 
+                    (shortage_amt+expiry_amt+damaged_amt+magrin_diff_amt) as ded_amt, 
+                    updated_date, updated_by, approved_by from 
+                (select A.grn_id, GROUP_CONCAT(distinct A.invoice_no) as inv_nos, 
+                        sum(case when A.particular='Taxable Amount' then A.edited_val else 0 end) as taxable_amt, 
+                        sum(case when A.particular='Tax' then A.edited_val else 0 end) as tax_amt, 
+                        sum(case when A.particular='Other Charges' then A.edited_val else 0 end) as other_amt, 
+                        sum(case when A.particular='Shortage Amount' then A.edited_val else 0 end) as shortage_amt, 
+                        sum(case when A.particular='Expiry Amount' then A.edited_val else 0 end) as expiry_amt, 
+                        sum(case when A.particular='Damaged Amount' then A.edited_val else 0 end) as damaged_amt, 
+                        sum(case when A.particular='Margin Diff Amount' then A.edited_val else 0 end) as magrin_diff_amt, 
+                        max(A.updated_date) as updated_date, max(A.updated_by) as updated_by, max(A.approved_by) as approved_by 
+                from grn_acc_entries A 
+                where A.is_active = '1' ".$cond." group by grn_id) A) B 
                 left join 
                 (select * from grn where status = 'approved') C 
-                on (B.grn_id = C.grn_id)";
+                on (B.grn_id = C.grn_id)) D 
+                left join 
+                (select * from user) E 
+                on (D.updated_by = E.id) 
+                order by UNIX_TIMESTAMP(D.updated_date) desc";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -269,7 +302,7 @@ class PendingGrn extends Model
         $sql = "select A.grn_id, B.*, D.tax_zone_code, D.tax_zone_name, E.invoice_date, A.gi_date, 
                     date_add(A.gi_date, interval ifnull(min_no_of_months_shelf_life_required,0) month) as earliest_expected_date, 
                     null as cost_acc_id, null as cost_ledger_name, null as cost_ledger_code, 
-                    null as tax_acc_id, null as tax_ledger_name, null as tax_ledger_code from grn A 
+                    null as tax_acc_id, null as tax_ledger_name, null as tax_ledger_code, null as remarks from grn A 
                 left join grn_entries B on (A.grn_id = B.grn_id) 
                 left join internal_warehouse_master C on (A.warehouse_id = C.warehouse_code and A.company_id = C.company_id) 
                 left join tax_zone_master D on (C.tax_zone_id = D.id) 
@@ -324,10 +357,17 @@ class PendingGrn extends Model
                 left join tax_zone_master CC on (BB.tax_zone_id = CC.id) 
                 where AA.grn_id = '$id' and AA.is_active = '1' and BB.is_active = '1' and CC.is_active = '1' limit 1) A 
                 left join 
-                (select * from ledger_entries where ref_id = '$id' and ref_type = 'purchase' and status = 'pending' and is_active = '1' 
-                order by ref_id, invoice_no, id) B 
+                (select A.*, C.invoice_date, D.due_date from ledger_entries A 
+                    left join grn B on(A.ref_id = B.grn_id and A.ref_type = 'purchase') 
+                    left join goods_inward_outward_invoices C on(A.invoice_no = C.invoice_no and 
+                     A.ref_type = 'purchase' and B.gi_id = C.gi_go_ref_no) 
+                    left join invoice_tracker D on(A.ref_id=D.gi_id and A.invoice_no=D.invoice_id) 
+                where A.ref_id = '$id' and A.status = 'pending' and A.is_active = '1' and A.ref_type = 'purchase' and 
+                        B.status = 'Approved' and B.is_active = '1' 
+                order by A.ref_id, A.invoice_no, A.id) B 
                 on (A.grn_id = B.ref_id) 
                 order by B.ref_id, B.invoice_no, B.id";
+
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -343,6 +383,12 @@ class PendingGrn extends Model
         $vendor_code = $request->post('vendor_code');
         $vendor_name = $request->post('vendor_name');
         $invoice_no = $request->post('invoice_no');
+        $gi_date = $request->post('gi_date');
+        if($gi_date==''){
+            $gi_date=NULL;
+        } else {
+            $gi_date=$mycomponent->formatdate($gi_date);
+        }
 
         // $taxable_amount = $request->post('taxable_amount');
         // $invoice_taxable_amount = $request->post('invoice_taxable_amount');
@@ -670,7 +716,8 @@ class PendingGrn extends Model
                 'status'=>'pending',
                 'is_active'=>'1',
                 'updated_by'=>$session['session_id'],
-                'updated_date'=>date('Y-m-d h:i:s')
+                'updated_date'=>date('Y-m-d h:i:s'),
+                'gi_date'=>$gi_date
             ];
 
             $j = $j + 1;
@@ -974,7 +1021,8 @@ class PendingGrn extends Model
                                     'status'=>'pending',
                                     'is_active'=>'1',
                                     'updated_by'=>$session['session_id'],
-                                    'updated_date'=>date('Y-m-d h:i:s')
+                                    'updated_date'=>date('Y-m-d h:i:s'),
+                                    'ref_date'=>$gi_date
                                 ];
 
                         $k = $k + 1;
@@ -1000,6 +1048,9 @@ class PendingGrn extends Model
     public function getSkuEntries($gi_id, $request, $invoice_no_val, $ded_type, $voucher_id, $narration){
         // echo $ded_type;
         // echo '<br/>';
+
+        $mycomponent = Yii::$app->mycomponent;
+        
         $vendor_id = $request->post('vendor_id');
         $cost_acc_id = $request->post($ded_type.'_cost_acc_id');
         $cost_ledger_name = $request->post($ded_type.'_cost_ledger_name');
@@ -1028,6 +1079,13 @@ class PendingGrn extends Model
         $total = $request->post($ded_type.'_total');
         $expiry_date = $request->post($ded_type.'_expiry_date');
         $earliest_expected_date = $request->post($ded_type.'_earliest_expected_date');
+        $remarks = $request->post($ded_type.'_remarks');
+        $gi_date = $request->post('gi_date');
+        if($gi_date==''){
+            $gi_date=NULL;
+        } else {
+            $gi_date=$mycomponent->formatdate($gi_date);
+        }
 
         $total_deduction_invoice_no = $request->post('invoice_no');
         $total_deduction_voucher_id = $request->post('total_deduction_voucher_id');
@@ -1094,7 +1152,8 @@ class PendingGrn extends Model
                             'expiry_date'=>$expiry_date[$i],
                             'earliest_expected_date'=>$earliest_expected_date[$i],
                             'status'=>'pending',
-                            'is_active'=>'1'
+                            'is_active'=>'1',
+                            'remarks'=>$remarks[$i]
                         ];
 
                 
@@ -1117,7 +1176,8 @@ class PendingGrn extends Model
                                     'status'=>'pending',
                                     'is_active'=>'1',
                                     'updated_by'=>$session['session_id'],
-                                    'updated_date'=>date('Y-m-d h:i:s')
+                                    'updated_date'=>date('Y-m-d h:i:s'),
+                                    'ref_date'=>$gi_date
                                 ];
                     // $ledgerArray[$k]=[
                     //             'grn_id'=>$gi_id,
@@ -1157,7 +1217,8 @@ class PendingGrn extends Model
                                     'status'=>'pending',
                                     'is_active'=>'1',
                                     'updated_by'=>$session['session_id'],
-                                    'updated_date'=>date('Y-m-d h:i:s')
+                                    'updated_date'=>date('Y-m-d h:i:s'),
+                                    'ref_date'=>$gi_date
                                 ];
                     // $ledgerArray[$k]=[
                     //             'grn_id'=>$gi_id,
@@ -1233,7 +1294,7 @@ class PendingGrn extends Model
     }
 
     public function getDebitNoteDetails($invoice_id){
-        $sql = "select A.invoice_no, A.invoice_date, B.grn_id, B.vendor_id, C.edited_val as total_deduction 
+        $sql = "select A.invoice_no, A.invoice_date, B.grn_id, B.vendor_id, C.edited_val as total_deduction, C.gi_date 
                 from goods_inward_outward_invoices A 
                 left join grn B on (A.gi_go_ref_no = B.gi_id) left join grn_acc_entries C 
                 on (B.grn_id = C.grn_id and A.invoice_no = C.invoice_no) 
@@ -1279,91 +1340,96 @@ class PendingGrn extends Model
             $reader = $command->query();
             $vendor_details = $reader->readAll();
 
+            $sql = "select sum(A.qty) as total_qty, sum(A.total) as total_deduction, 
+                    group_concat(distinct(CONCAT(UCASE(SUBSTRING(A.ded_type, 1, 1)),LOWER(SUBSTRING(A.ded_type, 2))))) as ded_type from 
+                    (select qty, total, case when ded_type='margindiff' then 'margin difference' else ded_type end as ded_type from 
+                        grn_acc_sku_entries where status = 'pending' and is_active = '1' and 
+                        grn_id = '$grn_id' and invoice_no = '$invoice_no' order by ded_type) A order by A.ded_type";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $deductions = $reader->readAll();
+            if(count($deductions)>0){
+                $total_qty = $deductions[0]['total_qty'];
+                $total_deduction = $deductions[0]['total_deduction'];
+                $ded_type = $deductions[0]['ded_type'];
+            }
+
+            $session = Yii::$app->session;
+
+            $array=[
+                'grn_id'=>$grn_id,
+                'vendor_id'=>$vendor_id,
+                'invoice_id'=>$invoice_id,
+                'invoice_no'=>$invoice_no,
+                'invoice_date'=>$invoice_date,
+                'ded_type'=>$ded_type,
+                'total_qty'=>$total_qty,
+                'total_deduction'=>$total_deduction,
+                'status'=>'pending',
+                'is_active'=>'1',
+                'updated_by'=>$session['session_id'],
+                'updated_date'=>date('Y-m-d h:i:s')
+            ];
+
+            $tableName = "grn_debit_notes";
+
             $sql = "select * from grn_debit_notes where status = 'pending' and is_active = '1' and 
                     grn_id = '$grn_id' and invoice_no = '$invoice_no'";
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $debit_note = $reader->readAll();
             if(count($debit_note)==0){
-                $sql = "select sum(qty) as total_qty, sum(total) as total_deduction, 
-                        group_concat(distinct(CONCAT(UCASE(SUBSTRING(ded_type, 1, 1)),LOWER(SUBSTRING(ded_type, 2))))) as ded_type 
-                        from grn_acc_sku_entries 
-                        where status = 'pending' and is_active = '1' and 
-                        grn_id = '$grn_id' and invoice_no = '$invoice_no'";
-                $command = Yii::$app->db->createCommand($sql);
-                $reader = $command->query();
-                $deductions = $reader->readAll();
-                if(count($deductions)>0){
-                    $total_qty = $deductions[0]['total_qty'];
-                    $total_deduction = $deductions[0]['total_deduction'];
-                    $ded_type = $deductions[0]['ded_type'];
-                }
-
-                $session = Yii::$app->session;
-
-                $array=[
-                    'grn_id'=>$grn_id,
-                    'vendor_id'=>$vendor_id,
-                    'invoice_id'=>$invoice_id,
-                    'invoice_no'=>$invoice_no,
-                    'invoice_date'=>$invoice_date,
-                    'ded_type'=>$ded_type,
-                    'total_qty'=>$total_qty,
-                    'total_deduction'=>$total_deduction,
-                    'status'=>'pending',
-                    'is_active'=>'1',
-                    'updated_by'=>$session['session_id'],
-                    'updated_date'=>date('Y-m-d h:i:s')
-                ];
-
-                $tableName = "grn_debit_notes";
                 $count = Yii::$app->db->createCommand()
                             ->insert($tableName, $array)
                             ->execute();
                 $ref_id = Yii::$app->db->getLastInsertID();
-
-                $sql = "select * from grn_debit_notes where status = 'pending' and is_active = '1' and 
-                        grn_id = '$grn_id' and invoice_no = '$invoice_no'";
-                $command = Yii::$app->db->createCommand($sql);
-                $reader = $command->query();
-                $debit_note = $reader->readAll();
-                
-                $mpdf=new mPDF();
-                $mpdf->WriteHTML(Yii::$app->controller->renderPartial('debit_note', [
-                    'invoice_details' => $invoice_details, 'debit_note' => $debit_note, 
-                    'deduction_details' => $deduction_details, 'vendor_details' => $vendor_details
-                ]));
-
-                $upload_path = './uploads';
-                if(!is_dir($upload_path)) {
-                    mkdir($upload_path, 0777, TRUE);
-                }
-                $upload_path = './uploads/debit_notes';
-                if(!is_dir($upload_path)) {
-                    mkdir($upload_path, 0777, TRUE);
-                }
-                $upload_path = './uploads/debit_notes/'.$grn_id;
-                if(!is_dir($upload_path)) {
-                    mkdir($upload_path, 0777, TRUE);
-                }
-
-                $file_name = $upload_path . '/debit_note_invoice_' . $invoice_id . '.pdf';
-                $file_path = 'uploads/debit_notes/' . $grn_id . '/debit_note_invoice_' . $invoice_id . '.pdf';
-
-                // $mpdf->Output('MyPDF.pdf', 'D');
-                $mpdf->Output($file_name, 'F');
-                // exit;
-
-                $sql = "update grn_debit_notes set debit_note_path = '$file_path' where id = '$ref_id'";
-                $command = Yii::$app->db->createCommand($sql);
-                $count = $command->execute();
-
-                $sql = "select * from grn_debit_notes where status = 'pending' and is_active = '1' and 
-                        grn_id = '$grn_id' and invoice_no = '$invoice_no'";
-                $command = Yii::$app->db->createCommand($sql);
-                $reader = $command->query();
-                $debit_note = $reader->readAll();
+            } else {
+                $ref_id = $debit_note[0]['id'];
+                $count = Yii::$app->db->createCommand()
+                            ->update($tableName, $array, "id = '".$ref_id."'")
+                            ->execute();
             }
+
+            $sql = "select * from grn_debit_notes where id = '$ref_id'";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $debit_note = $reader->readAll();
+            
+            $mpdf=new mPDF();
+            $mpdf->WriteHTML(Yii::$app->controller->renderPartial('debit_note', [
+                'invoice_details' => $invoice_details, 'debit_note' => $debit_note, 
+                'deduction_details' => $deduction_details, 'vendor_details' => $vendor_details
+            ]));
+
+            $upload_path = './uploads';
+            if(!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, TRUE);
+            }
+            $upload_path = './uploads/debit_notes';
+            if(!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, TRUE);
+            }
+            $upload_path = './uploads/debit_notes/'.$grn_id;
+            if(!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, TRUE);
+            }
+
+            $file_name = $upload_path . '/debit_note_invoice_' . $invoice_id . '.pdf';
+            $file_path = 'uploads/debit_notes/' . $grn_id . '/debit_note_invoice_' . $invoice_id . '.pdf';
+
+            // $mpdf->Output('MyPDF.pdf', 'D');
+            $mpdf->Output($file_name, 'F');
+            // exit;
+
+            $sql = "update grn_debit_notes set debit_note_path = '$file_path' where id = '$ref_id'";
+            $command = Yii::$app->db->createCommand($sql);
+            $count = $command->execute();
+
+            $sql = "select * from grn_debit_notes where status = 'pending' and is_active = '1' and 
+                    grn_id = '$grn_id' and invoice_no = '$invoice_no'";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $debit_note = $reader->readAll();
 
             
         } else {

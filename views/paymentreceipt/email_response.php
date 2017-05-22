@@ -35,7 +35,7 @@ select {
 </style>
 <div class="grn-index">
 	<div class=" col-md-12">  
-		<form id="account_master" class="form-horizontal" action="" method="post" enctype="multipart/form-data"> 
+		<form id="account_master" class="form-horizontal" action="" method="post" enctype="multipart/form-data" onkeypress="return event.keyCode != 13;"> 
 			<div class="form-group">
 				<div class="col-md-12 col-sm-12 col-xs-12">
 					<h4><?php echo $data['response']; ?></h4>

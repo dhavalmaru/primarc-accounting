@@ -11,7 +11,7 @@ use yii\helpers\Url;
 $mycomponent = Yii::$app->mycomponent;
 ?>
 <style>
-
+#form_purchase_details .error {color: #dd4b39!important;}
 .table-head { font-weight:100;  
     background: #41ace9; 
     color: #fff;
@@ -21,28 +21,33 @@ $mycomponent = Yii::$app->mycomponent;
 
    .border-ok { border:1px solid #ddd!important; padding: 0 5px;}
 /*--------------------------*/
+#shortage_sku_details { width: 1650px; }
 #shortage_sku_details tr td input { border: none; outline: none; }
 #shortage_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
 #shortage_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-
+#shortage_sku_details tr td:nth-child(15) input, #shortage_sku_details tr td:nth-child(27) input { border: 1px solid #ddd!important; outline: none; }
+#shortage_sku_details tr td:nth-child(27) { width: 400px; }
 /*-----------------------*/
-
+#expiry_sku_details { width: 1650px; }
 #expiry_sku_details tr td input { border: none; outline: none; }
 #expiry_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
 #expiry_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-
+#expiry_sku_details tr td:nth-child(15) input, #expiry_sku_details tr td:nth-child(27) input { border: 1px solid #ddd!important; outline: none; }
+#expiry_sku_details tr td:nth-child(27) { width: 400px; }
 /*----------------------*/
-
+#damaged_sku_details { width: 1650px; }
 #damaged_sku_details tr td input { border: none; outline: none; }
 #damaged_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
 #damaged_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-
+#damaged_sku_details tr td:nth-child(15) input, #damaged_sku_details tr td:nth-child(27) input { border: 1px solid #ddd!important; outline: none; }
+#damaged_sku_details tr td:nth-child(27) { width: 400px; }
 /*----------------------*/
-
+#margindiff_sku_details { width: 1650px; }
 #margindiff_sku_details tr td input { border: none; outline: none; }
 #margindiff_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
 #margindiff_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-
+#margindiff_sku_details tr td:nth-child(15) input, #margindiff_sku_details tr td:nth-child(27) input { border: 1px solid #ddd!important; outline: none; }
+#margindiff_sku_details tr td:nth-child(27) { width: 400px; }
 /*----------------------*/
 #ledger_details .modal-body .table   {  }
 
@@ -58,7 +63,7 @@ label { font-weight:normal;     font-size: 12px; }
 .modal-body { padding:10px; }
 input { outline:none; background:none; width:100%; }
 .edit-text { border:1px solid #ddd; padding:1px 5px;}
-table tr td:last-child {   padding:4px 5px; min-width:150px; }
+#update_grn tr td:last-child {   padding:4px 5px; min-width:150px; }
 table tr td:first-child  {   text-align:center;     }
 table tr th:nth-child(1) { padding:4px 3px!important; width:55px;    }
 table tr td:nth-child(2) {    }
@@ -100,9 +105,9 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
     border-bottom: 1px solid #ddd!important;
      border-right: 1px solid #ddd!important;
 }
-#update_grn thead tr th{ height:0; padding:0;   line-height:30px!important;  border:none!important;   }
+#update_grn thead tr th{ height:0; padding:0;   /*line-height:30px!important;*/  border:none!important;   }
  #update_grn   tr th {
- height:auto!important; padding:0px 10px!important; line-height:30px; border:none!important;  
+ height:auto!important; padding:0px 10px!important; /*line-height:30px;*/ border:none!important;  
 }
  #update_grn  tr td {
  height:auto!important; padding:3px 10px!important;
@@ -136,10 +141,11 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
 .diversion {margin-left: 10px;}
 .diversion table{max-width: 1300px;}
 .table-container {overflow: auto;}
+table {width: 1200px;}
 </style>
 <div class="grn-form">
   <div class=" col-md-12">  
-        <form id="form_purchase_details" action="<?php echo Url::base(); ?>index.php?r=pendinggrn%2Fsave" method="post">
+        <form id="form_purchase_details" action="<?php echo Url::base(); ?>index.php?r=pendinggrn%2Fsave" method="post" onkeypress="return event.keyCode != 13;">
         <!-- <form id="form_purchase_details" action="<?php //echo Url::base(); ?>index.php?r=pendinggrn%2Fgetgrnparticulars" method="post"> -->
     
         <input type="hidden" name="_csrf" value="<?=Yii::$app->request->getCsrfToken()?>" />
@@ -147,9 +153,10 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
         <div class="row    row-container">
             <div class="form-group">
     			<div class="col-md-2 col-sm-2 col-xs-6">
-                    <label class=" control-label">Scan Date </label> 
+                    <label class=" control-label">Posting Date </label> 
                     <div class=" "> 
-    					 <input type="text" class="form-control" name="gi_date" id="gi_date"   value="<?= $grn_details[0]['gi_date'] ?>" readonly />
+    					<input style="background-color: #fff;" type="text" class="form-control datepicker" name="gi_date" id="gi_date" value="<?php if(isset($grn_details)) echo (($grn_details[0]['gi_date']!=null && $grn_details[0]['gi_date']!='')?date('d/m/Y',strtotime($grn_details[0]['gi_date'])):date('d/m/Y')); else echo date('d/m/Y'); ?>" readonly />
+                        <input type="hidden" class="form-control" name="no_of_invoices" id="no_of_invoices" value="<?= count($invoice_details) ?>" />
                     </div>
     			</div>
     			<div class="col-md-2 col-sm-2 col-xs-6">
@@ -195,21 +202,21 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
             </div>
         </div>
     	
-    	<div class="table-container">
-            <table  id="update_grn" class="table table-bordered">
+    	<div id="update_grn_div" class="table-container sticky-table sticky-headers sticky-ltr-cells">
+            <table id="update_grn" class="table table-bordered">
                 <tr class="table-head">
-                    <th>Sr. No.</th>
-                    <th>Particulars</th>
-                    <th>Ledger Name</th>
-                    <th>Ledger Code</th>
-                    <th>Tax Percent</th>
-                    <th>Value</th>
+                    <th class="sticky-cell" style="border: none!important;">Sr. No.</th>
+                    <th class="sticky-cell" style="border: none!important;">Particulars</th>
+                    <th class="sticky-cell" style="width: 250px; border: none!important;">Ledger Name</th>
+                    <th class="sticky-cell" style="width: 200px; border: none!important;">Ledger Code</th>
+                    <th class="sticky-cell" style="width: 25px; border: none!important;">Tax <br/> Percent</th>
+                    <th class="sticky-cell" style="border: none!important;">Value</th>
                     <?php for($i=0; $i<count($invoice_details); $i++) { ?>
                         <th class="text-center">
                             <input type="hidden" id="invoice_no_<?php echo $i;?>" name="invoice_no[]" value="<?php echo $invoice_details[$i]['invoice_no']; ?>" />
-                            Invoice <span class="actual_value"> (<?php echo $invoice_details[$i]['invoice_no']; ?>) </span>    </th>
-                        <th>Edited <span class="actual_value"> (<?php echo $invoice_details[$i]['invoice_no']; ?>) </span>  </span></th>
-                        <th>Difference  <span class="actual_value"> (<?php echo $invoice_details[$i]['invoice_no']; ?>) </span>  </span></th>
+                            <span>Invoice</span> <br/> <span class="actual_value"> (<?php echo $invoice_details[$i]['invoice_no']; ?>) </span>    </th>
+                        <th style="width: 150px;"><span>Edited</span> <br/> <span class="actual_value"> (<?php echo $invoice_details[$i]['invoice_no']; ?>) </span>  </span></th>
+                        <th><span>Difference</span> <br/> <span class="actual_value"> (<?php echo $invoice_details[$i]['invoice_no']; ?>) </span>  </span></th>
                     <?php } ?>
                     <th>Narration</th>
                 </tr>
@@ -296,26 +303,28 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                     ?>
 
                 <tr>
-                    <td><?php echo '1.'.($j+1); ?></td>
-                    <td>Taxable Amount</td>
-                    <td>
+                    <td class="sticky-cell" style="border: none!important;"><?php echo '1.'.($j+1); ?></td>
+                    <td class="sticky-cell" style="border: none!important;">Taxable Amount</td>
+                    <td class="sticky-cell" style="border: none!important;">
                         <select id="invoicecost_acc_id_<?php echo $j;?>" class="form-control acc_id" name="invoice_cost_acc_id[]" onChange="get_acc_details(this)">
                             <option value="">Select</option>
-                            <?php for($i=0; $i<count($acc_master); $i++) { ?>
+                            <?php for($i=0; $i<count($acc_master); $i++) { 
+                                    if($acc_master[$i]['type']=="Goods Purchase") { 
+                            ?>
                             <option value="<?php echo $acc_master[$i]['id']; ?>" <?php if($total_tax[$j]['invoice_cost_acc_id']==$acc_master[$i]['id']) echo 'selected'; ?>><?php echo $acc_master[$i]['legal_name']; ?></option>
-                            <?php } ?>
+                            <?php }} ?>
                         </select>
                         <input type="hidden" id="invoicecost_ledger_name_<?php echo $j;?>" name="invoice_cost_ledger_name[]" value="<?php echo $total_tax[$j]['invoice_cost_ledger_name']; ?>" />
                     </td>
-                    <td><input type="text" id="invoicecost_ledger_code_<?php echo $j;?>" name="invoice_cost_ledger_code[]" value="<?php echo $total_tax[$j]['invoice_cost_ledger_code']; ?>" readonly /></td>
-                    <td>
+                    <td class="sticky-cell" style="border: none!important;"><input type="text" id="invoicecost_ledger_code_<?php echo $j;?>" name="invoice_cost_ledger_code[]" value="<?php echo $total_tax[$j]['invoice_cost_ledger_code']; ?>" style="border: none;" readonly /></td>
+                    <td class="sticky-cell" style="border: none!important;">
                         <input type="hidden" id="vat_cst_<?php echo $j;?>" name="vat_cst[]" value="<?php echo $total_tax[$j]['vat_cst']; ?>" />
                         <input type="hidden" id="vat_percen_<?php echo $j;?>" name="vat_percen[]" value="<?php echo $total_tax[$j]['vat_percen']; ?>" />
                         <input type="hidden" id="sub_particular_cost_<?php echo $j;?>" name="sub_particular_cost[]" value="<?php echo 'Purchase_'.$total_tax[$j]['tax_zone_code'].'_'.$total_tax[$j]['vat_cst'].'_'.$total_tax[$j]['vat_percen']; ?>" />
                         <?php //echo 'Purchase_'.$total_tax[$j]['tax_zone_code'].'_'.$total_tax[$j]['vat_cst'].'_'.$total_tax[$j]['vat_percen']; ?>
                         <?php echo $mycomponent->format_money($total_tax[$j]['vat_percen'],2); ?>
                     </td>
-                    <td class="text-right">
+                    <td class="sticky-cell text-right" style="border: none!important;">
                         <input type="text" class="text-right" id="total_cost_<?php echo $j;?>" name="total_cost_<?php echo $j;?>" value="<?php echo $mycomponent->format_money($total_tax[$j]['total_cost'], 2); ?>" readonly />
                     </td>
                     <?php echo $total_tax[$j]['invoice_cost_td']; ?>
@@ -324,26 +333,28 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                     </td>
                 </tr>
                 <tr>
-                    <td><?php echo '2.'.($j+1); ?></td>
-                    <td>Tax</td>
-                    <td>
+                    <td class="sticky-cell" style="border: none!important;"><?php echo '2.'.($j+1); ?></td>
+                    <td class="sticky-cell" style="border: none!important;">Tax</td>
+                    <td class="sticky-cell" style="border: none!important;">
                         <select id="invoicetax_acc_id_<?php echo $j;?>" class="form-control acc_id" name="invoice_tax_acc_id[]" onChange="get_acc_details(this)">
                             <option value="">Select</option>
-                            <?php for($i=0; $i<count($acc_master); $i++) { ?>
+                            <?php for($i=0; $i<count($acc_master); $i++) { 
+                                    if($acc_master[$i]['type']=="Tax") { 
+                            ?>
                             <option value="<?php echo $acc_master[$i]['id']; ?>" <?php if($total_tax[$j]['invoice_tax_acc_id']==$acc_master[$i]['id']) echo 'selected'; ?>><?php echo $acc_master[$i]['legal_name']; ?></option>
-                            <?php } ?>
+                            <?php }} ?>
                         </select>
                         <input type="hidden" id="invoicetax_ledger_name_<?php echo $j;?>" name="invoice_tax_ledger_name[]" value="<?php echo $total_tax[$j]['invoice_tax_ledger_name']; ?>" />
                     </td>
-                    <td><input type="text" id="invoicetax_ledger_code_<?php echo $j;?>" name="invoice_tax_ledger_code[]" value="<?php echo $total_tax[$j]['invoice_tax_ledger_code']; ?>" readonly /></td>
-                    <td>
+                    <td class="sticky-cell" style="border: none!important;"><input type="text" id="invoicetax_ledger_code_<?php echo $j;?>" name="invoice_tax_ledger_code[]" value="<?php echo $total_tax[$j]['invoice_tax_ledger_code']; ?>" style="border: none;" readonly /></td>
+                    <td class="sticky-cell" style="border: none!important;">
                         <!-- <input type="hidden" id="vat_cst_<?php //echo $j;?>" name="vat_cst[]" value="<?php //echo $total_tax[$j]['vat_cst']; ?>" />
                         <input type="hidden" id="vat_percen_<?php //echo $j;?>" name="vat_percen[]" value="<?php //echo $total_tax[$j]['vat_percen']; ?>" /> -->
                         <input type="hidden" id="sub_particular_tax_<?php echo $j;?>" name="sub_particular_tax[]" value="<?php echo 'Tax_'.$total_tax[$j]['tax_zone_code'].'_'.$total_tax[$j]['vat_cst'].'_'.$total_tax[$j]['vat_percen']; ?>" />
                         <?php //echo 'Tax_'.$total_tax[$j]['tax_zone_code'].'_'.$total_tax[$j]['vat_cst'].'_'.$total_tax[$j]['vat_percen']; ?>
                         <?php echo $mycomponent->format_money($total_tax[$j]['vat_percen'],2); ?>
                     </td>
-                    <td class="text-right">
+                    <td class="sticky-cell text-right" style="border: none!important;">
                         <input type="text" class="text-right " id="total_tax_<?php echo $j;?>" name="total_tax_<?php echo $j;?>" value="<?php echo $mycomponent->format_money($total_tax[$j]['total_tax'], 2); ?>" readonly />
                     </td>
                     <?php echo $total_tax[$j]['invoice_tax_td']; ?>
@@ -354,9 +365,9 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                 <?php } ?>
 
                 <tr>
-                    <td>3</td>
-                    <td>Other Charges</td>
-                    <td>
+                    <td class="sticky-cell" style="border: none!important;">3</td>
+                    <td class="sticky-cell" style="border: none!important;">Other Charges</td>
+                    <td class="sticky-cell" style="border: none!important;">
                         <select id="othercharges_acc_id_0" class="form-control acc_id" name="other_charges_acc_id" onChange="get_acc_details(this)">
                             <option value="">Select</option>
                             <?php for($i=0; $i<count($acc_master); $i++) { ?>
@@ -365,11 +376,11 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                         </select>
                         <input type="hidden" id="othercharges_ledger_name_0" name="other_charges_ledger_name" value="<?php echo $acc['other_charges_ledger_name']; ?>" />
                     </td>
-                    <td>
-                        <input type="text" id="othercharges_ledger_code_0" name="other_charges_ledger_code" value="<?php echo $acc['other_charges_ledger_code']; ?>" readonly />
+                    <td class="sticky-cell" style="border: none!important;">
+                        <input type="text" id="othercharges_ledger_code_0" name="other_charges_ledger_code" value="<?php echo $acc['other_charges_ledger_code']; ?>" style="border: none;" readonly />
                     </td>
-                    <td></td>
-                    <td>
+                    <td class="sticky-cell" style="border: none!important;"></td>
+                    <td class="sticky-cell" style="border: none!important;">
                         <input type="text" class="text-right" id="other_charges" name="other_charges" value="<?php echo $mycomponent->format_money($total_val[0]['other_charges'], 2); ?>" readonly />
                     </td>
                     <?php for($i=0; $i<count($invoice_details); $i++) { ?>
@@ -377,7 +388,7 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                             <input type="text" class="text-right" id="invoice_other_charges_<?php echo $i;?>" name="invoice_other_charges[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['invoice_other_charges'], 2); ?>" readonly />
                         </td>
                         <td>
-                            <input type="text" class="text-right edit-text" id="edited_other_charges_<?php echo $i;?>" name="edited_other_charges[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['edited_other_charges'], 2); ?>" onChange="getDifference(this);" />
+                            <input type="text" class="text-right edit-text edited_other_charges" id="edited_other_charges_<?php echo $i;?>" name="edited_other_charges[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['edited_other_charges'], 2); ?>" onChange="getDifference(this);" />
                         </td>
                         <td>
                             <input type="text" class="text-right" id="diff_other_charges_<?php echo $i;?>" name="diff_other_charges[]" value="<?php echo $mycomponent->format_money($invoice_details[$i]['diff_other_charges'], 2); ?>" readonly />
@@ -388,20 +399,32 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                     </td>
                 </tr>
                 <tr class="bold-text" style=" ">
-                    <td></td>
-                    <td>Total Amount</td>
-                    <td>
-                        <select id="totalamount_acc_id_0" class="form-control acc_id" name="total_amount_acc_id" onChange="get_acc_details(this)">
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">Total Amount</td>
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">
+                        <select id="totalamount_acc_id_0" class="form-control acc_id" name="total_amount_acc_id" onChange="get_acc_details(this)" style="display: none;">
                             <option value="">Select</option>
-                            <?php for($i=0; $i<count($acc_master); $i++) { ?>
+                            <?php for($i=0; $i<count($acc_master); $i++) { 
+                                    if($acc['total_amount_acc_id']==""){
+                                        if($grn_details[0]['vendor_id']==$acc_master[$i]['vendor_id']) {
+                                            $acc['total_amount_acc_id'] = $acc_master[$i]['id'];
+                                            $acc['total_amount_ledger_name'] = $acc_master[$i]['legal_name'];
+                                            $acc['total_amount_ledger_code'] = $acc_master[$i]['code'];
+                                        }
+                                    }
+                            ?>
                             <option value="<?php echo $acc_master[$i]['id']; ?>" <?php if($acc['total_amount_acc_id']==$acc_master[$i]['id']) echo 'selected'; ?>><?php echo $acc_master[$i]['legal_name']; ?></option>
                             <?php } ?>
                         </select>
                         <input type="hidden" id="totalamount_ledger_name_0" name="total_amount_ledger_name" value="<?php echo $acc['total_amount_ledger_name']; ?>" />
+                        <?php echo $acc['total_amount_ledger_name']; ?>
                     </td>
-                    <td><input type="text" id="totalamount_ledger_code_0" name="total_amount_ledger_code" value="<?php echo $acc['total_amount_ledger_code']; ?>" readonly /></td>
-                    <td></td>
-                    <td>
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">
+                        <input type="text" id="totalamount_ledger_code_0" name="total_amount_ledger_code" value="<?php echo $acc['total_amount_ledger_code']; ?>" style="display: none;" readonly />
+                        <?php echo $acc['total_amount_ledger_code']; ?>
+                    </td>
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">
                         <input type="text" class="text-right" id="total_amount" name="total_amount" value="<?php echo $mycomponent->format_money($total_val[0]['total_amount'], 2); ?>" readonly />
                     </td>
                     <?php for($i=0; $i<count($invoice_details); $i++) { ?>
@@ -423,12 +446,12 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                 </tr>
                
                 <tr>
-                    <td>4</td>
-                    <td>Less Amount - Shortage</td>
-                    <td align="center"><button type="button" class="btn btn-info btn-xs  " id="get_shortage_qty">Edit</button></td>
-                    <td></td>
-                    <td></td>
-                    <td>
+                    <td class="sticky-cell" style="border: none!important;">4</td>
+                    <td class="sticky-cell" style="border: none!important;">Less Amount - Shortage</td>
+                    <td class="sticky-cell" style="border: none!important;" align="center"><button type="button" class="btn btn-info btn-xs  " id="get_shortage_qty">Edit</button></td>
+                    <td class="sticky-cell" style="text-align: center; border: none!important;"><i id="shortage_validation_icon" class="fa fa-close" style="display: none; color: #dd4b39;"></i></td>
+                    <td class="sticky-cell" style="border: none!important;"></td>
+                    <td class="sticky-cell" style="border: none!important;">
                         <input type="text" class="text-right" id="shortage_amount" name="shortage_amount" value="<?php echo $mycomponent->format_money($total_val[0]['shortage_amount'], 2); ?>" readonly />
                     </td>
                     <?php for($i=0; $i<count($invoice_details); $i++) { ?>
@@ -447,12 +470,12 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                     </td>
                 </tr>
                 <tr>
-                    <td>5</td>
-                    <td>Less Amount - Expiry</td>
-                    <td align="center"><button type="button" class="btn btn-info btn-xs " id="get_expiry_qty">Edit</button></td>
-                    <td></td>
-                    <td></td>
-                    <td>
+                    <td class="sticky-cell" style="border: none!important;">5</td>
+                    <td class="sticky-cell" style="border: none!important;">Less Amount - Expiry</td>
+                    <td class="sticky-cell" align="center" style="border: none!important;"><button type="button" class="btn btn-info btn-xs " id="get_expiry_qty">Edit</button></td>
+                    <td class="sticky-cell" style="text-align: center; border: none!important;"><i id="expiry_validation_icon" class="fa fa-close" style="display: none; color: #dd4b39;"></i></td>
+                    <td class="sticky-cell" style="border: none!important;"></td>
+                    <td class="sticky-cell" style="border: none!important;">
                         <input type="text" class="text-right" id="expiry_amount" name="expiry_amount" value="<?php echo $mycomponent->format_money($total_val[0]['expiry_amount'], 2); ?>" readonly />
                     </td>
                     <?php for($i=0; $i<count($invoice_details); $i++) { ?>
@@ -471,12 +494,12 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                     </td>
                 </tr>
                 <tr>
-                    <td>6</td>
-                    <td>Less Amount - Damage</td>
-                    <td align="center"><button type="button" class="btn btn-info btn-xs" id="get_damaged_qty">Edit</button></td>
-                    <td></td>
-                    <td></td>
-                    <td>
+                    <td class="sticky-cell" style="border: none!important;">6</td>
+                    <td class="sticky-cell" style="border: none!important;">Less Amount - Damage</td>
+                    <td class="sticky-cell" align="center" style="border: none!important;"><button type="button" class="btn btn-info btn-xs" id="get_damaged_qty">Edit</button></td>
+                    <td class="sticky-cell" style="text-align: center; border: none!important;"><i id="damaged_validation_icon" class="fa fa-close" style="display: none; color: #dd4b39;"></i></td>
+                    <td class="sticky-cell" style="border: none!important;"></td>
+                    <td class="sticky-cell" style="border: none!important;">
                         <input type="text" class="text-right" id="damaged_amount" name="damaged_amount" value="<?php echo $mycomponent->format_money($total_val[0]['damaged_amount'], 2); ?>" readonly />
                     </td>
                     <?php for($i=0; $i<count($invoice_details); $i++) { ?>
@@ -495,12 +518,12 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                     </td>
                 </tr>
                 <tr>
-                    <td>7</td>
-                    <td>Less Amount - Margin Diff</td>
-                    <td align="center"><button type="button" class="btn btn-info btn-xs " id="get_margindiff_qty">Edit</button></td>
-                    <td></td>
-                    <td></td>
-                    <td>
+                    <td class="sticky-cell" style="border: none!important;">7</td>
+                    <td class="sticky-cell" style="border: none!important;">Less Amount - Margin Diff</td>
+                    <td class="sticky-cell" align="center" style="border: none!important;"><button type="button" class="btn btn-info btn-xs " id="get_margindiff_qty">Edit</button></td>
+                    <td class="sticky-cell" style="text-align: center; border: none!important;"><i id="margindiff_validation_icon" class="fa fa-close" style="display: none; color: #dd4b39;"></i></td>
+                    <td class="sticky-cell" style="border: none!important;"></td>
+                    <td class="sticky-cell" style="border: none!important;">
                         <input type="text" class="text-right" id="margindiff_amount" name="margindiff_amount" value="<?php echo $mycomponent->format_money($total_val[0]['margindiff_amount'], 2); ?>" readonly />
                     </td>
                     <?php for($i=0; $i<count($invoice_details); $i++) { ?>
@@ -519,21 +542,33 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                     </td>
                 </tr>
          
-                <tr  class="bold-text" >
-                    <td></td>
-                    <td>Total Deduction</td>
-                    <td>
-                        <select id="totaldeduction_acc_id_0" class="form-control acc_id" name="total_deduction_acc_id" onChange="get_acc_details(this)">
+                <tr class="bold-text" >
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">Total Deduction</td>
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">
+                        <select id="totaldeduction_acc_id_0" class="form-control acc_id" name="total_deduction_acc_id" onChange="get_acc_details(this)" style="display: none;">
                             <option value="">Select</option>
-                            <?php for($i=0; $i<count($acc_master); $i++) { ?>
+                            <?php for($i=0; $i<count($acc_master); $i++) { 
+                                    if($acc['total_deduction_acc_id']==""){
+                                        if($grn_details[0]['vendor_id']==$acc_master[$i]['vendor_id']) {
+                                            $acc['total_deduction_acc_id'] = $acc_master[$i]['id'];
+                                            $acc['total_deduction_ledger_name'] = $acc_master[$i]['legal_name'];
+                                            $acc['total_deduction_ledger_code'] = $acc_master[$i]['code'];
+                                        }
+                                    }
+                            ?>
                             <option value="<?php echo $acc_master[$i]['id']; ?>" <?php if($acc['total_deduction_acc_id']==$acc_master[$i]['id']) echo 'selected'; ?>><?php echo $acc_master[$i]['legal_name']; ?></option>
                             <?php } ?>
                         </select>
                         <input type="hidden" id="totaldeduction_ledger_name_0" name="total_deduction_ledger_name" value="<?php echo $acc['total_deduction_ledger_name']; ?>" />
+                        <?php echo $acc['total_deduction_ledger_name']; ?>
                     </td>
-                    <td><input type="text" id="totaldeduction_ledger_code_0" name="total_deduction_ledger_code" value="<?php echo $acc['total_deduction_ledger_code']; ?>" readonly /></td>
-                    <td></td>
-                    <td>
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">
+                        <input type="text" id="totaldeduction_ledger_code_0" name="total_deduction_ledger_code" value="<?php echo $acc['total_deduction_ledger_code']; ?>" style="display: none;" readonly />
+                        <?php echo $acc['total_deduction_ledger_code']; ?>
+                    </td>
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">
                         <input type="text" class="text-right" id="total_deduction" name="total_deduction" value="<?php echo $mycomponent->format_money($total_val[0]['total_deduction'], 2); ?>" readonly />
                     </td>
                     <?php for($i=0; $i<count($invoice_details); $i++) { ?>
@@ -554,13 +589,13 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                     </td>
                 </tr>
                 
-                <tr  class="bold-text" >
-                    <td></td>
-                    <td>Total Payable Amount</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td id="total_payable_amount" class="text-right">
+                <tr class="bold-text" >
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">Total Payable Amount</td>
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
+                    <td id="total_payable_amount" class="text-right sticky-cell" style="border: none!important; background-color: #f9f9f9;">
 
                     </td>
                     <?php for($i=0; $i<count($invoice_details); $i++) { ?>
@@ -587,12 +622,12 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                         <h4 class="modal-title">Shortage Deductions</h4>
                     </div>
                     <div class="modal-body" style=" ">
-    				  <div class="modal-body-inside"  >
+    				    <div class="modal-body-inside"  >
                         <?php echo $deductions['shortage']; ?>
+                        </div>
                     </div>
-    			</div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default  btn-danger" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-default btn-danger" id="close_shortage_modal">Save</button>
                     </div>
                 </div>
             </div>
@@ -607,12 +642,12 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                         <h4 class="modal-title">Expiry Deductions</h4>
                     </div>
                     <div class="modal-body" >
-    				  <div class="modal-body-inside"  >
-                        <?php echo $deductions['expiry']; ?>
-                    </div>
+    				    <div class="modal-body-inside"  >
+                            <?php echo $deductions['expiry']; ?>
+                        </div>
     				</div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default btn-danger" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-default btn-danger" id="close_expiry_modal">Save</button>
                     </div>
                 </div>
             </div>
@@ -627,12 +662,12 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                         <h4 class="modal-title">Damaged Deductions</h4>
                     </div>
                     <div class="modal-body" style=" ">
-    				  <div class="modal-body-inside"  >
-                        <?php echo $deductions['damaged']; ?>
-                    </div>
+    				    <div class="modal-body-inside"  >
+                            <?php echo $deductions['damaged']; ?>
+                        </div>
     				</div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default  btn-danger" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-default btn-danger" id="close_damaged_modal">Save</button>
                     </div>
                 </div>
             </div>
@@ -647,12 +682,12 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                         <h4 class="modal-title">Margin Diff Deductions</h4>
                     </div>
                     <div class="modal-body"  >
-    				  <div class="modal-body-inside"  >
-                        <?php echo $deductions['margindiff']; ?>
+    				    <div class="modal-body-inside"  >
+                            <?php echo $deductions['margindiff']; ?>
     					</div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default  btn-danger" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-default btn-danger" id="close_margindiff_modal">Save</button>
                     </div>
                 </div>
             </div>
@@ -680,7 +715,8 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
 
         <div class="form-group btn-margin">
             <button type="submit" class="btn btn-sm btn-success">Create</button>
-            <button type="button" class="btn   btn-sm  btn-info" id="get_ledger">View Ledger</button>
+            <button type="button" class="btn btn-sm btn-info" id="get_ledger">View Ledger</button>
+            <a class="btn btn-sm btn-danger pull-right" href="<?php echo Url::base(); ?>index.php?r=pendinggrn%2Findex">Close</a>
             <!-- <button type="button" class="btn   btn-sm  btn-info" id="view_debit_note">View Debit Note</button> -->
         </div>
         </form>
@@ -694,9 +730,9 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                 <th>Invoice No</th>
                 <th>Invoice Date</th>
                 <th>Total Deduction</th>
-                <th>View</th>
-                <th>Download</th>
-                <th>Email</th>
+                <th style="width: 125px;">View</th>
+                <th style="width: 125px;">Download</th>
+                <th style="width: 125px;">Email</th>
             </tr>
             <?php for($i=0; $i<count($debit_note); $i++) { ?>
             <tr>
@@ -723,6 +759,10 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
 </script>
 
 <?php 
+    $this->registerJsFile(
+        '@web/js/jquery-ui-1.11.2/jquery-ui.min.js',
+        ['depends' => [\yii\web\JqueryAsset::className()]]
+    );
     $this->registerJsFile(
         '@web/js/pending_grn.js',
         ['depends' => [\yii\web\JqueryAsset::className()]]

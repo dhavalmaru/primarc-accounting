@@ -115,12 +115,6 @@ class MyComponent extends Component
     }
 
     function convert_number_to_words($number) {
-        $no = floor($number);
-        $point = round($number - $no, 2) * 100;
-        $hundred = null;
-        $digits_1 = strlen($no);
-        $i = 0;
-        $str = array();
         $words = array('0' => ' ', '1' => 'One', '2' => 'Two',
         '3' => 'Three', '4' => 'Four', '5' => 'Five', '6' => 'Six',
         '7' => 'Seven', '8' => 'Eight', '9' => 'Nine',
@@ -132,30 +126,68 @@ class MyComponent extends Component
         '60' => 'Sixty', '70' => 'Seventy',
         '80' => 'Eighty', '90' => 'Ninety');
         $digits = array('', 'Hundred', 'Thousand', 'Lakh', 'Crore');
+
+        $no = floor($number);
+        $point = round($number - $no, 2) * 100;
+        $hundred = null;
+        $digits_1 = strlen($no);
+        $i = 0;
+        $str = array();
         while ($i < $digits_1) {
-         $divider = ($i == 2) ? 10 : 100;
-         $number = floor($no % $divider);
-         $no = floor($no / $divider);
-         $i += ($divider == 10) ? 1 : 2;
-         if ($number) {
-            $plural = (($counter = count($str)) && $number > 9) ? 's' : null;
-            $hundred = ($counter == 1 && $str[0]) ? ' and ' : null;
-            $str [] = ($number < 21) ? $words[$number] .
+            $divider = ($i == 2) ? 10 : 100;
+            $number = floor($no % $divider);
+            $no = floor($no / $divider);
+            $i += ($divider == 10) ? 1 : 2;
+            if ($number) {
+                $plural = (($counter = count($str)) && $number > 9) ? 's' : null;
+                $hundred = ($counter == 1 && $str[0]) ? ' ' : null;
+                $str [] = ($number < 21) ? $words[$number] .
                 " " . $digits[$counter] . $plural . " " . $hundred
                 :
                 $words[floor($number / 10) * 10]
                 . " " . $words[$number % 10] . " "
                 . $digits[$counter] . $plural . " " . $hundred;
-         } else $str[] = null;
+            } else $str[] = null;
         }
         $str = array_reverse($str);
         $result = implode('', $str);
-        $points = ($point) ? (" and " . $words[$point / 10] . " " .  $words[$point = $point % 10]) : '';
+        $rupees_text = $result;
 
-        if($points==""){
-            $result = $result . "Rupees ";
+        // $points = ($point) ? (" and " . $words[$point / 10] . " " .  $words[$point = $point % 10]) : '';
+        $hundred = null;
+        $digits_1 = strlen($point);
+        $i = 0;
+        $str = array();
+        while ($i < $digits_1) {
+            $divider = ($i == 2) ? 10 : 100;
+            $number = floor($point % $divider);
+            $point = floor($point / $divider);
+            $i += ($divider == 10) ? 1 : 2;
+            if ($number) {
+                $plural = (($counter = count($str)) && $number > 9) ? 's' : null;
+                $hundred = ($counter == 1 && $str[0]) ? ' ' : null;
+                $str [] = ($number < 21) ? $words[$number] .
+                " " . $digits[$counter] . $plural . " " . $hundred
+                :
+                $words[floor($number / 10) * 10]
+                . " " . $words[$number % 10] . " "
+                . $digits[$counter] . $plural . " " . $hundred;
+            } else $str[] = null;
+        }
+        $str = array_reverse($str);
+        $result = implode('', $str);
+        $paise_text = $result;
+
+        // if($points==""){
+        //     $result = $result . "Rupees ";
+        // } else {
+        //     $result = $result . "Rupees " . $points . " Paise";
+        // }
+
+        if($paise_text==""){
+            $result = $rupees_text . "Rupees Only";
         } else {
-            $result = $result . "Rupees " . $points . " Paise";
+            $result = $rupees_text . "Rupees and " . $paise_text . " Paise Only";
         }
         return $result;
     }

@@ -6948,7 +6948,8 @@ div.dataTables_wrapper div.dataTables_paginate ul.pagination {
 }
 table.dataTable thead>tr>th,
 table.dataTable thead>tr>td {
-    padding-right: 30px
+    /*padding-right: 30px*/
+    padding-right: 15px
 }
 table.dataTable thead>tr>th:active,
 table.dataTable thead>tr>td:active {

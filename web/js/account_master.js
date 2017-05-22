@@ -11,6 +11,15 @@ $(document).ready(function(){
     set_view();
 })
 
+function delete_row(elem){
+    var id = elem.id;
+    var index = id.substr(id.lastIndexOf('_')+1);
+
+    if(index!=0){
+        $('#cat_row_'+index).remove();
+    }
+}
+
 function set_view(){
     if($('#action').val()=='view'){
         console.log("view");
@@ -453,7 +462,8 @@ $('#repeat_business_category').click(function(){
     var newIndex = parseInt(index) + 1;
     // console.log(index);
     $trNew.attr('id', 'cat_row_'+newIndex);
-    $trNew.find('td:first-child').html(newIndex+1);
+    $trNew.find('td:nth-child(2)').html(newIndex+1);
+    $trNew.find('#delete_row_'+index).attr('id', 'delete_row_'+newIndex);
     $trNew.find('#cat_id_'+index).attr('id', 'cat_id_'+newIndex).val("");
     $trNew.find('#cat_name_'+index).attr('id', 'cat_name_'+newIndex).val("");
     // $trNew.find('#acc_code_'+index).attr('id', 'acc_code_'+newIndex).val("");

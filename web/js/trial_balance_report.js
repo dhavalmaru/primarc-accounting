@@ -15,6 +15,8 @@ $("#date_type").change(function(){
         $(".as_of_date_div").show();
         // $('#as_of_date').val(new Date());
     }
+
+    set_table();
 })
 
 $("#date_criteria").change(function(){
@@ -43,6 +45,8 @@ $("#generate").click(function(){
     generate_report();
 })
 
+var table = null;
+var table2 = null;
 function generate_report(){
     var date_type = $('#date_type').val();
     var as_of_date = $('#as_of_date').val();
@@ -57,9 +61,9 @@ function generate_report(){
     if($("#date_type").val()=="Date Range"){
         var as_of_date = to_date;
         $('#as_of_date').val(as_of_date);
-        $('#as_of').val(as_of_date);
+        $('#as_of').html('Date: '+as_of_date);
     } else {
-        $('#as_of').val(as_of_date);
+        $('#as_of').html('Date: '+as_of_date);
     }
 
     $.ajax({
@@ -75,19 +79,29 @@ function generate_report(){
         dataType: 'json',
         success: function (data) {
             if(data != null){
-                $('#tab_report tbody').html(data.tbody);
-                $('#tab_report2 tbody').html(data.tbody2);
-                $("#company_name").val("Primarc Pecan Retail Pvt Ltd");
-                $("#from").val(from_date);
-                $("#to").val(to_date);
+                $('#example').html(data.tbody);
+                $('#example2').html(data.tbody2);
+                // $('#example tbody').html(data.tbody);
+                // $('#example2 tbody').html(data.tbody2);
+                $("#company_name").html("Primarc Pecan Retail Pvt Ltd");
+                $("#from").html('From: '+from_date);
+                $("#to").html('To: '+to_date);
+
+                // $("#example").fixHeader();
+
+                // fix_header();
             } else {
-                $('#tab_report tbody').html("");
-                $("#company_name").val("");
-                $("#from").val("");
-                $("#to").val("");
+                $('#example').html("");
+                $('#example2').html("");
+                // $('#example tbody').html("");
+                // $('#example2 tbody').html("");
+                $("#company_name").html("");
+                $("#from").html("");
+                $("#to").html("");
             }
-            change_bus_cat();
-            change_acc_cat();
+
+            set_table();
+
         },
         error: function (xhr, ajaxOptions, thrownError) {
             alert(xhr.status);
@@ -118,4 +132,58 @@ function change_acc_cat(){
     } else {
         $('.acc_cat').hide();
     }
+}
+
+function set_table(){
+    if ($.fn.dataTable.isDataTable('#example')) {
+        table.destroy();
+    }
+
+    table = $('#example').DataTable({
+        scrollX: '50vh',
+        scrollY: '50vh',
+        scrollCollapse: true,
+        lengthChange: false,
+        ordering: false,
+        autoWidth: false,
+        searching: false,
+        paging: false,
+        bInfo: false,
+        buttons: [ 'excel', 'csv', 'print'  ]
+    });
+
+    table.buttons().container().appendTo('#example_wrapper .col-md-6:eq(1)');
+
+    $("#example_wrapper .btn-group a").hide(); 
+    $("#example_wrapper .btn-group").click(function(){
+        $("#example_wrapper .btn-group").toggleClass('btn_close');
+        $("#example_wrapper .btn-group a").toggle(100);
+    });
+
+    if ($.fn.dataTable.isDataTable('#example2')) {
+        table2.destroy();
+    }
+
+    table2 = $('#example2').DataTable({
+        scrollY: '50vh',
+        scrollCollapse: true,
+        lengthChange: false,
+        ordering: false,
+        autoWidth: false,
+        searching: false,
+        paging: false,
+        bInfo: false,
+        buttons: [ 'excel', 'csv', 'print'  ]
+    });
+
+    table2.buttons().container().appendTo('#example2_wrapper .col-md-6:eq(1)');
+
+    $("#example2_wrapper .btn-group a").hide(); 
+    $("#example2_wrapper .btn-group").click(function(){
+        $("#example2_wrapper .btn-group").toggleClass('btn_close');
+        $("#example2_wrapper .btn-group a").toggle(100);
+    });
+
+    change_bus_cat();
+    change_acc_cat();
 }

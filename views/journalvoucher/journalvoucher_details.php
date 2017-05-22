@@ -20,6 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
 $mycomponent = Yii::$app->mycomponent;
 ?>
 <style type="text/css">
+#journal_voucher .error {color: #dd4b39!important;}
 input:-webkit-autofill {
     background-color: white !important;
 }
@@ -37,7 +38,7 @@ table tr td { border: 1px solid #eee!important; }
 
 <div class="grn-index"> 
 	<div class=" col-md-12 ">  
-		<form id="journal_voucher" class="form-horizontal" action="<?php echo Url::base(); ?>index.php?r=journalvoucher%2Fsave" method="post" enctype="multipart/form-data"> 
+		<form id="journal_voucher" class="form-horizontal" action="<?php echo Url::base(); ?>index.php?r=journalvoucher%2Fsave" method="post" enctype="multipart/form-data" onkeypress="return event.keyCode != 13;"> 
 			<input type="hidden" name="_csrf" value="<?=Yii::$app->request->getCsrfToken()?>" />
 
 			<div class="form-devident">
@@ -84,7 +85,7 @@ table tr td { border: 1px solid #eee!important; }
 												</select>
 											</td>
 											<td><input class="form-control" type="text" name="debit_amt[]" id="debit_amt_<?php echo $i; ?>" value="<?php echo $mycomponent->format_money($jv_entries[$i]['debit_amt'],2); ?>" onChange="get_total();" /></td>
-											<td><input type="text" name="credit_amt[]" id="credit_amt_<?php echo $i; ?>" value="<?php echo $mycomponent->format_money($jv_entries[$i]['credit_amt'],2); ?>" onChange="get_total();" /></td>
+											<td><input class="form-control" type="text" name="credit_amt[]" id="credit_amt_<?php echo $i; ?>" value="<?php echo $mycomponent->format_money($jv_entries[$i]['credit_amt'],2); ?>" onChange="get_total();" /></td>
 											<td style="text-align: center;"><button type="button" class="btn btn-sm btn-success" id="delete_row_<?php echo $i; ?>" onClick="delete_row(this);">-</button></td>
 										</tr>
 								<?php }}} if($blFlag == false) { ?>
@@ -135,6 +136,14 @@ table tr td { border: 1px solid #eee!important; }
 			<div class="form-group"  >
 				<div class="row ">
 					<div class=" col-md-3 col-sm-3 col-xs-6">
+						<label class="control-label">JV Date</label>
+						<div class=" ">
+							<div class=" "> 
+								<input class="form-control datepicker" type="text" id="jv_date" name="jv_date" value="<?php if(isset($data)) echo (($data[0]['jv_date']!=null && $data[0]['jv_date']!='')?date('d/m/Y',strtotime($data[0]['jv_date'])):date('d/m/Y')); else echo date('d/m/Y'); ?>" readonly /> 
+							</div>
+						</div>
+					</div>
+					<div class=" col-md-3 col-sm-3 col-xs-6">
 						<label class="control-label">Reference</label>
 						<div class=" ">
 							<div class=" ">  
@@ -142,7 +151,6 @@ table tr td { border: 1px solid #eee!important; }
 							</div>
 						</div>
 					</div>
-
 					<div class="col-md-3 col-sm-3 col-xs-6">
 						<label class="control-label">Narration</label>
 						<div class="">

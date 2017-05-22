@@ -10,7 +10,7 @@ class JournalVoucher extends Model
     public function getJournalVoucherDetails($id="", $status=""){
         $cond = "";
         if($id!=""){
-            $cond = " and id = '$id'";
+            $cond = " and A.id = '$id'";
         }
         if($status!=""){
             // if($cond==""){
@@ -18,10 +18,10 @@ class JournalVoucher extends Model
             // } else {
             //     $cond = $cond . " and status = '$status'";
             // }
-            $cond = $cond . " and status = '$status'";
+            $cond = $cond . " and A.status = '$status'";
         }
 
-        $sql = "select * from journal_voucher_details where is_active='1'" . $cond . " order by id desc";
+        $sql = "select A.*, B.username from journal_voucher_details A left join user B on (A.updated_by = B.id) where A.is_active='1'" . $cond . " order by id desc";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -70,6 +70,12 @@ class JournalVoucher extends Model
         $diff_amt = $request->post('diff_amt');
         $reference = $request->post('reference');
         $narration = $request->post('narration');
+        $jv_date = $request->post('jv_date');
+        if($jv_date==''){
+            $jv_date=NULL;
+        } else {
+            $jv_date=$mycomponent->formatdate($jv_date);
+        }
         // $doc_file = $request->post('doc_file');
 
         $debit_acc = "";
@@ -124,7 +130,8 @@ class JournalVoucher extends Model
                         'status' => 'pending',
                         'is_active' => '1',
                         'updated_by'=>$session['session_id'],
-                        'updated_date'=>date('Y-m-d h:i:s')
+                        'updated_date'=>date('Y-m-d h:i:s'),
+                        'jv_date'=>$jv_date
                         );
 
         if(count($array)>0){
@@ -181,7 +188,7 @@ class JournalVoucher extends Model
                                 'sub_ref_id'=>$entry_id[$i],
                                 'ref_type'=>'journal_voucher',
                                 'entry_type'=>'Journal Voucher',
-                                // 'invoice_no'=>$invoice_no_val[$i],
+                                'invoice_no'=>$reference,
                                 // 'vendor_id'=>$vendor_id,
                                 'voucher_id' => $voucher_id, 
                                 'ledger_type' => $ledger_type, 
@@ -193,7 +200,8 @@ class JournalVoucher extends Model
                                 'status'=>'pending',
                                 'is_active'=>'1',
                                 'updated_by'=>$session['session_id'],
-                                'updated_date'=>date('Y-m-d h:i:s')
+                                'updated_date'=>date('Y-m-d h:i:s'),
+                                'ref_date'=>$jv_date
                             ];
 
             $tableName = "ledger_entries";

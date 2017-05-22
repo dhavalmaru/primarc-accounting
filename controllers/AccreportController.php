@@ -115,19 +115,19 @@ class AccreportController extends Controller
         return $this->render('trial_balance_report', ['acc_details' => $acc_details]);
     }
 
-    public function actionGetledger()
-    {   
+    public function actionGetledger() {   
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
 
-        $acc_id = $request->post('acc_id');
+        $account = $request->post('account');
         $from_date = $request->post('from_date');
         $to_date = $request->post('to_date');
+        $narration = $request->post('narration');
         
         // $from_date = '01-03-2007';
         // $to_date = '31-03-2017';
         
-        // $acc_id = '4';
+        // $account = '24';
         // $from_date = '01/03/2007';
         // $to_date = '31/03/2018';
 
@@ -148,7 +148,7 @@ class AccreportController extends Controller
 
         $report = new AccReport();
 
-        // $data = $report->getAccountDetails($acc_id);
+        // $data = $report->getAccountDetails($account);
         // if(count($data)>0){
         //     $acc_code = $data[0]['code'];
         // }
@@ -213,7 +213,7 @@ class AccreportController extends Controller
         $opening_bal = 0;
         $opening_bal_type = 'Cr';
         $balance = 0;
-        $data = $report->getOpeningBal($acc_id, $from_date);
+        $data = $report->getOpeningBal($account, $from_date);
         if(count($data)>0){
             $opening_bal = floatval($data[0]['opening_bal']);
         }
@@ -256,7 +256,7 @@ class AccreportController extends Controller
                   </tr>';
         $balance = $opening_bal;
 
-        $data = $report->getLedger($acc_id, $from_date, $to_date);
+        $data = $report->getLedger($account, $from_date, $to_date);
         $debit_amt = 0;
         $credit_amt = 0;
         $cur_total = 0;
@@ -269,15 +269,15 @@ class AccreportController extends Controller
                 if($data[$i]['type']=='Debit'){
                     $entry_type = 'Dr';
                     $debit_amt = floatval($data[$i]['amount']);
-                    $balance = $balance - $debit_amt;
+                    $balance = round($balance - $debit_amt,2);
                     $credit_amt = '';
-                    $cur_total = $cur_total - $debit_amt;
+                    $cur_total = round($cur_total - $debit_amt,2);
                 } else {
                     $entry_type = 'Cr';
                     $credit_amt = floatval($data[$i]['amount']);
-                    $balance = $balance + $credit_amt;
+                    $balance = round($balance + $credit_amt,2);
                     $debit_amt = '';
-                    $cur_total = $cur_total + $credit_amt;
+                    $cur_total = round($cur_total + $credit_amt,2);
                 }
                 if($balance<0){
                     $balance_type = 'Dr';
@@ -287,7 +287,7 @@ class AccreportController extends Controller
                     $balance_val = $balance;
                 }
                 if(isset($data[$i]['cp_acc_id'])){
-                    if($data[$i]['cp_acc_id']!=$acc_id){
+                    if($data[$i]['cp_acc_id']!=$account){
                         $ledger_code = $data[$i]['cp_ledger_code'];
                         $ledger_name = $data[$i]['cp_ledger_name'];
                     }
@@ -300,12 +300,11 @@ class AccreportController extends Controller
                 $tbody = $tbody . '<tr>
                                     <td>'.($i+1).'</td>
                                     <td>'.$data[$i]['voucher_id'].'</td>
-                                    <td>'.(($data[$i]['updated_date']!=null && $data[$i]['updated_date']!="")?date("d/m/Y",strtotime($data[$i]['updated_date'])):"").'</td>
+                                    <td>'.(($data[$i]['ref_date']!=null && $data[$i]['ref_date']!="")?date("d/m/Y",strtotime($data[$i]['ref_date'])):"").'</td>
                                     <td>'.$ledger_code.'</td>
                                     <td>'.$ledger_name.'</td>
                                     <td>'.$data[$i]['ref_id'].'</td>
                                     <td>'.$data[$i]['invoice_no'].'</td>
-                                    <td style="display: none;">'.$entry_type.'</td>
                                     <td style="text-align:right;">'.$mycomponent->format_money($debit_amt,2).'</td>
                                     <td style="text-align:right;">'.$mycomponent->format_money($credit_amt,2).'</td>
                                     <td style="text-align:right;">'.$mycomponent->format_money($balance_val,2).'</td>
@@ -382,27 +381,27 @@ class AccreportController extends Controller
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td></td>
+                            <td></td>
                             <td>Opening Balance</td>
-                            <td>'.$opening_bal_type.'</td>
                             <td style="text-align:right;">'.(($opening_bal_type == "Dr")?$mycomponent->format_money($opening_bal,2):"0.00").'</td>
                             <td style="text-align:right;">'.(($opening_bal_type == "Cr")?$mycomponent->format_money($opening_bal,2):"0.00").'</td>
-                            <td></td>
-                            <td></td>
+                            <td>'.$opening_bal_type.'</td>
                             <td></td>
                             <td></td>
                             <td class="show_narration"></td>
                           </tr>
                           <tr>
+                            <td></td>
+                            <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
                             <td>Current Total</td>
-                            <td>'.$cur_total_type.'</td>
                             <td style="text-align:right;">'.(($cur_total < 0)?$mycomponent->format_money($cur_total_val,2):"0.00").'</td>
                             <td style="text-align:right;">'.(($cur_total >= 0)?$mycomponent->format_money($cur_total_val,2):"0.00").'</td>
-                            <td></td>
-                            <td></td>
+                            <td>'.$cur_total_type.'</td>
                             <td></td>
                             <td></td>
                             <td class="show_narration"></td>
@@ -412,18 +411,116 @@ class AccreportController extends Controller
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td></td>
+                            <td></td>
                             <td>Closing Balance</td>
-                            <td>'.$balance_type.'</td>
                             <td style="text-align:right;">'.(($balance < 0)?$mycomponent->format_money($balance_val,2):"0.00").'</td>
                             <td style="text-align:right;">'.(($balance >= 0)?$mycomponent->format_money($balance_val,2):"0.00").'</td>
-                            <td></td>
-                            <td></td>
+                            <td>'.$balance_type.'</td>
                             <td></td>
                             <td></td>
                             <td class="show_narration"></td>
                           </tr>';
 
-        echo $tbody;
+        // $tbody = '<thead>
+        //             <tr>
+        //                 <th class="text-center"> Sr No </th>
+        //                 <th class="text-center"> Ref ID (Voucher No) </th>
+        //                 <th class="text-center"> Date </th>
+        //                 <th class="text-center"> Ledger Code </th>
+        //                 <th class="text-center"> Ledger Name </th>
+        //                 <th class="text-center"> Ref 1 </th>
+        //                 <th class="text-center"> Ref 2 </th>
+        //                 <th class="text-center"> Debit </th>
+        //                 <th class="text-center"> Credit </th>
+        //                 <th class="text-center"> Balance </th>
+        //                 <th class="text-center"> DB/CR </th>
+        //                 <th class="text-center"> Knock Off Ref </th>
+        //                 <th class="text-center show_narration"> Narration </th>
+        //             </tr>
+        //         </thead>
+        //         <tbody>
+        //             '.$tbody.'
+        //         </tbody>';
+
+
+        // echo $tbody;
+
+        $data['tbody']=$tbody;
+        $data['account']=$account;
+        $data['from_date']=$from_date;
+        $data['to_date']=$to_date;
+        $acc_details = $report->getAccountDetails();
+
+        // echo json_encode($data);
+
+        return $this->render('ledger_report', ['acc_details' => $acc_details, 'tbody' => $tbody, 
+                                                'account' => $account, 'narration' => $narration,
+                                                'from_date' => $from_date, 'to_date' => $to_date]);
+    }
+
+    public function actionGetledgerreport() {   
+        $request = Yii::$app->request;
+        $mycomponent = Yii::$app->mycomponent;
+
+        $account = $request->post('account');
+        $from_date = $request->post('from_date');
+        $to_date = $request->post('to_date');
+        $narration = $request->post('narration');
+        
+        // $from_date = '01-03-2007';
+        // $to_date = '31-03-2017';
+        
+        // $account = '24';
+        // $from_date = '01/03/2007';
+        // $to_date = '31/03/2018';
+
+        if($from_date==''){
+            $from_date=NULL;
+        } else {
+            $from_date=$mycomponent->formatdate($from_date);
+        }
+
+        if($to_date==''){
+            $to_date=NULL;
+        } else {
+            $to_date=$mycomponent->formatdate($to_date);
+        }
+        
+        // echo $from_date;
+        // echo $to_date;
+
+        $report = new AccReport();
+
+        $opening_bal = 0;
+        $opening_bal_type = 'Cr';
+        $balance = 0;
+        $result = $report->getOpeningBal($account, $from_date);
+        if(count($result)>0){
+            $opening_bal = floatval($result[0]['opening_bal']);
+        }
+
+        
+
+        $data = $report->getLedger($account, $from_date, $to_date);
+        
+
+        
+
+        // echo $tbody;
+
+        // $data['tbody']=$tbody;
+        // $data['data']=$result;
+        // $data['account']=$account;
+        // $data['from_date']=$from_date;
+        // $data['to_date']=$to_date;
+        $acc_details = $report->getAccountDetails();
+
+        // echo json_encode($data);
+
+        return $this->render('ledger_report', ['acc_details' => $acc_details, 'opening_bal' => $opening_bal, 
+                                                'data' => $data, 'account' => $account, 
+                                                'from_date' => $from_date, 'to_date' => $to_date, 'narration' => $narration]);
     }
 
     public function actionGettrialbalance()
@@ -478,6 +575,7 @@ class AccreportController extends Controller
         $tot_crd_tran = 0;
         $tot_deb_clo_bal = 0;
         $tot_crd_clo_bal = 0;
+        $sr_no = 0;
 
         if(count($data)>0){
             for($i=0; $i<count($data); $i++){
@@ -517,7 +615,7 @@ class AccreportController extends Controller
                     }
 
                     $tbody = $tbody . '<tr>
-                                        <td>'.($i+1).'</td>
+                                        <td>'.($sr_no+1).'</td>
                                         <td>'.$data[$i]['legal_name'].'</td>
                                         <td>'.$data[$i]['category_1'].'</td>
                                         <td>'.$data[$i]['code'].'</td>
@@ -535,7 +633,7 @@ class AccreportController extends Controller
 
 
                     $tbody2 = $tbody2 . '<tr>
-                                        <td>'.($i+1).'</td>
+                                        <td>'.($sr_no+1).'</td>
                                         <td>'.$data[$i]['legal_name'].'</td>
                                         <td>'.$data[$i]['category_1'].'</td>
                                         <td>'.$data[$i]['code'].'</td>
@@ -546,6 +644,8 @@ class AccreportController extends Controller
                                         <td class="acc_cat">'.$data[$i]['category_2'].'</td>
                                         <td class="acc_cat">'.$data[$i]['category_3'].'</td>
                                       </tr>';
+
+                  $sr_no = $sr_no + 1;
                 }
 
                 if($opening_bal<0){
@@ -594,6 +694,54 @@ class AccreportController extends Controller
                                     <td class="acc_cat"></td>
                                 </tr>';
         }
+
+        $tbody = '<thead>
+                    <tr class="sticky-row">
+                        <th class="text-center" rowspan="2"> Sr No </th>
+                        <th class="text-center" rowspan="2"> Particulars </th>
+                        <th class="text-center" rowspan="2"> Accounts Level 1 Category </th>
+                        <th class="text-center" rowspan="2"> Account Name </th>
+                        <th class="text-center" colspan="2" style="border-bottom: 0;"> Opening Balance </th>
+                        <th class="text-center" colspan="2" style="border-bottom: 0;"> Transaction </th>
+                        <th class="text-center" colspan="2" style="border-bottom: 0;"> Closing Balance </th>
+                        <th class="text-center bus_cat" rowspan="2"> Business Category </th>
+                        <th class="text-center acc_cat" rowspan="2"> Accounts Level 1 </th>
+                        <th class="text-center acc_cat" rowspan="2"> Accounts Level 2 </th>
+                        <th class="text-center acc_cat" rowspan="2"> Accounts Level 3 </th>
+                    </tr>
+                    <tr class="sticky-row">
+                        <th class="text-center"> Debit </th>
+                        <th class="text-center"> Credit </th>
+                        <th class="text-center"> Debit </th>
+                        <th class="text-center"> Credit </th>
+                        <th class="text-center"> Debit </th>
+                        <th class="text-center" style="border-right: 1px solid;"> Credit </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    '.$tbody.'
+                </tbody>';
+
+        $tbody2 = '<thead>
+                        <tr>
+                            <th class="text-center" rowspan="2"> Sr No </th>
+                            <th class="text-center" rowspan="2"> Particulars </th>
+                            <th class="text-center" rowspan="2"> Accounts Level 1 Category </th>
+                            <th class="text-center" rowspan="2"> Account Name </th>
+                            <th class="text-center" colspan="2" style="border-bottom: 0;"> Balance </th>
+                            <th class="text-center bus_cat" rowspan="2"> Business Category </th>
+                            <th class="text-center acc_cat" rowspan="2"> Accounts Level 1 </th>
+                            <th class="text-center acc_cat" rowspan="2"> Accounts Level 2 </th>
+                            <th class="text-center acc_cat" rowspan="2"> Accounts Level 3 </th>
+                        </tr>
+                        <tr>
+                            <th class="text-center"> Debit </th>
+                            <th class="text-center" style="border-right: 1px solid;"> Credit </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        '.$tbody2.'
+                    </tbody>';
 
         $data['tbody'] = $tbody;
         $data['tbody2'] = $tbody2;

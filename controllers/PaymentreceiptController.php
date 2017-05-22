@@ -39,6 +39,9 @@ class PaymentreceiptController extends Controller
         $transaction = "Create";
         $acc_details = $payment_receipt->getAccountDetails();
         $bank = $payment_receipt->getBanks();
+
+        // echo json_encode($acc_details);
+        // echo json_encode($bank);
         return $this->render('payment_receipt_details', ['transaction'=>$transaction, 'acc_details' => $acc_details, 'bank' => $bank]);
     }
 
@@ -63,7 +66,7 @@ class PaymentreceiptController extends Controller
         $acc_id = $request->post('acc_id');
 
         // $id = "";
-        // $acc_id = 4;
+        // $acc_id = 18;
         
         $payment_receipt = new PaymentReceipt();
         $data = $payment_receipt->getLedger($id, $acc_id);
@@ -80,6 +83,9 @@ class PaymentreceiptController extends Controller
             $net_credit_amt = 0;
 
             for($i=0; $i<count($data); $i++){
+                $ledger_code = '';
+                $ledger_name = '';
+                
                 if($data[$i]['type']=="Debit"){
                     $debit_amt = $data[$i]['amount'];
                     $credit_amt = 0;
@@ -94,6 +100,16 @@ class PaymentreceiptController extends Controller
                         $paying_credit_amt = $paying_credit_amt + $data[$i]['amount'];
                     }
                 }
+                if(isset($data[$i]['cp_acc_id'])){
+                    if($data[$i]['cp_acc_id']!=$acc_id){
+                        $ledger_code = $data[$i]['cp_ledger_code'];
+                        $ledger_name = $data[$i]['cp_ledger_name'];
+                    }
+                }
+                if($ledger_code == ''){
+                    $ledger_code = $data[$i]['ledger_code'];
+                    $ledger_name = $data[$i]['ledger_name'];
+                }
 
                 $tbody = $tbody . '<tr>
                                         <td class="text-center"> 
@@ -106,7 +122,7 @@ class PaymentreceiptController extends Controller
                                             <input type="hidden" class="form-control" id="ledger_id_'.$i.'" name="ledger_id[]" value="'.$data[$i]['id'].'" />
                                             <input type="hidden" class="form-control" id="ledger_type_'.$i.'" name="ledger_type[]" value="'.$data[$i]['ledger_type'].'" />
                                             <input type="hidden" class="form-control" id="vendor_id_'.$i.'" name="vendor_id[]" value="'.$data[$i]['vendor_id'].'" />
-                                            <input type="text" class="form-control" id="account_name_'.$i.'" name="account_name[]" value="'.$data[$i]['account_name'].'" readonly />
+                                            <input type="text" class="form-control" id="account_name_'.$i.'" name="account_name[]" value="'.$ledger_name.'" readonly />
                                         </td>
                                         <td> 
                                             <input type="text" class="form-control" id="invoice_no_'.$i.'" name="invoice_no[]" value="'.$data[$i]['invoice_no'].'" readonly />

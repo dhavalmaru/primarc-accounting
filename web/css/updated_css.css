@@ -34,14 +34,14 @@ body {  overflow-x:hidden;}
 table.dataTable thead .sorting:after, table.dataTable thead .sorting_asc:after, table.dataTable thead .sorting_desc:after, table.dataTable thead .sorting_asc_disabled:after, table.dataTable thead .sorting_desc_disabled:after {
     position: absolute;
     bottom: 3px;
-    right: 8px; 
+    right: 4px; font-size: 8px;
     display: block;
     font-family: 'Glyphicons Halflings';
     opacity: 0.5; 
 }
 .table > thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
     padding: 4px 6px;
-}8
+}
 
 .btn-success { outline:none;}
 .pagination > li > a, .pagination > li > span {   position: relative;    float: left; padding: 2px 10px; outline:none;  }

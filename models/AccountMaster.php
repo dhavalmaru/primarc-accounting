@@ -12,7 +12,7 @@ class AccountMaster extends Model
         $cond = "";
         $cond2 = "";
         if($id!=""){
-            $cond = " and id = '$id'";
+            $cond = " and A.id = '$id'";
             $cond2 = " and acc_id = '$id'";
         }
         // if($status!=""){
@@ -24,16 +24,17 @@ class AccountMaster extends Model
         // }
 
         if($status!=""){
-            $cond = $cond . " and status = '$status'";
+            $cond = $cond . " and A.status = '$status'";
         }
         
         // $sql = "select * from acc_master where is_active = '1'" . $cond . " order by id desc";
         $sql = "select A.*, concat_ws(',', A.category_1, A.category_2, A.category_3) as acc_category, B.bus_category from 
-                (select * from acc_master where is_active = '1'" . $cond . ") A 
+                (select A.*, B.username from acc_master A left join user B on (A.updated_by = B.id) 
+                    where A.is_active = '1'" . $cond . ") A 
                 left join 
                 (select acc_id, GROUP_CONCAT(category_name) as bus_category from acc_categories where is_active = '1'" . $cond2 . " 
                     group by acc_id) B 
-                on (A.id = B.acc_id) order by updated_date desc";
+                on (A.id = B.acc_id) order by UNIX_TIMESTAMP(updated_date) desc, id desc";
 
         // echo $sql;
         $command = Yii::$app->db->createCommand($sql);
@@ -206,6 +207,7 @@ class AccountMaster extends Model
 
     public function save(){
         $request = Yii::$app->request;
+        $session = Yii::$app->session;
 
         $id = $request->post('id');
         $type = $request->post('type_val');
@@ -328,7 +330,10 @@ class AccountMaster extends Model
                         'acc_no' => $acc_no,
                         'ifsc_code' => $ifsc_code,
                         'status' => 'pending',
-                        'is_active' => '1');
+                        'is_active' => '1',
+                        'updated_by'=>$session['session_id'],
+                        'updated_date'=>date('Y-m-d h:i:s')
+                        );
 
         if(count($array)>0){
             $tableName = "acc_master";

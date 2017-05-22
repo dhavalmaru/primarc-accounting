@@ -11,17 +11,17 @@ class PaymentReceipt extends Model
     public function getDetails($trans_id="", $status=""){
         $cond = "";
         if($trans_id!=""){
-            $cond = " Where id = '$trans_id'";
+            $cond = " Where A.id = '$trans_id'";
         }
         if($status!=""){
             if($cond==""){
-                $cond = " Where status = '$status'";
+                $cond = " Where A.status = '$status'";
             } else {
-                $cond = $cond . " and status = '$status'";
+                $cond = $cond . " and A.status = '$status'";
             }
         }
 
-        $sql = "select * from payment_receipt_details" . $cond;
+        $sql = "select A.*, B.username from payment_receipt_details A left join user B on (A.updated_by = B.id)" . $cond . " order by A.id desc";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -33,54 +33,7 @@ class PaymentReceipt extends Model
             $cond = " and id = '$id'";
         }
 
-        $sql = "select * from acc_master where is_active = '1'".$cond." order by legal_name";
-        $command = Yii::$app->db->createCommand($sql);
-        $reader = $command->query();
-        return $reader->readAll();
-    }
-
-    public function getLedger($id, $account_id){
-        // $sql = "select * from 
-        //         (select id, acc_id as account_id, ledger_name as account_name, ledger_code as account_code, 
-        //             type, amount, is_paid, payment_ref, ref_type as ledger_type from ledger_entries 
-        //         where acc_id = '$account_id' and amount!=0 and 
-        //             (is_paid is null or is_paid!='1' or payment_ref='$id') and is_active='1' 
-        //         union all 
-        //         select id, account_id, account_name, account_code, 'Debit' as type, amount, is_paid, payment_ref, 'payment_entry' as ledger_type 
-        //         from payment_receipt_details where account_id = '$account_id' and payment_type = 'Adhoc' and 
-        //             (is_paid is null or is_paid!='1' or payment_ref='$id') and is_active='1') A 
-        //         order by ledger_type desc, type desc, id";
-
-        // $sql = "select * from 
-        //         (select A.id, A.invoice_no, A.vendor_id, A.acc_id as account_id, A.entry_type as account_name, A.ledger_code as account_code, 
-        //             A.type, A.amount, A.is_paid, A.payment_ref, A.ref_type as ledger_type, 
-        //             B.gi_date, C.invoice_date, D.due_date from ledger_entries A 
-        //         left join grn B on(A.ref_id = B.grn_id and A.ref_type = 'purchase') 
-        //         left join  goods_inward_outward_invoices C on(A.invoice_no = C.invoice_no and 
-        //             A.ref_type = 'purchase' and B.gi_id = C.gi_go_ref_no) 
-        //         left join invoice_tracker D on(A.ref_id=D.gi_id and A.invoice_no=D.invoice_id) 
-        //         where A.acc_id = '$account_id' and A.amount!=0 and A.ref_type!='payment_receipt' and 
-        //             (A.is_paid is null or A.is_paid!='1' or A.payment_ref='$id') and A.is_active='1' 
-        //         union all 
-        //         select id, null as invoice_no, null as vendor_id, account_id, account_name, account_code, 'Debit' as type, amount, is_paid, payment_ref, 
-        //             'payment_entry' as ledger_type, null as gi_date, null as invoice_date, null as due_date
-        //         from payment_receipt_details where account_id = '$account_id' and payment_type = 'Adhoc' and 
-        //             (is_paid is null or is_paid!='1' or payment_ref='$id') and is_active='1') A 
-        //         order by invoice_no desc, ledger_type desc, type desc, id";
-
-
-        $sql = "select * from 
-                (select A.id, A.invoice_no, A.vendor_id, A.acc_id as account_id, A.entry_type as account_name, 
-                    A.ledger_code as account_code, A.type, A.amount, A.is_paid, A.payment_ref, A.ref_type as ledger_type, 
-                    B.gi_date, C.invoice_date, D.due_date from ledger_entries A 
-                left join grn B on(A.ref_id = B.grn_id and A.ref_type = 'purchase') 
-                left join goods_inward_outward_invoices C on(A.invoice_no = C.invoice_no and 
-                    A.ref_type = 'purchase' and B.gi_id = C.gi_go_ref_no) 
-                left join invoice_tracker D on(A.ref_id=D.gi_id and A.invoice_no=D.invoice_id) 
-                where A.acc_id = '$account_id' and A.amount!=0 and 
-                    (A.ref_type!='payment_receipt' or A.entry_type='Payment' or A.entry_type='Receipt') and 
-                    (A.is_paid is null or A.is_paid!='1' or A.payment_ref='$id') and A.is_active='1') A 
-                order by invoice_no desc, ledger_type desc, type desc, id";
+        $sql = "select * from acc_master where is_active = '1' and type = 'Vendor Goods'".$cond." order by legal_name";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -93,8 +46,114 @@ class PaymentReceipt extends Model
         return $reader->readAll();
     }
 
-    public function getBanks(){
-        $sql = "select * from acc_master where is_active = '1' and type = 'Bank Account'";
+    public function getBanks($id=""){
+        $cond = "";
+        if($id!=""){
+            $cond = " and id = '$id'";
+        }
+
+        $sql = "select * from acc_master where is_active = '1' and type = 'Bank Account'".$cond." order by legal_name";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
+    public function getLedger($id, $acc_id){
+        // $sql = "select * from 
+        //         (select id, acc_id as account_id, ledger_name as account_name, ledger_code as account_code, 
+        //             type, amount, is_paid, payment_ref, ref_type as ledger_type from ledger_entries 
+        //         where acc_id = '$acc_id' and amount!=0 and 
+        //             (is_paid is null or is_paid!='1' or payment_ref='$id') and is_active='1' 
+        //         union all 
+        //         select id, account_id, account_name, account_code, 'Debit' as type, amount, is_paid, payment_ref, 'payment_entry' as ledger_type 
+        //         from payment_receipt_details where account_id = '$acc_id' and payment_type = 'Adhoc' and 
+        //             (is_paid is null or is_paid!='1' or payment_ref='$id') and is_active='1') A 
+        //         order by ledger_type desc, type desc, id";
+
+        // $sql = "select * from 
+        //         (select A.id, A.invoice_no, A.vendor_id, A.acc_id as account_id, A.entry_type as account_name, A.ledger_code as account_code, 
+        //             A.type, A.amount, A.is_paid, A.payment_ref, A.ref_type as ledger_type, 
+        //             B.gi_date, C.invoice_date, D.due_date from ledger_entries A 
+        //         left join grn B on(A.ref_id = B.grn_id and A.ref_type = 'purchase') 
+        //         left join  goods_inward_outward_invoices C on(A.invoice_no = C.invoice_no and 
+        //             A.ref_type = 'purchase' and B.gi_id = C.gi_go_ref_no) 
+        //         left join invoice_tracker D on(A.ref_id=D.gi_id and A.invoice_no=D.invoice_id) 
+        //         where A.acc_id = '$acc_id' and A.amount!=0 and A.ref_type!='payment_receipt' and 
+        //             (A.is_paid is null or A.is_paid!='1' or A.payment_ref='$id') and A.is_active='1' 
+        //         union all 
+        //         select id, null as invoice_no, null as vendor_id, account_id, account_name, account_code, 'Debit' as type, amount, is_paid, payment_ref, 
+        //             'payment_entry' as ledger_type, null as gi_date, null as invoice_date, null as due_date
+        //         from payment_receipt_details where account_id = '$acc_id' and payment_type = 'Adhoc' and 
+        //             (is_paid is null or is_paid!='1' or payment_ref='$id') and is_active='1') A 
+        //         order by invoice_no desc, ledger_type desc, type desc, id";
+
+
+        // $sql = "select * from 
+        //         (select A.id, A.invoice_no, A.vendor_id, A.acc_id as account_id, A.entry_type as account_name, 
+        //             A.ledger_code as account_code, A.type, A.amount, A.is_paid, A.payment_ref, A.ref_type as ledger_type, 
+        //             B.gi_date, C.invoice_date, D.due_date from ledger_entries A 
+        //         left join grn B on(A.ref_id = B.grn_id and A.ref_type = 'purchase') 
+        //         left join goods_inward_outward_invoices C on(A.invoice_no = C.invoice_no and 
+        //             A.ref_type = 'purchase' and B.gi_id = C.gi_go_ref_no) 
+        //         left join invoice_tracker D on(A.ref_id=D.gi_id and A.invoice_no=D.invoice_id) 
+        //         where A.acc_id = '$acc_id' and A.amount!=0 and 
+        //             (A.ref_type!='payment_receipt' or A.entry_type='Payment' or A.entry_type='Receipt') and 
+        //             (A.is_paid is null or A.is_paid!='1' or A.payment_ref='$id') and A.is_active='1') A 
+        //         order by invoice_no desc, ledger_type desc, type desc, id";
+
+        $status = 'Pending';
+
+        $sql = "select * from 
+                (select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    A.gi_date, A.invoice_date, A.due_date, 
+                    B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.gi_date, C.invoice_date, D.due_date from ledger_entries A 
+                    left join grn B on(A.ref_id = B.grn_id and A.ref_type = 'purchase') 
+                    left join goods_inward_outward_invoices C on(A.invoice_no = C.invoice_no and 
+                     A.ref_type = 'purchase' and B.gi_id = C.gi_go_ref_no) 
+                    left join invoice_tracker D on(A.ref_id=D.gi_id and A.invoice_no=D.invoice_id) 
+                    where A.status = '$status' and A.is_active = '1' and B.status = 'Approved' and B.is_active = '1' and 
+                          A.ref_type = 'purchase' and A.ledger_type != 'Main Entry') A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'purchase' and ledger_type = 'Main Entry') B 
+                on (A.voucher_id = B.cp_voucher_id) 
+                union all 
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
+                    A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    null as gi_date, null as invoice_date, null as due_date, 
+                    B.acc_id as cp_acc_id, B.ledger_name as cp_ledger_name, B.ledger_code as cp_ledger_code from 
+                (select * from ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'journal_voucher' and acc_id!='$acc_id') A 
+                left join 
+                (select * from ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'journal_voucher' and acc_id='$acc_id') B 
+                on (A.ref_id=B.ref_id) 
+                union all 
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    null as gi_date, null as invoice_date, null as due_date, 
+                    B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select * from ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'payment_receipt' and ledger_type = 'Main Entry') A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'payment_receipt' and ledger_type = 'Sub Entry') B 
+                on (A.voucher_id = B.cp_voucher_id)) AA 
+                where (AA.acc_id = '$acc_id' or AA.cp_acc_id = '$acc_id') and AA.amount!=0 and 
+                        (AA.ref_type!='payment_receipt' or AA.entry_type='Payment' or AA.entry_type='Receipt') and 
+                        (AA.is_paid is null or AA.is_paid!='1' or AA.payment_ref='$id')
+                order by AA.ref_date, AA.id";
+                // order by AA.invoice_no desc, AA.ledger_type desc, AA.type desc, AA.id";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -122,11 +181,11 @@ class PaymentReceipt extends Model
         } else {
             $payment_date=$mycomponent->formatdate($payment_date);
         }
+        $ref_no = $request->post('ref_no');
 
         $amount = 0;
         if($payment_type == "Adhoc"){
             $amount = $mycomponent->format_number($request->post('amount'),2);
-            $ref_no = $request->post('ref_no');
         } else {
             $payable_debit_amt = $mycomponent->format_number($request->post('payable_debit_amt'),2);
             $payable_credit_amt = $mycomponent->format_number($request->post('payable_credit_amt'),2);
@@ -136,8 +195,6 @@ class PaymentReceipt extends Model
             } else {
                 $amount = $payable_credit_amt;
             }
-            
-            $ref_no = null;
         }
 
         $tableName = "payment_receipt_details";
@@ -176,7 +233,7 @@ class PaymentReceipt extends Model
                 'bank_id'=>$bank_id,
                 'bank_name'=>$bank_name,
                 'payment_type'=>$payment_type,
-                'amount'=>$amount,
+                'amount'=>($amount<0?$amount*-1:$amount),
                 'ref_no'=>$ref_no,
                 'narration'=>$narration,
                 'status'=>'pending',
@@ -214,7 +271,7 @@ class PaymentReceipt extends Model
                             'sub_ref_id'=>null,
                             'ref_type'=>'payment_receipt',
                             'entry_type'=>$trans_type,
-                            'invoice_no'=>null,
+                            'invoice_no'=>$ref_no,
                             'vendor_id'=>$vendor_id,
                             'voucher_id' => $voucher_id, 
                             'ledger_type' => 'Main Entry', 
@@ -227,7 +284,8 @@ class PaymentReceipt extends Model
                             'status'=>'pending',
                             'is_active'=>'1',
                             'updated_by'=>$session['session_id'],
-                            'updated_date'=>date('Y-m-d h:i:s')
+                            'updated_date'=>date('Y-m-d h:i:s'),
+                            'ref_date'=>$payment_date
                         ];
 
             $count = Yii::$app->db->createCommand()
@@ -240,7 +298,7 @@ class PaymentReceipt extends Model
                             ->execute();
             }
 
-            $data = $this->getAccountDetails($bank_id);
+            $data = $this->getBanks($bank_id);
             if(count($data)>0){
                 $bank_legal_name = $data[0]['legal_name'];
                 $bank_acc_code = $data[0]['code'];
@@ -258,10 +316,10 @@ class PaymentReceipt extends Model
                             'sub_ref_id'=>null,
                             'ref_type'=>'payment_receipt',
                             'entry_type'=>'Bank Entry',
-                            'invoice_no'=>null,
+                            'invoice_no'=>$ref_no,
                             'vendor_id'=>null,
                             'voucher_id' => $voucher_id, 
-                            'ledger_type' => 'Main Entry', 
+                            'ledger_type' => 'Sub Entry', 
                             'acc_id'=>$bank_id,
                             'ledger_name'=>$bank_legal_name,
                             'ledger_code'=>$bank_acc_code,
@@ -271,7 +329,8 @@ class PaymentReceipt extends Model
                             'status'=>'pending',
                             'is_active'=>'1',
                             'updated_by'=>$session['session_id'],
-                            'updated_date'=>date('Y-m-d h:i:s')
+                            'updated_date'=>date('Y-m-d h:i:s'),
+                            'ref_date'=>$payment_date
                         ];
 
             $count = Yii::$app->db->createCommand()
@@ -340,7 +399,8 @@ class PaymentReceipt extends Model
                                             'status'=>'pending',
                                             'is_active'=>'1',
                                             'updated_by'=>$session['session_id'],
-                                            'updated_date'=>date('Y-m-d h:i:s')
+                                            'updated_date'=>date('Y-m-d h:i:s'),
+                                            'ref_date'=>$payment_date
                                         ];
 
                         $count = Yii::$app->db->createCommand()
@@ -365,7 +425,7 @@ class PaymentReceipt extends Model
                 }
             }
 
-            $data = $this->getAccountDetails($bank_id);
+            $data = $this->getBanks($bank_id);
             if(count($data)>0){
                 $bank_legal_name = $data[0]['legal_name'];
                 $bank_acc_code = $data[0]['code'];
@@ -385,7 +445,7 @@ class PaymentReceipt extends Model
                             'sub_ref_id'=>null,
                             'ref_type'=>'payment_receipt',
                             'entry_type'=>'Bank Entry',
-                            'invoice_no'=>null,
+                            'invoice_no'=>$ref_no,
                             'vendor_id'=>null,
                             'voucher_id' => $voucher_id, 
                             'ledger_type' => 'Main Entry', 
@@ -398,7 +458,9 @@ class PaymentReceipt extends Model
                             'status'=>'pending',
                             'is_active'=>'1',
                             'updated_by'=>$session['session_id'],
-                            'updated_date'=>date('Y-m-d h:i:s')
+                            'updated_date'=>date('Y-m-d h:i:s'),
+                            'ref_date'=>$payment_date,
+                            'payment_ref'=>$id
                         ];
 
             $count = Yii::$app->db->createCommand()

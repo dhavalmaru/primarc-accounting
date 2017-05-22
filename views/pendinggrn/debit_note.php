@@ -21,16 +21,32 @@
         .table {   border-collapse:collapse; width:100%;}
         .table-bordered tr th{ border:1px solid #999; padding:3px 7px; border-collapse:collapse;  }
         .modal-body-inside { padding:10px; }
+        @media print{@page {size: portrait}}
         /*.modal-body-inside table { font-size: 14px; }*/
     </style>
 </head>
 
 <?php $mycomponent = Yii::$app->mycomponent; ?>
 
+<?php 
+    $financial_year='';
+    if(isset($invoice_details[0]['gi_date'])) {
+        if($invoice_details[0]['gi_date']!=null && $invoice_details[0]['gi_date']!=''){
+            $month=date('m',strtotime($invoice_details[0]['gi_date']));
+            $year=date('y',strtotime($invoice_details[0]['gi_date']));
+            if($month<=3){
+                $financial_year = '(FY '.($year-1).'-'.$year.')';
+            } else {
+                $financial_year = '(FY '.$year.'-'.($year+1).')';
+            }
+        }
+    }
+?>
+
 <body class="hold-transition">
 <div class="debit_note">
     <div class="header-section">
-        <h1><b> Primarc Pecan Retail (P) Ltd - Mum(FY 16-17)</b></h1>
+        <h1><b> Primarc Pecan Retail (P) Ltd - Mum<?php echo $financial_year; ?></b></h1>
         <p>210A, 214, Building No 2-B, <br>  Mittal Industrial Estate Premises <br> 
         Co-Operative Society Limited, Marol Naka <br>
         Andheri (East), Mumbai - 400059 <br> Maharashtra  </p>
@@ -41,10 +57,26 @@
             <td style="border:none;" colspan="6" align="center"><h2><b>Debit Note</b></h2></td>
         </tr>
         <tr style="border:none;">
-            <td width="17%" style="border:none;"><p>No.</p></td>
+            <td width="17%" style="border:none;"><p> Ref.</p></td>
+            <td width="3%" style="border:none;">:</td>
+            <td width="40%" style="border:none;"><p><b> <?php if(isset($debit_note[0]['id'])) echo $debit_note[0]['id']; ?> </b></p></td>
+            <td width="22%" style="border:none;"><p>Posting Date</p></td>
+            <td width="4%" style="border:none;">:</td>
+            <td width="14%" style="border:none;">
+                <p>
+                    <b> 
+                        <?php if(isset($invoice_details[0]['gi_date'])) 
+                                echo (($invoice_details[0]['gi_date']!=null && $invoice_details[0]['gi_date']!='')?
+                                date('d/m/Y',strtotime($invoice_details[0]['gi_date'])):''); ?> 
+                    </b>
+                </p>
+            </td>
+        </tr>
+        <tr style="border:none;">
+            <td width="17%" style="border:none;"><p>Invoice No.</p></td>
             <td width="3%" height="25" style="border:none;">:</td>
-            <td width="53%" style="border:none;"><p><b> <?php if(isset($debit_note[0]['invoice_no'])) echo $debit_note[0]['invoice_no']; ?></b></p></td>
-            <td width="9%" style="border:none;"><p>Dated</p></td>
+            <td width="40%" style="border:none;"><p><b> <?php if(isset($debit_note[0]['invoice_no'])) echo $debit_note[0]['invoice_no']; ?></b></p></td>
+            <td width="22%" style="border:none;"><p>Invoice Date</p></td>
             <td width="4%" style="border:none;">:</td>
             <td width="14%" style="border:none;">
                 <p>
@@ -55,14 +87,6 @@
                     </b>
                 </p>
             </td>
-        </tr>
-        <tr>
-            <td width="17%" style="border:none;"><p> Ref.</p></td>
-            <td width="3%" style="border:none;">:</td>
-            <td width="53%" style="border:none;"><p><b> <?php if(isset($debit_note[0]['id'])) echo $debit_note[0]['id']; ?> </b></p></td>
-            <td style="border:none;">&nbsp;</td>
-            <td style="border:none;">&nbsp;</td>
-            <td style="border:none;">&nbsp;</td>
         </tr>
         <tr valign="top">
             <td  width="17%" style="border:none; vertical-align:top;"><p>Party's Name</p></td>
@@ -88,35 +112,36 @@
         <tr valign="top"  style="border:none; ">
             <td colspan="3"   style="border-left:none; border-bottom:none; ">
                 <p>
-                    Being Debit Note Raised For 
+                    Being debit note raised for 
                     <?php if(isset($debit_note[0]['ded_type'])) echo $debit_note[0]['ded_type']; ?> 
-                    As Per Attached Details <br>
+                    as per details mentioned below <br>
                     Qty - <?php if(isset($debit_note[0]['total_qty'])) echo $debit_note[0]['total_qty']; ?> Nos
                 </p>
             </td>
-            <td colspan="3" align="center" valign="top" style="border-right:none;"><p><b>Rs.<?php if(isset($debit_note[0]['total_deduction'])) echo $mycomponent->format_money($debit_note[0]['total_deduction'],0); ?></b></p></td>
+            <td colspan="3" align="center" valign="top" style="border-right:none;"><p><b>Rs.<?php if(isset($debit_note[0]['total_deduction'])) echo $mycomponent->format_money($debit_note[0]['total_deduction'],2); ?></b></p></td>
         </tr>
         <tr>
             <td  style="border:none; border-right:1px solid #999;" colspan="3"><p><b> Amount (in words) </b></p></td>
             <td colspan="3" style="border:none; border-left:1px solid #999;"></td>
         </tr>
         <tr>
-            <td height="70" colspan="3" valign="top" style="border:none; border-bottom:1px solid #999; border-right:1px solid #999;"> 
-                <p><?php if(isset($debit_note[0]['total_deduction'])) echo $mycomponent->convert_number_to_words(round($debit_note[0]['total_deduction'],0)); ?></p>
+            <td height="40" colspan="3" valign="top" style="border:none; border-bottom:1px solid #999; border-right:1px solid #999;"> 
+                <p><?php if(isset($debit_note[0]['total_deduction'])) echo $mycomponent->convert_number_to_words(round($debit_note[0]['total_deduction'],2)); ?></p>
             </td>
             <td colspan="3" style="border:none; border-left:1px solid #999; border-bottom:1px solid #999;"></td>
         </tr>
-        <tr valign="bottom" >
+        <!-- <tr valign="bottom" >
             <td colspan="6" style="border:none;">&nbsp;   </td>
             <td colspan="3" style="border:none;"></td>
-        </tr>
+        </tr> -->
         <tr valign="bottom" >
-            <td colspan="3" style="border:none;">&nbsp;  </td>
-            <td valign="bottom" colspan="3" style="border:none; text-align:center "><p> <b>Authorised Signatory</b></p></td>
+            <td colspan="6" style="border:none;"><p style="text-align: center;">This is a computer generated debit note. No signature required. &nbsp;</p></td>
+            <!-- <td colspan="2" style="border:none;"> &nbsp; </td>
+            <td valign="bottom" colspan="2" style="border:none; text-align:center "><p> <b>Authorised Signatory</b></p></td> -->
         </tr>
-        <tr valign="bottom" >
+        <!-- <tr valign="bottom" >
             <td colspan="6" style="border:none;">&nbsp;   </td>
-        </tr>
+        </tr> -->
     </table>
 </div>
 
@@ -139,7 +164,7 @@
         } else {
             $expiry_style = 'display: none;';
         }
-        if($ded_type=='margin_diff'){
+        if($ded_type=='margindiff'){
             $margin_diff_style = '';
             $deduction_type = 'Margin Difference';
         } else {
@@ -151,12 +176,6 @@
                     <td>' . $deduction_details[$i]['psku'] . '</td>
                     <td>' . $deduction_details[$i]['product_title'] . '</td>
                     <td>' . $deduction_details[$i]['ean'] . '</td>
-                    <td>' . ((isset($debit_note[0]['invoice_no']))? $debit_note[0]['invoice_no']:'') . '</td>
-                    <td>' . (($debit_note[0]['invoice_date']!=null && $debit_note[0]['invoice_date']!='')?
-                                date('d/m/Y',strtotime($debit_note[0]['invoice_date'])):'') . '</td>
-                    <td>' . $deduction_details[$i]['state'] . '</td>
-                    <td>' . $deduction_details[$i]['vat_cst'] . '</td>
-                    <td>' . $deduction_details[$i]['vat_percen'] . '</td>
                     <td>' . $deduction_details[$i]['qty'] . '</td>
                     <td>' . $deduction_details[$i]['box_price'] . '</td>
                     <td>' . $deduction_details[$i]['cost_excl_vat_per_unit'] . '</td>
@@ -174,10 +193,10 @@
                                 (($deduction_details[$i]['earliest_expected_date']!=null && $deduction_details[$i]['earliest_expected_date']!='')?
                                 date('d/m/Y',strtotime($deduction_details[$i]['earliest_expected_date'])):'') . '
                     </td>':'') . 
-                    (($ded_type=='margin_diff')?
+                    (($ded_type=='margindiff')?
                     '<td style="'.$margin_diff_style.'"></td>
                     <td style="'.$margin_diff_style.'"></td>':'') . 
-                    '<td></td>
+                    '<td style="word-break: break-all;">' . $deduction_details[$i]['remarks'] . '</td>
                 </tr>';
 
         $result = $result . $row;
@@ -197,27 +216,20 @@
                             <thead>
                                 <tr>
                                     <th colspan="4" style="text-align:center;">SKU Details</th>
-                                    <th colspan="2" style="text-align:center;">Invoice Details</th>
-                                    <th colspan="3" style="text-align:center;">Purchase Ledger</th>
                                     <th colspan="2" style="text-align:center;">Quantity Deducted</th>
                                     <th colspan="3" style="text-align:center;">Amount Deducted (Per Unit)</th>
                                     <th colspan="3" style="text-align:center;">Amount Deducted (Total)</th>' . 
                                     (($ded_type=='expiry')?
-                                    '<th colspan="2" style="'.$expiry_style.'text-align:center;">For Expiry Only</th>':'') . 
-                                    (($ded_type=='margin_diff')?
-                                    '<th colspan="2" style="'.$margin_diff_style.'text-align:center;">For Margin Difference (Per Unit)</th>':'') . 
-                                    '<th rowspan="2">Remarks</th>
+                                    '<th colspan="2" style="'.$expiry_style.'text-align:center;">Expiry Dates</th>':'') . 
+                                    (($ded_type=='margindiff')?
+                                    '<th colspan="2" style="'.$margin_diff_style.'text-align:center;">Margin Difference (Per Unit)</th>':'') . 
+                                    '<th rowspan="2" style="width: 15%">Remarks</th>
                                 </tr>
                                 <tr>
                                     <th style="text-align:center;"> Sr. No.</th>
                                     <th>SKU Code</th>
                                     <th>SKU Name</th>
                                     <th>EAN Code</th>
-                                    <th>Invoice Number</th>
-                                    <th>Invoice Date</th>
-                                    <th>Purchase State</th>
-                                    <th>Tax</th>
-                                    <th>Tax Rate</th>
                                     <th>Quantity</th>
                                     <th>MRP</th>
                                     <th>Cost Excl Tax</th>
@@ -229,15 +241,14 @@
                                     (($ded_type=='expiry')?
                                     '<th style="'.$expiry_style.'">Date Received</th>
                                     <th style="'.$expiry_style.'">Earliest Expected Date</th>':'') . 
-                                    (($ded_type=='margin_diff')?
+                                    (($ded_type=='margindiff')?
                                     '<th style="'.$margin_diff_style.'">Difference in Cost Excl Tax</th>
                                     <th style="'.$margin_diff_style.'">Difference in Tax</th>':'') . 
                                 '</tr>
                             </thead>
                             <tbody>' . $result . '</tbody>
                         </table>   
-                    </div>
-                    <br clear="all"/>';
+                    </div>';
 
             echo $table;
             $result = '';

@@ -23,6 +23,13 @@ $mycomponent = Yii::$app->mycomponent;
 ?>
 
 <style>
+#payment_receipt .error {color: #dd4b39!important;}
+.table-head { font-weight:100;  
+    background: #41ace9; 
+    color: #fff;
+    border-bottom: 1px solid #41ace9;
+    background-image: linear-gradient(#54b4eb, #2fa4e7 60%, #1d9ce5);
+}
 .form-horizontal .checkbox, .form-horizontal .radio { padding:0;  margin:0; min-height:auto; line-height:20px;}
 .checkbox input[type=checkbox], .checkbox-inline input[type=checkbox], .radio input[type=radio], .radio-inline input[type=radio] { position:relative; margin:0;}
 .table>thead>tr>th {   vertical-align: middle;  border-bottom: 2px solid #ddd;}
@@ -38,7 +45,7 @@ $mycomponent = Yii::$app->mycomponent;
 
 <div class="grn-index">
 	<div class=" col-md-12 ">
-		<form id="payment_receipt" class="form-horizontal" action="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Fsave" method="post"> 
+		<form id="payment_receipt" class="form-horizontal" action="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Fsave" method="post" onkeypress="return event.keyCode != 13;"> 
 			<input type="hidden" name="_csrf" value="<?=Yii::$app->request->getCsrfToken()?>" />
 			<div class="form-group">
 				<div class="col-md-3 col-sm-12 col-xs-12">
@@ -161,7 +168,7 @@ $mycomponent = Yii::$app->mycomponent;
 									</div>
 								</th> 
 								<th class="text-center">  Particular </th>
-								<th class="text-center">  Invoice No </th>
+								<th class="text-center">  Ref No </th>
 								<th class="text-center">  GI Date </th>
 								<th class="text-center">  Invoice Date </th>
 								<th class="text-center">  Due Date </th>
