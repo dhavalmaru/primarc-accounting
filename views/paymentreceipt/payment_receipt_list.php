@@ -4,10 +4,6 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
 
-/* @var $this yii\web\View */
-/* @var $searchModel app\models\GrnSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
-
 $this->title = 'Payment Receipt';
 $this->params['breadcrumbs'][] = $this->title;
 $mycomponent = Yii::$app->mycomponent;
@@ -21,6 +17,7 @@ $mycomponent = Yii::$app->mycomponent;
 				<ul class="nav nav-tabs">
 					<li class="active"><a href="#tab1primary" data-toggle="tab"> Pending (<?php echo count($pending); ?>)</a></li>
 					<li><a href="#tab2primary" data-toggle="tab"> Approved (<?php echo count($approved); ?>)</a></li>
+					<li><a href="#tab3primary" data-toggle="tab"> Rejected (<?php echo count($rejected); ?>)</a></li>
 				</ul>
 			</div>
 			<div class="panel-body">
@@ -43,14 +40,18 @@ $mycomponent = Yii::$app->mycomponent;
 											<th>Amount</th> 
 											<th>Status</th> 
 											<th>Updated By</th> 
-											<th>Approved By</th> 
+											<th style="display: none;">Approved By</th> 
 										</tr>  
 									</thead>
 									<tbody id="grn_details"> 
 										<?php for($i=0; $i<count($pending); $i++) { ?>
 										<tr> 
 											<td scope="row"><?php echo $i+1; ?></td> 
-											<td><a href="<?php echo Url::base() .'index.php?r=paymentreceipt%2Fedit&id='.$pending[$i]['id']; ?>" >Edit </a></td> 
+											<td>
+												<a href="<?php echo Url::base() .'index.php?r=paymentreceipt%2Fview&id='.$pending[$i]['id']; ?>" >View </a> <br/>
+												<a href="<?php echo Url::base() .'index.php?r=paymentreceipt%2Fedit&id='.$pending[$i]['id']; ?>" style="<?php if(isset($access[0]['r_edit'])) { if($access[0]['r_edit']=='1' && $access[0]['session_id']==$pending[$i]['updated_by']) echo ''; else echo 'display: none;'; } else { echo 'display: none;'; } ?>">Edit </a> <br/>
+												<a href="<?php echo Url::base() .'index.php?r=paymentreceipt%2Fauthorise&id='.$pending[$i]['id']; ?>" style="<?php if(isset($access[0]['r_approval'])) { if($access[0]['r_approval']=='1' && $access[0]['session_id']!=$pending[$i]['updated_by']) echo ''; else echo 'display: none;'; } else { echo 'display: none;'; } ?>">Authorise </a>
+											</td> 
 											<td><?php echo $pending[$i]['id']; ?></td> 
 											<td><?php echo $pending[$i]['trans_type']; ?></td> 
 											<td><?php echo $pending[$i]['account_name']; ?></td> 
@@ -59,8 +60,8 @@ $mycomponent = Yii::$app->mycomponent;
 											<td><?php echo (($pending[$i]['payment_date']!=null && $pending[$i]['payment_date']!='')?date('d/m/Y',strtotime($pending[$i]['payment_date'])):''); ?></td> 
 											<td class="text-right"><?php echo $mycomponent->format_money($pending[$i]['amount'],2); ?></td> 
 											<td><?php echo $pending[$i]['status']; ?></td> 
-											<th><?php echo $pending[$i]['username']; ?></th> 
-											<th><?php echo $pending[$i]['approved_by']; ?></th> 
+											<td><?php echo $pending[$i]['updater']; ?></td> 
+											<td style="display: none;"><?php echo $pending[$i]['approver']; ?></td> 
 										</tr> 
 										<?php } ?>
 									</tbody> 
@@ -79,6 +80,7 @@ $mycomponent = Yii::$app->mycomponent;
 											<th>Account Name</th> 
 											<th>Bank Name</th> 
 											<th>Payment Type</th> 
+											<th>Payment Date</th> 
 											<th>Amount</th> 
 											<th>Status</th> 
 											<th>Updated By</th> 
@@ -89,7 +91,9 @@ $mycomponent = Yii::$app->mycomponent;
 										<?php for($i=0; $i<count($approved); $i++) { ?>
 										<tr> 
 											<td scope="row"><?php echo $i+1; ?></td> 
-											<td><a href="<?php echo Url::base() .'index.php?r=paymentreceipt%2Fedit&id='.$approved[$i]['id']; ?>" >Edit </a></td> 
+											<td>
+												<a href="<?php echo Url::base() .'index.php?r=paymentreceipt%2Fview&id='.$approved[$i]['id']; ?>" >View </a>
+											</td> 
 											<td><?php echo $approved[$i]['id']; ?></td> 
 											<td><?php echo $approved[$i]['trans_type']; ?></td> 
 											<td><?php echo $approved[$i]['account_name']; ?></td> 
@@ -98,14 +102,57 @@ $mycomponent = Yii::$app->mycomponent;
 											<td><?php echo (($approved[$i]['payment_date']!=null && $approved[$i]['payment_date']!='')?date('d/m/Y',strtotime($approved[$i]['payment_date'])):''); ?></td> 
 											<td class="text-right"><?php echo $mycomponent->format_money($approved[$i]['amount'],2); ?></td> 
 											<td><?php echo $approved[$i]['status']; ?></td> 
-											<th><?php echo $approved[$i]['username']; ?></th> 
-											<th><?php echo $approved[$i]['approved_by']; ?></th> 
+											<td><?php echo $approved[$i]['updater']; ?></td> 
+											<td><?php echo $approved[$i]['approver']; ?></td> 
 										</tr> 
 										<?php } ?>
 									</tbody> 
 								</table>
 							</div>
 						</div> 
+						<div class="tab-pane fade" id="tab3primary">
+							<div class="bs-example grn-index table-container containner" data-example-id="bordered-table"  >  
+								<table id="example2" class="table datatable table-bordered display" cellspacing="0" width="100%">
+									<thead> 
+										<tr> 
+											<th width="45">Sr. No.</th> 
+											<th>Action</th> 
+											<th>P_Id</th> 
+											<th>Transaction Type</th> 
+											<th>Account Name</th> 
+											<th>Bank Name</th> 
+											<th>Payment Type</th> 
+											<th>Payment Date</th> 
+											<th>Amount</th> 
+											<th>Status</th> 
+											<th>Updated By</th> 
+											<th>Rejected By</th> 
+										</tr>  
+									</thead>
+									<tbody> 
+										<?php for($i=0; $i<count($rejected); $i++) { ?>
+										<tr> 
+											<td scope="row"><?php echo $i+1; ?></td> 
+											<td>
+												<a href="<?php echo Url::base() .'index.php?r=paymentreceipt%2Fview&id='.$rejected[$i]['id']; ?>" >View </a> <br/>
+												<a href="<?php echo Url::base() .'index.php?r=paymentreceipt%2Fedit&id='.$rejected[$i]['id']; ?>" style="<?php if(isset($access[0]['r_edit'])) { if($access[0]['r_edit']=='1' && $access[0]['session_id']==$rejected[$i]['updated_by']) echo ''; else echo 'display: none;'; } else { echo 'display: none;'; } ?>">Edit </a> <br/>
+											</td> 
+											<td><?php echo $rejected[$i]['id']; ?></td> 
+											<td><?php echo $rejected[$i]['trans_type']; ?></td> 
+											<td><?php echo $rejected[$i]['account_name']; ?></td> 
+											<td><?php echo $rejected[$i]['bank_name']; ?></td> 
+											<td><?php echo $rejected[$i]['payment_type']; ?></td> 
+											<td><?php echo (($rejected[$i]['payment_date']!=null && $rejected[$i]['payment_date']!='')?date('d/m/Y',strtotime($rejected[$i]['payment_date'])):''); ?></td> 
+											<td class="text-right"><?php echo $mycomponent->format_money($rejected[$i]['amount'],2); ?></td> 
+											<td><?php echo $rejected[$i]['status']; ?></td> 
+											<td><?php echo $rejected[$i]['updater']; ?></td> 
+											<td><?php echo $rejected[$i]['approver']; ?></td> 
+										</tr> 
+										<?php } ?>
+									</tbody> 
+								</table>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>

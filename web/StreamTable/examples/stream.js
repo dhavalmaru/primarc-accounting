@@ -20,11 +20,11 @@ $(document).ready(function() {
       $summary.text( summary.from + ' to '+ summary.to +' of '+ summary.total +' entries');
     },
     after_add: function(){
-      var percent = this.data.length*100/2000;
+      var percent = this.data.length*100/this.data.length;
       $record_count.text(percent + '%').attr('style', 'width:' + percent + '%');
 
       //Only for example: Stop ajax streaming beacause from localfile data size never going to empty.
-      if (this.data.length == 2000){
+      if (this.data.length == this.data.length){
         this.stopStreaming();
         $('.example .progress').removeClass('active').hide();
       }
@@ -32,16 +32,18 @@ $(document).ready(function() {
     }
   }
 
-  // st = StreamTable('#stream_table',
-  //   { view: view, 
-  //     per_page: 10, 
-  //     data_url: BASE_URL+'StreamTable/examples/data/movies.json',
-  //     stream_after: 0.5,
-  //     fetch_data_limit: 100,
-  //     callbacks: callbacks,
-  //     pagination: {span: 5, next_text: 'Next &rarr;', prev_text: '&larr; Previous'}
-  //   },
-  //  data);
+  st = StreamTable('#stream_table',
+    { view: view, 
+      per_page: 10, 
+      data_url: data,
+      stream_after: 0.5,
+      fetch_data_limit: 100,
+      callbacks: callbacks,
+      pagination: {span: 5, next_text: 'Next &rarr;', prev_text: '&larr; Previous'},
+      buttons: [ 'excel', 'csv', 'print'  ]
+    },
+   data);
+  st.buttons().container().appendTo('#stream_table_wrapper .col-md-6:eq(1)');
 
   //Only for example: Stop ajax streaming beacause from localfile data size never going to empty.
   /*

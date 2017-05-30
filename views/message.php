@@ -17,4 +17,4 @@
 $this->title = $title;
 ?>
 
-<?= $this->render('/_alert', ['module' => $module]);
+<?= $this->render('/_alert', ['module' => $module, 'msg' => $msg]);

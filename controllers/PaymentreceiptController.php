@@ -11,63 +11,166 @@ use yii\helpers\Url;
 
 class PaymentreceiptController extends Controller
 {
-    public function actionIndex()
-    {
+    public function actionIndex(){
         $payment_receipt = new PaymentReceipt();
-        $pending = $payment_receipt->getDetails("", "pending");
-        $approved = $payment_receipt->getDetails("", "approved");
+        $access = $payment_receipt->getAccess();
+        if(count($access)>0) {
+            if($access[0]['r_view']==1) {
+                $pending = $payment_receipt->getDetails("", "pending");
+                $approved = $payment_receipt->getDetails("", "approved");
+                $rejected = $payment_receipt->getDetails("", "rejected");
 
-        return $this->render('payment_receipt_list', ['pending' => $pending, 'approved' => $approved]);
+                $payment_receipt->setLog('PaymentReceipt', '', 'View', '', 'View Payment Receipt List', 'acc_payment_receipt', '');
+                return $this->render('payment_receipt_list', ['access' => $access, 'pending' => $pending, 'approved' => $approved, 
+                                                                'rejected' => $rejected]);
+            } else {
+                return $this->render('/message', [
+                    'title'  => \Yii::t('user', 'Access Denied'),
+                    'module' => $this->module,
+                    'msg' => '<h4>You donot have access to this page.</h4>'
+                ]);
+            }
+        } else {
+            $this->layout = 'other';
+            return $this->render('/message', [
+                'title'  => \Yii::t('user', 'Session Expired'),
+                'module' => $this->module,
+                'msg' => 'Session Expired. Please <a href="'.Url::base().'index.php">Login</a> again.'
+            ]);
+        }
+    }
+
+    public function actionCreate(){
+        $payment_receipt = new PaymentReceipt();
+        $access = $payment_receipt->getAccess();
+        if(count($access)>0) {
+            if($access[0]['r_insert']==1) {
+                $acc_details = $payment_receipt->getAccountDetails();
+                $bank = $payment_receipt->getBanks();
+
+                $payment_receipt->setLog('PaymentReceipt', '', 'Insert', '', 'Insert Payment Receipt Details', 'acc_payment_receipt', '');
+                return $this->render('payment_receipt_details', ['action' => 'insert', 
+                                                                    'acc_details' => $acc_details, 'bank' => $bank]);
+            } else {
+                return $this->render('/message', [
+                    'title'  => \Yii::t('user', 'Access Denied'),
+                    'module' => $this->module,
+                    'msg' => '<h4>You donot have access to this page.</h4>'
+                ]);
+            }
+        } else {
+            $this->layout = 'other';
+            return $this->render('/message', [
+                'title'  => \Yii::t('user', 'Session Expired'),
+                'module' => $this->module,
+                'msg' => 'Session Expired. Please <a href="'.Url::base().'index.php">Login</a> again.'
+            ]);
+        }
+    }
+
+    public function actionRedirect($action, $id) {
+        $payment_receipt = new PaymentReceipt();
+        $data = $payment_receipt->getDetails($id, "");
+        $acc_details = $payment_receipt->getAccountDetails();
+        $bank = $payment_receipt->getBanks();
+        return $this->render('payment_receipt_details', ['action' => $action, 'data' => $data, 
+                                                            'acc_details' => $acc_details, 'bank' => $bank]);
+    }
+
+    public function actionView($id) {
+        $payment_receipt = new PaymentReceipt();
+        $access = $payment_receipt->getAccess();
+        if(count($access)>0) {
+            if($access[0]['r_view']==1) {
+                $payment_receipt->setLog('PaymentReceipt', '', 'View', '', 'View Payment Receipt Details', 'acc_payment_receipt', $id);
+                return $this->actionRedirect('view', $id);
+            } else {
+                return $this->render('/message', [
+                    'title'  => \Yii::t('user', 'Access Denied'),
+                    'module' => $this->module,
+                    'msg' => '<h4>You donot have access to this page.</h4>'
+                ]);
+            }
+        } else {
+            $this->layout = 'other';
+            return $this->render('/message', [
+                'title'  => \Yii::t('user', 'Session Expired'),
+                'module' => $this->module,
+                'msg' => 'Session Expired. Please <a href="'.Url::base().'index.php">Login</a> again.'
+            ]);
+        }
+    }
+
+    public function actionEdit($id) {
+        $payment_receipt = new PaymentReceipt();
+        $access = $payment_receipt->getAccess();
+        $data = $payment_receipt->getDetails($id, "");
+        if(count($access)>0) {
+            if($access[0]['r_edit']==1 && $access[0]['session_id']==$data[0]['updated_by']) {
+                $payment_receipt->setLog('PaymentReceipt', '', 'Edit', '', 'Edit Payment Receipt Details', 'acc_payment_receipt', $id);
+                return $this->actionRedirect('edit', $id);
+            } else {
+                return $this->render('/message', [
+                    'title'  => \Yii::t('user', 'Access Denied'),
+                    'module' => $this->module,
+                    'msg' => '<h4>You donot have access to this page.</h4>'
+                ]);
+            }
+        } else {
+            $this->layout = 'other';
+            return $this->render('/message', [
+                'title'  => \Yii::t('user', 'Session Expired'),
+                'module' => $this->module,
+                'msg' => 'Session Expired. Please <a href="'.Url::base().'index.php">Login</a> again.'
+            ]);
+        }
+    }
+
+    public function actionAuthorise($id) {
+        $payment_receipt = new PaymentReceipt();
+        $access = $payment_receipt->getAccess();
+        $data = $payment_receipt->getDetails($id, "");
+        if(count($access)>0) {
+            if($access[0]['r_approval']==1 && $access[0]['session_id']!=$data[0]['updated_by']) {
+                $payment_receipt->setLog('PaymentReceipt', '', 'Authorise', '', 'Authorise Payment Receipt Details', 'acc_payment_receipt', $id);
+                return $this->actionRedirect('authorise', $id);
+            } else {
+                return $this->render('/message', [
+                    'title'  => \Yii::t('user', 'Access Denied'),
+                    'module' => $this->module,
+                    'msg' => '<h4>You donot have access to this page.</h4>'
+                ]);
+            }
+        } else {
+            $this->layout = 'other';
+            return $this->render('/message', [
+                'title'  => \Yii::t('user', 'Session Expired'),
+                'module' => $this->module,
+                'msg' => 'Session Expired. Please <a href="'.Url::base().'index.php">Login</a> again.'
+            ]);
+        }
+    }
+
+    public function actionSave(){   
+        $payment_receipt = new PaymentReceipt();
+        $result = $payment_receipt->save();
+        $this->redirect(array('paymentreceipt/index'));
     }
 
     public function actionGetaccdetails(){
         $payment_receipt = new PaymentReceipt();
         $request = Yii::$app->request;
         $acc_id = $request->post('acc_id');
-        // $acc_id = '43';
-        // $acc_code = '';
         $data = $payment_receipt->getAccountDetails($acc_id);
-        // if(count($data)>0){
-        //     $acc_code = $data[0]['code'];
-        // }
         echo json_encode($data);
     }
 
-    public function actionCreate()
-    {
-        $payment_receipt = new PaymentReceipt();
-        $transaction = "Create";
-        $acc_details = $payment_receipt->getAccountDetails();
-        $bank = $payment_receipt->getBanks();
-
-        // echo json_encode($acc_details);
-        // echo json_encode($bank);
-        return $this->render('payment_receipt_details', ['transaction'=>$transaction, 'acc_details' => $acc_details, 'bank' => $bank]);
-    }
-
-    public function actionEdit($id)
-    {
-        $payment_receipt = new PaymentReceipt();
-        $data = $payment_receipt->getDetails($id, "");
-        $debit = null;
-        $credit = null;
-        $transaction = "Update";
-        $acc_details = $payment_receipt->getAccountDetails();
-        $bank = $payment_receipt->getBanks();
-
-        return $this->render('payment_receipt_details', ['transaction'=>$transaction, 'data' => $data, 'acc_details' => $acc_details, 'bank' => $bank]);
-    }
-
-    public function actionGetledger()
-    {   
+    public function actionGetledger(){   
         $request = Yii::$app->request;
 
         $id = $request->post('id');
         $acc_id = $request->post('acc_id');
 
-        // $id = "";
-        // $acc_id = 18;
-        
         $payment_receipt = new PaymentReceipt();
         $data = $payment_receipt->getLedger($id, $acc_id);
         $mycomponent = Yii::$app->mycomponent;
@@ -215,77 +318,110 @@ class PaymentreceiptController extends Controller
                                         <input type="text" class="form-control text-right" id="payable_credit_amt" name="payable_credit_amt" value="'.$mycomponent->format_money($payable_credit_amt,2).'" readonly />
                                     </td> 
                                 </tr>';
-
-            // $tbody = '<tbody>'. $tbody . '</tbody>';
-
-            // $thead = '<thead>
-            //                 <tr>
-            //                     <th class="text-center" width="60"> 
-            //                         <div class="  ">
-            //                             <input type="checkbox" class="check" id="checkAll" value="">
-            //                         </div>
-            //                     </th> 
-            //                     <th class="text-center">  Particular </th>
-            //                     <th class="text-center" width="120"> Debit </th>
-            //                     <th class="text-center" width="120">  Credit </th> 
-            //                 </tr>
-            //             </thead>';
-
-            // $table = '<table class="table table-bordered table-hover" id="tab_logic">' . $thead . $tbody . '</table>';
         }
 
         echo $tbody;
     }
 
-    public function actionSave()
-    {   
-        $payment_receipt = new PaymentReceipt();
-        $transaction_id = $payment_receipt->save();
-        $this->redirect(array('paymentreceipt/index'));
-    }
-
     public function actionViewpaymentadvice($id){
-        $model = new PaymentReceipt();
-        $data = $model->getPaymentAdviceDetails($id);
+        $payment_receipt = new PaymentReceipt();
+        $access = $payment_receipt->getAccess();
+        if(count($access)>0) {
+            if($access[0]['r_view']==1) {
+                $data = $payment_receipt->getPaymentAdviceDetails($id);
         
-        $this->layout = false;
-        return $this->render('payment_advice', [
-            'payment_details' => $data['payment_details'],
-            'entry_details' => $data['entry_details'],
-            'vendor_details' => $data['vendor_details']
-        ]);
+                $payment_receipt->setLog('PaymentReceipt', '', 'View', '', 'View Payment Advice Details', 'acc_payment_receipt', $id);
+                $this->layout = false;
+                return $this->render('payment_advice', [
+                    'payment_details' => $data['payment_details'],
+                    'entry_details' => $data['entry_details'],
+                    'vendor_details' => $data['vendor_details']
+                ]);
+            } else {
+                return $this->render('/message', [
+                    'title'  => \Yii::t('user', 'Access Denied'),
+                    'module' => $this->module,
+                    'msg' => '<h4>You donot have access to this page.</h4>'
+                ]);
+            }
+        } else {
+            $this->layout = 'other';
+            return $this->render('/message', [
+                'title'  => \Yii::t('user', 'Session Expired'),
+                'module' => $this->module,
+                'msg' => 'Session Expired. Please <a href="'.Url::base().'index.php">Login</a> again.'
+            ]);
+        }
     }
 
     public function actionDownload($id){
-        $model = new PaymentReceipt();
-        $data = $model->getPaymentAdviceDetails($id);
-        $file = "";
+        $payment_receipt = new PaymentReceipt();
+        $access = $payment_receipt->getAccess();
+        if(count($access)>0) {
+            if($access[0]['r_view']==1) {
+                $data = $payment_receipt->getPaymentAdviceDetails($id);
+                $file = "";
 
-        if(isset($data['payment_advice'])){
-            if(count($data['payment_advice'])>0){
-                $payment_advice = $data['payment_advice'];
-                $file = $payment_advice[0]['payment_advice_path'];
+                $payment_receipt->setLog('PaymentReceipt', '', 'Download', '', 'Download Payment Advice Details', 'acc_payment_receipt', $id);
+                if(isset($data['payment_advice'])){
+                    if(count($data['payment_advice'])>0){
+                        $payment_advice = $data['payment_advice'];
+                        $file = $payment_advice[0]['payment_advice_path'];
+                    }
+                }
+
+                if( file_exists( $file ) ){
+                    Yii::$app->response->sendFile($file);
+                } else {
+                    echo $file;
+                }
+            } else {
+                return $this->render('/message', [
+                    'title'  => \Yii::t('user', 'Access Denied'),
+                    'module' => $this->module,
+                    'msg' => '<h4>You donot have access to this page.</h4>'
+                ]);
             }
-        }
-
-        if( file_exists( $file ) ){
-            Yii::$app->response->sendFile($file);
         } else {
-            echo $file;
+            $this->layout = 'other';
+            return $this->render('/message', [
+                'title'  => \Yii::t('user', 'Session Expired'),
+                'module' => $this->module,
+                'msg' => 'Session Expired. Please <a href="'.Url::base().'index.php">Login</a> again.'
+            ]);
         }
     }
 
     public function actionEmailpaymentadvice($id){
-        $model = new PaymentReceipt();
-        $data = $model->getPaymentAdviceDetails($id);
-        $file = "";
-
-        return $this->render('email', [
-            'payment_details' => $data['payment_details'],
-            'entry_details' => $data['entry_details'],
-            'vendor_details' => $data['vendor_details'],
-            'payment_advice' => $data['payment_advice']
-        ]);
+        $payment_receipt = new PaymentReceipt();
+        $access = $payment_receipt->getAccess();
+        if(count($access)>0) {
+            if($access[0]['r_view']==1) {
+                $data = $payment_receipt->getPaymentAdviceDetails($id);
+                
+                $payment_receipt->setLog('PaymentReceipt', '', 'Email', '', 'Email Payment Advice Details', 'acc_payment_receipt', $id);
+                return $this->render('email', [
+                    'payment_details' => $data['payment_details'],
+                    'entry_details' => $data['entry_details'],
+                    'vendor_details' => $data['vendor_details'],
+                    'payment_advice' => $data['payment_advice']
+                ]);
+            } else {
+                return $this->render('/message', [
+                    'title'  => \Yii::t('user', 'Access Denied'),
+                    'module' => $this->module,
+                    'msg' => '<h4>You donot have access to this page.</h4>'
+                ]);
+            }
+        } else {
+            $this->layout = 'other';
+            return $this->render('/message', [
+                'title'  => \Yii::t('user', 'Session Expired'),
+                'module' => $this->module,
+                'msg' => 'Session Expired. Please <a href="'.Url::base().'index.php">Login</a> again.'
+            ]);
+        }
+        
     }
 
     public function actionEmail(){
@@ -321,9 +457,22 @@ class PaymentreceiptController extends Controller
         $response = $message->send();
         if($response=='1'){
             $data['response'] = 'Mail Sent.';
+            $email_sent_status = '1';
+            $error_message = '';
         } else {
             $data['response'] = 'Mail Sending Failed.';
+            $email_sent_status = '0';
+            $error_message = $response;
         }
+
+        $attachment_type = 'PDF';
+        $vendor_name = $request->post('vendor_name');
+        $company_id = $request->post('company_id');
+        $payment_receipt = new PaymentReceipt();
+        $payment_receipt->setEmailLog($vendor_name, $from, $to, $id, $body, $attachment, 
+                                        $attachment_type, $email_sent_status, $error_message, $company_id);
+
+
         $data['id'] = $id;
         $data['payment_id'] = $payment_id;
 

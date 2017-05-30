@@ -26,7 +26,7 @@ use yii\helpers\Url;
                <div class="box box-widget widget-user"> 
             <div class="widget-user-header bg-aqua-active"> 
               <h3 class="widget-user-username">Welcome to <br> Primarc Pecan Accounting System </h3>
-             
+              <!-- <h2><?php //echo $access['S_Account_Master']['r_view']; ?></h2> -->
             </div>
             <div class="box-footer"> 
               <img class="  " src="dist/img/logo.png"  > 

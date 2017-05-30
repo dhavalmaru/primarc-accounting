@@ -9,13 +9,7 @@ use yii\jui\DatePicker;
 use yii\web\JsExpression;
 use yii\db\Query;
 
-// use kartik\date\DatePicker;
-
-/* @var $this yii\web\View */
-/* @var $searchModel app\models\GrnSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
-
-$this->title = 'Email Debit Note: ' . $data['payment_id'];
+$this->title = 'Email Payment Advice: ' . $data['payment_id'];
 $this->params['breadcrumbs'][] = ['label' => 'Payment Receipt', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $data['payment_id'], 'url' => ['edit', 'id' => $data['payment_id']]];
 $this->params['breadcrumbs'][] = ['label' => 'Email', 'url' => ['emailpaymentadvice', 'id' => $data['payment_id']]];;
@@ -39,8 +33,6 @@ select {
 			<div class="form-group">
 				<div class="col-md-12 col-sm-12 col-xs-12">
 					<h4><?php echo $data['response']; ?></h4>
-					<!-- <label class="control-label">To</label>
-					<input type="text" class="form-control" id="to" name="to" value="" /> -->
 				</div>
 			</div>
 		</form>

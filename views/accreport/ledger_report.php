@@ -78,7 +78,7 @@ tbody {
 					<label class="control-label">From Date</label>
 					<div class=" ">
 						<div class=" ">
-							<input class="form-control datepicker" type="text" id="from_date" name="from_date" value="<?php if(isset($from_date)) echo (($from_date!=null && $from_date!='')?date('d/m/Y',strtotime($from_date)):date('d/m/Y')); else echo date('d/m/Y'); ?>" readonly />
+							<input class="form-control datepicker" type="text" id="from_date" name="from_date" value="<?php if(isset($from_date)) echo (($from_date!=null && $from_date!='')?date('d/m/Y',strtotime($from_date)):''); ?>" readonly />
 						</div>
 					</div>
 				</div>
@@ -86,7 +86,7 @@ tbody {
 					<label class="control-label">To Date</label>
 				      <div class=" ">
 						<div class=" ">
-							<input class="form-control datepicker" type="text" id="to_date" name="to_date" value="<?php if(isset($to_date)) echo (($to_date!=null && $to_date!='')?date('d/m/Y',strtotime($to_date)):date('d/m/Y')); else echo date('d/m/Y'); ?>" readonly />
+							<input class="form-control datepicker" type="text" id="to_date" name="to_date" value="<?php if(isset($to_date)) echo (($to_date!=null && $to_date!='')?date('d/m/Y',strtotime($to_date)):''); ?>" readonly />
 						</div>
 					</div>
 				</div>

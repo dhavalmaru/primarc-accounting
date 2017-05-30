@@ -4,21 +4,16 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
 
-/* @var $this yii\web\View */
-/* @var $searchModel app\models\GrnSearch */
-/* @var $data[0]Provider yii\data\ActiveDataProvider */
+// if($action == "Create") {
+// 	$this->title = 'Create Payment Receipt';
+// } else {
+// 	$this->title = 'Update Payment Receipt: ' . $data[0]['id'];
+// }
 
-if($transaction == "Create") {
-	$this->title = 'Create Payment Receipt';
-} else {
-	$this->title = 'Update Payment Receipt: ' . $data[0]['id'];
-}
+$this->title = ucfirst($action) . ' Payment Receipt' . (isset($data[0]['id'])?': '.$data[0]['id']:'');
 
-// $this->title = 'Payment Receipt Details';
-// $this->params['breadcrumbs'][] = $this->title;
 $this->params['breadcrumbs'][] = ['label' => 'Payment Receipt', 'url' => ['index']];
-// $this->params['breadcrumbs'][] = ['label' => $grn_details[0]['grn_id'], 'url' => ['update', 'id' => $grn_details[0]['grn_id']]];
-$this->params['breadcrumbs'][] = $transaction;
+$this->params['breadcrumbs'][] = ucfirst($action);
 $mycomponent = Yii::$app->mycomponent;
 ?>
 
@@ -51,7 +46,9 @@ $mycomponent = Yii::$app->mycomponent;
 				<div class="col-md-3 col-sm-12 col-xs-12">
 					<label class="control-label">Transaction Type</label>
 					<div class="">
+						<input type="hidden" id="action" name="action" value="<?php if(isset($action)) echo $action; ?>">
 						<input type="hidden" id="id" name="id" value="<?php if(isset($data[0])) echo $data[0]['id']; ?>" />
+						<input type="hidden" id="status" name="status" value="<?php if(isset($data)) echo $data[0]['status']; ?>" />
 						<input type="hidden" id="voucher_id" name="voucher_id" value="<?php if(isset($data[0])) echo $data[0]['voucher_id']; ?>" />
 						<input type="hidden" id="ledger_type" name="ledger_type" value="<?php if(isset($data[0])) echo $data[0]['ledger_type']; ?>" />
 						<select id="trans_type" class="form-control" name="trans_type">
@@ -72,15 +69,7 @@ $mycomponent = Yii::$app->mycomponent;
 								<?php } ?>
 							</select>
 							<input class="form-control" type="hidden" name="legal_name" id="legal_name" value="<?php if(isset($data[0])) { echo $data[0]['account_name']; } ?>" />
-        					
-        					<!-- <select id="vendor_id" class="form-control" name="vendor_id">
-								<option value="">Select</option>
-								<?php //for($i=0; $i<count($vendor); $i++) { ?>
-									<option value="<?php //echo $vendor[$i]['id']; ?>" <?php //if(isset($data[0])) { if($data[0]['vendor_id']==$vendor[$i]['id']) echo "selected"; } ?>><?php //echo $vendor[$i]['vendor_name']; ?></option>
-								<?php //} ?>
-							</select>
-							<input id="vendor_name" name="vendor_name" class="form-control" type="hidden" value="<?php //if(isset($data[0])) echo $data[0]['vendor_name']; ?>" /> -->
-						</div>
+        				</div>
 					</div>
 				</div>
 				<div class="col-md-3 col-sm-12 col-xs-12">
@@ -177,47 +166,26 @@ $mycomponent = Yii::$app->mycomponent;
 							</tr>
 						</thead>
 						<tbody id="ledger_details">
-							<?php //for($i=0; $i<count($debit_credit); $i++) { ?>
-							<!-- <tr>
-								<td class="text-center"> 
-									<div class="checkbox"> 
-										<input type="checkbox" value="" class="check" id="chk1"> 
-									</div> 
-								</td>
-								<td> To Purchase </td>
-								<td class="text-right" > 10,000 </td>
-								<td class="text-right" > 0</td> 
-							</tr> -->
-							<? //} ?>
-
-							<!-- <tr class="bold-text">
-								<th  class="text-center" > &nbsp; </th>
-								<th class="text-right"  >  Total Amount   </th>
-								<th class="text-right" > 10,100 </th>
-								<th class="text-right"  > 10,100</th>  
-							</tr>
-							<tr class="bold-text">
-								<th  class="text-center" > &nbsp; </th>
-								<th class="text-right"  > Amount paying  </th>
-								<th class="text-right dbamountpaying"> 0 </th>
-								<th class="text-right cramountpaying"  > 0</th> 
-							</tr>
-							<tr class="bold-text">
-								<th  class="text-center" > &nbsp; </th>
-								<th class="text-right"  > Net Total Amount   </th>
-								<th class="text-right dbtotamount" > 10,100 </th>
-								<th class="text-right crtotamount"  > 10,100</th> 
-							</tr> -->
+							
 						</tbody>
 					</table>
+				</div>
+			</div>
+
+			<div class="form-group">
+	         	<div class="col-md-6 col-sm-6 col-xs-6">
+					<label class="control-label">Remarks</label>
+					<textarea id="remarks" name="remarks" class="form-control" rows="2" maxlength="1000"><?php if(isset($data)) echo $data[0]['approver_comments']; ?></textarea>
 				</div>
 			</div>
 
 			<!-- Button -->
 			<div class="btn-container "> 
 				<div class="col-md-12">
-					<button type="submit" class="btn btn-success btn-sm">Submit For Approval</button>
-					<a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Findex" class="btn btn-danger btn-sm">Cancel</a>
+					<!-- <button type="submit" class="btn btn-success btn-sm">Submit For Approval</button> -->
+					<input type="submit" class="btn btn-success btn-sm" id="btn_submit" name="btn_submit" value="Submit For Approval" />
+					<input type="submit" class="btn btn-danger btn-sm" id="btn_reject" name="btn_reject" value="Reject" />
+					<a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Findex" class="btn btn-primary btn-sm pull-right" >Cancel</a>
 					<!-- <button type="submit" class="btn btn-danger btn-sm" >Cancel </button> -->
 				</div>
 			</div>
@@ -245,7 +213,9 @@ $mycomponent = Yii::$app->mycomponent;
                 <td><?php echo $mycomponent->format_money($data[0]['amount'],2); ?></td>
                 <td><a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Fviewpaymentadvice&id=<?php echo $data[0]['id']; ?>" target="_blank">View</a></td>
                 <td><a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Fdownload&id=<?php echo $data[0]['id']; ?>" target="_blank">Download</a></td>
-                <td><a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Femailpaymentadvice&id=<?php echo $data[0]['id']; ?>">Email</a></td>
+                <td style="<?php if(isset($data)) {if($data[0]['status']=='approved') echo ''; else echo 'display: none;';} else echo 'display: none;'; ?>">
+                	<a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Femailpaymentadvice&id=<?php echo $data[0]['id']; ?>">Email</a>
+                </td>
             </tr>
         </table>
         </div>

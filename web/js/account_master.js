@@ -3,13 +3,48 @@ $('.datepicker').datepicker({changeMonth: true,changeYear: true});
 $(document).ready(function(){
     set_acc_type();
 
-	addMultiInputNamingRules('#account_category_master', 'input[name="category_1[]"]', { required: true });
-    addMultiInputNamingRules('#account_category_master', 'input[name="category_2[]"]', { required: true });
-    addMultiInputNamingRules('#account_category_master', 'input[name="category_3[]"]', { required: true });
+	addMultiInputNamingRules('#acc_category_master', 'input[name="category_1[]"]', { required: true });
+    addMultiInputNamingRules('#acc_category_master', 'input[name="category_2[]"]', { required: true });
+    addMultiInputNamingRules('#acc_category_master', 'input[name="category_3[]"]', { required: true });
 
     get_categories();
     set_view();
 })
+
+function set_view(){
+    if($('#action').val()=='view' || $('#status').val()=='approved'){
+        $('#add_category_div').hide();
+        $('#business_category tfoot').hide();
+        $('#btn_submit').hide();
+        $('#btn_reject').hide();
+        $('.action_delete').hide();
+
+        $("input").attr("disabled", true);
+        $("select").attr("disabled", true);
+        $("textarea").attr("disabled", true);
+    } else if($('#action').val()=='insert' || $('#action').val()=='edit'){
+        $('#btn_submit').val("Submit For Approval");
+        $('#btn_submit').show();
+        $('#btn_reject').hide();
+        $('.action_delete').show();
+    } else if($('#action').val()=='authorise'){
+        $('#add_category_div').hide();
+        $('#business_category tfoot').hide();
+
+        $("input[type!='hidden']").attr("disabled", true);
+        $("select").attr("disabled", true);
+        $("textarea").attr("disabled", true);
+
+        $('#btn_submit').val("Approve");
+        $('#btn_submit').show();
+        $('#btn_reject').show();
+        $('.action_delete').hide();
+
+        $('#remarks').attr("disabled", false);
+        $('#btn_submit').attr("disabled", false);
+        $('#btn_reject').attr("disabled", false);
+    }
+}
 
 function delete_row(elem){
     var id = elem.id;
@@ -17,24 +52,6 @@ function delete_row(elem){
 
     if(index!=0){
         $('#cat_row_'+index).remove();
-    }
-}
-
-function set_view(){
-    if($('#action').val()=='view'){
-        console.log("view");
-        // $('form input').each(
-        //     function() { $(this).attr('readonly', true); }
-        // );
-        // $('form select').each(
-        //     function() { $(this).attr('disabled', true); }
-        // );
-        $('#add_category_div').hide();
-        $('#business_category tfoot').hide();
-        $('#btn_submit').hide();
-
-        $("input").attr("disabled", true);
-        $("select").attr("disabled", true);
     }
 }
 
@@ -320,19 +337,19 @@ $("#repeat_category").click(function(){
 			'</tr>';
 	$("#category_body").append(tr);
 
-	removeMultiInputNamingRules('#account_category_master', 'input[alt="category_1[]"]');
-    removeMultiInputNamingRules('#account_category_master', 'input[alt="category_2[]"]');
-    removeMultiInputNamingRules('#account_category_master', 'input[alt="category_3[]"]');
+	removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_1[]"]');
+    removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_2[]"]');
+    removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_3[]"]');
 
-    addMultiInputNamingRules('#account_category_master', 'input[name="category_1[]"]', { required: true });
-    addMultiInputNamingRules('#account_category_master', 'input[name="category_2[]"]', { required: true });
-    addMultiInputNamingRules('#account_category_master', 'input[name="category_3[]"]', { required: true });
+    addMultiInputNamingRules('#acc_category_master', 'input[name="category_1[]"]', { required: true });
+    addMultiInputNamingRules('#acc_category_master', 'input[name="category_2[]"]', { required: true });
+    addMultiInputNamingRules('#acc_category_master', 'input[name="category_3[]"]', { required: true });
 
 	cat_cnt++;
 })
 
 $("#btn_save_category").click(function(){
-	if ($("#account_category_master").valid()) {
+	if ($("#acc_category_master").valid()) {
 	    save_categories();
 	    // get_categories();
 	}
@@ -354,7 +371,7 @@ function save_categories(){
 	$.ajax({
         url: BASE_URL+'index.php?r=accountmaster%2Fsavecategories',
         type: 'post',
-        data: $("#account_category_master").serialize(),
+        data: $("#acc_category_master").serialize(),
         dataType: 'json',
         success: function (data) {
       		// if (parseInt(data)) {
@@ -374,7 +391,7 @@ function get_categories(){
 	$.ajax({
         url: BASE_URL+'index.php?r=accountmaster%2Fgetcategories',
         type: 'post',
-        data: $("#account_category_master").serialize(),
+        data: $("#acc_category_master").serialize(),
         dataType: 'json',
         success: function (data) {
             update_categories(data);

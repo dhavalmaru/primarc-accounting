@@ -78,41 +78,41 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
         <h5 class="text-center">GRN Posting Voucher</h5>
         <div>Vendor Name: <?php echo $grn_details[0]['vendor_name']; ?></div>
         <div class="pull-left">Grn Id: <?php echo $grn_details[0]['grn_id']; ?></div>
-        <div class="pull-right">Posting Date: <?php if(isset($grn_acc_ledger_entries[0]["ref_date"])) echo (($grn_acc_ledger_entries[0]["ref_date"]!=null && $grn_acc_ledger_entries[0]["ref_date"]!='')?date('d/m/Y',strtotime($grn_acc_ledger_entries[0]["ref_date"])):date('d/m/Y')); else echo date('d/m/Y'); ?></div>
+        <div class="pull-right">Posting Date: <?php if(isset($acc_ledger_entries[0]["ref_date"])) echo (($acc_ledger_entries[0]["ref_date"]!=null && $acc_ledger_entries[0]["ref_date"]!='')?date('d/m/Y',strtotime($acc_ledger_entries[0]["ref_date"])):date('d/m/Y')); else echo date('d/m/Y'); ?></div>
         
 
-    <?php //echo count($grn_acc_ledger_entries); ?> 
+    <?php //echo count($acc_ledger_entries); ?> 
     <?php $rows = ""; $new_invoice_no = ""; $invoice_no = ""; $debit_amt=0; $credit_amt=0; $sr_no=1;
         $total_debit_amt=0; $total_credit_amt=0; 
         $table_arr = array(); $table_cnt = 0;
 
-        for($i=0; $i<count($grn_acc_ledger_entries); $i++) {
+        for($i=0; $i<count($acc_ledger_entries); $i++) {
             $rows = $rows . '<tr>
                                 <td>' . ($sr_no++) . '</td>
-                                <td>' . $grn_acc_ledger_entries[$i]["voucher_id"] . '</td>
-                                <td>' . $grn_acc_ledger_entries[$i]["ledger_name"] . '</td>
-                                <td>' . $grn_acc_ledger_entries[$i]["ledger_code"] . '</td>';
+                                <td>' . $acc_ledger_entries[$i]["voucher_id"] . '</td>
+                                <td>' . $acc_ledger_entries[$i]["ledger_name"] . '</td>
+                                <td>' . $acc_ledger_entries[$i]["ledger_code"] . '</td>';
 
-            if($grn_acc_ledger_entries[$i]["type"]=="Debit") {
-                $debit_amt = $debit_amt + $grn_acc_ledger_entries[$i]["amount"];
-                $total_debit_amt = $total_debit_amt + $grn_acc_ledger_entries[$i]["amount"];
-                $rows = $rows . '<td class="text-right">'.$mycomponent->format_money($grn_acc_ledger_entries[$i]["amount"],2).'</td>';
+            if($acc_ledger_entries[$i]["type"]=="Debit") {
+                $debit_amt = $debit_amt + $acc_ledger_entries[$i]["amount"];
+                $total_debit_amt = $total_debit_amt + $acc_ledger_entries[$i]["amount"];
+                $rows = $rows . '<td class="text-right">'.$mycomponent->format_money($acc_ledger_entries[$i]["amount"],2).'</td>';
             } else {
                 $rows = $rows . '<td></td>';
             }
 
-            if($grn_acc_ledger_entries[$i]["type"]=="Credit") {
-                $credit_amt = $credit_amt + $grn_acc_ledger_entries[$i]["amount"];
-                $total_credit_amt = $total_credit_amt + $grn_acc_ledger_entries[$i]["amount"];
-                $rows = $rows . '<td class="text-right">'.$mycomponent->format_money($grn_acc_ledger_entries[$i]["amount"],2).'</td>';
+            if($acc_ledger_entries[$i]["type"]=="Credit") {
+                $credit_amt = $credit_amt + $acc_ledger_entries[$i]["amount"];
+                $total_credit_amt = $total_credit_amt + $acc_ledger_entries[$i]["amount"];
+                $rows = $rows . '<td class="text-right">'.$mycomponent->format_money($acc_ledger_entries[$i]["amount"],2).'</td>';
             } else {
                 $rows = $rows . '<td></td>';
             }
 
             $rows = $rows . '</tr>';
 
-            if($grn_acc_ledger_entries[$i]["entry_type"]=="Total Amount" || $grn_acc_ledger_entries[$i]["entry_type"]=="Total Deduction"){
-                if($grn_acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
+            if($acc_ledger_entries[$i]["entry_type"]=="Total Amount" || $acc_ledger_entries[$i]["entry_type"]=="Total Deduction"){
+                if($acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
                     $particular = "Total Purchase Amount";
                 } else {
                     $particular = "Total Deduction Amount";
@@ -131,7 +131,7 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                 $total_credit_amt = 0;
                 $sr_no=1;
 
-                if($grn_acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
+                if($acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
                     $rows = $rows . '<tr class="bold-text text-right">
                                         <td colspan="6" style="text-align:left;">Deduction Entry</td>
                                     </tr>';
@@ -139,9 +139,9 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
             }
 
             $blFlag = false;
-            if(($i+1)==count($grn_acc_ledger_entries)){
+            if(($i+1)==count($acc_ledger_entries)){
                 $blFlag = true;
-            } else if($grn_acc_ledger_entries[$i]["invoice_no"]!=$grn_acc_ledger_entries[$i+1]["invoice_no"]){
+            } else if($acc_ledger_entries[$i]["invoice_no"]!=$acc_ledger_entries[$i+1]["invoice_no"]){
                 $blFlag = true;
             }
 
@@ -151,14 +151,14 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                         </tr>' . $rows;
 
                 $invoice_date = '';
-                if(isset($grn_acc_ledger_entries[0]["invoice_date"])) {
-                    if(($grn_acc_ledger_entries[0]["invoice_date"]!=null && $grn_acc_ledger_entries[0]["invoice_date"]!='')){
-                        $invoice_date = date('d/m/Y',strtotime($grn_acc_ledger_entries[0]["invoice_date"]));
+                if(isset($acc_ledger_entries[0]["invoice_date"])) {
+                    if(($acc_ledger_entries[0]["invoice_date"]!=null && $acc_ledger_entries[0]["invoice_date"]!='')){
+                        $invoice_date = date('d/m/Y',strtotime($acc_ledger_entries[0]["invoice_date"]));
                     }
                 }
                 
                 $table = '<div class="diversion">
-                            <div class="pull-left">Invoice No: ' . $grn_acc_ledger_entries[$i]["invoice_no"] . '</div>
+                            <div class="pull-left">Invoice No: ' . $acc_ledger_entries[$i]["invoice_no"] . '</div>
                             <div class="pull-right">Invoice Date: ' . $invoice_date . '</div>
                             <table class="table table-bordered">
                                 <tr class="table-head">

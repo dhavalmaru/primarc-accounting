@@ -82,7 +82,13 @@ class SecurityController extends BaseSecurityController {
                 $session->open();
                 $session['session_id'] = $data[0]['id'];
                 $session['username'] = $data[0]['username'];
+                $session['role_id'] = $data[0]['role_id'];
 
+                for($i=0; $i<count($data); $i++){
+                    $session[$data[$i]['r_section']] = $data[$i]['r_view'];
+                }
+
+                $login->log("User Login");
                 $this->redirect(array('welcome/index'));
             }
         }
@@ -104,6 +110,10 @@ class SecurityController extends BaseSecurityController {
         
         $session = Yii::$app->session;
         $userPermission=  json_decode($session->get('userPermission'));
+
+        $login = new Login();
+        $login->log("User Logout");
+        
         if(isset($userPermission->company_id))
         {
         $company_id=$userPermission->company_id; 
@@ -114,17 +124,20 @@ class SecurityController extends BaseSecurityController {
 
         Yii::$app->getUser()->logout();
 
+
         $this->trigger(self::EVENT_AFTER_LOGOUT, $event);
         
        
         
-         //set log history
-            $userlog=new \backend\models\UserLogHistory();
-            $userlog->company_id=$company_id;
-            $userlog->user_id=$user_id;
-            $userlog->user_action="User Logout";
-            $userlog->action_date=date("Y-m-d H:i:s");
-            $userlog->save(false);
+            //set log history
+            // $userlog=new \backend\models\UserLogHistory();
+            // $userlog->company_id=$company_id;
+            // $userlog->user_id=$user_id;
+            // $userlog->user_action="User Logout";
+            // $userlog->action_date=date("Y-m-d H:i:s");
+            // $userlog->save(false);
+
+
         }else{
 
             $user_id=Yii::$app->user->id;
@@ -141,6 +154,7 @@ class SecurityController extends BaseSecurityController {
             
         }
         
+
 
         return $this->goHome();
     }

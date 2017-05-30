@@ -95,15 +95,11 @@ class AccreportController extends Controller
                 // return $this->render('ledger_report', ['acc_details' => $acc_details]);
     }
 
-    // public function actionGenerate(){
-
-    // }
-
     public function actionLedgerreport()
     {
         $report = new AccReport();
         $acc_details = $report->getAccountDetails();
-
+        $report->setLog('LedgerReport', '', 'View', '', 'View Ledger Report', 'acc_ledger_entries', '');
         return $this->render('ledger_report', ['acc_details' => $acc_details]);
     }
 
@@ -111,7 +107,7 @@ class AccreportController extends Controller
     {
         $report = new AccReport();
         $acc_details = $report->getAccountDetails();
-
+        $report->setLog('TrialBalanceReport', '', 'View', '', 'View Trial Balance Report', 'acc_ledger_entries', '');
         return $this->render('trial_balance_report', ['acc_details' => $acc_details]);
     }
 
@@ -518,13 +514,13 @@ class AccreportController extends Controller
 
         // echo json_encode($data);
 
+        $report->setLog('LedgerReport', '', 'Generate', '', 'Generate Ledger Report', 'acc_ledger_entries', $account);
         return $this->render('ledger_report', ['acc_details' => $acc_details, 'opening_bal' => $opening_bal, 
                                                 'data' => $data, 'account' => $account, 
                                                 'from_date' => $from_date, 'to_date' => $to_date, 'narration' => $narration]);
     }
 
-    public function actionGettrialbalance()
-    {   
+    public function actionGettrialbalance() {   
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
 
@@ -745,6 +741,8 @@ class AccreportController extends Controller
 
         $data['tbody'] = $tbody;
         $data['tbody2'] = $tbody2;
+
+        $report->setLog('TrialBalanceReport', '', 'Generate', '', 'Generate Trial Balance Report', 'acc_ledger_entries', '');
         echo json_encode($data);
     }
 }

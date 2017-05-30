@@ -9,12 +9,6 @@ use yii\jui\DatePicker;
 use yii\web\JsExpression;
 use yii\db\Query;
 
-// use kartik\date\DatePicker;
-
-/* @var $this yii\web\View */
-/* @var $searchModel app\models\GrnSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
-
 $this->title = 'Account Details';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -39,6 +33,7 @@ select {
 					<label class="control-label">Type</label>
 					<input type="hidden" id="action" name="action" value="<?php if(isset($action)) echo $action; ?>">
 					<input type="hidden" id="id" name="id" value="<?php if(isset($data)) echo $data[0]['id']; ?>" />
+					<input type="hidden" id="status" name="status" value="<?php if(isset($data)) echo $data[0]['status']; ?>" />
 					<input type="hidden" id="type_val" name="type_val" value="<?php if(isset($data)) echo $data[0]['type']; ?>" />
 					<select class="form-control" id="type" name="type" <?php if(isset($data)) echo 'disabled'; ?>>
 						<option value="">Select</option>
@@ -88,13 +83,13 @@ select {
 						<option value="Liability" <?php if(isset($data)) { if($data[0]['account_type']=="Liability") echo "selected"; } ?>>Liability</option>
 					</select>
 				</div>
+	         	<div class="col-md-3 col-sm-3 col-xs-6">
+					<label class="control-label">Details</label>
+					<input id="details" name="details" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['details']; ?>" />
+				</div>
 	         	<div class="col-md-3 col-sm-3 col-xs-6 vendor_expenses employee" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Expenses' && $data[0]['type'] != 'Employee') echo 'display: none;'; } else echo 'display: none;'; ?>">
 					<label class="control-label">Expences Type</label>
 					<input id="expense_type" name="expense_type" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['expense_type']; ?>" />
-				</div>
-	         	<div class="col-md-3 col-sm-3 col-xs-6">
-					<label class="control-label">Remarks</label>
-					<input id="details" name="details" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['details']; ?>" />
 				</div>
 				<div class=" col-md-3 col-sm-3 col-xs-6 vendor_expenses employee" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Expenses' && $data[0]['type'] != 'Employee') echo 'display: none;'; } else echo 'display: none;'; ?>">
 					<label class="control-label">Location</label>
@@ -140,6 +135,7 @@ select {
 					</div>
 				</div>
 			</div>
+
 			<div class="form-group vendor_expenses employee" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Expenses' && $data[0]['type'] != 'Employee') echo 'display: none;'; } else echo 'display: none;'; ?>">
 				<div class="employee" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Employee') echo 'display: none;'; } else echo 'display: none;'; ?>">
 					<div class="col-md-3 col-sm-3 col-xs-6">
@@ -196,6 +192,7 @@ select {
 					</div>
 				</div>
 			</div>
+
 			<div class="form-group" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Goods' && $data[0]['type'] != 'Vendor Expenses') echo 'display: none;'; } else echo 'display: none;'; ?>">
 				<div class="vendor_goods vendor_expenses" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Goods' && $data[0]['type'] != 'Vendor Expenses') echo 'display: none;'; } else echo 'display: none;'; ?>">
 					<div class="col-md-3 col-sm-3 col-xs-6">
@@ -235,7 +232,6 @@ select {
 				</div>
 			</div>
 
-
 			<div class="form-group vendor_goods vendor_expenses bank_account employee" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Goods' && $data[0]['type'] != 'Vendor Expenses' && $data[0]['type'] != 'Employee' && $data[0]['type'] != 'Bank Account') echo 'display: none;'; } else echo 'display: none;'; ?>">
 				<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Account Number</label>
@@ -254,6 +250,7 @@ select {
                     <span class="fa download fa-download" ></span></a><?php }} ?>
 				</div>
 			</div>
+
 			<div class="form-group vendor_goods vendor_expenses bank_account employee" id="bank_details" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Goods' && $data[0]['type'] != 'Vendor Expenses' && $data[0]['type'] != 'Employee' && $data[0]['type'] != 'Bank Account') echo 'display: none;'; } else echo 'display: none;'; ?>">
 				<div class="col-md-3 col-sm-3 col-xs-6" id="acc_hold_name">
 					<label class="control-label">Account Holder Name</label>
@@ -336,7 +333,7 @@ select {
 					<table class="table table-bordered" id="business_category">
                 		<thead>
                 			<tr>
-	                			<th width="55px;" style="text-align: center;">Action</th>
+	                			<th width="55px;" style="text-align: center;" class="action_delete">Action</th>
 	                			<th width="55px;" style="text-align: center;">Sr. No.</th>
 	                			<th width="250px;">Category</th>
                 			</tr>
@@ -345,7 +342,7 @@ select {
                 			<?php $blFlag = false; if(isset($acc_category)) { if(count($acc_category)>0) { $blFlag = true;
                 					for($i=0; $i<count($acc_category); $i++) { ?>
 		                				<tr id="cat_row_<?php echo $i; ?>">
-		                					<td style="text-align: center;"><button type="button" class="btn btn-sm btn-success" id="delete_row_<?php echo $i; ?>" onClick="delete_row(this);">-</button></td>
+		                					<td style="text-align: center;" class="action_delete"><button type="button" class="btn btn-sm btn-success" id="delete_row_<?php echo $i; ?>" onClick="delete_row(this);">-</button></td>
 				                			<td style="text-align: center;"><?php echo $i+1; ?></td>
 				                			<td>
 				                				<select id="cat_id_<?php echo $i; ?>" name="bus_category[]" onChange="set_bus_category(this);" class="form-control">
@@ -359,7 +356,7 @@ select {
 			                			</tr>
                 			<?php }}} if($blFlag == false) { ?>
                 						<tr id="cat_row_0">
-				                			<td style="text-align: center;"><button type="button" class="btn btn-sm btn-success" id="delete_row_0" onClick="delete_row(this);">-</button></td>
+				                			<td style="text-align: center;" class="action_delete"><button type="button" class="btn btn-sm btn-success" id="delete_row_0" onClick="delete_row(this);">-</button></td>
 				                			<td style="text-align: center;">1</td>
 				                			<td>
 				                				<select id="cat_id_0" name="bus_category[]" class="form-control" onChange="set_bus_category(this);">
@@ -383,12 +380,19 @@ select {
 				</div>
 			</div>
 
-			<!-- Button -->
+			<div class="form-group">
+	         	<div class="col-md-6 col-sm-6 col-xs-6">
+					<label class="control-label">Remarks</label>
+					<textarea id="remarks" name="remarks" class="form-control" rows="2" maxlength="1000"><?php if(isset($data)) echo $data[0]['approver_comments']; ?></textarea>
+				</div>
+			</div>
+
 			<div class="form-group btn-container"> 
 				<div class="col-md-12">
-					<button type="submit" class="btn btn-success btn-sm" id="btn_submit">Submit For Approval  </button>
-					<a href="<?php echo Url::base(); ?>index.php?r=accountmaster%2Findex" class="btn btn-danger btn-sm" >Cancel</a>
-					<!-- <button type="submit" class="btn btn-danger btn-sm" >Cancel </button> -->
+					<!-- <button type="submit" class="btn btn-success btn-sm" id="btn_submit">Submit For Approval  </button> -->
+					<input type="submit" class="btn btn-success btn-sm" id="btn_submit" name="btn_submit" value="Submit For Approval" />
+					<input type="submit" class="btn btn-danger btn-sm" id="btn_reject" name="btn_reject" value="Reject" />
+					<a href="<?php echo Url::base(); ?>index.php?r=accountmaster%2Findex" class="btn btn-primary btn-sm pull-right">Cancel</a>
 				</div>
 			</div>
 		</form>
@@ -404,7 +408,7 @@ select {
             </div>
             <div class="modal-body" style=" ">
 			  	<div class="modal-body-inside">
-			  		<form id="account_category_master" class="form-horizontal"> 
+			  		<form id="acc_category_master" class="form-horizontal"> 
 			  			<input type="hidden" name="_csrf" value="<?=Yii::$app->request->getCsrfToken()?>" />
 			  			<!-- <div class="bs-example grn-index" data-example-id="bordered-table"> -->
 	                	<table class="table table-bordered">

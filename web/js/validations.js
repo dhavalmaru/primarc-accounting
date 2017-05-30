@@ -330,7 +330,7 @@ $.validator.addMethod("check_legal_name_availablity", function (value, element) 
 
 
 // ----------------- ACCOUNT CATEGORY MASTER FORM VALIDATION -------------------------------------
-$("#account_category_master").validate({
+$("#acc_category_master").validate({
     rules: {
         
     },
@@ -347,21 +347,21 @@ $("#account_category_master").validate({
     }
 });
 
-$('#account_category_master').submit(function() {
-    removeMultiInputNamingRules('#account_category_master', 'input[alt="category_1[]"]');
-    removeMultiInputNamingRules('#account_category_master', 'input[alt="category_2[]"]');
-    removeMultiInputNamingRules('#account_category_master', 'input[alt="category_3[]"]');
+$('#acc_category_master').submit(function() {
+    removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_1[]"]');
+    removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_2[]"]');
+    removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_3[]"]');
 
-    addMultiInputNamingRules('#account_category_master', 'input[name="category_1[]"]', { required: true });
-    addMultiInputNamingRules('#account_category_master', 'input[name="category_2[]"]', { required: true });
-    addMultiInputNamingRules('#account_category_master', 'input[name="category_3[]"]', { required: true });
+    addMultiInputNamingRules('#acc_category_master', 'input[name="category_1[]"]', { required: true });
+    addMultiInputNamingRules('#acc_category_master', 'input[name="category_2[]"]', { required: true });
+    addMultiInputNamingRules('#acc_category_master', 'input[name="category_3[]"]', { required: true });
 
-    if (!$("#account_category_master").valid()) {
+    if (!$("#acc_category_master").valid()) {
         return false;
     } else {
-        removeMultiInputNamingRules('#account_category_master', 'input[alt="category_1[]"]');
-        removeMultiInputNamingRules('#account_category_master', 'input[alt="category_2[]"]');
-        removeMultiInputNamingRules('#account_category_master', 'input[alt="category_3[]"]');
+        removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_1[]"]');
+        removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_2[]"]');
+        removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_3[]"]');
 
         return true;
     }
@@ -780,7 +780,7 @@ $('#journal_voucher').submit(function() {
 
         return false;
     } else {
-        if (check_journal_voucher_details()==false) {
+        if (check_acc_jv_details()==false) {
             return false;
         } else {
             removeMultiInputNamingRules('#journal_voucher', 'select[alt="acc_id[]"]');
@@ -794,7 +794,7 @@ $('#journal_voucher').submit(function() {
     }
 });
 
-function check_journal_voucher_details() {
+function check_acc_jv_details() {
     var validator = $("#journal_voucher").validate();
     var valid = true;
 
@@ -862,7 +862,7 @@ $('#payment_receipt').submit(function() {
     if (!$("#payment_receipt").valid()) {
         return false;
     } else {
-        if (check_payment_receipt_details()==false) {
+        if (check_acc_payment_receipt()==false) {
             return false;
         }
 
@@ -870,7 +870,7 @@ $('#payment_receipt').submit(function() {
     }
 });
 
-function check_payment_receipt_details() {
+function check_acc_payment_receipt() {
     var validator = $("#payment_receipt").validate();
     var valid = true;
 
@@ -932,6 +932,150 @@ $("#ledger_report").validate({
 
 $('#ledger_report').submit(function() {
     if (!$("#ledger_report").valid()) {
+        return false;
+    } else {
+        return true;
+    }
+});
+
+
+
+
+// ----------------- USER ROLE DETAILS FORM VALIDATION -------------------------------------
+$("#user_role").validate({
+    rules: {
+        role: {
+            required: true,
+            checkRoleAvailability: true
+        }
+    },
+
+    ignore: false,
+    onkeyup: false,
+
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
+
+$.validator.addMethod("checkRoleAvailability", function (value, element) {
+    var result = 1;
+
+    $.ajax({
+        url: BASE_URL+'index.php?r=userrole%2Fcheckroleavailablity',
+        data: $("#user_role").serialize(),
+        type: "POST",
+        dataType: 'html',
+        global: false,
+        async: false,
+        success: function (data) {
+            result = parseInt(data);
+        },
+      error: function (xhr, ajaxOptions, thrownError) {
+        alert(xhr.status);
+        alert(thrownError);
+      }
+    });
+
+    if (result) {
+        return false;
+    } else {
+        return true;
+    }
+}, 'User Role already exist.');
+
+$('#user_role').submit(function() {
+    if (!$("#user_role").valid()) {
+        return false;
+    } else {
+        if (checkRole()==false) {
+            return false;
+        }
+
+        return true;
+    }
+});
+
+function checkRole() {
+    var validator = $("#user_role").validate();
+    var valid = true;
+
+    var result = 1;
+
+    $('.cls_chk').each(function(){
+        if ($(this).is(":checked")) result=0;
+    });
+
+    if (result) {
+        var errors = {};
+        var name = "role";
+        errors[name] = "Please assign atleast one role.";
+        validator.showErrors(errors);
+        valid = false;
+    }
+
+    return valid;
+}
+
+
+
+
+
+// ----------------- ASSIGN ROLE DETAILS FORM VALIDATION -------------------------------------
+$("#assign_role").validate({
+    rules: {
+        role: {
+            required: true,
+            checkUserRoleAvailability: true
+        }
+    },
+
+    ignore: false,
+    onkeyup: false,
+
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
+
+$.validator.addMethod("checkUserRoleAvailability", function (value, element) {
+    var result = 1;
+
+    $.ajax({
+        url: BASE_URL+'index.php?r=userrole%2Fcheckroleavailablity',
+        data: $("#assign_role").serialize(),
+        type: "POST",
+        dataType: 'html',
+        global: false,
+        async: false,
+        success: function (data) {
+            result = parseInt(data);
+        },
+      error: function (xhr, ajaxOptions, thrownError) {
+        alert(xhr.status);
+        alert(thrownError);
+      }
+    });
+
+    if (result) {
+        return false;
+    } else {
+        return true;
+    }
+}, 'User Role already exist.');
+
+$('#assign_role').submit(function() {
+    if (!$("#assign_role").valid()) {
         return false;
     } else {
         return true;

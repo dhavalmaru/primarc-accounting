@@ -235,7 +235,7 @@ class Grn extends \yii\db\ActiveRecord
                 (select A.*, B.grn_id as b_grn_id from 
                 (select * from grn where status = 'approved') A 
                 left join 
-                (select distinct grn_id from grn_acc_entries) B 
+                (select distinct grn_id from acc_grn_entries) B 
                 on (A.grn_id = B.grn_id)) C 
                 where b_grn_id is null";
         $command = Yii::$app->db->createCommand($sql);
@@ -253,7 +253,7 @@ class Grn extends \yii\db\ActiveRecord
                         sum(case when particular='Expiry Amount' then edited_val else 0 end) as expiry_amt, 
                         sum(case when particular='Damaged Amount' then edited_val else 0 end) as damaged_amt, 
                         sum(case when particular='Margin Diff Amount' then edited_val else 0 end) as magrin_diff_amt 
-                from grn_acc_entries where status = 'pending' group by grn_id) A) B 
+                from acc_grn_entries where status = 'pending' group by grn_id) A) B 
                 left join 
                 (select * from grn where status = 'approved') C 
                 on (B.grn_id = C.grn_id)";
@@ -272,7 +272,7 @@ class Grn extends \yii\db\ActiveRecord
                         sum(case when particular='Expiry Amount' then edited_val else 0 end) as expiry_amt, 
                         sum(case when particular='Damaged Amount' then edited_val else 0 end) as damaged_amt, 
                         sum(case when particular='Margin Diff Amount' then edited_val else 0 end) as magrin_diff_amt 
-                from grn_acc_entries where status = 'approved' group by grn_id) A) B 
+                from acc_grn_entries where status = 'approved' group by grn_id) A) B 
                 left join 
                 (select * from grn where status = 'approved') C 
                 on (B.grn_id = C.grn_id)";
@@ -383,7 +383,7 @@ class Grn extends \yii\db\ActiveRecord
     }
 
     public function getGrnAccEntries($id){
-        $sql = "select * from grn_acc_entries where grn_id = '$id' and status = 'pending' order by grn_id, invoice_no, vat_cst, vat_percen";
+        $sql = "select * from acc_grn_entries where grn_id = '$id' and status = 'pending' order by grn_id, invoice_no, vat_cst, vat_percen";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -398,7 +398,7 @@ class Grn extends \yii\db\ActiveRecord
 
     public function getGrnAccSkuEntries($id, $ded_type){
         $sql = "select invoice_no, ean, psku, product_title, vat_percen, box_price, cost_excl_vat_per_unit, tax_per_unit, 
-                total_per_unit, cost_excl_vat, tax, total, qty as ".$ded_type."_qty from grn_acc_sku_entries 
+                total_per_unit, cost_excl_vat, tax, total, qty as ".$ded_type."_qty from acc_grn_sku_entries 
                 where grn_id = '$id' and ded_type = '$ded_type' order by invoice_no, vat_percen";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
@@ -406,7 +406,7 @@ class Grn extends \yii\db\ActiveRecord
     }
 
     public function getGrnAccLedgerEntries($id){
-        $sql = "select * from grn_acc_ledger_entries where grn_id = '$id' and status = 'pending' order by grn_id, invoice_no, id";
+        $sql = "select * from acc_ledger_entries where grn_id = '$id' and status = 'pending' order by grn_id, invoice_no, id";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();

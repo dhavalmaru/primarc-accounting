@@ -61,7 +61,7 @@ class DebitCreditNote extends Model
         if(isset($trans_id[0]) && $trans_id[0]!=""){
             $transaction_id = $trans_id[0];
         } else {
-            $sql = "select * from series_master where type = 'Transaction'";
+            $sql = "select * from acc_series_master where type = 'Transaction'";
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $data = $reader->readAll();
@@ -69,13 +69,13 @@ class DebitCreditNote extends Model
             if(count($data)>0){
                 $series = intVal($data[0]['series']) + 1;
 
-                $sql = "update series_master set series = '$series' where type = 'Transaction'";
+                $sql = "update acc_series_master set series = '$series' where type = 'Transaction'";
                 $command = Yii::$app->db->createCommand($sql);
                 $count = $command->execute();
             } else {
                 $series = 1;
 
-                $sql = "insert into series_master (type, series) values ('Transaction', '".$series."')";
+                $sql = "insert into acc_series_master (type, series) values ('Transaction', '".$series."')";
                 $command = Yii::$app->db->createCommand($sql);
                 $count = $command->execute();
             }

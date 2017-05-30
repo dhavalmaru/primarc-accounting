@@ -101,12 +101,65 @@ $session = Yii::$app->session;
         </form>
         <!-- /.search form -->
         <!-- sidebar menu: : style can be found in sidebar.less -->
+        <!-- <ul class="sidebar-menu"> 
+            <li style="<?php //if(isset($access['S_Account_Master']['r_view'])) {if($access['S_Account_Master']['r_view']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="<?php //echo Url::base(); ?>index.php?r=accountmaster%2Findex"><i class="fa fa-book"></i> <span>Account Master</span></a>
+            </li> 
+            <li style="<?php //if(isset($access['S_Purchase']['r_view'])) {if($access['S_Purchase']['r_view']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="<?php //echo Url::base(); ?>index.php?r=pendinggrn%2Findex"><i class="fa fa-credit-card"></i> <span>Purchase</span></a>
+            </li>
+            <li style="<?php //if(isset($access['S_Journal_Voucher']['r_view'])) {if($access['S_Journal_Voucher']['r_view']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="<?php //echo Url::base(); ?>index.php?r=journalvoucher%2Findex"><i class="fa fa-book"></i> <span>Journal Voucher</span></a>
+            </li>
+            <li style="<?php //if(isset($access['S_Payment_Receipt']['r_view'])) {if($access['S_Payment_Receipt']['r_view']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="<?php //echo Url::base(); ?>index.php?r=paymentreceipt%2Findex"><i class="fa fa-money"></i> <span>Payment / Receipt</span></a>
+            </li> 
+            <li style="<?php //if(isset($access['S_User_Roles']['r_view'])) {if($access['S_User_Roles']['r_view']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="<?php //echo Url::base(); ?>index.php?r=userrole%2Findex"><i class="fa fa-book"></i> <span>User Roles</span></a>
+            </li>
+            <li class="treeview" style="<?php //if(isset($access['S_Reports']['r_view'])) {if($access['S_Reports']['r_view']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="#">
+                    <i class="fa fa-bug"></i> <span>Reports</span>
+                    <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li class="active"><a href="<?php //echo Url::base(); ?>index.php?r=accreport%2Fledgerreport"><i class="fa fa-circle-o"></i> Ledger</a></li>
+                    <li><a href="<?php //echo Url::base(); ?>index.php?r=accreport%2Ftrialbalancereport"><i class="fa fa-circle-o"></i> Trial Balance </a></li>
+                </ul>
+            </li>
+        </ul> -->
+
         <ul class="sidebar-menu"> 
-            <li><a href="<?php echo Url::base(); ?>index.php?r=accountmaster%2Findex"><i class="fa fa-book"></i> <span>Account Master</span></a></li> 
-            <li><a href="<?php echo Url::base(); ?>index.php?r=pendinggrn%2Findex"><i class="fa fa-credit-card"></i> <span>Purchase</span></a></li>
-            <li><a href="<?php echo Url::base(); ?>index.php?r=journalvoucher%2Findex"><i class="fa fa-book"></i> <span>Journal Voucher</span></a></li>
-            <li><a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Findex"><i class="fa fa-money"></i> <span>Payment / Receipt</span></a></li>
-            <li class="treeview">
+            <li style="<?php if(isset($session['S_Account_Master'])) {if($session['S_Account_Master']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="<?php echo Url::base(); ?>index.php?r=accountmaster%2Findex"><i class="fa fa-book"></i> <span>Account Master</span></a>
+            </li> 
+            <li style="<?php if(isset($session['S_Purchase'])) {if($session['S_Purchase']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="<?php echo Url::base(); ?>index.php?r=pendinggrn%2Findex"><i class="fa fa-credit-card"></i> <span>Purchase</span></a>
+            </li>
+            <li style="<?php if(isset($session['S_Journal_Voucher'])) {if($session['S_Journal_Voucher']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="<?php echo Url::base(); ?>index.php?r=journalvoucher%2Findex"><i class="fa fa-book"></i> <span>Journal Voucher</span></a>
+            </li>
+            <li style="<?php if(isset($session['S_Payment_Receipt'])) {if($session['S_Payment_Receipt']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Findex"><i class="fa fa-money"></i> <span>Payment / Receipt</span></a>
+            </li> 
+            <li class="treeview" style="<?php if(isset($session['S_User_Roles'])) {if($session['S_User_Roles']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="#">
+                    <i class="fa fa-bug"></i> <span>User Roles</span>
+                    <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li class="active"><a href="<?php echo Url::base(); ?>index.php?r=userrole%2Findex"><i class="fa fa-circle-o"></i> Create</a></li>
+                    <li><a href="<?php echo Url::base(); ?>index.php?r=assignrole%2Findex"><i class="fa fa-circle-o"></i> Assign </a></li>
+                </ul>
+            </li>
+            <!-- <li style="<?php //if(isset($session['S_User_Roles'])) {if($session['S_User_Roles']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="<?php //echo Url::base(); ?>index.php?r=userrole%2Findex"><i class="fa fa-book"></i> <span>User Roles</span></a>
+            </li> -->
+            <li class="treeview" style="<?php if(isset($session['S_Reports'])) {if($session['S_Reports']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
                 <a href="#">
                     <i class="fa fa-bug"></i> <span>Reports</span>
                     <span class="pull-right-container">

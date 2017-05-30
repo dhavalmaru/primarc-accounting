@@ -93,7 +93,7 @@ class User extends BaseUser {
         
         $connection = \Yii::$app->db;
 
-        $command = $connection->createCommand("select distinct(u.id),u.username,u.email,u.created_at,u.blocked_at,r.role_name from user as u left join user_roles as ur on ur.user_id=u.id left join roles as r on r.id=ur.role_id");
+        $command = $connection->createCommand("select distinct(u.id),u.username,u.email,u.created_at,u.blocked_at,r.role_name from user as u left join acc_user_roles as ur on ur.user_id=u.id left join roles as r on r.id=ur.role_id");
 
         $dataReader = $command->queryAll();
         return $dataReader;
@@ -154,7 +154,7 @@ class User extends BaseUser {
         if($this->id)
         {
            // echo $this->id;die;
-        $role= UserRoles::find()->select('roles.*')->leftJoin('roles', 'user_roles.role_id=roles.id')->where(['user_roles.user_id'=>$this->id])->asArray()->one();
+        $role= UserRoles::find()->select('roles.*')->leftJoin('roles', 'acc_user_roles.role_id=roles.id')->where(['acc_user_roles.user_id'=>$this->id])->asArray()->one();
         //var_dump($role);die;
       return  $role['role_name'];
         }else{
@@ -175,7 +175,7 @@ class User extends BaseUser {
         
            $connection = \Yii::$app->db;
 
-           $command = $connection->createCommand("select group_concat(role_id) as roles from user_roles  where user_id=".$id." group by user_id"
+           $command = $connection->createCommand("select group_concat(role_id) as roles from acc_user_roles  where user_id=".$id." group by user_id"
             );
 
             $dataReader = $command->queryAll();
@@ -192,7 +192,7 @@ class User extends BaseUser {
     {
         $connection = \Yii::$app->db;
 
-        $command = $connection->createCommand("delete from user_roles where user_id=".$id );
+        $command = $connection->createCommand("delete from acc_user_roles where user_id=".$id );
 
         $dataReader = $command->execute();
         
@@ -339,7 +339,7 @@ class User extends BaseUser {
     {
          $connection = \Yii::$app->db;
 
-        $command = $connection->createCommand("select group_concat(ur.role_id) as role_id from user_roles as ur left join roles as r on ur.role_id=r.id where ur.user_id=".$user_id." group by ur.user_id");
+        $command = $connection->createCommand("select group_concat(ur.role_id) as role_id from acc_user_roles as ur left join roles as r on ur.role_id=r.id where ur.user_id=".$user_id." group by ur.user_id");
        
         $dataReader = $command->queryAll();  
         

@@ -17,7 +17,9 @@ $(document).ready(function(){
     $('.loading').fadeIn(1000); 
     $('#loader').fadeOut(400);
 
-    change_date_criteria();
+    if($('#from_date').val()==""){
+        change_date_criteria();
+    }
 
     // $("#company_name").html("Primarc Pecan Retail Pvt Ltd");
     $("#account_name").html($("#account option:selected").text());

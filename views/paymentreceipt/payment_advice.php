@@ -4,10 +4,8 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title> Primac Pecan | Payment Advice</title>
-    <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <!-- Bootstrap 3.3.6 -->
-
+    
     <style>
         body { font-family:Muli; margin:0; padding:0;}
         .debit_note {  margin:20px auto; border:0px solid #ddd; max-width:800px; }
@@ -103,18 +101,6 @@
                         <td style="text-align:right;"><p style="text-align:right;"> <?php echo $mycomponent->format_money($entry_details[$i]['amount'],2); ?> </p></td>
                     </tr>
                 <?php } ?>
-                <!-- <tr style="text-align:right;">
-                    <td style="text-align:left;"><p> Taxable Amount </p></td>
-                    <td><p> WH001 </p></td>
-                    <td><p> 06-03-2017 </p></td>
-                    <td><p> 22,200.50 </p></td>
-                </tr>
-                <tr style="text-align:right;">
-                    <td style="text-align:left;"><p> Taxable Amount </p></td>
-                    <td><p> WH001 </p></td>
-                    <td><p> 06-03-2017 </p></td>
-                    <td><p> 25,005.81 </p></td>
-                </tr> -->
             </table>
         </td>
     </tr >

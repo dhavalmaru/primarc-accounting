@@ -9,50 +9,160 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\helpers\Url;
 
-/**
- * GrnController implements the CRUD actions for Grn model.
- */
 class JournalvoucherController extends Controller
 {
-    public function actionIndex()
-    {
+    public function actionIndex(){
         $journal_voucher = new JournalVoucher();
-        $pending = $journal_voucher->getJournalVoucherDetails("", "pending");
-        $approved = $journal_voucher->getJournalVoucherDetails("", "approved");
-        return $this->render('journalvoucher_list', [
-            'pending' => $pending, 'approved' => $approved,
-        ]);
+        $access = $journal_voucher->getAccess();
+        if(count($access)>0) {
+            if($access[0]['r_view']==1) {
+                $pending = $journal_voucher->getJournalVoucherDetails("", "pending");
+                $approved = $journal_voucher->getJournalVoucherDetails("", "approved");
+                $rejected = $journal_voucher->getJournalVoucherDetails("", "rejected");
+
+                $journal_voucher->setLog('JournalVoucher', '', 'View', '', 'View Journal Voucher List', 'acc_jv_details', '');
+                return $this->render('journalvoucher_list', ['access' => $access, 'pending' => $pending, 'approved' => $approved, 
+                                                        'rejected' => $rejected]);
+            } else {
+                return $this->render('/message', [
+                    'title'  => \Yii::t('user', 'Access Denied'),
+                    'module' => $this->module,
+                    'msg' => '<h4>You donot have access to this page.</h4>'
+                ]);
+            }
+        } else {
+            $this->layout = 'other';
+            return $this->render('/message', [
+                'title'  => \Yii::t('user', 'Session Expired'),
+                'module' => $this->module,
+                'msg' => 'Session Expired. Please <a href="'.Url::base().'index.php">Login</a> again.'
+            ]);
+        }
+    }
+
+    public function actionCreate(){
+        $journal_voucher = new JournalVoucher();
+        $access = $journal_voucher->getAccess();
+        if(count($access)>0) {
+            if($access[0]['r_insert']==1) {
+                $acc_details = $journal_voucher->getAccountDetails();
+
+                $journal_voucher->setLog('JournalVoucher', '', 'Insert', '', 'Insert Journal Voucher Details', 'acc_jv_details', '');
+                return $this->render('journalvoucher_details', ['action' => 'insert', 'acc_details' => $acc_details]);
+            } else {
+                return $this->render('/message', [
+                    'title'  => \Yii::t('user', 'Access Denied'),
+                    'module' => $this->module,
+                    'msg' => '<h4>You donot have access to this page.</h4>'
+                ]);
+            }
+        } else {
+            $this->layout = 'other';
+            return $this->render('/message', [
+                'title'  => \Yii::t('user', 'Session Expired'),
+                'module' => $this->module,
+                'msg' => 'Session Expired. Please <a href="'.Url::base().'index.php">Login</a> again.'
+            ]);
+        }
+    }
+
+    public function actionRedirect($action, $id) {
+        $journal_voucher = new JournalVoucher();
+        $data = $journal_voucher->getJournalVoucherDetails($id, "");
+        $acc_details = $journal_voucher->getAccountDetails();
+        $jv_entries = $journal_voucher->gerJournalVoucherEntries($id);
+        $jv_docs = $journal_voucher->gerJournalVoucherDocs($id);
+
+        return $this->render('journalvoucher_details', ['action' => $action, 'data' => $data, 'acc_details' => $acc_details, 
+                                                        'jv_entries' => $jv_entries, 'jv_docs' => $jv_docs]);
+    }
+
+    public function actionView($id) {
+        $journal_voucher = new JournalVoucher();
+        $access = $journal_voucher->getAccess();
+        if(count($access)>0) {
+            if($access[0]['r_view']==1) {
+                $journal_voucher->setLog('JournalVoucher', '', 'View', '', 'View Journal Voucher Details', 'acc_jv_details', $id);
+                return $this->actionRedirect('view', $id);
+            } else {
+                return $this->render('/message', [
+                    'title'  => \Yii::t('user', 'Access Denied'),
+                    'module' => $this->module,
+                    'msg' => '<h4>You donot have access to this page.</h4>'
+                ]);
+            }
+        } else {
+            $this->layout = 'other';
+            return $this->render('/message', [
+                'title'  => \Yii::t('user', 'Session Expired'),
+                'module' => $this->module,
+                'msg' => 'Session Expired. Please <a href="'.Url::base().'index.php">Login</a> again.'
+            ]);
+        }
+    }
+
+    public function actionEdit($id) {
+        $journal_voucher = new JournalVoucher();
+        $access = $journal_voucher->getAccess();
+        $data = $journal_voucher->getJournalVoucherDetails($id, "");
+        if(count($access)>0) {
+            if($access[0]['r_edit']==1 && $access[0]['session_id']==$data[0]['updated_by']) {
+                $journal_voucher->setLog('JournalVoucher', '', 'Edit', '', 'Edit Journal Voucher Details', 'acc_jv_details', $id);
+                return $this->actionRedirect('edit', $id);
+            } else {
+                return $this->render('/message', [
+                    'title'  => \Yii::t('user', 'Access Denied'),
+                    'module' => $this->module,
+                    'msg' => '<h4>You donot have access to this page.</h4>'
+                ]);
+            }
+        } else {
+            $this->layout = 'other';
+            return $this->render('/message', [
+                'title'  => \Yii::t('user', 'Session Expired'),
+                'module' => $this->module,
+                'msg' => 'Session Expired. Please <a href="'.Url::base().'index.php">Login</a> again.'
+            ]);
+        }
+    }
+
+    public function actionAuthorise($id) {
+        $journal_voucher = new JournalVoucher();
+        $access = $journal_voucher->getAccess();
+        $data = $journal_voucher->getJournalVoucherDetails($id, "");
+        if(count($access)>0) {
+            if($access[0]['r_approval']==1 && $access[0]['session_id']!=$data[0]['updated_by']) {
+                $journal_voucher->setLog('JournalVoucher', '', 'Authorise', '', 'Authorise Journal Voucher Details', 'acc_jv_details', $id);
+                return $this->actionRedirect('authorise', $id);
+            } else {
+                return $this->render('/message', [
+                    'title'  => \Yii::t('user', 'Access Denied'),
+                    'module' => $this->module,
+                    'msg' => '<h4>You donot have access to this page.</h4>'
+                ]);
+            }
+        } else {
+            $this->layout = 'other';
+            return $this->render('/message', [
+                'title'  => \Yii::t('user', 'Session Expired'),
+                'module' => $this->module,
+                'msg' => 'Session Expired. Please <a href="'.Url::base().'index.php">Login</a> again.'
+            ]);
+        }
+    }
+
+    public function actionSave(){   
+        $journal_voucher = new JournalVoucher();
+        $result = $journal_voucher->save();
+        $this->redirect(array('journalvoucher/index'));
     }
 
     public function actionGetaccdetails(){
         $journal_voucher = new JournalVoucher();
         $request = Yii::$app->request;
         $acc_id = $request->post('acc_id');
-        // $acc_id = '43';
-        // $acc_code = '';
         $data = $journal_voucher->getAccountDetails($acc_id);
-        // if(count($data)>0){
-        //     $acc_code = $data[0]['code'];
-        // }
         echo json_encode($data);
-    }
-
-    public function actionCreate()
-    {
-        $journal_voucher = new JournalVoucher();
-        $acc_details = $journal_voucher->getAccountDetails();
-
-        // $vendor = json_encode($vendor);
-
-        return $this->render('journalvoucher_details', ['acc_details' => $acc_details]);
-        // return $this->render('journalvoucher_details', ['category' => $category]);
-    }
-
-    public function actionSave()
-    {   
-        $journal_voucher = new JournalVoucher();
-        $result = $journal_voucher->save();
-        $this->redirect(array('journalvoucher/index'));
     }
 
     public function actionGetcode(){
@@ -60,22 +170,11 @@ class JournalvoucherController extends Controller
         echo $journal_voucher->getCode();
     }
 
-    public function actionEdit($id)
-    {
-        $journal_voucher = new JournalVoucher();
-        $data = $journal_voucher->getJournalVoucherDetails($id, "");
-        $acc_details = $journal_voucher->getAccountDetails();
-        $jv_entries = $journal_voucher->gerJournalVoucherEntries($id);
-        
-        return $this->render('journalvoucher_details', ['data' => $data, 'acc_details' => $acc_details, 'jv_entries' => $jv_entries]);
-    }
-
     public function actionSavecategories(){
         $journal_voucher = new JournalVoucher();
         $result = $journal_voucher->saveCategories();
         $category = $journal_voucher->getAccountCategories();
         echo json_encode($category);
-        // echo $result;
     }
 
     public function actionGetcategories(){
@@ -87,12 +186,6 @@ class JournalvoucherController extends Controller
     public function actionGetvendors(){
         $journal_voucher = new JournalVoucher();
         $vendor = $journal_voucher->getVendors();
-
-        // foreach($vendor as $row) {
-        //     $abc[] = array('value' => $row['vendor_code'], 'label' => $row['vendor_name']);
-        // }
-        
-        // echo json_encode($abc);
 
         echo json_encode($vendor);
     }

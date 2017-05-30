@@ -18,7 +18,7 @@ class UserRoles extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'user_roles';
+        return 'acc_user_roles';
     }
 
     /**

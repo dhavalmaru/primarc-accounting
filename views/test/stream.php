@@ -106,10 +106,10 @@ $this->params['breadcrumbs'][] = $this->title;
     // );
 
 
-    $this->registerJsFile(
-        '@web/js/test.js',
-        ['depends' => [\yii\web\JqueryAsset::className()]]
-    );
+    // $this->registerJsFile(
+    //     '@web/js/test.js',
+    //     ['depends' => [\yii\web\JqueryAsset::className()]]
+    // );
 ?>
 
 

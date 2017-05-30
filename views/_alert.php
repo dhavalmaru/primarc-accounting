@@ -29,4 +29,10 @@ use yii\bootstrap\Alert;
             <?php endforeach ?>
         </div>
     </div>
+
+    <div class="" style="">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <?php if(isset($msg)) echo $msg; ?>
+        </div>
+    </div>
 <?php //endif ?>

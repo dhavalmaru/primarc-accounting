@@ -1,9 +1,37 @@
 $('.datepicker').datepicker({changeMonth: true,changeYear: true});
 
-// $("#vendor_id").change(function(){
-//     $("#vendor_name").val($("#vendor_id option:selected").text());
-//     getLedger();
-// });
+$(document).ready(function() {
+    setPaymentType();
+    getLedger();
+    set_view();
+});
+
+function set_view(){
+    if($('#action').val()=='view' || $('#status').val()=='approved'){
+        $('#btn_submit').hide();
+        $('#btn_reject').hide();
+
+        $("input").attr("disabled", true);
+        $("select").attr("disabled", true);
+        $("textarea").attr("disabled", true);
+    } else if($('#action').val()=='insert' || $('#action').val()=='edit'){
+        $('#btn_submit').val("Submit For Approval");
+        $('#btn_submit').show();
+        $('#btn_reject').hide();
+    } else if($('#action').val()=='authorise'){
+        $("input[type!='hidden']").attr("disabled", true);
+        $("select").attr("disabled", true);
+        $("textarea").attr("disabled", true);
+
+        $('#btn_submit').val("Approve");
+        $('#btn_submit').show();
+        $('#btn_reject').show();
+
+        $('#remarks').attr("disabled", false);
+        $('#btn_submit').attr("disabled", false);
+        $('#btn_reject').attr("disabled", false);
+    }
+}
 
 $("#acc_id").change(function(){
     var acc_id = $("#acc_id").val();
@@ -83,35 +111,7 @@ function getLedger(){
             alert(thrownError);
         }
     });
-
-    // $(".check").each(function( index ) {
-    //     console.log($(this).attr("id"));
-    //     $(this).change(function(){
-    //         getLedgerTotal();
-    //     });
-    // });
-
-    // if (result) {
-    //     return false;
-    // } else {
-    //     return true;
-    // }
 }
-
-$(document).ready(function() {
-    setPaymentType();
-    getLedger();
-
-    // $(".check").each(function( index ) {
-    //     $(this).change(function(){
-    //         getLedgerTotal();
-    //     });
-    // });
-
-    // addMultiInputNamingRules('#debit_credit_note', 'select[name="transaction[]"]', { required: true });
-    // addMultiInputNamingRules('#debit_credit_note', 'input[name="due_date[]"]', { required: true });
-    // addMultiInputNamingRules('#debit_credit_note', 'input[name="amount[]"]', { required: true, numbersandcommaonly: true });
-});
 
 $("#check_all").change(function(){
     var blChecked = false;

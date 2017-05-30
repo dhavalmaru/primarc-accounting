@@ -7,18 +7,18 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\helpers\Url;
-use app\models\UserRole;
+use app\models\AssignRole;
 
-class UserroleController extends Controller
+class AssignroleController extends Controller
 {
     public function actionIndex() {
-        $user_role = new UserRole();
-        $access = $user_role->getAccess();
+        $assign_role = new AssignRole();
+        $access = $assign_role->getAccess();
         if(count($access)>0) {
             if($access[0]['r_view']==1) {
-                $data = $user_role->getRoleDetails();
+                $data = $assign_role->getDetails();
                 
-                return $this->render('userrole_list', ['data' => $data, 'access' => $access]);
+                return $this->render('assignrole_list', ['data' => $data, 'access' => $access]);
             } else {
                 return $this->render('/message', [
                     'title'  => \Yii::t('user', 'Access Denied'),
@@ -37,11 +37,13 @@ class UserroleController extends Controller
     }
 
     public function actionCreate() {
-        $user_role = new UserRole();
-        $access = $user_role->getAccess();
+        $assign_role = new AssignRole();
+        $access = $assign_role->getAccess();
         if(count($access)>0) {
             if($access[0]['r_insert']==1) {
-                return $this->render('userrole_details');
+                $users = $assign_role->getUsers();
+                $roles = $assign_role->getRoles();
+                return $this->render('assignrole_details', ['users'=>$users, 'roles'=> $roles]);
             } else {
                 return $this->render('/message', [
                     'title'  => \Yii::t('user', 'Access Denied'),
@@ -60,27 +62,15 @@ class UserroleController extends Controller
     }
 
     public function actionEdit($id) {
-        $user_role = new UserRole();
-        $access = $user_role->getAccess();
+        $assign_role = new AssignRole();
+        $access = $assign_role->getAccess();
         if(count($access)>0) {
             if($access[0]['r_edit']==1) {
-                $data = $user_role->getRoleDetails($id);
-                $result = $user_role->getRoleOptions($id);
-                $editoptions=array();
-                if (count($result)>0) {
-                    for($i=0;$i<count($result);$i++) {
-                        if ($result[$i]['r_section']=="S_Account_Master") $num=0;
-                        else if ($result[$i]['r_section']=="S_Purchase") $num=1;
-                        else if ($result[$i]['r_section']=="S_Journal_Voucher") $num=2;
-                        else if ($result[$i]['r_section']=="S_Payment_Receipt") $num=3;
-                        else if ($result[$i]['r_section']=="S_User_Roles") $num=4;
-                        else if ($result[$i]['r_section']=="S_Reports") $num=5;
-
-                        $editoptions[$num]=$result[$i];
-                    }
-                }
+                $data = $assign_role->getDetails($id);
+                $users = $assign_role->getUsers($id);
+                $roles = $assign_role->getRoles();
                 
-                return $this->render('userrole_details', ['access' => $access, 'data' => $data, 'editoptions' => $editoptions]);
+                return $this->render('assignrole_details', ['access' => $access, 'data' => $data, 'users'=>$users, 'roles'=> $roles]);
             } else {
                 return $this->render('/message', [
                     'title'  => \Yii::t('user', 'Access Denied'),
@@ -99,12 +89,12 @@ class UserroleController extends Controller
     }
 
     public function actionSave() { 
-        $user_role = new UserRole();
-        $access = $user_role->getAccess();
+        $assign_role = new AssignRole();
+        $access = $assign_role->getAccess();
         if(count($access)>0) {
             if($access[0]['r_insert']==1 || $access[0]['r_edit']==1) {
-                $result = $user_role->save();
-                $this->redirect(array('userrole/index'));
+                $result = $assign_role->save();
+                $this->redirect(array('assignrole/index'));
             } else {
                 return $this->render('/message', [
                     'title'  => \Yii::t('user', 'Access Denied'),
@@ -122,9 +112,9 @@ class UserroleController extends Controller
         }
     }
 
-    public function actionCheckroleavailablity(){
-        $user_role = new UserRole();
-        $result = $user_role->checkRoleAvailablity();
+    public function actionCheckuserroleavailablity(){
+        $assign_role = new AssignRole();
+        $result = $assign_role->checkUserRoleAvailablity();
         echo $result;
     }
 }

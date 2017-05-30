@@ -9,12 +9,6 @@ use yii\jui\DatePicker;
 use yii\web\JsExpression;
 use yii\db\Query;
 
-// use kartik\date\DatePicker;
-
-/* @var $this yii\web\View */
-/* @var $searchModel app\models\GrnSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
-
 $this->title = 'Email Payment Advice: ' . $payment_advice[0]['payment_id'];
 $this->params['breadcrumbs'][] = ['label' => 'Payment Receipt', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $payment_advice[0]['payment_id'], 'url' => ['edit', 'id' => $payment_advice[0]['payment_id']]];
@@ -39,11 +33,9 @@ select {
 			<input type="hidden" name="_csrf" value="<?=Yii::$app->request->getCsrfToken()?>" />
 			<input type="hidden" name="id" value="<?php echo $payment_advice[0]['id']; ?>" />
 			<input type="hidden" name="payment_id" value="<?php echo $payment_advice[0]['payment_id']; ?>" />
+			<input type="hidden" name="vendor_name" value="<?php echo $vendor_details[0]['vendor_name']; ?>" />
+			<input type="hidden" name="company_id" value="<?php echo $vendor_details[0]['company_id']; ?>" />
 			<div class="form-group">
-				<!-- <div class="col-md-6 col-sm-6 col-xs-6">
-					<label class="control-label">From</label>
-					<input type="text" class="form-control" id="from" name="from" value="" />
-				</div> -->
 				<div class="col-md-6 col-sm-6 col-xs-6">
 					<label class="control-label">To</label>
 					<input type="text" class="form-control" id="to" name="to" value="<?php echo $vendor_details[0]['contact_email']; ?>" />
@@ -82,7 +74,6 @@ Team Primarc</textarea>
 				</div>
 			</div>
 
-			<!-- Button -->
 			<div class="form-group btn-container"> 
 				<div class="col-md-12">
 					<button type="submit" class="btn btn-success btn-sm" id="btn_submit"> Send </button>

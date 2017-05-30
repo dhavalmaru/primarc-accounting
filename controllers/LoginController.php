@@ -3,7 +3,7 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\Login;
+// use app\models\Login;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -64,8 +64,18 @@ class LoginController extends Controller
             $session = Yii::$app->session;
             $session->open();
             $session['session_id'] = $data[0]['id'];
+            $session['temp_temp'] = $data[0]['id'];
             $session['username'] = $data[0]['username'];
+            // $session['role_id'] = $data[0]['role_id'];
 
+            // $user_role = new UserRole();
+            // $data = $user_role->getAccess();
+
+            for($i=0; $i<count($data); $i++){
+                $session[$data[$i]['r_section']] = $data[$i]['r_view'];
+            }
+
+            // echo json_encode($data);
             $this->redirect(array('welcome/index'));
         } else {
             $this->redirect(array('login/index'));

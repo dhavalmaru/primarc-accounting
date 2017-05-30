@@ -4,31 +4,48 @@ namespace app\models;
 
 use Yii;
 use yii\base\Model;
+use yii\web\UploadedFile;
 
 class JournalVoucher extends Model
 {
+    public function getAccess(){
+        $session = Yii::$app->session;
+        $session_id = $session['session_id'];
+        $role_id = $session['role_id'];
+
+        $sql = "select A.*, '".$session_id."' as session_id from acc_user_role_options A 
+                where A.role_id = '$role_id' and A.r_section = 'S_Journal_Voucher'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
     public function getJournalVoucherDetails($id="", $status=""){
         $cond = "";
         if($id!=""){
             $cond = " and A.id = '$id'";
         }
         if($status!=""){
-            // if($cond==""){
-            //     $cond = " Where status = '$status'";
-            // } else {
-            //     $cond = $cond . " and status = '$status'";
-            // }
             $cond = $cond . " and A.status = '$status'";
         }
 
-        $sql = "select A.*, B.username from journal_voucher_details A left join user B on (A.updated_by = B.id) where A.is_active='1'" . $cond . " order by id desc";
+        $sql = "select A.*, B.username as updater, C.username as approver from 
+                acc_jv_details A left join user B on (A.updated_by = B.id) left join user C on (A.approved_by = C.id) 
+                where A.is_active='1'" . $cond . " order by UNIX_TIMESTAMP(A.updated_date) desc, A.id desc";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
     }
 
     public function gerJournalVoucherEntries($id){
-        $sql = "select * from journal_voucher_entries where jv_id='$id' and is_active='1' order by id";
+        $sql = "select * from acc_jv_entries where jv_id='$id' and is_active='1' order by id";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
+    public function gerJournalVoucherDocs($id){
+        $sql = "select * from acc_jv_docs where jv_id='$id' and is_active='1' order by id";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -40,11 +57,7 @@ class JournalVoucher extends Model
             $cond = " and id = '$id'";
         }
 
-        // $sql = "select * from 
-        //         (select id, case when legal_name = 'Taxable Amount' then code when legal_name = 'Tax' then code else legal_name end as acc_name, code 
-        //         from acc_master where is_active = '1'".$cond.") A order by A.acc_name";
-        
-        $sql = "select * from acc_master where is_active = '1'".$cond." order by legal_name";
+        $sql = "select * from acc_master where is_active = '1' and status = 'approved'".$cond." order by legal_name";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -52,8 +65,34 @@ class JournalVoucher extends Model
 
     public function save(){
         $request = Yii::$app->request;
+
+        $action = $request->post('action');
+        if($action=="authorise"){
+            if($request->post('btn_reject')!==null){
+                $action = "reject";
+            } else {
+                $action = "approve";
+            }
+        }
+
+        if($action=="edit" || $action=="insert"){
+            $this->saveEdit();
+        } else if($action=="approve"){
+            $this->authorise("approved");
+        } else if($action=="reject"){
+            $this->authorise("rejected");
+        }
+        
+        return true;
+    }
+
+    public function saveEdit(){
+        $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
         $session = Yii::$app->session;
+
+        $curusr = $session['session_id'];
+        $now = date('Y-m-d H:i:s');
 
         $id = $request->post('id');
         $voucher_id = $request->post('voucher_id');
@@ -76,7 +115,7 @@ class JournalVoucher extends Model
         } else {
             $jv_date=$mycomponent->formatdate($jv_date);
         }
-        // $doc_file = $request->post('doc_file');
+        $remarks = $request->post('remarks');
 
         $debit_acc = "";
         $credit_acc = "";
@@ -96,20 +135,20 @@ class JournalVoucher extends Model
 
         if(!isset($voucher_id) || $voucher_id==''){
             $series = 1;
-            $sql = "select * from series_master where type = 'Voucher'";
+            $sql = "select * from acc_series_master where type = 'Voucher'";
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $data = $reader->readAll();
             if (count($data)>0){
                 $series = intval($data[0]['series']) + 1;
 
-                $sql = "update series_master set series = '$series' where type = 'Voucher'";
+                $sql = "update acc_series_master set series = '$series' where type = 'Voucher'";
                 $command = Yii::$app->db->createCommand($sql);
                 $count = $command->execute();
             } else {
                 $series = 1;
 
-                $sql = "insert into series_master (type, series) values ('Voucher', '".$series."')";
+                $sql = "insert into acc_series_master (type, series) values ('Voucher', '".$series."')";
                 $command = Yii::$app->db->createCommand($sql);
                 $count = $command->execute();
             }
@@ -129,53 +168,76 @@ class JournalVoucher extends Model
                         'diff_amt' => $mycomponent->format_number($diff_amt,2),
                         'status' => 'pending',
                         'is_active' => '1',
-                        'updated_by'=>$session['session_id'],
-                        'updated_date'=>date('Y-m-d h:i:s'),
-                        'jv_date'=>$jv_date
+                        'updated_by'=>$curusr,
+                        'updated_date'=>$now,
+                        'jv_date'=>$jv_date,
+                        'approver_comments'=>$remarks
                         );
 
         if(count($array)>0){
-            $tableName = "journal_voucher_details";
-
             if (isset($id) && $id!=""){
                 $count = Yii::$app->db->createCommand()
-                            ->update($tableName, $array, "id = '".$id."'")
+                            ->update("acc_jv_details", $array, "id = '".$id."'")
                             ->execute();
+
+                $this->setLog('JournalVoucher', '', 'Save', '', 'Update Journal Voucher Details', 'acc_jv_details', $id);
             } else {
+                $array['created_by'] = $curusr;
+                $array['created_date'] = $now;
                 $count = Yii::$app->db->createCommand()
-                            ->insert($tableName, $array)
+                            ->insert("acc_jv_details", $array)
                             ->execute();
                 $id = Yii::$app->db->getLastInsertID();
+
+                $this->setLog('JournalVoucher', '', 'Save', '', 'Insert Journal Voucher Details', 'acc_jv_details', $id);
             }
         }
 
-        $journal_voucher_entries = array();
+
+
+        $acc_jv_entries = array();
+
+        $sql = "delete from acc_jv_entries where jv_id = '$id'";
+        Yii::$app->db->createCommand($sql)->execute();
+
+        $sql = "delete from acc_ledger_entries where ref_id = '".$id."' and ref_type = 'journal_voucher'";
+        Yii::$app->db->createCommand($sql)->execute();
+
         for($i=0; $i<count($acc_id); $i++){
-            $journal_voucher_entries = array('jv_id' => $id, 
-                                                'account_id' => $acc_id[$i], 
-                                                'account_name' => $legal_name[$i], 
-                                                'account_code' => $acc_code[$i], 
-                                                'transaction' => $transaction[$i], 
-                                                'debit_amt' => $mycomponent->format_number($debit_amt[$i],2), 
-                                                'credit_amt' => $mycomponent->format_number($credit_amt[$i],2),
-                                                'status' => 'pending',
-                                                'is_active' => '1',
-                                                'updated_by'=>$session['session_id'],
-                                                'updated_date'=>date('Y-m-d h:i:s')
-                                            );
+            $acc_jv_entries = array('jv_id' => $id, 
+                                    'account_id' => $acc_id[$i], 
+                                    'account_name' => $legal_name[$i], 
+                                    'account_code' => $acc_code[$i], 
+                                    'transaction' => $transaction[$i], 
+                                    'debit_amt' => $mycomponent->format_number($debit_amt[$i],2), 
+                                    'credit_amt' => $mycomponent->format_number($credit_amt[$i],2),
+                                    'status' => 'pending',
+                                    'is_active' => '1',
+                                    'updated_by'=>$curusr,
+                                    'updated_date'=>$now,
+                                    'approver_comments'=>$remarks
+                                );
 
-            $tableName = "journal_voucher_entries";
+            $acc_jv_entries['created_by'] = $curusr;
+            $acc_jv_entries['created_date'] = $now;
+            $count = Yii::$app->db->createCommand()
+                        ->insert("acc_jv_entries", $acc_jv_entries)
+                        ->execute();
+            $entry_id[$i] = Yii::$app->db->getLastInsertID();
 
-            if (isset($entry_id[$i]) && $entry_id[$i]!=""){
-                $count = Yii::$app->db->createCommand()
-                            ->update($tableName, $journal_voucher_entries, "id = '".$entry_id[$i]."'")
-                            ->execute();
-            } else {
-                $count = Yii::$app->db->createCommand()
-                            ->insert($tableName, $journal_voucher_entries)
-                            ->execute();
-                $entry_id[$i] = Yii::$app->db->getLastInsertID();
-            }
+            // if (isset($entry_id[$i]) && $entry_id[$i]!=""){
+            //     $count = Yii::$app->db->createCommand()
+            //                 ->update("acc_jv_entries", $acc_jv_entries, "id = '".$entry_id[$i]."'")
+            //                 ->execute();
+            // } else {
+            //     $acc_jv_entries['created_by'] = $curusr;
+            //     $acc_jv_entries['created_date'] = $now;
+
+            //     $count = Yii::$app->db->createCommand()
+            //                 ->insert("acc_jv_entries", $acc_jv_entries)
+            //                 ->execute();
+            //     $entry_id[$i] = Yii::$app->db->getLastInsertID();
+            // }
 
             if($transaction[$i]=="Debit"){
                 $amount = $debit_amt[$i];
@@ -199,37 +261,166 @@ class JournalVoucher extends Model
                                 'amount'=>$mycomponent->format_number($amount,2),
                                 'status'=>'pending',
                                 'is_active'=>'1',
-                                'updated_by'=>$session['session_id'],
-                                'updated_date'=>date('Y-m-d h:i:s'),
-                                'ref_date'=>$jv_date
+                                'updated_by'=>$curusr,
+                                'updated_date'=>$now,
+                                'ref_date'=>$jv_date,
+                                'approver_comments'=>$remarks
                             ];
 
-            $tableName = "ledger_entries";
-
+            $ledgerArray['created_by'] = $curusr;
+            $ledgerArray['created_date'] = $now;
             $count = Yii::$app->db->createCommand()
-                        ->update($tableName, $ledgerArray, "ref_id = '".$id."' and sub_ref_id = '".$entry_id[$i]."' and ref_type = 'journal_voucher'")
+                        ->insert("acc_ledger_entries", $ledgerArray)
                         ->execute();
 
-            if ($count==0){
-                $count = Yii::$app->db->createCommand()
-                            ->insert($tableName, $ledgerArray)
-                            ->execute();
-            }
+            // $count = Yii::$app->db->createCommand()
+            //             ->update("acc_ledger_entries", $ledgerArray, "ref_id = '".$id."' and sub_ref_id = '".$entry_id[$i]."' and ref_type = 'journal_voucher'")
+            //             ->execute();
+
+            // if ($count==0){
+            //     $ledgerArray['created_by'] = $curusr;
+            //     $ledgerArray['created_date'] = $now;
+
+            //     $count = Yii::$app->db->createCommand()
+            //                 ->insert("acc_ledger_entries", $ledgerArray)
+            //                 ->execute();
+            // }
         }
 
-        // $sql = "delete from journal_voucher_entries where jv_id = '$id'";
-        // Yii::$app->db->createCommand($sql)->execute();
 
-        // if(count($journal_voucher_entries)>0){
-        //     $columnNameArray=['jv_id','account_id','account_name', 'account_code', 'transaction', 'debit_amt', 'credit_amt', 'status', 'is_active'];
-        //     $tableName = "journal_voucher_entries";
-        //     $insertCount = Yii::$app->db->createCommand()
-        //                     ->batchInsert(
-        //                         $tableName, $columnNameArray, $journal_voucher_entries
-        //                     )
-        //                     ->execute();
-        // }
+        $jv_doc_id = $request->post('jv_doc_id');
+        $doc_path = $request->post('doc_path');
+        $description = $request->post('description');
+        if(count($jv_doc_id)>0){
+            $upload_path = './uploads';
+            if(!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, TRUE);
+            }
+            $upload_path = './uploads/journal_voucher';
+            if(!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, TRUE);
+            }
+            $upload_path = './uploads/journal_voucher/'.$id;
+            if(!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, TRUE);
+            }
+
+            $acc_jv_docs = array();
+
+            $sql = "delete from acc_jv_docs where jv_id = '$id'";
+            Yii::$app->db->createCommand($sql)->execute();
+            
+            $doc_cnt = 0;
+            for($i=0; $i<count($jv_doc_id); $i++){
+                $file_nm='doc_file_'.$doc_cnt;
+                while (!isset($_FILES[$file_nm])) {
+                    $doc_cnt = $doc_cnt + 1;
+                    $file_nm = 'doc_file_'.$doc_cnt;
+                }
+
+                $uploadedFile = UploadedFile::getInstanceByName($file_nm);
+                if(!empty($uploadedFile)){
+                    $src_filename= $_FILES[$file_nm];
+                    $filePath = $upload_path.'/'.$src_filename['name'];
+                    $uploadedFile->saveAs($filePath);
+                    $doc_path[$i] = 'uploads/journal_voucher/'.$id.'/'.$src_filename['name'];
+                }
+
+                if(isset($doc_path[$i]) && $doc_path[$i]!=''){
+                    $acc_jv_docs = array('jv_id' => $id, 
+                                        'doc_path' => $doc_path[$i], 
+                                        'description' => $description[$i], 
+                                        'status' => 'pending',
+                                        'is_active' => '1',
+                                        'updated_by'=>$curusr,
+                                        'updated_date'=>$now,
+                                        'approver_comments'=>$remarks
+                                    );
+
+                    $acc_jv_docs['created_by'] = $curusr;
+                    $acc_jv_docs['created_date'] = $now;
+                    $count = Yii::$app->db->createCommand()
+                                ->insert("acc_jv_docs", $acc_jv_docs)
+                                ->execute();
+                    $jv_doc_id[$i] = Yii::$app->db->getLastInsertID();
+
+                    // if (isset($jv_doc_id[$i]) && $jv_doc_id[$i]!=""){
+                    //     $count = Yii::$app->db->createCommand()
+                    //                 ->update("acc_jv_docs", $acc_jv_docs, "id = '".$jv_doc_id[$i]."'")
+                    //                 ->execute();
+                    // } else {
+                    //     $acc_jv_docs['created_by'] = $curusr;
+                    //     $acc_jv_docs['created_date'] = $now;
+
+                    //     $count = Yii::$app->db->createCommand()
+                    //                 ->insert("acc_jv_docs", $acc_jv_docs)
+                    //                 ->execute();
+                    //     $jv_doc_id[$i] = Yii::$app->db->getLastInsertID();
+                    // }
+                }
+
+                $doc_cnt = $doc_cnt + 1;
+            }
+        }
         
+        return true;
+    }
+
+    public function authorise($status){
+        $request = Yii::$app->request;
+        $session = Yii::$app->session;
+
+        $curusr = $session['session_id'];
+        $now = date('Y-m-d H:i:s');
+        $id = $request->post('id');
+        $remarks = $request->post('remarks');
+
+        $array = array('status' => $status, 
+                        'approved_by' => $curusr, 
+                        'approved_date' => $now,
+                        'approver_comments'=>$remarks);
+
+        $count = Yii::$app->db->createCommand()
+                            ->update("acc_jv_details", $array, "id = '".$id."'")
+                            ->execute();
+
+        $count = Yii::$app->db->createCommand()
+                            ->update("acc_jv_entries", $array, "jv_id = '".$id."'")
+                            ->execute();
+
+        $count = Yii::$app->db->createCommand()
+                            ->update("acc_ledger_entries", $array, "ref_id = '".$id."' and ref_type = 'journal_voucher'")
+                            ->execute();
+
+        $count = Yii::$app->db->createCommand()
+                            ->update("acc_jv_docs", $array, "jv_id = '".$id."'")
+                            ->execute();
+
+        if($status=='approved'){
+            $this->setLog('JournalVoucher', '', 'Approve', '', 'Approve Journal Voucher Details', 'acc_jv_details', $id);
+        } else {
+            $this->setLog('JournalVoucher', '', 'Reject', '', 'Reject Journal Voucher Details', 'acc_jv_details', $id);
+        }
+    }
+
+    public function setLog($module_name, $sub_module, $action, $vendor_id, $description, $table_name, $table_id) {
+        $session = Yii::$app->session;
+        $curusr = $session['session_id'];
+        $now = date('Y-m-d H:i:s');
+
+        $array = array('module_name' => $module_name, 
+                        'sub_module' => $sub_module, 
+                        'action' => $action, 
+                        'vendor_id' => $vendor_id, 
+                        'user_id' => $curusr, 
+                        'description' => $description, 
+                        'log_activity_date' => $now, 
+                        'table_name' => $table_name, 
+                        'table_id' => $table_id);
+        $count = Yii::$app->db->createCommand()
+                            ->insert("acc_user_log", $array)
+                            ->execute();
+
         return true;
     }
 }

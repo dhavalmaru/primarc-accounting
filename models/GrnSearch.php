@@ -47,7 +47,7 @@ class GrnSearch extends Grn
      */
     public function search($params)
     {
-        // $query = Grn::find()->where("status='approved' and grn_id not in (select distinct grn_id from grn_acc_entries)");
+        // $query = Grn::find()->where("status='approved' and grn_id not in (select distinct grn_id from acc_grn_entries)");
 
         // $query = Grn::find()->all();
 
@@ -56,23 +56,23 @@ class GrnSearch extends Grn
         // print_r( $query[0] );
 
 
-        $query = Grn::find()->where("grn.status='approved' and grn_acc_entries.grn_id is null")
-                            ->leftJoin('grn_acc_entries', 'grn.grn_id=grn_acc_entries.grn_id')
+        $query = Grn::find()->where("grn.status='approved' and acc_grn_entries.grn_id is null")
+                            ->leftJoin('acc_grn_entries', 'grn.grn_id=acc_grn_entries.grn_id')
                             ->select("grn.gi_id, grn.location, grn.vendor_name, grn.scanned_qty, grn.payable_val_after_tax, 
                                 grn.gi_date, grn.status")
                             ->orderBy('grn.grn_id');
 
-        // $query = Grn::find()->where("grn.status='approved' and grn_acc_entries_gi_id is null")
-        //                     ->leftJoin('grn_acc_entries', 'grn.grn_id=grn_acc_entries.grn_id')
+        // $query = Grn::find()->where("grn.status='approved' and acc_grn_entries_gi_id is null")
+        //                     ->leftJoin('acc_grn_entries', 'grn.grn_id=acc_grn_entries.grn_id')
         //                     ->select("grn.gi_id, grn.location, grn.vendor_name, grn.scanned_qty, grn.payable_val_after_tax, 
-        //                             grn.gi_date, grn.status, grn_acc_entries.gi_id as grn_acc_entries_gi_id")
+        //                             grn.gi_date, grn.status, acc_grn_entries.gi_id as acc_grn_entries_gi_id")
         //                     ->orderBy('grn.gi_id');
 
         // $query = Grn::find()->where("grn.status='approved'")
-        //                     ->leftJoin('grn_acc_entries', 'grn.grn_id=grn_acc_entries.grn_id')
-        //                     ->andWhere(['=', 'grn_acc_entries_gi_id', 1])
+        //                     ->leftJoin('acc_grn_entries', 'grn.grn_id=acc_grn_entries.grn_id')
+        //                     ->andWhere(['=', 'acc_grn_entries_gi_id', 1])
         //                     ->select("grn.gi_id, grn.location, grn.vendor_name, grn.scanned_qty, grn.payable_val_after_tax, 
-        //                             grn.gi_date, grn.status, grn_acc_entries.gi_id as grn_acc_entries_gi_id")
+        //                             grn.gi_date, grn.status, acc_grn_entries.gi_id as acc_grn_entries_gi_id")
         //                     ->orderBy('grn.gi_id');
 
 
@@ -80,7 +80,7 @@ class GrnSearch extends Grn
         //         (select A.*, B.grn_id as b_grn_id from 
         //         (select * from grn where status = 'approved') A 
         //         left join 
-        //         (select distinct grn_id from grn_acc_entries) B 
+        //         (select distinct grn_id from acc_grn_entries) B 
         //         on (A.grn_id = B.grn_id)) C 
         //         where b_grn_id is null";
         // $query = Grn::findBySql($sql, [':status' => 'approved']);
@@ -97,9 +97,9 @@ class GrnSearch extends Grn
 
 
         // $query = Grn::find()->where("grn.status='approved'")
-        //                     ->leftJoin('grn_acc_entries', 'grn.grn_id=grn_acc_entries.grn_id')
+        //                     ->leftJoin('acc_grn_entries', 'grn.grn_id=acc_grn_entries.grn_id')
         //                     ->select("grn.gi_id, grn.location, grn.vendor_name, grn.scanned_qty, grn.payable_val_after_tax, 
-        //                             grn.gi_date, grn.status, grn_acc_entries.gi_id as grn_acc_entries_gi_id")
+        //                             grn.gi_date, grn.status, acc_grn_entries.gi_id as acc_grn_entries_gi_id")
         //                     ->orderBy('grn.gi_id');
 
 
@@ -107,7 +107,7 @@ class GrnSearch extends Grn
         //         (select A.*, B.grn_id as b_grn_id from 
         //         (select * from grn where status = 'approved') A 
         //         left join 
-        //         (select distinct grn_id from grn_acc_entries) B 
+        //         (select distinct grn_id from acc_grn_entries) B 
         //         on (A.grn_id = B.grn_id)) C 
         //         where b_grn_id is null";
 

@@ -95,7 +95,7 @@ $mycomponent = Yii::$app->mycomponent;
 										<?php for($i=0; $i<count($pending); $i++) { ?>
 										<tr> 
 											<td style="text-align: center;" scope="row"><?php echo $i+1; ?></td> 
-											<td><a href="<?php echo Url::base() .'index.php?r=pendinggrn%2Fupdate&id='.$pending[$i]['grn_id']; ?>" >Post </a></td> 
+											<td><a href="<?php echo Url::base() .'index.php?r=pendinggrn%2Fupdate&id='.$pending[$i]['grn_id']; ?>" >Edit </a></td> 
 											<td><?php echo $pending[$i]['grn_id']; ?></td> 
 											<td><?php echo $pending[$i]['grn_no']; ?></td> 
 											<td><?php echo $pending[$i]['vendor_name']; ?></td> 
@@ -137,8 +137,8 @@ $mycomponent = Yii::$app->mycomponent;
 										<?php for($i=0; $i<count($approved); $i++) { ?>
 										<tr> 
 											<td style="text-align: center;" scope="row"><?php echo $i+1; ?></td> 
-											<td><a href="<?php echo Url::base() .'index.php?r=pendinggrn%2Fupdate&id='.$approved[$i]['grn_id']; ?>" >Post </a></td> 
-											<td><?php echo $approved[$i]['gi_id']; ?></td> 
+											<td><a href="<?php echo Url::base() .'index.php?r=pendinggrn%2Fupdate&id='.$approved[$i]['grn_id']; ?>" >Edit </a></td> 
+											<td><?php echo $approved[$i]['grn_id']; ?></td> 
 											<td><?php echo $approved[$i]['grn_no']; ?></td> 
 											<td><?php echo $approved[$i]['vendor_name']; ?></td> 
 											<td><?php echo $approved[$i]['category_name']; ?></td> 

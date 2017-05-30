@@ -11,13 +11,9 @@ use yii\filters\VerbFilter;
 use yii\helpers\Url;
 use yii\web\Session;
 
-/**
- * GrnController implements the CRUD actions for Grn model.
- */
 class PendinggrnController extends Controller
 {
-    public function actionIndex()
-    {
+    public function actionIndex(){
         $grn_cnt = new PendingGrn();
         $grn = $grn_cnt->getNewGrnDetails();
         $pending = $grn_cnt->getPurchaseDetails('pending');
@@ -113,19 +109,18 @@ class PendinggrnController extends Controller
         return $this->render('email_response', ['data' => $data]);
     }
 
-    public function actionUpdate($id)
-    {
+    public function actionUpdate($id){
         $model = new PendingGrn();
 
-        $grn_acc_entries = $model->getGrnAccEntries($id);
+        $grn_entries = $model->getGrnAccEntries($id);
         $grn_details = $model->getGrnDetails($id);
         $total_val = $model->getTotalValue($id);
         $total_tax = $model->getTotalTax($id);
 
-        $acc_master = $model->getAccountDetails('', 'pending');
+        $acc_master = $model->getAccountDetails('', 'approved');
 
-        if (count($grn_acc_entries) > 0){
-            // echo json_encode($grn_acc_entries);
+        if (count($grn_entries) > 0){
+            // echo json_encode($grn_entries);
 
             $num = -1;
             $prev_invoice_no = "";
@@ -138,8 +133,8 @@ class PendinggrnController extends Controller
             $tax = "";
             $tax_num = 0;
 
-            for($i=0; $i<count($grn_acc_entries); $i++){
-                $invoice_no = $grn_acc_entries[$i]['invoice_no'];
+            for($i=0; $i<count($grn_entries); $i++){
+                $invoice_no = $grn_entries[$i]['invoice_no'];
 
                 if($prev_invoice_no != $invoice_no){
                     $num = $num + 1;
@@ -151,60 +146,60 @@ class PendinggrnController extends Controller
                     // $tax_num = 0;
                 }
                 
-                // if($grn_acc_entries[$i]['particular']=="Taxable Amount"){
-                //     $invoice_details[$num]['invoice_total_cost'] = $grn_acc_entries[$i]['invoice_val'];
-                //     $invoice_details[$num]['edited_total_cost'] = $grn_acc_entries[$i]['edited_val'];
-                //     $invoice_details[$num]['diff_total_cost'] = $grn_acc_entries[$i]['difference_val'];
-                //     $narration['narration_taxable_amount'] = $grn_acc_entries[$i]['narration'];
+                // if($grn_entries[$i]['particular']=="Taxable Amount"){
+                //     $invoice_details[$num]['invoice_total_cost'] = $grn_entries[$i]['invoice_val'];
+                //     $invoice_details[$num]['edited_total_cost'] = $grn_entries[$i]['edited_val'];
+                //     $invoice_details[$num]['diff_total_cost'] = $grn_entries[$i]['difference_val'];
+                //     $narration['narration_taxable_amount'] = $grn_entries[$i]['narration'];
                 // }
 
-                // if($grn_acc_entries[$i]['particular']=="Tax"){
-                //     $invoice_details[$num]['invoice_total_tax'] = $grn_acc_entries[$i]['invoice_val'];
-                //     $invoice_details[$num]['edited_total_tax'] = $grn_acc_entries[$i]['edited_val'];
-                //     $invoice_details[$num]['diff_total_tax'] = $grn_acc_entries[$i]['difference_val'];
-                //     $narration['narration_total_tax'] = $grn_acc_entries[$i]['narration'];
+                // if($grn_entries[$i]['particular']=="Tax"){
+                //     $invoice_details[$num]['invoice_total_tax'] = $grn_entries[$i]['invoice_val'];
+                //     $invoice_details[$num]['edited_total_tax'] = $grn_entries[$i]['edited_val'];
+                //     $invoice_details[$num]['diff_total_tax'] = $grn_entries[$i]['difference_val'];
+                //     $narration['narration_total_tax'] = $grn_entries[$i]['narration'];
                 // }
 
-                if($grn_acc_entries[$i]['particular']=="Taxable Amount" || $grn_acc_entries[$i]['particular']=="Tax"){
+                if($grn_entries[$i]['particular']=="Taxable Amount" || $grn_entries[$i]['particular']=="Tax"){
                     $blFlag = false;
 
-                    // if($grn_acc_entries[$i]['particular']=="Tax"){
+                    // if($grn_entries[$i]['particular']=="Tax"){
                     //     $blFlag = true;
-                    //     $invoice_tax[$tax_num]['invoice_tax_acc_id'] = $grn_acc_entries[$i]['acc_id'];
-                    //     $invoice_tax[$tax_num]['invoice_tax_ledger_name'] = $grn_acc_entries[$i]['ledger_name'];
-                    //     $invoice_tax[$tax_num]['invoice_tax_ledger_code'] = $grn_acc_entries[$i]['ledger_code'];
-                    //     $invoice_tax[$tax_num]['invoice_tax'] = $grn_acc_entries[$i]['invoice_val'];
-                    //     $invoice_tax[$tax_num]['edited_tax'] = $grn_acc_entries[$i]['edited_val'];
-                    //     $invoice_tax[$tax_num]['diff_tax'] = $grn_acc_entries[$i]['difference_val'];
-                    //     $narration[$tax_num]['tax'] = $grn_acc_entries[$i]['narration'];
+                    //     $invoice_tax[$tax_num]['invoice_tax_acc_id'] = $grn_entries[$i]['acc_id'];
+                    //     $invoice_tax[$tax_num]['invoice_tax_ledger_name'] = $grn_entries[$i]['ledger_name'];
+                    //     $invoice_tax[$tax_num]['invoice_tax_ledger_code'] = $grn_entries[$i]['ledger_code'];
+                    //     $invoice_tax[$tax_num]['invoice_tax'] = $grn_entries[$i]['invoice_val'];
+                    //     $invoice_tax[$tax_num]['edited_tax'] = $grn_entries[$i]['edited_val'];
+                    //     $invoice_tax[$tax_num]['diff_tax'] = $grn_entries[$i]['difference_val'];
+                    //     $narration[$tax_num]['tax'] = $grn_entries[$i]['narration'];
                     // }
 
-                    if($grn_acc_entries[$i]['particular']=="Taxable Amount" || $grn_acc_entries[$i]['particular']=="Tax"){
+                    if($grn_entries[$i]['particular']=="Taxable Amount" || $grn_entries[$i]['particular']=="Tax"){
                         for($k=0; $k<count($invoice_tax); $k++){
-                            if($invoice_tax[$k]['invoice_no']==$grn_acc_entries[$i]['invoice_no'] && 
-                                $invoice_tax[$k]['vat_cst']==$grn_acc_entries[$i]['vat_cst'] && 
-                                $invoice_tax[$k]['vat_percen']==$grn_acc_entries[$i]['vat_percen']){
+                            if($invoice_tax[$k]['invoice_no']==$grn_entries[$i]['invoice_no'] && 
+                                $invoice_tax[$k]['vat_cst']==$grn_entries[$i]['vat_cst'] && 
+                                $invoice_tax[$k]['vat_percen']==$grn_entries[$i]['vat_percen']){
                                 $blFlag = true;
-                                if($grn_acc_entries[$i]['particular']=="Taxable Amount"){
-                                    $invoice_tax[$k]['invoice_cost_acc_id'] = $grn_acc_entries[$i]['acc_id'];
-                                    $invoice_tax[$k]['invoice_cost_ledger_name'] = $grn_acc_entries[$i]['ledger_name'];
-                                    $invoice_tax[$k]['invoice_cost_ledger_code'] = $grn_acc_entries[$i]['ledger_code'];
-                                    // $invoice_tax[$k]['invoice_cost_voucher_id'] = $grn_acc_entries[$i]['voucher_id'];
-                                    // $invoice_tax[$k]['invoice_cost_ledger_type'] = $grn_acc_entries[$i]['ledger_type'];
-                                    $invoice_tax[$k]['invoice_cost'] = $grn_acc_entries[$i]['invoice_val'];
-                                    $invoice_tax[$k]['edited_cost'] = $grn_acc_entries[$i]['edited_val'];
-                                    $invoice_tax[$k]['diff_cost'] = $grn_acc_entries[$i]['difference_val'];
-                                    $narration[$k]['cost'] = $grn_acc_entries[$i]['narration'];
+                                if($grn_entries[$i]['particular']=="Taxable Amount"){
+                                    $invoice_tax[$k]['invoice_cost_acc_id'] = $grn_entries[$i]['acc_id'];
+                                    $invoice_tax[$k]['invoice_cost_ledger_name'] = $grn_entries[$i]['ledger_name'];
+                                    $invoice_tax[$k]['invoice_cost_ledger_code'] = $grn_entries[$i]['ledger_code'];
+                                    // $invoice_tax[$k]['invoice_cost_voucher_id'] = $grn_entries[$i]['voucher_id'];
+                                    // $invoice_tax[$k]['invoice_cost_ledger_type'] = $grn_entries[$i]['ledger_type'];
+                                    $invoice_tax[$k]['invoice_cost'] = $grn_entries[$i]['invoice_val'];
+                                    $invoice_tax[$k]['edited_cost'] = $grn_entries[$i]['edited_val'];
+                                    $invoice_tax[$k]['diff_cost'] = $grn_entries[$i]['difference_val'];
+                                    $narration[$k]['cost'] = $grn_entries[$i]['narration'];
                                 } else {
-                                    $invoice_tax[$k]['invoice_tax_acc_id'] = $grn_acc_entries[$i]['acc_id'];
-                                    $invoice_tax[$k]['invoice_tax_ledger_name'] = $grn_acc_entries[$i]['ledger_name'];
-                                    $invoice_tax[$k]['invoice_tax_ledger_code'] = $grn_acc_entries[$i]['ledger_code'];
-                                    // $invoice_tax[$k]['invoice_tax_voucher_id'] = $grn_acc_entries[$i]['voucher_id'];
-                                    // $invoice_tax[$k]['invoice_tax_ledger_type'] = $grn_acc_entries[$i]['ledger_type'];
-                                    $invoice_tax[$k]['invoice_tax'] = $grn_acc_entries[$i]['invoice_val'];
-                                    $invoice_tax[$k]['edited_tax'] = $grn_acc_entries[$i]['edited_val'];
-                                    $invoice_tax[$k]['diff_tax'] = $grn_acc_entries[$i]['difference_val'];
-                                    $narration[$k]['tax'] = $grn_acc_entries[$i]['narration'];
+                                    $invoice_tax[$k]['invoice_tax_acc_id'] = $grn_entries[$i]['acc_id'];
+                                    $invoice_tax[$k]['invoice_tax_ledger_name'] = $grn_entries[$i]['ledger_name'];
+                                    $invoice_tax[$k]['invoice_tax_ledger_code'] = $grn_entries[$i]['ledger_code'];
+                                    // $invoice_tax[$k]['invoice_tax_voucher_id'] = $grn_entries[$i]['voucher_id'];
+                                    // $invoice_tax[$k]['invoice_tax_ledger_type'] = $grn_entries[$i]['ledger_type'];
+                                    $invoice_tax[$k]['invoice_tax'] = $grn_entries[$i]['invoice_val'];
+                                    $invoice_tax[$k]['edited_tax'] = $grn_entries[$i]['edited_val'];
+                                    $invoice_tax[$k]['diff_tax'] = $grn_entries[$i]['difference_val'];
+                                    $narration[$k]['tax'] = $grn_entries[$i]['narration'];
                                 }
 
                                 // echo json_encode($invoice_tax);
@@ -214,33 +209,33 @@ class PendinggrnController extends Controller
                     }
                     
                     if($blFlag==false){
-                        $invoice_tax[$tax_num]['particular'] = $grn_acc_entries[$i]['particular'];
-                        $invoice_tax[$tax_num]['tax_zone_code'] = $grn_acc_entries[$i]['tax_zone_code'];
-                        $invoice_tax[$tax_num]['invoice_no'] = $grn_acc_entries[$i]['invoice_no'];
-                        $invoice_tax[$tax_num]['sub_particular_cost'] = $grn_acc_entries[$i]['sub_particular'];
-                        $invoice_tax[$tax_num]['vat_cst'] = $grn_acc_entries[$i]['vat_cst'];
-                        $invoice_tax[$tax_num]['vat_percen'] = $grn_acc_entries[$i]['vat_percen'];
+                        $invoice_tax[$tax_num]['particular'] = $grn_entries[$i]['particular'];
+                        $invoice_tax[$tax_num]['tax_zone_code'] = $grn_entries[$i]['tax_zone_code'];
+                        $invoice_tax[$tax_num]['invoice_no'] = $grn_entries[$i]['invoice_no'];
+                        $invoice_tax[$tax_num]['sub_particular_cost'] = $grn_entries[$i]['sub_particular'];
+                        $invoice_tax[$tax_num]['vat_cst'] = $grn_entries[$i]['vat_cst'];
+                        $invoice_tax[$tax_num]['vat_percen'] = $grn_entries[$i]['vat_percen'];
 
-                        if($grn_acc_entries[$i]['particular']=="Taxable Amount"){
-                            $invoice_tax[$tax_num]['invoice_cost_acc_id'] = $grn_acc_entries[$i]['acc_id'];
-                            $invoice_tax[$tax_num]['invoice_cost_ledger_name'] = $grn_acc_entries[$i]['ledger_name'];
-                            $invoice_tax[$tax_num]['invoice_cost_ledger_code'] = $grn_acc_entries[$i]['ledger_code'];
-                            // $invoice_tax[$tax_num]['invoice_cost_voucher_id'] = $grn_acc_entries[$i]['voucher_id'];
-                            // $invoice_tax[$tax_num]['invoice_cost_ledger_type'] = $grn_acc_entries[$i]['ledger_type'];
-                            $invoice_tax[$tax_num]['invoice_cost'] = $grn_acc_entries[$i]['invoice_val'];
-                            $invoice_tax[$tax_num]['edited_cost'] = $grn_acc_entries[$i]['edited_val'];
-                            $invoice_tax[$tax_num]['diff_cost'] = $grn_acc_entries[$i]['difference_val'];
-                            $narration[$tax_num]['cost'] = $grn_acc_entries[$i]['narration'];
+                        if($grn_entries[$i]['particular']=="Taxable Amount"){
+                            $invoice_tax[$tax_num]['invoice_cost_acc_id'] = $grn_entries[$i]['acc_id'];
+                            $invoice_tax[$tax_num]['invoice_cost_ledger_name'] = $grn_entries[$i]['ledger_name'];
+                            $invoice_tax[$tax_num]['invoice_cost_ledger_code'] = $grn_entries[$i]['ledger_code'];
+                            // $invoice_tax[$tax_num]['invoice_cost_voucher_id'] = $grn_entries[$i]['voucher_id'];
+                            // $invoice_tax[$tax_num]['invoice_cost_ledger_type'] = $grn_entries[$i]['ledger_type'];
+                            $invoice_tax[$tax_num]['invoice_cost'] = $grn_entries[$i]['invoice_val'];
+                            $invoice_tax[$tax_num]['edited_cost'] = $grn_entries[$i]['edited_val'];
+                            $invoice_tax[$tax_num]['diff_cost'] = $grn_entries[$i]['difference_val'];
+                            $narration[$tax_num]['cost'] = $grn_entries[$i]['narration'];
                         } else {
-                            $invoice_tax[$tax_num]['invoice_tax_acc_id'] = $grn_acc_entries[$i]['acc_id'];
-                            $invoice_tax[$tax_num]['invoice_tax_ledger_name'] = $grn_acc_entries[$i]['ledger_name'];
-                            $invoice_tax[$tax_num]['invoice_tax_ledger_code'] = $grn_acc_entries[$i]['ledger_code'];
-                            // $invoice_tax[$tax_num]['invoice_tax_voucher_id'] = $grn_acc_entries[$i]['voucher_id'];
-                            // $invoice_tax[$tax_num]['invoice_tax_ledger_type'] = $grn_acc_entries[$i]['ledger_type'];
-                            $invoice_tax[$tax_num]['invoice_tax'] = $grn_acc_entries[$i]['invoice_val'];
-                            $invoice_tax[$tax_num]['edited_tax'] = $grn_acc_entries[$i]['edited_val'];
-                            $invoice_tax[$tax_num]['diff_tax'] = $grn_acc_entries[$i]['difference_val'];
-                            $narration[$tax_num]['tax'] = $grn_acc_entries[$i]['narration'];
+                            $invoice_tax[$tax_num]['invoice_tax_acc_id'] = $grn_entries[$i]['acc_id'];
+                            $invoice_tax[$tax_num]['invoice_tax_ledger_name'] = $grn_entries[$i]['ledger_name'];
+                            $invoice_tax[$tax_num]['invoice_tax_ledger_code'] = $grn_entries[$i]['ledger_code'];
+                            // $invoice_tax[$tax_num]['invoice_tax_voucher_id'] = $grn_entries[$i]['voucher_id'];
+                            // $invoice_tax[$tax_num]['invoice_tax_ledger_type'] = $grn_entries[$i]['ledger_type'];
+                            $invoice_tax[$tax_num]['invoice_tax'] = $grn_entries[$i]['invoice_val'];
+                            $invoice_tax[$tax_num]['edited_tax'] = $grn_entries[$i]['edited_val'];
+                            $invoice_tax[$tax_num]['diff_tax'] = $grn_entries[$i]['difference_val'];
+                            $narration[$tax_num]['tax'] = $grn_entries[$i]['narration'];
                         }
                         
                         $tax_num = $tax_num + 1;
@@ -249,81 +244,81 @@ class PendinggrnController extends Controller
                     }
                 }
 
-                // if($grn_acc_entries[$i]['particular']=="Tax"){
-                //     $invoice_tax[$tax_num]['tax_zone_code'] = $grn_acc_entries[$i]['tax_zone_code'];
-                //     $invoice_tax[$tax_num]['invoice_no'] = $grn_acc_entries[$i]['invoice_no'];
-                //     $invoice_tax[$tax_num]['sub_particular'] = $grn_acc_entries[$i]['sub_particular'];
-                //     $invoice_tax[$tax_num]['vat_cst'] = $grn_acc_entries[$i]['vat_cst'];
-                //     $invoice_tax[$tax_num]['vat_percen'] = $grn_acc_entries[$i]['vat_percen'];
-                //     $invoice_tax[$tax_num]['invoice_tax'] = $grn_acc_entries[$i]['invoice_val'];
-                //     $invoice_tax[$tax_num]['edited_tax'] = $grn_acc_entries[$i]['edited_val'];
-                //     $invoice_tax[$tax_num]['diff_tax'] = $grn_acc_entries[$i]['difference_val'];
-                //     $narration[$tax_num] = $grn_acc_entries[$i]['narration'];
+                // if($grn_entries[$i]['particular']=="Tax"){
+                //     $invoice_tax[$tax_num]['tax_zone_code'] = $grn_entries[$i]['tax_zone_code'];
+                //     $invoice_tax[$tax_num]['invoice_no'] = $grn_entries[$i]['invoice_no'];
+                //     $invoice_tax[$tax_num]['sub_particular'] = $grn_entries[$i]['sub_particular'];
+                //     $invoice_tax[$tax_num]['vat_cst'] = $grn_entries[$i]['vat_cst'];
+                //     $invoice_tax[$tax_num]['vat_percen'] = $grn_entries[$i]['vat_percen'];
+                //     $invoice_tax[$tax_num]['invoice_tax'] = $grn_entries[$i]['invoice_val'];
+                //     $invoice_tax[$tax_num]['edited_tax'] = $grn_entries[$i]['edited_val'];
+                //     $invoice_tax[$tax_num]['diff_tax'] = $grn_entries[$i]['difference_val'];
+                //     $narration[$tax_num] = $grn_entries[$i]['narration'];
                 //     $tax_num = $tax_num + 1;
                 // }
 
-                if($grn_acc_entries[$i]['particular']=="Other Charges"){
-                    $acc['other_charges_acc_id'] = $grn_acc_entries[$i]['acc_id'];
-                    $acc['other_charges_ledger_name'] = $grn_acc_entries[$i]['ledger_name'];
-                    $acc['other_charges_ledger_code'] = $grn_acc_entries[$i]['ledger_code'];
-                    // $acc['other_charges_voucher_id'] = $grn_acc_entries[$i]['voucher_id'];
-                    // $acc['other_charges_ledger_type'] = $grn_acc_entries[$i]['ledger_type'];
-                    $invoice_details[$num]['invoice_other_charges'] = $grn_acc_entries[$i]['invoice_val'];
-                    $invoice_details[$num]['edited_other_charges'] = $grn_acc_entries[$i]['edited_val'];
-                    $invoice_details[$num]['diff_other_charges'] = $grn_acc_entries[$i]['difference_val'];
-                    $narration['narration_other_charges'] = $grn_acc_entries[$i]['narration'];
+                if($grn_entries[$i]['particular']=="Other Charges"){
+                    $acc['other_charges_acc_id'] = $grn_entries[$i]['acc_id'];
+                    $acc['other_charges_ledger_name'] = $grn_entries[$i]['ledger_name'];
+                    $acc['other_charges_ledger_code'] = $grn_entries[$i]['ledger_code'];
+                    // $acc['other_charges_voucher_id'] = $grn_entries[$i]['voucher_id'];
+                    // $acc['other_charges_ledger_type'] = $grn_entries[$i]['ledger_type'];
+                    $invoice_details[$num]['invoice_other_charges'] = $grn_entries[$i]['invoice_val'];
+                    $invoice_details[$num]['edited_other_charges'] = $grn_entries[$i]['edited_val'];
+                    $invoice_details[$num]['diff_other_charges'] = $grn_entries[$i]['difference_val'];
+                    $narration['narration_other_charges'] = $grn_entries[$i]['narration'];
                 }
 
-                if($grn_acc_entries[$i]['particular']=="Total Amount"){
-                    $acc['total_amount_acc_id'] = $grn_acc_entries[$i]['acc_id'];
-                    $acc['total_amount_ledger_name'] = $grn_acc_entries[$i]['ledger_name'];
-                    $acc['total_amount_ledger_code'] = $grn_acc_entries[$i]['ledger_code'];
-                    $invoice_details[$num]['invoice_total_amount'] = $grn_acc_entries[$i]['invoice_val'];
-                    $invoice_details[$num]['edited_total_amount'] = $grn_acc_entries[$i]['edited_val'];
-                    $invoice_details[$num]['diff_total_amount'] = $grn_acc_entries[$i]['difference_val'];
-                    $invoice_details[$num]['total_amount_voucher_id'] = $grn_acc_entries[$i]['voucher_id'];
-                    $invoice_details[$num]['total_amount_ledger_type'] = $grn_acc_entries[$i]['ledger_type'];
-                    $narration['narration_total_amount'] = $grn_acc_entries[$i]['narration'];
+                if($grn_entries[$i]['particular']=="Total Amount"){
+                    $acc['total_amount_acc_id'] = $grn_entries[$i]['acc_id'];
+                    $acc['total_amount_ledger_name'] = $grn_entries[$i]['ledger_name'];
+                    $acc['total_amount_ledger_code'] = $grn_entries[$i]['ledger_code'];
+                    $invoice_details[$num]['invoice_total_amount'] = $grn_entries[$i]['invoice_val'];
+                    $invoice_details[$num]['edited_total_amount'] = $grn_entries[$i]['edited_val'];
+                    $invoice_details[$num]['diff_total_amount'] = $grn_entries[$i]['difference_val'];
+                    $invoice_details[$num]['total_amount_voucher_id'] = $grn_entries[$i]['voucher_id'];
+                    $invoice_details[$num]['total_amount_ledger_type'] = $grn_entries[$i]['ledger_type'];
+                    $narration['narration_total_amount'] = $grn_entries[$i]['narration'];
                 }
 
-                if($grn_acc_entries[$i]['particular']=="Shortage Amount"){
-                    $invoice_details[$num]['invoice_shortage_amount'] = $grn_acc_entries[$i]['invoice_val'];
-                    $invoice_details[$num]['edited_shortage_amount'] = $grn_acc_entries[$i]['edited_val'];
-                    $invoice_details[$num]['diff_shortage_amount'] = $grn_acc_entries[$i]['difference_val'];
-                    $narration['narration_shortage_amount'] = $grn_acc_entries[$i]['narration'];
+                if($grn_entries[$i]['particular']=="Shortage Amount"){
+                    $invoice_details[$num]['invoice_shortage_amount'] = $grn_entries[$i]['invoice_val'];
+                    $invoice_details[$num]['edited_shortage_amount'] = $grn_entries[$i]['edited_val'];
+                    $invoice_details[$num]['diff_shortage_amount'] = $grn_entries[$i]['difference_val'];
+                    $narration['narration_shortage_amount'] = $grn_entries[$i]['narration'];
                 }
 
-                if($grn_acc_entries[$i]['particular']=="Expiry Amount"){
-                    $invoice_details[$num]['invoice_expiry_amount'] = $grn_acc_entries[$i]['invoice_val'];
-                    $invoice_details[$num]['edited_expiry_amount'] = $grn_acc_entries[$i]['edited_val'];
-                    $invoice_details[$num]['diff_expiry_amount'] = $grn_acc_entries[$i]['difference_val'];
-                    $narration['narration_expiry_amount'] = $grn_acc_entries[$i]['narration'];
+                if($grn_entries[$i]['particular']=="Expiry Amount"){
+                    $invoice_details[$num]['invoice_expiry_amount'] = $grn_entries[$i]['invoice_val'];
+                    $invoice_details[$num]['edited_expiry_amount'] = $grn_entries[$i]['edited_val'];
+                    $invoice_details[$num]['diff_expiry_amount'] = $grn_entries[$i]['difference_val'];
+                    $narration['narration_expiry_amount'] = $grn_entries[$i]['narration'];
                 }
 
-                if($grn_acc_entries[$i]['particular']=="Damaged Amount"){
-                    $invoice_details[$num]['invoice_damaged_amount'] = $grn_acc_entries[$i]['invoice_val'];
-                    $invoice_details[$num]['edited_damaged_amount'] = $grn_acc_entries[$i]['edited_val'];
-                    $invoice_details[$num]['diff_damaged_amount'] = $grn_acc_entries[$i]['difference_val'];
-                    $narration['narration_damaged_amount'] = $grn_acc_entries[$i]['narration'];
+                if($grn_entries[$i]['particular']=="Damaged Amount"){
+                    $invoice_details[$num]['invoice_damaged_amount'] = $grn_entries[$i]['invoice_val'];
+                    $invoice_details[$num]['edited_damaged_amount'] = $grn_entries[$i]['edited_val'];
+                    $invoice_details[$num]['diff_damaged_amount'] = $grn_entries[$i]['difference_val'];
+                    $narration['narration_damaged_amount'] = $grn_entries[$i]['narration'];
                 }
 
-                if($grn_acc_entries[$i]['particular']=="Margin Diff Amount"){
-                    $invoice_details[$num]['invoice_margindiff_amount'] = $grn_acc_entries[$i]['invoice_val'];
-                    $invoice_details[$num]['edited_margindiff_amount'] = $grn_acc_entries[$i]['edited_val'];
-                    $invoice_details[$num]['diff_margindiff_amount'] = $grn_acc_entries[$i]['difference_val'];
-                    $narration['narration_margindiff_amount'] = $grn_acc_entries[$i]['narration'];
+                if($grn_entries[$i]['particular']=="Margin Diff Amount"){
+                    $invoice_details[$num]['invoice_margindiff_amount'] = $grn_entries[$i]['invoice_val'];
+                    $invoice_details[$num]['edited_margindiff_amount'] = $grn_entries[$i]['edited_val'];
+                    $invoice_details[$num]['diff_margindiff_amount'] = $grn_entries[$i]['difference_val'];
+                    $narration['narration_margindiff_amount'] = $grn_entries[$i]['narration'];
                 }
 
-                if($grn_acc_entries[$i]['particular']=="Total Deduction"){
-                    $acc['total_deduction_acc_id'] = $grn_acc_entries[$i]['acc_id'];
-                    $acc['total_deduction_ledger_name'] = $grn_acc_entries[$i]['ledger_name'];
-                    $acc['total_deduction_ledger_code'] = $grn_acc_entries[$i]['ledger_code'];
-                    $invoice_details[$num]['invoice_total_deduction'] = $grn_acc_entries[$i]['invoice_val'];
-                    $invoice_details[$num]['edited_total_deduction'] = $grn_acc_entries[$i]['edited_val'];
-                    $invoice_details[$num]['diff_total_deduction'] = $grn_acc_entries[$i]['difference_val'];
-                    $invoice_details[$num]['total_deduction_voucher_id'] = $grn_acc_entries[$i]['voucher_id'];
-                    $invoice_details[$num]['total_deduction_ledger_type'] = $grn_acc_entries[$i]['ledger_type'];
-                    $narration['narration_total_deduction'] = $grn_acc_entries[$i]['narration'];
+                if($grn_entries[$i]['particular']=="Total Deduction"){
+                    $acc['total_deduction_acc_id'] = $grn_entries[$i]['acc_id'];
+                    $acc['total_deduction_ledger_name'] = $grn_entries[$i]['ledger_name'];
+                    $acc['total_deduction_ledger_code'] = $grn_entries[$i]['ledger_code'];
+                    $invoice_details[$num]['invoice_total_deduction'] = $grn_entries[$i]['invoice_val'];
+                    $invoice_details[$num]['edited_total_deduction'] = $grn_entries[$i]['edited_val'];
+                    $invoice_details[$num]['diff_total_deduction'] = $grn_entries[$i]['difference_val'];
+                    $invoice_details[$num]['total_deduction_voucher_id'] = $grn_entries[$i]['voucher_id'];
+                    $invoice_details[$num]['total_deduction_ledger_type'] = $grn_entries[$i]['ledger_type'];
+                    $narration['narration_total_deduction'] = $grn_entries[$i]['narration'];
                 }
             }
 
@@ -331,10 +326,10 @@ class PendinggrnController extends Controller
 
             $sql = "select A.gi_go_invoice_id, A.invoice_no, A.invoice_date, B.grn_id, B.vendor_id, 
                     C.edited_val as total_deduction from goods_inward_outward_invoices A 
-                    left join grn B on (A.gi_go_ref_no = B.gi_id) left join grn_acc_entries C 
+                    left join grn B on (A.gi_go_ref_no = B.gi_id) left join acc_grn_entries C 
                     on (B.grn_id = C.grn_id and A.invoice_no = C.invoice_no) 
                     where B.grn_id = '$id' and B.status = 'approved' and B.is_active = '1' and 
-                    C.status = 'pending' and C.is_active = '1' and C.particular = 'Total Deduction' and 
+                    C.status = 'approved' and C.is_active = '1' and C.particular = 'Total Deduction' and 
                     C.edited_val>0";
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
@@ -347,20 +342,20 @@ class PendinggrnController extends Controller
 
             for($i=0; $i<count($invoice_details); $i++) {
                 $series = 2;
-                $sql = "select * from series_master where type = 'Voucher'";
+                $sql = "select * from acc_series_master where type = 'Voucher'";
                 $command = Yii::$app->db->createCommand($sql);
                 $reader = $command->query();
                 $data = $reader->readAll();
                 if (count($data)>0){
                     $series = intval($data[0]['series']) + 2;
 
-                    $sql = "update series_master set series = '$series' where type = 'Voucher'";
+                    $sql = "update acc_series_master set series = '$series' where type = 'Voucher'";
                     $command = Yii::$app->db->createCommand($sql);
                     $count = $command->execute();
                 } else {
                     $series = 2;
 
-                    $sql = "insert into series_master (type, series) values ('Voucher', '".$series."')";
+                    $sql = "insert into acc_series_master (type, series) values ('Voucher', '".$series."')";
                     $command = Yii::$app->db->createCommand($sql);
                     $count = $command->execute();
                 }
@@ -426,21 +421,13 @@ class PendinggrnController extends Controller
         // echo $deductions['shortage'];
     }
 
-
-
-    public function actionLedger($id)
-    {
-        //http://localhost/primarc_pecan/web/index.php?r=pendinggrn%2Fledger&id=4
-        // echo "Hii";
-        // $model = $this->findModel($id);
-        // $id = 4;
-
+    public function actionLedger($id){
         $model = new PendingGrn();
 
-        $grn_acc_ledger_entries = $model->getGrnAccLedgerEntries($id);
+        $acc_ledger_entries = $model->getGrnAccLedgerEntries($id);
         $grn_details = $model->getGrnDetails($id);
 
-        return $this->render('ledger', ['grn_details' => $grn_details, 'grn_acc_ledger_entries' => $grn_acc_ledger_entries]);
+        return $this->render('ledger', ['grn_details' => $grn_details, 'acc_ledger_entries' => $acc_ledger_entries]);
     }
 
     public function actionGetledger(){
@@ -448,7 +435,7 @@ class PendinggrnController extends Controller
         $mycomponent = Yii::$app->mycomponent;
 
         $data = $model->getGrnParticulars();
-        $grn_acc_ledger_entries = $data['ledgerArray'];
+        $acc_ledger_entries = $data['ledgerArray'];
 
         $rows = ""; $new_invoice_no = ""; $invoice_no = ""; $debit_amt=0; $credit_amt=0; $sr_no=1;
         $total_debit_amt=0; $total_credit_amt=0; 
@@ -456,37 +443,37 @@ class PendinggrnController extends Controller
         $bl_deduction = false;
         $row_deduction = '';
 
-        for($i=0; $i<count($grn_acc_ledger_entries); $i++) {
+        for($i=0; $i<count($acc_ledger_entries); $i++) {
             if ($bl_deduction==true){
                 $rows = $rows . $row_deduction;
                 $bl_deduction = false;
             }
             $rows = $rows . '<tr>
                                 <td>' . ($sr_no++) . '</td>
-                                <td>' . $grn_acc_ledger_entries[$i]["voucher_id"] . '</td>
-                                <td>' . $grn_acc_ledger_entries[$i]["ledger_name"] . '</td>
-                                <td>' . $grn_acc_ledger_entries[$i]["ledger_code"] . '</td>';
+                                <td>' . $acc_ledger_entries[$i]["voucher_id"] . '</td>
+                                <td>' . $acc_ledger_entries[$i]["ledger_name"] . '</td>
+                                <td>' . $acc_ledger_entries[$i]["ledger_code"] . '</td>';
 
-            if($grn_acc_ledger_entries[$i]["type"]=="Debit") {
-                $debit_amt = $debit_amt + $grn_acc_ledger_entries[$i]["amount"];
-                $total_debit_amt = $total_debit_amt + $grn_acc_ledger_entries[$i]["amount"];
-                $rows = $rows . '<td class="text-right">'.$mycomponent->format_money($grn_acc_ledger_entries[$i]["amount"],2).'</td>';
+            if($acc_ledger_entries[$i]["type"]=="Debit") {
+                $debit_amt = $debit_amt + $acc_ledger_entries[$i]["amount"];
+                $total_debit_amt = $total_debit_amt + $acc_ledger_entries[$i]["amount"];
+                $rows = $rows . '<td class="text-right">'.$mycomponent->format_money($acc_ledger_entries[$i]["amount"],2).'</td>';
             } else {
                 $rows = $rows . '<td></td>';
             }
 
-            if($grn_acc_ledger_entries[$i]["type"]=="Credit") {
-                $credit_amt = $credit_amt + $grn_acc_ledger_entries[$i]["amount"];
-                $total_credit_amt = $total_credit_amt + $grn_acc_ledger_entries[$i]["amount"];
-                $rows = $rows . '<td class="text-right">'.$mycomponent->format_money($grn_acc_ledger_entries[$i]["amount"],2).'</td>';
+            if($acc_ledger_entries[$i]["type"]=="Credit") {
+                $credit_amt = $credit_amt + $acc_ledger_entries[$i]["amount"];
+                $total_credit_amt = $total_credit_amt + $acc_ledger_entries[$i]["amount"];
+                $rows = $rows . '<td class="text-right">'.$mycomponent->format_money($acc_ledger_entries[$i]["amount"],2).'</td>';
             } else {
                 $rows = $rows . '<td></td>';
             }
 
             $rows = $rows . '</tr>';
 
-            if($grn_acc_ledger_entries[$i]["entry_type"]=="Total Amount" || $grn_acc_ledger_entries[$i]["entry_type"]=="Total Deduction"){
-                if($grn_acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
+            if($acc_ledger_entries[$i]["entry_type"]=="Total Amount" || $acc_ledger_entries[$i]["entry_type"]=="Total Deduction"){
+                if($acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
                     $particular = "Total Purchase Amount";
                 } else {
                     $particular = "Total Deduction Amount";
@@ -505,7 +492,7 @@ class PendinggrnController extends Controller
                 $total_credit_amt = 0;
                 $sr_no=1;
 
-                if($grn_acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
+                if($acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
                     // $rows = $rows . '<tr class="bold-text text-right">
                     //                     <td colspan="6" style="text-align:left;">Deduction Entry</td>
                     //                 </tr>';
@@ -518,9 +505,9 @@ class PendinggrnController extends Controller
             }
 
             $blFlag = false;
-            if(($i+1)==count($grn_acc_ledger_entries)){
+            if(($i+1)==count($acc_ledger_entries)){
                 $blFlag = true;
-            } else if($grn_acc_ledger_entries[$i]["invoice_no"]!=$grn_acc_ledger_entries[$i+1]["invoice_no"]){
+            } else if($acc_ledger_entries[$i]["invoice_no"]!=$acc_ledger_entries[$i+1]["invoice_no"]){
                 $blFlag = true;
             }
 
@@ -529,7 +516,7 @@ class PendinggrnController extends Controller
                             <td colspan="6" style="text-align:left;">Purchase Entry</td>
                         </tr>' . $rows;
 
-                $table = '<div class="diversion"><h4 class=" ">Invoice No: ' . $grn_acc_ledger_entries[$i]["invoice_no"] . '</h4>
+                $table = '<div class="diversion"><h4 class=" ">Invoice No: ' . $acc_ledger_entries[$i]["invoice_no"] . '</h4>
                         <table class="table table-bordered">
                             <tr class="table-head">
                                 <th>Sr. No.</th>
@@ -558,8 +545,7 @@ class PendinggrnController extends Controller
         echo json_encode($table_arr);
     }
 
-    public function actionSave()
-    {
+    public function actionSave(){
         $request = Yii::$app->request;
         $model = new PendingGrn();
         $mycomponent = Yii::$app->mycomponent;
@@ -579,7 +565,7 @@ class PendinggrnController extends Controller
         // echo '<br/>';
 
         if(count($bulkInsertArray)>0){
-            $sql = "delete from grn_acc_entries where grn_id = '$gi_id'";
+            $sql = "delete from acc_grn_entries where grn_id = '$gi_id'";
             Yii::$app->db->createCommand($sql)->execute();
 
             $columnNameArray=['grn_id','vendor_id','particular','sub_particular','acc_id','ledger_name','ledger_code',
@@ -587,7 +573,7 @@ class PendinggrnController extends Controller
                                 'invoice_val','edited_val','difference_val','narration','status','is_active',
                                 'updated_by','updated_date', 'gi_date'];
             // below line insert all your record and return number of rows inserted
-            $tableName = "grn_acc_entries";
+            $tableName = "acc_grn_entries";
             $insertCount = Yii::$app->db->createCommand()
                            ->batchInsert(
                                  $tableName, $columnNameArray, $bulkInsertArray
@@ -600,14 +586,14 @@ class PendinggrnController extends Controller
         }
 
         if(count($ledgerArray)>0){
-            $sql = "delete from ledger_entries where ref_id = '$gi_id' and ref_type='purchase'";
+            $sql = "delete from acc_ledger_entries where ref_id = '$gi_id' and ref_type='purchase'";
             Yii::$app->db->createCommand($sql)->execute();
 
             $columnNameArray=['ref_id','ref_type','entry_type','invoice_no','vendor_id','acc_id','ledger_name','ledger_code',
                                 'voucher_id','ledger_type','type','amount','narration','status','is_active',
                                 'updated_by','updated_date', 'ref_date'];
             // below line insert all your record and return number of rows inserted
-            $tableName = "ledger_entries";
+            $tableName = "acc_ledger_entries";
             $insertCount = Yii::$app->db->createCommand()
                            ->batchInsert(
                                  $tableName, $columnNameArray, $ledgerArray
@@ -625,7 +611,7 @@ class PendinggrnController extends Controller
         // $this->actionSaveskudetails($gi_id, $request, "margindiff");
 
         if(count($grnAccEntries)>0){
-            $sql = "delete from grn_acc_sku_entries where grn_id = '$gi_id'";
+            $sql = "delete from acc_grn_sku_entries where grn_id = '$gi_id'";
             Yii::$app->db->createCommand($sql)->execute();
 
             $columnNameArray=['grn_id','vendor_id','ded_type','cost_acc_id','cost_ledger_name','cost_ledger_code','tax_acc_id','tax_ledger_name','tax_ledger_code','invoice_no','state',
@@ -633,7 +619,7 @@ class PendinggrnController extends Controller
                                 'tax_per_unit','total_per_unit','cost_excl_vat','tax','total','expiry_date','earliest_expected_date',
                                 'status','is_active', 'remarks'];
             // below line insert all your record and return number of rows inserted
-            $tableName = "grn_acc_sku_entries";
+            $tableName = "acc_grn_sku_entries";
             $insertCount = Yii::$app->db->createCommand()
                            ->batchInsert(
                                 $tableName, $columnNameArray, $grnAccEntries
@@ -648,77 +634,7 @@ class PendinggrnController extends Controller
         $this->redirect(array('pendinggrn/ledger', 'id'=>$gi_id));
     }
 
-
-    // public function actionSaveskudetails($gi_id, $request, $ded_type){
-    //     $invoice_no = $request->post($ded_type.'_invoice_no');
-    //     $state = $request->post($ded_type.'_state');
-    //     $vat_cst = $request->post($ded_type.'_vat_cst');
-    //     $vat_percen = $request->post($ded_type.'_vat_percen');
-    //     $ean = $request->post($ded_type.'_ean');
-    //     $psku = $request->post($ded_type.'_psku');
-    //     $product_title = $request->post($ded_type.'_product_title');
-    //     $qty = $request->post($ded_type.'_qty');
-    //     $box_price = $request->post($ded_type.'_box_price');
-    //     $cost_excl_tax_per_unit = $request->post($ded_type.'_cost_excl_tax_per_unit');
-    //     $tax_per_unit = $request->post($ded_type.'_tax_per_unit');
-    //     $total_per_unit = $request->post($ded_type.'_total_per_unit');
-    //     $cost_excl_tax = $request->post($ded_type.'_cost_excl_tax');
-    //     $tax = $request->post($ded_type.'_tax');
-    //     $total = $request->post($ded_type.'_total');
-
-    //     $bulkInsertArray = array();
-    //     $mycomponent = Yii::$app->mycomponent;
-    //     for($i=0; $i<count($invoice_no); $i++){
-    //         $qty_val = $mycomponent->format_number($qty[$i],2);
-    //         if($qty_val>0){
-    //             $bulkInsertArray[$i]=[
-    //                 'grn_id'=>$gi_id,
-    //                 'ded_type'=>$ded_type,
-    //                 'invoice_no'=>$invoice_no[$i],
-    //                 'state'=>$state[$i],
-    //                 'vat_cst'=>$vat_cst[$i],
-    //                 'vat_percen'=>$vat_percen[$i],
-    //                 'ean'=>$ean[$i],
-    //                 'psku'=>$psku[$i],
-    //                 'product_title'=>$product_title[$i],
-    //                 'qty'=>$qty_val,
-    //                 'box_price'=>$mycomponent->format_number($box_price[$i],2),
-    //                 'cost_excl_vat_per_unit'=>$mycomponent->format_number($cost_excl_tax_per_unit[$i],2),
-    //                 'tax_per_unit'=>$mycomponent->format_number($tax_per_unit[$i],2),
-    //                 'total_per_unit'=>$mycomponent->format_number($total_per_unit[$i],2),
-    //                 'cost_excl_vat'=>$mycomponent->format_number($cost_excl_tax[$i],2),
-    //                 'tax'=>$mycomponent->format_number($tax[$i],2),
-    //                 'total'=>$mycomponent->format_number($total[$i],2),
-    //                 'status'=>'pending',
-    //                 'is_active'=>'1'
-    //             ];
-    //         }
-    //     }
-
-    //     // echo count($bulkInsertArray);
-    //     // echo '<br/>';
-
-    //     if(count($bulkInsertArray)>0){
-    //         $sql = "delete from grn_acc_sku_entries where grn_id = '$gi_id' and ded_type = '$ded_type'";
-    //         Yii::$app->db->createCommand($sql)->execute();
-
-    //         $columnNameArray=['grn_id','ded_type','invoice_no','state','vat_cst','vat_percen','ean','psku','product_title','qty','box_price','cost_excl_vat_per_unit','tax_per_unit','total_per_unit','cost_excl_vat','tax','total','status','is_active'];
-    //         // below line insert all your record and return number of rows inserted
-    //         $tableName = "grn_acc_sku_entries";
-    //         $insertCount = Yii::$app->db->createCommand()
-    //                        ->batchInsert(
-    //                             $tableName, $columnNameArray, $bulkInsertArray
-    //                         )
-    //                        ->execute();
-
-    //         // echo $insertCount;
-    //         // echo '<br/>';
-    //         // echo 'hii';
-    //     }
-    // }
-
-    public function actionPendinggrn()
-    {
+    public function actionPendinggrn(){
         $model = new PendingGrn();
         $rows = $model->getPendingGrn();
         
@@ -736,8 +652,7 @@ class PendinggrnController extends Controller
         $this->actionGetinvoicedeductiondetails('5909', 'shortage');
     }
 
-    public function actionGetinvoicedeductiondetails($gi_id, $ded_type)
-    {   
+    public function actionGetinvoicedeductiondetails($gi_id, $ded_type){   
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
 
@@ -777,7 +692,7 @@ class PendinggrnController extends Controller
 
         $model = new PendingGrn();
         $rows = array();
-        $acc_master = $model->getAccountDetails('', 'pending');
+        $acc_master = $model->getAccountDetails('', 'approved');
 
         $grnAccSku = $model->getGrnAccSku($gi_id);
         if(count($grnAccSku)>0){
@@ -1075,8 +990,7 @@ class PendinggrnController extends Controller
         // echo $table;
     }
 
-    public function actionGetnewrow()
-    {   
+    public function actionGetnewrow(){   
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
 
@@ -1122,7 +1036,7 @@ class PendinggrnController extends Controller
         $model = new PendingGrn();
         // $rows = array();
         // $rows = $model->getInvoiceDeductionDetails($gi_id, $col_qty);
-        $acc_master = $model->getAccountDetails('', 'pending');
+        $acc_master = $model->getAccountDetails('', 'approved');
         
         $result = "";
         $table = "";
