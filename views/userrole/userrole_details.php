@@ -89,7 +89,7 @@ table tr td { border: 1px solid #eee!important; }
 									<td class="center hide"><input type="checkbox" class="cls_chk" id="account_master_exp" name="export[]" value="0" <?php if(isset($editoptions[0])) { if($editoptions[0]['r_export'] == 1) { echo 'checked';} } ?> /></td>
 								</tr>
 								<tr id="trow_3">
-									<td>Purcahse</td>
+									<td>Purchase</td>
 									<td class="center"><input type="checkbox" class="cls_chk" id="purchase_vw" name="view[]" value="1" <?php if(isset($editoptions[1])) { if($editoptions[1]['r_view'] == 1) { echo 'checked';} } ?> /></td>
 									<td class="center"><input type="checkbox" class="cls_chk" id="purchase_ins" name="insert[]" value="1" <?php if(isset($editoptions[1])) { if($editoptions[1]['r_insert'] == 1) { echo 'checked';} } ?> /></td>
 									<td class="center"><input type="checkbox" class="cls_chk" id="purchase_upd" name="update[]" value="1" <?php if(isset($editoptions[1])) { if($editoptions[1]['r_edit'] == 1) { echo 'checked';} } ?> /></td>

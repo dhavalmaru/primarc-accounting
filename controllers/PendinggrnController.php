@@ -649,6 +649,7 @@ class PendinggrnController extends Controller
     }
 
     public function actionGetinvoicedeductiondetailstest(){
+
         $this->actionGetinvoicedeductiondetails('5909', 'shortage');
     }
 

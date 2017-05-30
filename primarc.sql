@@ -216,4 +216,6 @@ INSERT INTO `acc_user_role_options` (`id`, `role_id`, `r_section`, `r_view`, `r_
 (29, 4, 'S_User_Roles', 0, 0, 0, 0, 0, 0),
 (30, 4, 'S_Reports', 1, 0, 0, 0, 0, 0);
 
-
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

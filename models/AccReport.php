@@ -13,7 +13,7 @@ class AccReport extends Model
             $cond = " and id = '$id'";
         }
 
-        $sql = "select * from acc_master where is_active = '1'".$cond." order by legal_name";
+        $sql = "select * from acc_master where is_active = '1' and status = 'approved'".$cond." order by legal_name";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();

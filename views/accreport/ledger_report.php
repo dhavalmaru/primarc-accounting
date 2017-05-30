@@ -38,6 +38,9 @@ table tr td { border: 1px solid #eee!important; }
 #example_wrapper .row:first-child .col-md-6:last-child .btn-group { margin-right: 0px; }
 #example_wrapper .row:nth-child(1) {margin-top: -60px;}
 #example_wrapper .row:nth-child(2) {margin-top: 20px;}
+#example {
+	width: 1040px !important;
+}
 
 /*tbody{
    	height:150px;display:block;overflow:scroll
@@ -129,8 +132,8 @@ tbody {
 						<!-- <button type="button" class="btn btn-sm btn-info pull-right" id="btn_print" onclick="javascript:window.print();">Print</button> -->
 						<label id="company_name" class="text-center">Primarc Pecan Retail Pvt Ltd</label>
 						<label id="account_name" class="text-center">&nbsp;</label>
-						<label class="pull-left"><span id="from"><?php if(isset($from_date)) echo (($from_date!=null && $from_date!='')?date('d/m/Y',strtotime($from_date)):date('d/m/Y')); else echo date('d/m/Y'); ?></span></label>
-						<label class="pull-right"><span id="to"><?php if(isset($to_date)) echo (($to_date!=null && $to_date!='')?date('d/m/Y',strtotime($to_date)):date('d/m/Y')); else echo date('d/m/Y'); ?></span></label>
+						<label class="pull-left"><span id="from"><?php if(isset($from_date)) echo (($from_date!=null && $from_date!='')?'From: ' . date('d/m/Y',strtotime($from_date)):date('d/m/Y')); else echo date('d/m/Y'); ?></span></label>
+						<label class="pull-right"><span id="to"><?php if(isset($to_date)) echo (($to_date!=null && $to_date!='')?'To: ' . date('d/m/Y',strtotime($to_date)):date('d/m/Y')); else echo date('d/m/Y'); ?></span></label>
 					</div>
 				</div>
 

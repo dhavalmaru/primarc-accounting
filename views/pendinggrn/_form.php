@@ -155,7 +155,7 @@ table {width: 1200px;}
     			<div class="col-md-2 col-sm-2 col-xs-6">
                     <label class=" control-label">Posting Date </label> 
                     <div class=" "> 
-    					<input style="background-color: #fff;" type="text" class="form-control datepicker" name="gi_date" id="gi_date" value="<?php if(isset($grn_details)) echo (($grn_details[0]['gi_date']!=null && $grn_details[0]['gi_date']!='')?date('d/m/Y',strtotime($grn_details[0]['gi_date'])):date('d/m/Y')); else echo date('d/m/Y'); ?>" readonly />
+    					<input style="background-color: #fff;" type="text" class="form-control datepicker" name="gi_date" id="gi_date" value="<?php if(isset($grn_details)) { if($grn_details[0]['grn_date']!=null && $grn_details[0]['grn_date']!='') echo date('d/m/Y',strtotime($grn_details[0]['grn_date'])); else echo (($grn_details[0]['gi_date']!=null && $grn_details[0]['gi_date']!='')?date('d/m/Y',strtotime($grn_details[0]['gi_date'])):date('d/m/Y')); } else echo date('d/m/Y'); ?>" readonly />
                         <input type="hidden" class="form-control" name="no_of_invoices" id="no_of_invoices" value="<?= count($invoice_details) ?>" />
                     </div>
     			</div>

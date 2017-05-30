@@ -61,8 +61,10 @@ class PendingGrn extends Model
     }
 
 	public function getGrnDetails($id){
-        $sql = "select A.*, B.vendor_code from grn A left join vendor_master B on (A.vendor_id = B.id) 
-                where A.grn_id = '$id' and A.status = 'approved' and A.is_active='1'";
+        $sql = "select A.*, B.vendor_code, C.gi_date as grn_date from grn A left join vendor_master B on (A.vendor_id = B.id) 
+                left join acc_grn_entries C on (A.grn_id = C.grn_id and C.status = 'approved' and C.is_active='1' and 
+                C.particular = 'Total Amount') where A.grn_id = '$id' and 
+                A.status = 'approved' and A.is_active='1'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
