@@ -215,5 +215,3 @@ INSERT INTO `acc_user_role_options` (`id`, `role_id`, `r_section`, `r_view`, `r_
 (28, 4, 'S_Payment_Receipt', 1, 1, 1, 1, 1, 0),
 (29, 4, 'S_User_Roles', 0, 0, 0, 0, 0, 0),
 (30, 4, 'S_Reports', 1, 0, 0, 0, 0, 0);
-
-
