@@ -1,0 +1,1 @@
+update acc_user_role_options set r_view = '1', r_insert = '1', r_edit = '1', r_delete = '1', r_approval = '1', r_export = '1' where role_id='4' and r_section = 'S_User_Roles';
