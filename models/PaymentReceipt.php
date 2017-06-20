@@ -20,6 +20,25 @@ class PaymentReceipt extends Model
         return $reader->readAll();
     }
 
+    public function getApprover($action){
+        $session = Yii::$app->session;
+        $session_id = $session['session_id'];
+
+        $cond = "";
+        if($action!="authorise" && $action!="view"){
+            $cond = " and A.id!='".$session_id."'";
+        } 
+
+        $sql = "select distinct A.id, A.username, C.r_approval from user A 
+                left join acc_user_roles B on (A.id = B.user_id) 
+                left join acc_user_role_options C on (B.role_id = C.role_id) 
+                where C.r_section = 'S_Payment_Receipt' and 
+                        C.r_approval = '1' and C.r_approval is not null" . $cond;
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
     public function getDetails($trans_id="", $status=""){
         $cond = "";
         if($trans_id!=""){
@@ -184,6 +203,8 @@ class PaymentReceipt extends Model
         $narration = $request->post('narration');
         $payment_date = $request->post('payment_date');
         $remarks = $request->post('remarks');
+        $approver_id = $request->post('approver_id');
+        
         if($payment_date==''){
             $payment_date=NULL;
         } else {
@@ -248,7 +269,8 @@ class PaymentReceipt extends Model
                 'updated_by'=>$curusr,
                 'updated_date'=>$now,
                 'payment_date'=>$payment_date,
-                'approver_comments'=>$remarks
+                'approver_comments'=>$remarks,
+                'approver_id'=>$approver_id
             ];
 
         if (isset($id) && $id!=""){
@@ -504,7 +526,17 @@ class PaymentReceipt extends Model
         $id = $request->post('id');
         $voucher_id = $request->post('voucher_id');
         $remarks = $request->post('remarks');
-        $payment_type = $request->post('payment_type');
+        // $payment_type = $request->post('payment_type');
+
+        $sql = "select * from acc_payment_receipt where id = '$id'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $result = $reader->readAll();
+        if(count($result)>0){
+            $payment_type = $result[0]['payment_type'];
+        } else {
+            $payment_type = '';
+        }
 
         $array = array('status' => $status, 
                         'approved_by' => $curusr, 
@@ -704,7 +736,8 @@ class PaymentReceipt extends Model
     }
 
     public function setEmailLog($vendor_name, $from_email_id, $to_recipient, $reference_number, $email_content, 
-                                $email_attachment, $attachment_type, $email_sent_status, $error_message, $company_id){
+                                $email_attachment, $attachment_type, $email_sent_status, $error_message, $company_id)
+    {
         $session = Yii::$app->session;
         $curusr = $session['session_id'];
         $username = $session['username'];

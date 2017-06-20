@@ -45,10 +45,13 @@ class JournalvoucherController extends Controller
         $access = $journal_voucher->getAccess();
         if(count($access)>0) {
             if($access[0]['r_insert']==1) {
+                $action = 'insert';
                 $acc_details = $journal_voucher->getAccountDetails();
+                $approver_list = $journal_voucher->getApprover($action);
 
                 $journal_voucher->setLog('JournalVoucher', '', 'Insert', '', 'Insert Journal Voucher Details', 'acc_jv_details', '');
-                return $this->render('journalvoucher_details', ['action' => 'insert', 'acc_details' => $acc_details]);
+                return $this->render('journalvoucher_details', ['action' => $action, 'acc_details' => $acc_details, 
+                                                                'approver_list' => $approver_list]);
             } else {
                 return $this->render('/message', [
                     'title'  => \Yii::t('user', 'Access Denied'),
@@ -72,9 +75,11 @@ class JournalvoucherController extends Controller
         $acc_details = $journal_voucher->getAccountDetails();
         $jv_entries = $journal_voucher->gerJournalVoucherEntries($id);
         $jv_docs = $journal_voucher->gerJournalVoucherDocs($id);
+        $approver_list = $journal_voucher->getApprover($action);
 
         return $this->render('journalvoucher_details', ['action' => $action, 'data' => $data, 'acc_details' => $acc_details, 
-                                                        'jv_entries' => $jv_entries, 'jv_docs' => $jv_docs]);
+                                                        'jv_entries' => $jv_entries, 'jv_docs' => $jv_docs, 
+                                                        'approver_list' => $approver_list]);
     }
 
     public function actionView($id) {
@@ -106,7 +111,7 @@ class JournalvoucherController extends Controller
         $access = $journal_voucher->getAccess();
         $data = $journal_voucher->getJournalVoucherDetails($id, "");
         if(count($access)>0) {
-            if($access[0]['r_edit']==1 && $access[0]['session_id']==$data[0]['updated_by']) {
+            if($access[0]['r_edit']==1 && $access[0]['session_id']!=$data[0]['approver_id']) {
                 $journal_voucher->setLog('JournalVoucher', '', 'Edit', '', 'Edit Journal Voucher Details', 'acc_jv_details', $id);
                 return $this->actionRedirect('edit', $id);
             } else {
@@ -131,7 +136,7 @@ class JournalvoucherController extends Controller
         $access = $journal_voucher->getAccess();
         $data = $journal_voucher->getJournalVoucherDetails($id, "");
         if(count($access)>0) {
-            if($access[0]['r_approval']==1 && $access[0]['session_id']!=$data[0]['updated_by']) {
+            if($access[0]['r_approval']==1 && $access[0]['session_id']==$data[0]['approver_id']) {
                 $journal_voucher->setLog('JournalVoucher', '', 'Authorise', '', 'Authorise Journal Voucher Details', 'acc_jv_details', $id);
                 return $this->actionRedirect('authorise', $id);
             } else {

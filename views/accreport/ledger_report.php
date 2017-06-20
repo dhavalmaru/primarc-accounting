@@ -141,7 +141,7 @@ tbody {
 				<div class="loading">
 					<div class="form-group">
 						<div class="col-md-12"> 
-							<table class="table table-bordered display" id="example">
+							<table id="example" class="table table-bordered display">
 								<thead>
 									<tr>
 										<th class="text-center"> Sr No </th>

@@ -9,6 +9,18 @@ use mPDF;
 
 class PendingGrn extends Model
 {
+    public function getAccess(){
+        $session = Yii::$app->session;
+        $session_id = $session['session_id'];
+        $role_id = $session['role_id'];
+
+        $sql = "select A.*, '".$session_id."' as session_id from acc_user_role_options A 
+                where A.role_id = '$role_id' and A.r_section = 'S_Purchase'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
     public function getAccountDetails($id="", $status=""){
         $cond = "";
         $cond2 = "";
@@ -48,9 +60,22 @@ class PendingGrn extends Model
     }
 
     public function getAllGrnDetails(){
+        // $sql = "select * from 
+        //         (select A.*, B.status as grn_status from 
+        //         (select distinct A.*, B.username from grn A left join user B on(A.updated_by = B.id) 
+        //             where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-01-15')) A 
+        //         left join 
+        //         (select distinct grn_id, status from acc_grn_entries) B 
+        //         on (A.grn_id = B.grn_id)) C order by UNIX_TIMESTAMP(updated_date) desc";
+        // $command = Yii::$app->db->createCommand($sql);
+        // $reader = $command->query();
+        // return $reader->readAll();
+
         $sql = "select * from 
                 (select A.*, B.status as grn_status from 
-                (select A.*, B.username from grn A left join user B on(A.updated_by = B.id) 
+                (select distinct A.*, B.username, C.is_paid from grn A left join user B on(A.updated_by = B.id) 
+                    left join acc_ledger_entries C on (A.grn_id = C.ref_id and 'purchase' = C.ref_type and 
+                        '1' = C.is_active and 'Approved' = C.status and '1' = C.is_paid) 
                     where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-01-15')) A 
                 left join 
                 (select distinct grn_id, status from acc_grn_entries) B 
@@ -73,14 +98,14 @@ class PendingGrn extends Model
     public function getPurchaseDetails($status=""){
         $cond = "";
         if($status!=""){
-            $cond = " and status = '$status'";
+            $cond = " and A.status = '$status'";
         }
         $sql = "select D.*, E.username from 
                 (select B.*, C.grn_no, C.vendor_name, C.category_name, C.po_no from 
                 (select grn_id, inv_nos, (taxable_amt+tax_amt+other_amt) as net_amt, 
                     (shortage_amt+expiry_amt+damaged_amt+magrin_diff_amt) as ded_amt, 
-                    updated_date, updated_by, approved_by from 
-                (select A.grn_id, GROUP_CONCAT(distinct A.invoice_no) as inv_nos, 
+                    updated_date, updated_by, approved_by, is_paid from 
+                (select distinct A.grn_id, GROUP_CONCAT(distinct A.invoice_no) as inv_nos, 
                         sum(case when A.particular='Taxable Amount' then A.edited_val else 0 end) as taxable_amt, 
                         sum(case when A.particular='Tax' then A.edited_val else 0 end) as tax_amt, 
                         sum(case when A.particular='Other Charges' then A.edited_val else 0 end) as other_amt, 
@@ -88,8 +113,11 @@ class PendingGrn extends Model
                         sum(case when A.particular='Expiry Amount' then A.edited_val else 0 end) as expiry_amt, 
                         sum(case when A.particular='Damaged Amount' then A.edited_val else 0 end) as damaged_amt, 
                         sum(case when A.particular='Margin Diff Amount' then A.edited_val else 0 end) as magrin_diff_amt, 
-                        max(A.updated_date) as updated_date, max(A.updated_by) as updated_by, max(A.approved_by) as approved_by 
+                        max(A.updated_date) as updated_date, max(A.updated_by) as updated_by, max(A.approved_by) as approved_by, 
+                        B.is_paid 
                 from acc_grn_entries A 
+                    left join acc_ledger_entries B on (A.grn_id = B.ref_id and 'purchase' = B.ref_type and 
+                        '1' = B.is_active and 'Approved' = B.status and '1' = B.is_paid) 
                 where A.is_active = '1' ".$cond." group by grn_id) A) B 
                 left join 
                 (select * from grn where status = 'approved') C 
@@ -117,7 +145,7 @@ class PendingGrn extends Model
                     (excess_cost+excess_tax) as excess_amount, (shortage_cost+shortage_tax) as shortage_amount, 
                     (expiry_cost+expiry_tax) as expiry_amount, (damaged_cost+damaged_tax) as damaged_amount, 
                     (margindiff_cost+margindiff_tax) as margindiff_amount from 
-                (select invoice_no, ifnull((total_qty*cost_excl_vat),0) as total_cost, ifnull((total_qty*cost_excl_vat*vat_percen)/100,0) as total_tax, 
+                (select invoice_no, ifnull((invoice_qty*cost_excl_vat),0) as total_cost, ifnull((invoice_qty*cost_excl_vat*vat_percen)/100,0) as total_tax, 
                     ifnull((excess_qty*cost_excl_vat),0) as excess_cost, ifnull((excess_qty*cost_excl_vat*vat_percen)/100,0) as excess_tax, 
                     ifnull((shortage_qty*cost_excl_vat),0) as shortage_cost, ifnull((shortage_qty*cost_excl_vat*vat_percen)/100,0) as shortage_tax, 
                     ifnull((expiry_qty*cost_excl_vat),0) as expiry_cost, ifnull((expiry_qty*cost_excl_vat*vat_percen)/100,0) as expiry_tax, 
@@ -131,6 +159,40 @@ class PendingGrn extends Model
     }
 
     public function getInvoiceDetails($id){
+        // $sql = "select invoice_no, total_cost as invoice_total_cost, total_tax as invoice_total_tax, total_amount as invoice_total_amount, 
+        //         excess_amount as invoice_excess_amount, shortage_amount as invoice_shortage_amount, expiry_amount as invoice_expiry_amount, 
+        //         damaged_amount as invoice_damaged_amount, margindiff_amount as invoice_margindiff_amount, total_deduction as invoice_total_deduction, 
+        //         total_payable_amount as invoice_total_payable_amount, total_cost as edited_total_cost, total_tax as edited_total_tax, total_amount as edited_total_amount, 
+        //         excess_amount as edited_excess_amount, shortage_amount as edited_shortage_amount, expiry_amount as edited_expiry_amount, 
+        //         damaged_amount as edited_damaged_amount, margindiff_amount as edited_margindiff_amount, total_deduction as edited_total_deduction, 
+        //         total_payable_amount as edited_total_payable_amount, 0 as diff_total_cost, 0 as diff_total_tax, 0 as diff_total_amount, 
+        //         0 as diff_excess_amount, 0 as diff_shortage_amount, 0 as diff_expiry_amount, 0 as diff_damaged_amount, 
+        //         0 as diff_margindiff_amount, 0 as diff_total_deduction, 0 as diff_total_payable_amount, 
+        //         0 as invoice_other_charges, 0 as edited_other_charges, 0 as diff_other_charges, 
+        //         null as total_amount_voucher_id, null as total_amount_ledger_type, 
+        //         null as total_deduction_voucher_id, null as total_deduction_ledger_type from 
+        //         (select invoice_no, sum(total_cost) as total_cost, sum(total_tax) as total_tax, sum(total_amount) as total_amount, 
+        //         sum(excess_amount) as excess_amount, sum(shortage_amount) as shortage_amount, sum(expiry_amount) as expiry_amount, 
+        //         sum(damaged_amount) as damaged_amount, sum(margindiff_amount) as margindiff_amount, sum(total_deduction) as total_deduction, 
+        //         sum(total_payable_amount) as total_payable_amount from 
+        //         (select invoice_no, total_cost, total_tax, total_amount, excess_amount, shortage_amount, expiry_amount, damaged_amount, 
+        //             margindiff_amount, total_deduction, (total_amount-total_deduction) as total_payable_amount from 
+        //         (select invoice_no, total_cost, total_tax, (total_cost+total_tax) as total_amount, excess_amount, shortage_amount, expiry_amount, 
+        //             damaged_amount, margindiff_amount, (shortage_amount+expiry_amount+damaged_amount+margindiff_amount) as total_deduction from 
+        //         (select invoice_no, (total_cost+shortage_cost+expiry_cost+damaged_cost+margindiff_cost-excess_cost) as total_cost, 
+        //             (total_tax+shortage_tax+expiry_tax+damaged_tax+margindiff_tax-excess_tax) as total_tax, 
+        //             (excess_cost+excess_tax) as excess_amount, (shortage_cost+shortage_tax) as shortage_amount, 
+        //             (expiry_cost+expiry_tax) as expiry_amount, (damaged_cost+damaged_tax) as damaged_amount, 
+        //             (margindiff_cost+margindiff_tax) as margindiff_amount from 
+        //         (select invoice_no, ifnull((invoice_qty*cost_excl_vat),0) as total_cost, ifnull((invoice_qty*cost_excl_vat*vat_percen)/100,0) as total_tax, 
+        //             ifnull((excess_qty*cost_excl_vat),0) as excess_cost, ifnull((excess_qty*cost_excl_vat*vat_percen)/100,0) as excess_tax, 
+        //             ifnull((shortage_qty*cost_excl_vat),0) as shortage_cost, ifnull((shortage_qty*cost_excl_vat*vat_percen)/100,0) as shortage_tax, 
+        //             ifnull((expiry_qty*cost_excl_vat),0) as expiry_cost, ifnull((expiry_qty*cost_excl_vat*vat_percen)/100,0) as expiry_tax, 
+        //             ifnull((damaged_qty*cost_excl_vat),0) as damaged_cost, ifnull((damaged_qty*cost_excl_vat*vat_percen)/100,0) as damaged_tax, 
+        //             ifnull((0*cost_excl_vat),0) as margindiff_cost, ifnull((0*cost_excl_vat*vat_percen)/100,0) as margindiff_tax 
+        //             from grn_entries where is_active = '1' and grn_id = '$id') A) B) C) D 
+        //         group by invoice_no) E order by invoice_no";
+        
         $sql = "select invoice_no, total_cost as invoice_total_cost, total_tax as invoice_total_tax, total_amount as invoice_total_amount, 
                 excess_amount as invoice_excess_amount, shortage_amount as invoice_shortage_amount, expiry_amount as invoice_expiry_amount, 
                 damaged_amount as invoice_damaged_amount, margindiff_amount as invoice_margindiff_amount, total_deduction as invoice_total_deduction, 
@@ -156,15 +218,27 @@ class PendingGrn extends Model
                     (excess_cost+excess_tax) as excess_amount, (shortage_cost+shortage_tax) as shortage_amount, 
                     (expiry_cost+expiry_tax) as expiry_amount, (damaged_cost+damaged_tax) as damaged_amount, 
                     (margindiff_cost+margindiff_tax) as margindiff_amount from 
-                (select invoice_no, ifnull((total_qty*cost_excl_vat),0) as total_cost, ifnull((total_qty*cost_excl_vat*vat_percen)/100,0) as total_tax, 
-                    ifnull((excess_qty*cost_excl_vat),0) as excess_cost, ifnull((excess_qty*cost_excl_vat*vat_percen)/100,0) as excess_tax, 
-                    ifnull((shortage_qty*cost_excl_vat),0) as shortage_cost, ifnull((shortage_qty*cost_excl_vat*vat_percen)/100,0) as shortage_tax, 
-                    ifnull((expiry_qty*cost_excl_vat),0) as expiry_cost, ifnull((expiry_qty*cost_excl_vat*vat_percen)/100,0) as expiry_tax, 
-                    ifnull((damaged_qty*cost_excl_vat),0) as damaged_cost, ifnull((damaged_qty*cost_excl_vat*vat_percen)/100,0) as damaged_tax, 
-                    ifnull((0*cost_excl_vat),0) as margindiff_cost, ifnull((0*cost_excl_vat*vat_percen)/100,0) as margindiff_tax 
-                    from grn_entries where is_active = '1' and grn_id = '$id') A) B) C) D 
+                (select invoice_no, total_cost, total_tax, excess_cost, excess_tax, shortage_cost, shortage_tax, expiry_cost, expiry_tax, damaged_cost, damaged_tax, 
+                        case when margindiff_cost<=0 then 0 else margindiff_cost end as margindiff_cost, 
+                        case when margindiff_tax<=0 then 0 else margindiff_tax end as margindiff_tax from 
+                (select B.invoice_no, ifnull((B.invoice_qty*B.cost_excl_vat),0) as total_cost, ifnull((B.invoice_qty*B.cost_excl_vat*B.vat_percen)/100,0) as total_tax, 
+                    ifnull((B.excess_qty*B.cost_excl_vat),0) as excess_cost, ifnull((B.excess_qty*B.cost_excl_vat*B.vat_percen)/100,0) as excess_tax, 
+                    ifnull((B.shortage_qty*B.cost_excl_vat),0) as shortage_cost, ifnull((B.shortage_qty*B.cost_excl_vat*B.vat_percen)/100,0) as shortage_tax, 
+                    ifnull((B.expiry_qty*B.cost_excl_vat),0) as expiry_cost, ifnull((B.expiry_qty*B.cost_excl_vat*B.vat_percen)/100,0) as expiry_tax, 
+                    ifnull((B.damaged_qty*B.cost_excl_vat),0) as damaged_cost, ifnull((B.damaged_qty*B.cost_excl_vat*B.vat_percen)/100,0) as damaged_tax, 
+                    round(ifnull((B.invoice_qty*B.cost_excl_vat),0)-ifnull((B.invoice_qty*G.cost_price_exc_tax),0), 2) as margindiff_cost, 
+                    round(ifnull((B.invoice_qty*B.cost_excl_vat*B.vat_percen)/100,0)-ifnull((B.invoice_qty*G.cost_price_exc_tax*B.vat_percen)/100,0), 2) as margindiff_tax 
+                from grn A 
+                left join grn_entries B on (A.grn_id = B.grn_id) 
+                left join internal_warehouse_master C on (A.warehouse_id = C.warehouse_code and A.company_id = C.company_id) 
+                left join tax_zone_master D on (C.tax_zone_id = D.id) 
+                left join goods_inward_outward_invoices E on (A.gi_id = E.gi_go_ref_no and B.invoice_no = E.invoice_no) 
+                left join purchase_order F on (A.po_no = F.po_no) 
+                left join purchase_order_items G on (F.purchase_order_id = G.purchase_order_id and B.psku = G.psku) 
+                where A.grn_id = '$id' and B.grn_id = '$id' and A.is_active = '1' and B.is_active = '1' and 
+                    C.is_active = '1' and D.is_active = '1' and B.invoice_no is not null) AA) A) B) C) D 
                 group by invoice_no) E order by invoice_no";
-        // $sql = "select * from grn where grn_id = '".$id."'";
+
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -175,7 +249,7 @@ class PendingGrn extends Model
     //             (select invoice_no, vat_cst, vat_percen, sum(total_cost) as total_cost, sum(total_tax) as total_tax from 
     //             (select invoice_no, vat_cst, vat_percen, (total_cost+shortage_cost+expiry_cost+damaged_cost+margindiff_cost-excess_cost) as total_cost, 
     //                 (total_tax+shortage_tax+expiry_tax+damaged_tax+margindiff_tax-excess_tax) as total_tax from 
-    //             (select invoice_no, vat_cst, vat_percen, ifnull((total_qty*cost_excl_vat),0) as total_cost, ifnull((total_qty*cost_excl_vat*vat_percen)/100,0) as total_tax, 
+    //             (select invoice_no, vat_cst, vat_percen, ifnull((invoice_qty*cost_excl_vat),0) as total_cost, ifnull((invoice_qty*cost_excl_vat*vat_percen)/100,0) as total_tax, 
     //                 ifnull((excess_qty*cost_excl_vat),0) as excess_cost, ifnull((excess_qty*cost_excl_vat*vat_percen)/100,0) as excess_tax, 
     //                 ifnull((shortage_qty*cost_excl_vat),0) as shortage_cost, ifnull((shortage_qty*cost_excl_vat*vat_percen)/100,0) as shortage_tax, 
     //                 ifnull((expiry_qty*cost_excl_vat),0) as expiry_cost, ifnull((expiry_qty*cost_excl_vat*vat_percen)/100,0) as expiry_tax, 
@@ -206,7 +280,7 @@ class PendingGrn extends Model
                     (total_tax+shortage_tax+expiry_tax+damaged_tax+margindiff_tax-excess_tax) as total_tax from 
                 (select grn_id, null as invoice_cost_acc_id, null as invoice_cost_ledger_name, null as invoice_cost_ledger_code, 
                     null as invoice_tax_acc_id, null as invoice_tax_ledger_name, null as invoice_tax_ledger_code, vat_cst, vat_percen, 
-                    ifnull((total_qty*cost_excl_vat),0) as total_cost, ifnull((total_qty*cost_excl_vat*vat_percen)/100,0) as total_tax, 
+                    ifnull((invoice_qty*cost_excl_vat),0) as total_cost, ifnull((invoice_qty*cost_excl_vat*vat_percen)/100,0) as total_tax, 
                     ifnull((excess_qty*cost_excl_vat),0) as excess_cost, ifnull((excess_qty*cost_excl_vat*vat_percen)/100,0) as excess_tax, 
                     ifnull((shortage_qty*cost_excl_vat),0) as shortage_cost, ifnull((shortage_qty*cost_excl_vat*vat_percen)/100,0) as shortage_tax, 
                     ifnull((expiry_qty*cost_excl_vat),0) as expiry_cost, ifnull((expiry_qty*cost_excl_vat*vat_percen)/100,0) as expiry_tax, 
@@ -238,7 +312,7 @@ class PendingGrn extends Model
                 (select grn_id, invoice_no, vat_cst, vat_percen, sum(total_cost) as total_cost, sum(total_tax) as total_tax from 
                 (select grn_id, invoice_no, vat_cst, vat_percen, (total_cost+shortage_cost+expiry_cost+damaged_cost+margindiff_cost-excess_cost) as total_cost, 
                     (total_tax+shortage_tax+expiry_tax+damaged_tax+margindiff_tax-excess_tax) as total_tax from 
-                (select grn_id, invoice_no, vat_cst, vat_percen, ifnull((total_qty*cost_excl_vat),0) as total_cost, ifnull((total_qty*cost_excl_vat*vat_percen)/100,0) as total_tax, 
+                (select grn_id, invoice_no, vat_cst, vat_percen, ifnull((invoice_qty*cost_excl_vat),0) as total_cost, ifnull((invoice_qty*cost_excl_vat*vat_percen)/100,0) as total_tax, 
                     ifnull((excess_qty*cost_excl_vat),0) as excess_cost, ifnull((excess_qty*cost_excl_vat*vat_percen)/100,0) as excess_tax, 
                     ifnull((shortage_qty*cost_excl_vat),0) as shortage_cost, ifnull((shortage_qty*cost_excl_vat*vat_percen)/100,0) as shortage_tax, 
                     ifnull((expiry_qty*cost_excl_vat),0) as expiry_cost, ifnull((expiry_qty*cost_excl_vat*vat_percen)/100,0) as expiry_tax, 
@@ -301,17 +375,26 @@ class PendingGrn extends Model
         //         where B.invoice_no is not null
         //         order by B.invoice_no, B.vat_percen";
 
-        $sql = "select A.grn_id, B.*, D.tax_zone_code, D.tax_zone_name, E.invoice_date, A.gi_date, 
+        $sql = "select * from 
+                (select AA.*, case when AA.margindiff_amount>0 then AA.invoice_qty else 0 end as margindiff_qty from 
+                (select B.*, D.tax_zone_code, D.tax_zone_name, E.invoice_date, A.gi_date, 
                     date_add(A.gi_date, interval ifnull(min_no_of_months_shelf_life_required,0) month) as earliest_expected_date, 
                     null as cost_acc_id, null as cost_ledger_name, null as cost_ledger_code, 
-                    null as tax_acc_id, null as tax_ledger_name, null as tax_ledger_code, null as remarks from grn A 
+                    null as tax_acc_id, null as tax_ledger_name, null as tax_ledger_code, 
+                    F.purchase_order_id, G.quantity as po_quantity, G.cost_price_exc_tax as po_unit_rate_excl_tax, 
+                    G.unit_tax_amount as po_unit_tax, G.cost_price_inc_tax as po_unit_rate_incl_tax, 
+                    ifnull((B.invoice_qty*B.cost_incl_vat_cst),0)-ifnull((B.invoice_qty*G.cost_price_inc_tax),0) as margindiff_amount 
+                from grn A 
                 left join grn_entries B on (A.grn_id = B.grn_id) 
                 left join internal_warehouse_master C on (A.warehouse_id = C.warehouse_code and A.company_id = C.company_id) 
                 left join tax_zone_master D on (C.tax_zone_id = D.id) 
                 left join goods_inward_outward_invoices E on (A.gi_id = E.gi_go_ref_no and B.invoice_no = E.invoice_no) 
+                left join purchase_order F on (A.po_no = F.po_no) 
+                left join purchase_order_items G on (F.purchase_order_id = G.purchase_order_id and B.psku = G.psku) 
                 where A.grn_id = '$id' and B.grn_id = '$id' and A.is_active = '1' and B.is_active = '1' and 
-                    C.is_active = '1' and D.is_active = '1' and B.invoice_no is not null and B." . $col_qty . " > 0 
-                order by B.invoice_no, B.vat_percen";
+                    C.is_active = '1' and D.is_active = '1' and B.invoice_no is not null) AA) BB 
+                where BB." . $col_qty . " > 0 
+                order by BB.invoice_no, BB.vat_percen";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -339,7 +422,8 @@ class PendingGrn extends Model
         //         where B.invoice_no is not null 
         //         order by B.invoice_no, B.vat_percen";
 
-        $sql = "select A.grn_id, B.*, B.qty as ".$ded_type."_qty, D.tax_zone_code, D.tax_zone_name, E.invoice_date from grn A 
+        $sql = "select A.grn_id, B.*, B.qty as ".$ded_type."_qty, D.tax_zone_code, D.tax_zone_name, E.invoice_date 
+                from grn A 
                 left join acc_grn_sku_entries B on (A.grn_id = B.grn_id) 
                 left join internal_warehouse_master C on (A.warehouse_id = C.warehouse_code and A.company_id = C.company_id) 
                 left join tax_zone_master D on (C.tax_zone_id = D.id) 
@@ -1083,6 +1167,27 @@ class PendingGrn extends Model
         $earliest_expected_date = $request->post($ded_type.'_earliest_expected_date');
         $remarks = $request->post($ded_type.'_remarks');
         $gi_date = $request->post('gi_date');
+
+        $po_cost_excl_tax = $request->post($ded_type.'_po_cost_excl_tax');
+        $po_tax = $request->post($ded_type.'_po_tax');
+        $po_total = $request->post($ded_type.'_po_total');
+        $diff_cost_excl_tax = $request->post($ded_type.'_diff_cost_excl_tax');
+        $diff_tax = $request->post($ded_type.'_diff_tax');
+        $diff_total = $request->post($ded_type.'_diff_total');
+
+        // echo json_encode($po_cost_excl_tax);
+        // echo '<br/>';
+        // echo json_encode($po_tax);
+        // echo '<br/>';
+        // echo json_encode($po_total);
+        // echo '<br/>';
+        // echo json_encode($diff_cost_excl_tax);
+        // echo '<br/>';
+        // echo json_encode($diff_tax);
+        // echo '<br/>';
+        // echo json_encode($diff_total);
+        // echo '<br/>';
+
         if($gi_date==''){
             $gi_date=NULL;
         } else {
@@ -1155,12 +1260,23 @@ class PendingGrn extends Model
                             'earliest_expected_date'=>$earliest_expected_date[$i],
                             'status'=>'approved',
                             'is_active'=>'1',
-                            'remarks'=>$remarks[$i]
+                            'remarks'=>$remarks[$i],
+                            'po_cost_excl_vat'=>$mycomponent->format_number($po_cost_excl_tax[$i],2),
+                            'po_tax'=>$mycomponent->format_number($po_tax[$i],2),
+                            'po_total'=>$mycomponent->format_number($po_total[$i],2)
                         ];
 
-                
-                if($mycomponent->format_number($cost_excl_tax[$i],2)!=0){
+                if($ded_type=='margindiff'){
+                    $cost_excl_tax_amt = $mycomponent->format_number($diff_cost_excl_tax[$i],2);
+                    $tax_amt = $mycomponent->format_number($diff_tax[$i],2);
+                } else {
+                    $cost_excl_tax_amt = $mycomponent->format_number($cost_excl_tax[$i],2);
+                    $tax_amt = $mycomponent->format_number($tax[$i],2);
+                }
+
+                if($cost_excl_tax_amt!=0){
                     // $code = 'Purchase_'.$state[$i].'_'.$vat_cst[$i].'_'.$vat_percen[$i];
+
                     $ledgerArray[$k]=[
                                     'ref_id'=>$gi_id,
                                     'ref_type'=>'purchase',
@@ -1173,7 +1289,7 @@ class PendingGrn extends Model
                                     'voucher_id'=>$voucher_id,
                                     'ledger_type'=>'Sub Entry',
                                     'type'=>$ledg_type,
-                                    'amount'=>$mycomponent->format_number($cost_excl_tax[$i],2),
+                                    'amount'=>$cost_excl_tax_amt,
                                     'narration'=>$narration,
                                     'status'=>'approved',
                                     'is_active'=>'1',
@@ -1200,7 +1316,7 @@ class PendingGrn extends Model
                 }
                 
 
-                if($mycomponent->format_number($tax[$i],2)!=0){
+                if($tax_amt!=0){
                     // $code = 'Tax_'.$state[$i].'_'.$vat_cst[$i].'_'.$vat_percen[$i];
                     $ledgerArray[$k]=[
                                     'ref_id'=>$gi_id,
@@ -1214,7 +1330,7 @@ class PendingGrn extends Model
                                     'voucher_id'=>$voucher_id,
                                     'ledger_type'=>'Sub Entry',
                                     'type'=>$ledg_type,
-                                    'amount'=>$mycomponent->format_number($tax[$i],2),
+                                    'amount'=>$tax_amt,
                                     'narration'=>$narration,
                                     'status'=>'approved',
                                     'is_active'=>'1',
@@ -1344,7 +1460,8 @@ class PendingGrn extends Model
 
             $sql = "select sum(A.qty) as total_qty, sum(A.total) as total_deduction, 
                     group_concat(distinct(CONCAT(UCASE(SUBSTRING(A.ded_type, 1, 1)),LOWER(SUBSTRING(A.ded_type, 2))))) as ded_type from 
-                    (select qty, total, case when ded_type='margindiff' then 'margin difference' else ded_type end as ded_type from 
+                    (select qty, case when ded_type='margindiff' then round(total-po_total,2) else total end as total, 
+                        case when ded_type='margindiff' then 'margin difference' else ded_type end as ded_type from 
                         acc_grn_sku_entries where status = 'approved' and is_active = '1' and 
                         grn_id = '$grn_id' and invoice_no = '$invoice_no' order by ded_type) A order by A.ded_type";
             $command = Yii::$app->db->createCommand($sql);
@@ -1397,11 +1514,11 @@ class PendingGrn extends Model
             $reader = $command->query();
             $debit_note = $reader->readAll();
             
-            $mpdf=new mPDF();
-            $mpdf->WriteHTML(Yii::$app->controller->renderPartial('debit_note', [
-                'invoice_details' => $invoice_details, 'debit_note' => $debit_note, 
-                'deduction_details' => $deduction_details, 'vendor_details' => $vendor_details
-            ]));
+            // $mpdf=new mPDF();
+            // $mpdf->WriteHTML(Yii::$app->controller->renderPartial('debit_note', [
+            //     'invoice_details' => $invoice_details, 'debit_note' => $debit_note, 
+            //     'deduction_details' => $deduction_details, 'vendor_details' => $vendor_details
+            // ]));
 
             $upload_path = './uploads';
             if(!is_dir($upload_path)) {
@@ -1419,9 +1536,9 @@ class PendingGrn extends Model
             $file_name = $upload_path . '/debit_note_invoice_' . $invoice_id . '.pdf';
             $file_path = 'uploads/debit_notes/' . $grn_id . '/debit_note_invoice_' . $invoice_id . '.pdf';
 
-            // $mpdf->Output('MyPDF.pdf', 'D');
-            $mpdf->Output($file_name, 'F');
-            // exit;
+            // // $mpdf->Output('MyPDF.pdf', 'D');
+            // $mpdf->Output($file_name, 'F');
+            // // exit;
 
             $sql = "update acc_grn_debit_notes set debit_note_path = '$file_path' where id = '$ref_id'";
             $command = Yii::$app->db->createCommand($sql);
@@ -1446,5 +1563,26 @@ class PendingGrn extends Model
         $data['vendor_details'] = $vendor_details;
         
         return $data;
+    }
+    
+    public function setLog($module_name, $sub_module, $action, $vendor_id, $description, $table_name, $table_id) {
+        $session = Yii::$app->session;
+        $curusr = $session['session_id'];
+        $now = date('Y-m-d H:i:s');
+
+        $array = array('module_name' => $module_name, 
+                        'sub_module' => $sub_module, 
+                        'action' => $action, 
+                        'vendor_id' => $vendor_id, 
+                        'user_id' => $curusr, 
+                        'description' => $description, 
+                        'log_activity_date' => $now, 
+                        'table_name' => $table_name, 
+                        'table_id' => $table_id);
+        $count = Yii::$app->db->createCommand()
+                            ->insert("acc_user_log", $array)
+                            ->execute();
+
+        return true;
     }
 }

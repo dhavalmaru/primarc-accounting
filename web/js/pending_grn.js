@@ -9,7 +9,26 @@ $(document).ready(function(){
         window.location.href = BASE_URL + "index.php?r=pendinggrn%2Findex";
     }
 
+    set_view();
 });
+
+function set_view(){
+    if($('#action').val()=='view'){
+        $('#btn_submit').hide();
+        // $("[id$=repeat_sku]").hide();
+        // $("[id*=shortage]").hide();
+        // $("[id*=expiry]").hide();
+        // $("[id*=damaged]").hide();
+        // $("[id*=margindiff]").hide();
+
+        $("[id*=repeat]").hide();
+        $("[id*=delete]").hide();
+
+        $("input").attr("readonly", true);
+        $("select").attr("disabled", true);
+        $("textarea").attr("disabled", true);
+    }
+}
 
 function getDifference(elem){
     var id = elem.id;
@@ -254,7 +273,6 @@ function add_sku_details(elem){
     });
 }
 
-
 function get_sku_details(elem){
     var elem_id = elem.id;
     if(elem_id.indexOf("_")>0){
@@ -341,6 +359,7 @@ function set_sku_details(elem){
         var sku_qty = get_number($("#"+ded_type+"_qty_"+index).val(),2);
         var sku_per_unit_cost = get_number($("#"+ded_type+"_cost_excl_tax_per_unit_"+index).val(),2);
         var vat_percen = get_number($("#"+ded_type+"_vat_percen_"+index).val(),2);
+        var po_cost_excl_tax = get_number($("#"+ded_type+"_po_cost_excl_tax_"+index).val(),2);
 
         if (sku_qty==0) sku_qty=0;
         if (sku_per_unit_cost==0) sku_per_unit_cost=0;
@@ -353,11 +372,25 @@ function set_sku_details(elem){
         var sku_tax = (sku_cost*vat_percen)/100;
         var sku_total = sku_cost + sku_tax;
 
+        var po_tax = (po_cost_excl_tax*vat_percen)/100;
+        var po_total = po_cost_excl_tax + po_tax;
+
         $("#"+ded_type+"_tax_per_unit_"+index).val(format_money(sku_per_unit_tax,2));
         $("#"+ded_type+"_total_per_unit_"+index).val(format_money(sku_per_unit_total,2));
         $("#"+ded_type+"_cost_excl_tax_"+index).val(format_money(sku_cost,2));
         $("#"+ded_type+"_tax_"+index).val(format_money(sku_tax,2));
         $("#"+ded_type+"_total_"+index).val(format_money(sku_total,2));
+
+        $("#"+ded_type+"_po_cost_excl_tax_"+index).val(format_money(po_cost_excl_tax,2));
+        $("#"+ded_type+"_po_tax_"+index).val(format_money(po_tax,2));
+        $("#"+ded_type+"_po_total_"+index).val(format_money(po_total,2));
+
+        // console.log(sku_cost-po_cost_excl_tax);
+        // console.log(Math.round(sku_cost-po_cost_excl_tax,4));
+
+        $("#"+ded_type+"_diff_cost_excl_tax_"+index).val(format_money(Math.round((sku_cost-po_cost_excl_tax)*100)/100,2));
+        $("#"+ded_type+"_diff_tax_"+index).val(format_money(Math.round((sku_tax-po_tax)*100)/100,2));
+        $("#"+ded_type+"_diff_total_"+index).val(format_money(Math.round((sku_total-po_total)*100)/100,2));
 
         setDeductionTotal(ded_type);
 
@@ -383,20 +416,44 @@ function set_sku_details(elem){
 function setDeductionTotal(ded_type){
     var total_rows = $('#'+ded_type+'_total_rows').val();
     var grand_total = 0;
+    var po_grand_total = 0;
+    var diff_grand_total = 0;
     var invoices = $("#no_of_invoices").val();
+    var invoice_no = '';
+    var invoice_total = 0;
+    var po_invoice_total = 0;
+    var diff_invoice_total = 0;
+
     for(var i=0; i<invoices; i++){
-        var invoice_no = $('#invoice_no_'+i).val();
-        var invoice_total = 0;
+        invoice_no = $('#invoice_no_'+i).val();
+        invoice_total = 0;
+        po_invoice_total = 0;
+        diff_invoice_total = 0;
+
         for(var j=0; j<total_rows; j++){
             if(invoice_no==$('#'+ded_type+'_invoice_no_'+j).val()){
                 invoice_total = invoice_total + get_number($('#'+ded_type+'_total_'+j).val(),2);
+                po_invoice_total = po_invoice_total + get_number($('#'+ded_type+'_po_total_'+j).val(),2);
+                diff_invoice_total = diff_invoice_total + get_number($('#'+ded_type+'_diff_total_'+j).val(),2);
             }
         }
+
         grand_total = grand_total + invoice_total;
-        $('#edited_'+ded_type+'_amount_'+i).val(format_money(invoice_total,2));
+        po_grand_total = po_grand_total + po_invoice_total;
+        diff_grand_total = diff_grand_total + diff_invoice_total;
+
+        if(ded_type=="margindiff"){
+            $('#edited_'+ded_type+'_amount_'+i).val(format_money(diff_invoice_total,2));
+        } else {
+            $('#edited_'+ded_type+'_amount_'+i).val(format_money(invoice_total,2));
+        }
+        
         getDifference(document.getElementById("edited_"+ded_type+"_amount_"+i));
     }
+
     $('#'+ded_type+'_grand_total').html(format_money(grand_total,2));
+    $('#'+ded_type+'_po_grand_total').html(format_money(po_grand_total,2));
+    $('#'+ded_type+'_diff_grand_total').html(format_money(diff_grand_total,2));
 }
 
 function delete_row(elem){

@@ -25,29 +25,29 @@ $mycomponent = Yii::$app->mycomponent;
 #shortage_sku_details tr td input { border: none; outline: none; }
 #shortage_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
 #shortage_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-#shortage_sku_details tr td:nth-child(15) input, #shortage_sku_details tr td:nth-child(27) input { border: 1px solid #ddd!important; outline: none; }
-#shortage_sku_details tr td:nth-child(27) { width: 400px; }
+#shortage_sku_details tr td:nth-child(15) input, #shortage_sku_details tr td:nth-child(31) input { border: 1px solid #ddd!important; outline: none; }
+#shortage_sku_details tr td:nth-child(31) { width: 400px; }
 /*-----------------------*/
 #expiry_sku_details { width: 1650px; }
 #expiry_sku_details tr td input { border: none; outline: none; }
 #expiry_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
 #expiry_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-#expiry_sku_details tr td:nth-child(15) input, #expiry_sku_details tr td:nth-child(27) input { border: 1px solid #ddd!important; outline: none; }
-#expiry_sku_details tr td:nth-child(27) { width: 400px; }
+#expiry_sku_details tr td:nth-child(15) input, #expiry_sku_details tr td:nth-child(31) input { border: 1px solid #ddd!important; outline: none; }
+#expiry_sku_details tr td:nth-child(31) { width: 400px; }
 /*----------------------*/
 #damaged_sku_details { width: 1650px; }
 #damaged_sku_details tr td input { border: none; outline: none; }
 #damaged_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
 #damaged_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-#damaged_sku_details tr td:nth-child(15) input, #damaged_sku_details tr td:nth-child(27) input { border: 1px solid #ddd!important; outline: none; }
-#damaged_sku_details tr td:nth-child(27) { width: 400px; }
+#damaged_sku_details tr td:nth-child(15) input, #damaged_sku_details tr td:nth-child(31) input { border: 1px solid #ddd!important; outline: none; }
+#damaged_sku_details tr td:nth-child(31) { width: 400px; }
 /*----------------------*/
-#margindiff_sku_details { width: 1650px; }
+#margindiff_sku_details { width: 1800px; }
 #margindiff_sku_details tr td input { border: none; outline: none; }
 #margindiff_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
 #margindiff_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-#margindiff_sku_details tr td:nth-child(15) input, #margindiff_sku_details tr td:nth-child(27) input { border: 1px solid #ddd!important; outline: none; }
-#margindiff_sku_details tr td:nth-child(27) { width: 400px; }
+#margindiff_sku_details tr td:nth-child(25) input, #margindiff_sku_details tr td:nth-child(31) input { border: 1px solid #ddd!important; outline: none; }
+#margindiff_sku_details tr td:nth-child(31) { width: 400px; }
 /*----------------------*/
 #ledger_details .modal-body .table   {  }
 
@@ -163,6 +163,7 @@ table {width: 1200px;}
                     <label class="control-label">Grn No. </label> 
                     <div class=" ">
                         <input type="hidden" class="form-control" name="gi_id" id="grn_id" placeholder="Grn No" value="<?= $grn_details[0]['grn_id'] ?>" />
+                        <input type="hidden" class="form-control" name="action" id="action" placeholder="Action" value="<?= $action ?>" />
                         <input type="text" class="form-control" id="gi_id" placeholder="Grn No" value="<?= $grn_details[0]['gi_id'] ?>" readonly />
                     </div>
                 </div>
@@ -714,7 +715,7 @@ table {width: 1200px;}
         </div>
 
         <div class="form-group btn-margin">
-            <button type="submit" class="btn btn-sm btn-success">Create</button>
+            <button type="submit" class="btn btn-sm btn-success" id="btn_submit">Create</button>
             <button type="button" class="btn btn-sm btn-info" id="get_ledger">View Ledger</button>
             <a class="btn btn-sm btn-danger pull-right" href="<?php echo Url::base(); ?>index.php?r=pendinggrn%2Findex">Close</a>
             <!-- <button type="button" class="btn   btn-sm  btn-info" id="view_debit_note">View Debit Note</button> -->

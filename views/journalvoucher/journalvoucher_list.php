@@ -51,8 +51,8 @@ $this->params['breadcrumbs'][] = $this->title;
 											<td scope="row"><?php echo $i+1; ?></td> 
 											<td>
 												<a href="<?php echo Url::base() .'index.php?r=journalvoucher%2Fview&id='.$pending[$i]['id']; ?>" >View </a> <br/>
-												<a href="<?php echo Url::base() .'index.php?r=journalvoucher%2Fedit&id='.$pending[$i]['id']; ?>" style="<?php if(isset($access[0]['r_edit'])) { if($access[0]['r_edit']=='1' && $access[0]['session_id']==$pending[$i]['updated_by']) echo ''; else echo 'display: none;'; } else { echo 'display: none;'; } ?>">Edit </a> <br/>
-												<a href="<?php echo Url::base() .'index.php?r=journalvoucher%2Fauthorise&id='.$pending[$i]['id']; ?>" style="<?php if(isset($access[0]['r_approval'])) { if($access[0]['r_approval']=='1' && $access[0]['session_id']!=$pending[$i]['updated_by']) echo ''; else echo 'display: none;'; } else { echo 'display: none;'; } ?>">Authorise </a>
+												<a href="<?php echo Url::base() .'index.php?r=journalvoucher%2Fedit&id='.$pending[$i]['id']; ?>" style="<?php if(isset($access[0]['r_edit'])) { if($access[0]['r_edit']=='1' && $access[0]['session_id']!=$pending[$i]['approver_id']) echo ''; else echo 'display: none;'; } else { echo 'display: none;'; } ?>">Edit </a> <br/>
+												<a href="<?php echo Url::base() .'index.php?r=journalvoucher%2Fauthorise&id='.$pending[$i]['id']; ?>" style="<?php if(isset($access[0]['r_approval'])) { if($access[0]['r_approval']=='1' && $access[0]['session_id']==$pending[$i]['approver_id']) echo ''; else echo 'display: none;'; } else { echo 'display: none;'; } ?>">Authorise </a>
 											</td> 
 											<td><?php echo $pending[$i]['id']; ?></td> 
 											<td><?php echo $pending[$i]['reference']; ?></td> 
@@ -141,7 +141,7 @@ $this->params['breadcrumbs'][] = $this->title;
 											<td scope="row"><?php echo $i+1; ?></td> 
 											<td>
 												<a href="<?php echo Url::base() .'index.php?r=journalvoucher%2Fview&id='.$rejected[$i]['id']; ?>" >View </a> <br/>
-												<a href="<?php echo Url::base() .'index.php?r=journalvoucher%2Fedit&id='.$rejected[$i]['id']; ?>" style="<?php if(isset($access[0]['r_edit'])) { if($access[0]['r_edit']=='1' && $access[0]['session_id']==$rejected[$i]['updated_by']) echo ''; else echo 'display: none;'; } else { echo 'display: none;'; } ?>">Edit </a> <br/>
+												<a href="<?php echo Url::base() .'index.php?r=journalvoucher%2Fedit&id='.$rejected[$i]['id']; ?>" style="<?php if(isset($access[0]['r_edit'])) { if($access[0]['r_edit']=='1' && $access[0]['session_id']!=$rejected[$i]['approver_id']) echo ''; else echo 'display: none;'; } else { echo 'display: none;'; } ?>">Edit </a> <br/>
 											</td> 
 											<td><?php echo $rejected[$i]['id']; ?></td> 
 											<td><?php echo $rejected[$i]['reference']; ?></td> 

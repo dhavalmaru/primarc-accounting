@@ -287,6 +287,15 @@ table tr td { border: 1px solid #eee!important; }
 					<label class="control-label">Remarks</label>
 					<textarea id="remarks" name="remarks" class="form-control" rows="2" maxlength="1000"><?php if(isset($data)) echo $data[0]['approver_comments']; ?></textarea>
 				</div>
+				<div class="col-md-3 col-sm-3 col-xs-6">
+					<label class="control-label">Approver</label>
+					<select id="approver_id" name="approver_id" class="form-control">
+						<option value="">Select</option>
+						<?php for($i=0; $i<count($approver_list); $i++) { ?>
+							<option value="<?php echo $approver_list[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['approver_id']==$approver_list[$i]['id']) echo "selected"; } ?>><?php echo $approver_list[$i]['username']; ?></option>
+						<?php } ?>
+					</select>
+				</div>
 			</div>
 
 			<div class="  btn-container"> 

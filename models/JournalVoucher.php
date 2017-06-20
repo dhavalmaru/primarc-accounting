@@ -20,6 +20,25 @@ class JournalVoucher extends Model
         return $reader->readAll();
     }
 
+    public function getApprover($action){
+        $session = Yii::$app->session;
+        $session_id = $session['session_id'];
+
+        $cond = "";
+        if($action!="authorise" && $action!="view"){
+            $cond = " and A.id!='".$session_id."'";
+        } 
+
+        $sql = "select distinct A.id, A.username, C.r_approval from user A 
+                left join acc_user_roles B on (A.id = B.user_id) 
+                left join acc_user_role_options C on (B.role_id = C.role_id) 
+                where C.r_section = 'S_Journal_Voucher' and 
+                        C.r_approval = '1' and C.r_approval is not null" . $cond;
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
     public function getJournalVoucherDetails($id="", $status=""){
         $cond = "";
         if($id!=""){
@@ -116,6 +135,7 @@ class JournalVoucher extends Model
             $jv_date=$mycomponent->formatdate($jv_date);
         }
         $remarks = $request->post('remarks');
+        $approver_id = $request->post('approver_id');
 
         $debit_acc = "";
         $credit_acc = "";
@@ -171,7 +191,8 @@ class JournalVoucher extends Model
                         'updated_by'=>$curusr,
                         'updated_date'=>$now,
                         'jv_date'=>$jv_date,
-                        'approver_comments'=>$remarks
+                        'approver_comments'=>$remarks,
+                        'approver_id'=>$approver_id
                         );
 
         if(count($array)>0){

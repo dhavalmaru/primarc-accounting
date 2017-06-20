@@ -24,6 +24,19 @@ class PendinggrnController extends Controller
         ]);
     }
 
+    // public function actionGetdebitnote(){
+    //     $invoice_id = '11266';
+
+    //     $model = new PendingGrn();
+    //     $data = $model->getDebitNoteDetails($invoice_id);
+        
+    //     $this->layout = false;
+    //     return $this->render('debit_note', [
+    //         'invoice_details' => $data['invoice_details'], 'debit_note' => $data['debit_note'], 
+    //         'deduction_details' => $data['deduction_details'], 'vendor_details' => $data['vendor_details']
+    //     ]);
+    // }
+
     public function actionViewdebitnote($invoice_id){
         $model = new PendingGrn();
         $data = $model->getDebitNoteDetails($invoice_id);
@@ -42,8 +55,8 @@ class PendinggrnController extends Controller
 
         if(isset($data['debit_note'])){
             if(count($data['debit_note'])>0){
-                $debot_note = $data['debit_note'];
-                $file = $debot_note[0]['debit_note_path'];
+                $debit_note = $data['debit_note'];
+                $file = $debit_note[0]['debit_note_path'];
             }
         }
 
@@ -109,7 +122,55 @@ class PendinggrnController extends Controller
         return $this->render('email_response', ['data' => $data]);
     }
 
-    public function actionUpdate($id){
+    public function actionView($id) {
+        $model = new PendingGrn();
+        $access = $model->getAccess();
+        if(count($access)>0) {
+            if($access[0]['r_view']==1) {
+                $model->setLog('PendingGrn', '', 'View', '', 'View GRN Details', 'acc_grn_entries', $id);
+                return $this->actionRedirect('view', $id);
+            } else {
+                return $this->render('/message', [
+                    'title'  => \Yii::t('user', 'Access Denied'),
+                    'module' => $this->module,
+                    'msg' => '<h4>You donot have access to this page.</h4>'
+                ]);
+            }
+        } else {
+            $this->layout = 'other';
+            return $this->render('/message', [
+                'title'  => \Yii::t('user', 'Session Expired'),
+                'module' => $this->module,
+                'msg' => 'Session Expired. Please <a href="'.Url::base().'index.php">Login</a> again.'
+            ]);
+        }
+    }
+
+    public function actionUpdate($id) {
+        $model = new PendingGrn();
+        $access = $model->getAccess();
+        if(count($access)>0) {
+            if($access[0]['r_view']==1) {
+                $model->setLog('PendingGrn', '', 'Edit', '', 'Edit GRN Details', 'acc_grn_entries', $id);
+                return $this->actionRedirect('edit', $id);
+            } else {
+                return $this->render('/message', [
+                    'title'  => \Yii::t('user', 'Access Denied'),
+                    'module' => $this->module,
+                    'msg' => '<h4>You donot have access to this page.</h4>'
+                ]);
+            }
+        } else {
+            $this->layout = 'other';
+            return $this->render('/message', [
+                'title'  => \Yii::t('user', 'Session Expired'),
+                'module' => $this->module,
+                'msg' => 'Session Expired. Please <a href="'.Url::base().'index.php">Login</a> again.'
+            ]);
+        }
+    }
+
+    public function actionRedirect($action, $id){
         $model = new PendingGrn();
 
         $grn_entries = $model->getGrnAccEntries($id);
@@ -411,7 +472,8 @@ class PendinggrnController extends Controller
         if (count($grn_details)>0) {
             return $this->render('update', ['grn_details' => $grn_details, 'total_val' => $total_val, 'total_tax' => $total_tax, 
                                 'invoice_details' => $invoice_details, 'invoice_tax' => $invoice_tax, 'narration' => $narration, 
-                                'deductions' => $deductions, 'acc_master' => $acc_master, 'acc' => $acc, 'debit_note' => $debit_note]);
+                                'deductions' => $deductions, 'acc_master' => $acc_master, 'acc' => $acc, 
+                                'debit_note' => $debit_note, 'action' => $action]);
         }
 
         // echo json_encode($invoice_details);
@@ -617,7 +679,7 @@ class PendinggrnController extends Controller
             $columnNameArray=['grn_id','vendor_id','ded_type','cost_acc_id','cost_ledger_name','cost_ledger_code','tax_acc_id','tax_ledger_name','tax_ledger_code','invoice_no','state',
                                 'vat_cst','vat_percen','ean','psku','product_title','qty','box_price','cost_excl_vat_per_unit',
                                 'tax_per_unit','total_per_unit','cost_excl_vat','tax','total','expiry_date','earliest_expected_date',
-                                'status','is_active', 'remarks'];
+                                'status','is_active', 'remarks','po_cost_excl_vat','po_tax','po_total'];
             // below line insert all your record and return number of rows inserted
             $tableName = "acc_grn_sku_entries";
             $insertCount = Yii::$app->db->createCommand()
@@ -682,7 +744,7 @@ class PendinggrnController extends Controller
         } else if($ded_type=="damaged"){
             $col_qty = "damaged_qty";
         } else if($ded_type=="margindiff"){
-            $col_qty = "mrp_issue_qty";
+            $col_qty = "margindiff_qty";
             $margindiff_style = '';
         }
 
@@ -698,13 +760,15 @@ class PendinggrnController extends Controller
         $grnAccSku = $model->getGrnAccSku($gi_id);
         if(count($grnAccSku)>0){
             $rows = $model->getGrnAccSkuEntries($gi_id, $ded_type);
-            if($ded_type=="margindiff"){
-                $col_qty = "margindiff_qty";
-            }
+            // if($ded_type=="margindiff"){
+            //     $col_qty = "margindiff_qty";
+            // }
         } else {
-            if($col_qty != "mrp_issue_qty"){
-                $rows = $model->getInvoiceDeductionDetails($gi_id, $col_qty);
-            }
+            // if($col_qty != "mrp_issue_qty"){
+            //     $rows = $model->getInvoiceDeductionDetails($gi_id, $col_qty);
+            // }
+
+            $rows = $model->getInvoiceDeductionDetails($gi_id, $col_qty);
         }
         
         $result = "";
@@ -713,6 +777,8 @@ class PendinggrnController extends Controller
         $new_invoice_no = "";
         $invoice_total = 0;
         $grand_total = 0;
+        $po_grand_total = 0;
+        $diff_grand_total = 0;
         $sr_no = 1;
         // $sr_no_val = 1;
 
@@ -790,8 +856,16 @@ class PendinggrnController extends Controller
                 $cost_excl_tax_per_unit = 0;
                 if(count($grnAccSku)>0){
                     $cost_excl_tax_per_unit = floatval($rows[$i]["cost_excl_vat_per_unit"]);
+
+                    $po_cost_excl_tax = floatval($rows[$i]["po_cost_excl_vat"]);
+                    // $po_tax = floatval($rows[$i]["po_tax"]);
+                    // $po_total = floatval($rows[$i]["po_total"]);
                 } else {
                     $cost_excl_tax_per_unit = floatval($rows[$i]["cost_excl_vat"]);
+
+                    $po_cost_excl_tax = $qty*floatval($rows[$i]["po_unit_rate_excl_tax"]);
+                    // $po_tax = $qty*floatval($rows[$i]["po_unit_tax"]);
+                    // $po_total = $po_cost_excl_tax + $po_tax;
                 }
                 
                 $tax_per_unit = ($cost_excl_tax_per_unit*$vat_percen)/100;
@@ -800,7 +874,17 @@ class PendinggrnController extends Controller
                 $tax = $qty*$tax_per_unit;
                 $total = $cost_excl_tax + $tax;
                 $invoice_total = $invoice_total + $total;
+
+                $po_tax = ($po_cost_excl_tax*$vat_percen)/100;
+                $po_total = $po_cost_excl_tax + $po_tax;
+
+                $diff_cost_excl_tax = round($cost_excl_tax - $po_cost_excl_tax,2);
+                $diff_tax = round($tax - $po_tax,2);
+                $diff_total = round($total - $po_total,2);
+
                 $grand_total = $grand_total + $total;
+                $po_grand_total = $po_grand_total + $po_total;
+                $diff_grand_total = $diff_grand_total + $diff_total;
 
                 $remarks = $rows[$i]["remarks"];
 
@@ -838,7 +922,7 @@ class PendinggrnController extends Controller
                             <td><input type="text" class="'.$ded_type.'_vat_cst_'.$sr_no.'" id="'.$ded_type.'_vat_cst_'.$i.'" name="'.$ded_type.'_vat_cst[]" value="'.$vat_cst.'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_vat_percen_'.$sr_no.'" id="'.$ded_type.'_vat_percen_'.$i.'" name="'.$ded_type.'_vat_percen[]" value="'.$mycomponent->format_money($vat_percen,2).'" readonly /></td>
                             <td>
-                                <input type="text" class="'.$ded_type.'_qty_'.$sr_no.' format_number" id="'.$ded_type.'_qty_'.$i.'" name="'.$ded_type.'_qty[]" value="' . $mycomponent->format_money($qty,2) . '" onChange="set_sku_details(this)" data-error="#'.$ded_type.'qty_'.$i.'_error" />
+                                <input type="text" class="'.$ded_type.'_qty_'.$sr_no.'" id="'.$ded_type.'_qty_'.$i.'" name="'.$ded_type.'_qty[]" value="' . $mycomponent->format_money($qty,2) . '" onChange="set_sku_details(this)" data-error="#'.$ded_type.'qty_'.$i.'_error" '.(($ded_type=="margindiff")?"readonly ":" ").'/>
                                 <div id="'.$ded_type.'qty_'.$i.'_error"></div>
                             </td>
                             <td><input type="text" class="'.$ded_type.'_box_price_'.$sr_no.'" id="'.$ded_type.'_box_price_'.$i.'" name="'.$ded_type.'_box_price[]" value="'.$mycomponent->format_money($rows[$i]["box_price"],2).'" readonly /></td>
@@ -850,8 +934,12 @@ class PendinggrnController extends Controller
                             <td><input type="text" class="'.$ded_type.'_total_'.$sr_no.'" id="'.$ded_type.'_total_'.$i.'" name="'.$ded_type.'_total[]" value="'.$mycomponent->format_money($total,2).'" readonly /></td>
                             <td style="'.$expiry_style.'"><input type="text" class="'.$ded_type.'_expiry_date_'.$sr_no.'" id="'.$ded_type.'_expiry_date_'.$i.'" name="'.$ded_type.'_expiry_date[]" value="'.$rows[$i]["expiry_date"].'" readonly /></td>
                             <td style="'.$expiry_style.'"><input type="text" class="'.$ded_type.'_earliest_expected_date_'.$sr_no.'" id="'.$ded_type.'_earliest_expected_date_'.$i.'" name="'.$ded_type.'_earliest_expected_date[]" value="'.$rows[$i]["earliest_expected_date"].'" readonly /></td>
-                            <td style="'.$margindiff_style.'"></td>
-                            <td style="'.$margindiff_style.'"></td>
+                            <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_cost_excl_tax_'.$sr_no.'" id="'.$ded_type.'_po_cost_excl_tax_'.$i.'" name="'.$ded_type.'_po_cost_excl_tax[]" value="'.$mycomponent->format_money($po_cost_excl_tax,2).'" onChange="set_sku_details(this)" /></td>
+                            <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_tax_'.$sr_no.'" id="'.$ded_type.'_po_tax_'.$i.'" name="'.$ded_type.'_po_tax[]" value="'.$mycomponent->format_money($po_tax,2).'" readonly /></td>
+                            <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_total_'.$sr_no.'" id="'.$ded_type.'_po_total_'.$i.'" name="'.$ded_type.'_po_total[]" value="'.$mycomponent->format_money($po_total,2).'" readonly /></td>
+                            <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_diff_cost_excl_tax_'.$sr_no.'" id="'.$ded_type.'_diff_cost_excl_tax_'.$i.'" name="'.$ded_type.'_diff_cost_excl_tax[]" value="'.$mycomponent->format_money($diff_cost_excl_tax,2).'" readonly /></td>
+                            <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_diff_tax_'.$sr_no.'" id="'.$ded_type.'_diff_tax_'.$i.'" name="'.$ded_type.'_diff_tax[]" value="'.$mycomponent->format_money($diff_tax,2).'" readonly /></td>
+                            <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_diff_total_'.$sr_no.'" id="'.$ded_type.'_diff_total_'.$i.'" name="'.$ded_type.'_diff_total[]" value="'.$mycomponent->format_money($diff_total,2).'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_remarks_'.$sr_no.'" id="'.$ded_type.'_remarks_'.$i.'" name="'.$ded_type.'_remarks[]" value="' . $remarks . '" maxlength="500" /></td>
                         </tr>';
 
@@ -905,7 +993,7 @@ class PendinggrnController extends Controller
         $row = '<tr id="grand_total_row">
                     <td>
                         <input type="hidden" name="'.$ded_type.'_total_rows" id="'.$ded_type.'_total_rows" value="'.$sr_no.'" />
-                        <button type="button" class="btn btn-success" id="'.$ded_type.'_repeat_sku" onClick="add_sku_details(this)">+</button>
+                        <button type="button" class="btn btn-success" id="'.$ded_type.'_repeat_sku" onClick="add_sku_details(this)" style="'.(($ded_type=="margindiff")?"display: none;":"").'">+</button>
                     </td>
                     <td style="display: none;"></td>
                     <td>GRN Total</td>
@@ -932,6 +1020,10 @@ class PendinggrnController extends Controller
                     <td style="'.$expiry_style.'"></td>
                     <td style="'.$margindiff_style.'"></td>
                     <td style="'.$margindiff_style.'"></td>
+                    <td style="'.$margindiff_style.'" id="'.$ded_type.'_po_grand_total">' . $mycomponent->format_money($po_grand_total,2) . '</td>
+                    <td style="'.$margindiff_style.'"></td>
+                    <td style="'.$margindiff_style.'"></td>
+                    <td style="'.$margindiff_style.'" id="'.$ded_type.'_diff_grand_total">' . $mycomponent->format_money($diff_grand_total,2) . '</td>
                     <td></td>
                 </tr>';
 
@@ -947,8 +1039,9 @@ class PendinggrnController extends Controller
                             <th colspan="2">Quantity Deducted</th>
                             <th colspan="3">Amount Deducted (Per Unit)</th>
                             <th colspan="3">Amount Deducted (Total)</th>
-                            <th colspan="2" style="'.$expiry_style.'">For Expiry Only</th>
-                            <th colspan="2" style="'.$margindiff_style.'">For Margin Difference (Per Unit)</th>
+                            <th colspan="2" style="'.$expiry_style.'">Expiry Dates</th>
+                            <th colspan="3" style="'.$margindiff_style.'">Purchase Order Details</th>
+                            <th colspan="3" style="'.$margindiff_style.'">Margin Difference Details</th>
                             <th rowspan="2">Remarks</th>
                         </tr>
                         <tr>
@@ -976,8 +1069,12 @@ class PendinggrnController extends Controller
                             <th>Total</th>
                             <th style="'.$expiry_style.'">Date Received</th>
                             <th style="'.$expiry_style.'">Earliest Expected Date</th>
+                            <th style="'.$margindiff_style.'">Cost Excl Tax</th>
+                            <th style="'.$margindiff_style.'">Tax</th>
+                            <th style="'.$margindiff_style.'">Total</th>
                             <th style="'.$margindiff_style.'">Difference in Cost Excl Tax</th>
                             <th style="'.$margindiff_style.'">Difference in Tax</th>
+                            <th style="'.$margindiff_style.'">Difference in Total</th>
                         </tr>
                     </thead>
                     <tbody id="deduction_data">
@@ -1119,7 +1216,7 @@ class PendinggrnController extends Controller
                     <td><input type="text" class="'.$ded_type.'_vat_cst_'.$sr_no.'" id="'.$ded_type.'_vat_cst_'.$i.'" name="'.$ded_type.'_vat_cst[]" value="'.$vat_cst.'" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_vat_percen_'.$sr_no.'" id="'.$ded_type.'_vat_percen_'.$i.'" name="'.$ded_type.'_vat_percen[]" value="'.$mycomponent->format_money($vat_percen,2).'" readonly /></td>
                     <td>
-                        <input type="text" class="'.$ded_type.'_qty_'.$sr_no.' format_number" id="'.$ded_type.'_qty_'.$i.'" name="'.$ded_type.'_qty[]" value="' . $mycomponent->format_money($qty,2) . '" onChange="set_sku_details(this);" data-error="#'.$ded_type.'qty_'.$i.'_error" />
+                        <input type="text" class="'.$ded_type.'_qty_'.$sr_no.'" id="'.$ded_type.'_qty_'.$i.'" name="'.$ded_type.'_qty[]" value="' . $mycomponent->format_money($qty,2) . '" onChange="set_sku_details(this);" data-error="#'.$ded_type.'qty_'.$i.'_error" />
                         <div id="'.$ded_type.'qty_'.$i.'_error"></div>
                     </td>
                     <td><input type="text" class="'.$ded_type.'_box_price_'.$sr_no.'" id="'.$ded_type.'_box_price_'.$i.'" name="'.$ded_type.'_box_price[]" value="" readonly /></td>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title> Primac Pecan | Debit Note</title>
+    <title> Primarc Pecan | Debit Note</title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <!-- Bootstrap 3.3.6 -->
@@ -150,7 +150,7 @@
 <?php 
     $deduction_type = '';
     $expiry_style = 'display: none;';
-    $margin_diff_style = 'display: none;';
+    $margindiff_style = 'display: none;';
     $result = "";
     $table = "";
     $sr_no = 1;
@@ -165,10 +165,10 @@
             $expiry_style = 'display: none;';
         }
         if($ded_type=='margindiff'){
-            $margin_diff_style = '';
+            $margindiff_style = '';
             $deduction_type = 'Margin Difference';
         } else {
-            $margin_diff_style = 'display: none;';
+            $margindiff_style = 'display: none;';
         }
 
         $row = '<tr>
@@ -194,8 +194,12 @@
                                 date('d/m/Y',strtotime($deduction_details[$i]['earliest_expected_date'])):'') . '
                     </td>':'') . 
                     (($ded_type=='margindiff')?
-                    '<td style="'.$margin_diff_style.'"></td>
-                    <td style="'.$margin_diff_style.'"></td>':'') . 
+                    '<td style="'.$margindiff_style.'">' . $deduction_details[$i]['po_cost_excl_vat'] . '</td>
+                    <td style="'.$margindiff_style.'">' . $deduction_details[$i]['po_tax'] . '</td>
+                    <td style="'.$margindiff_style.'">' . $deduction_details[$i]['po_total'] . '</td>
+                    <td style="'.$margindiff_style.'">' . round($deduction_details[$i]['cost_excl_vat']-$deduction_details[$i]['po_cost_excl_vat'],2) . '</td>
+                    <td style="'.$margindiff_style.'">' . round($deduction_details[$i]['tax']-$deduction_details[$i]['po_tax'],2) . '</td>
+                    <td style="'.$margindiff_style.'">' . round($deduction_details[$i]['total']-$deduction_details[$i]['po_total'],2) . '</td>':'') . 
                     '<td style="word-break: break-all;">' . $deduction_details[$i]['remarks'] . '</td>
                 </tr>';
 
@@ -222,7 +226,8 @@
                                     (($ded_type=='expiry')?
                                     '<th colspan="2" style="'.$expiry_style.'text-align:center;">Expiry Dates</th>':'') . 
                                     (($ded_type=='margindiff')?
-                                    '<th colspan="2" style="'.$margin_diff_style.'text-align:center;">Margin Difference (Per Unit)</th>':'') . 
+                                    '<th colspan="3" style="'.$margindiff_style.'">Purchase Order Details</th>
+                                    <th colspan="3" style="'.$margindiff_style.'">Margin Difference Details</th>':'') . 
                                     '<th rowspan="2" style="width: 15%">Remarks</th>
                                 </tr>
                                 <tr>
@@ -242,8 +247,12 @@
                                     '<th style="'.$expiry_style.'">Date Received</th>
                                     <th style="'.$expiry_style.'">Earliest Expected Date</th>':'') . 
                                     (($ded_type=='margindiff')?
-                                    '<th style="'.$margin_diff_style.'">Difference in Cost Excl Tax</th>
-                                    <th style="'.$margin_diff_style.'">Difference in Tax</th>':'') . 
+                                    '<th style="'.$margindiff_style.'">Cost Excl Tax</th>
+                                    <th style="'.$margindiff_style.'">Tax</th>
+                                    <th style="'.$margindiff_style.'">Total</th>
+                                    <th style="'.$margindiff_style.'">Difference in Cost Excl Tax</th>
+                                    <th style="'.$margindiff_style.'">Difference in Tax</th>
+                                    <th style="'.$margindiff_style.'">Difference in Total</th>':'') . 
                                 '</tr>
                             </thead>
                             <tbody>' . $result . '</tbody>

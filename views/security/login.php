@@ -19,7 +19,7 @@ $this->title = 'Login Master';
 
 <div class="login-box">
     <div class="login-logo">
-        <a href="#"><b>Primac</b> Pecan</a>
+        <a href="#"><b>Primarc</b> Pecan</a>
     </div>
     <div class="login-box-body">
         <?php $form = ActiveForm::begin([

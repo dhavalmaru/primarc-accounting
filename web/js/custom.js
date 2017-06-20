@@ -83,6 +83,11 @@ var format_num = function(num, decimals){
         num="";
     }
     num = num.toString().replace(/[^0-9]/g,'');
+
+    // num = num.toString().replace(/[^\d\.]/g,'');
+    // num = num.match(/[\d\.]+/);
+
+
     var x=num;
     x=x.toString();
     x = x.split(",").join("");
@@ -98,6 +103,7 @@ var format_num = function(num, decimals){
 
 var format_number = function(elem){
     var res = format_num(elem.value,2);
+    // var res = format_money(elem.value,2);
     $(elem).val(res);
 }
 

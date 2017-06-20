@@ -45,12 +45,14 @@ class PaymentreceiptController extends Controller
         $access = $payment_receipt->getAccess();
         if(count($access)>0) {
             if($access[0]['r_insert']==1) {
+                $action = 'insert';
                 $acc_details = $payment_receipt->getAccountDetails();
                 $bank = $payment_receipt->getBanks();
+                $approver_list = $payment_receipt->getApprover($action);
 
                 $payment_receipt->setLog('PaymentReceipt', '', 'Insert', '', 'Insert Payment Receipt Details', 'acc_payment_receipt', '');
-                return $this->render('payment_receipt_details', ['action' => 'insert', 
-                                                                    'acc_details' => $acc_details, 'bank' => $bank]);
+                return $this->render('payment_receipt_details', ['action' => $action, 'acc_details' => $acc_details, 
+                                                                 'bank' => $bank, 'approver_list' => $approver_list]);
             } else {
                 return $this->render('/message', [
                     'title'  => \Yii::t('user', 'Access Denied'),
@@ -73,8 +75,10 @@ class PaymentreceiptController extends Controller
         $data = $payment_receipt->getDetails($id, "");
         $acc_details = $payment_receipt->getAccountDetails();
         $bank = $payment_receipt->getBanks();
-        return $this->render('payment_receipt_details', ['action' => $action, 'data' => $data, 
-                                                            'acc_details' => $acc_details, 'bank' => $bank]);
+        $approver_list = $payment_receipt->getApprover($action);
+
+        return $this->render('payment_receipt_details', ['action' => $action, 'data' => $data, 'acc_details' => $acc_details, 
+                                                         'bank' => $bank, 'approver_list' => $approver_list]);
     }
 
     public function actionView($id) {
@@ -421,7 +425,6 @@ class PaymentreceiptController extends Controller
                 'msg' => 'Session Expired. Please <a href="'.Url::base().'index.php">Login</a> again.'
             ]);
         }
-        
     }
 
     public function actionEmail(){

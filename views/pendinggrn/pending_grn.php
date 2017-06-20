@@ -22,7 +22,7 @@ $mycomponent = Yii::$app->mycomponent;
 			<div class="panel-heading">
 				<ul class="nav nav-tabs">
 					<li class="active"><a href="#tab1primary" data-toggle="tab"> Not Posted (<?php echo count($grn); ?>)</a></li>
-					<li><a href="#tab2primary" data-toggle="tab">Pending For Approval (<?php echo count($pending); ?>)</a></li>
+					<!-- <li><a href="#tab2primary" data-toggle="tab">Pending For Approval (<?php //echo count($pending); ?>)</a></li> -->
 					<li><a href="#tab3primary" data-toggle="tab"> Posted (<?php echo count($approved); ?>)</a></li>
 					<li><a href="#tab4primary" data-toggle="tab"> All (<?php echo count($all); ?>)</a></li>
 				</ul>
@@ -54,7 +54,10 @@ $mycomponent = Yii::$app->mycomponent;
 										<?php for($i=0; $i<count($grn); $i++) { ?>
 										<tr> 
 											<td scope="row" style="text-align: center;"><?php echo $i+1; ?></td> 
-											<td><a href="<?php echo Url::base() .'index.php?r=pendinggrn%2Fupdate&id='.$grn[$i]['grn_id']; ?>" >Post </a></td> 
+											<td>
+												<!-- <a href="<?php //echo Url::base() .'index.php?r=pendinggrn%2Fview&id='.$grn[$i]['grn_id']; ?>" >View </a> -->
+												<a href="<?php echo Url::base() .'index.php?r=pendinggrn%2Fupdate&id='.$grn[$i]['grn_id']; ?>" >Post </a>
+											</td> 
 											<td><?php echo $grn[$i]['grn_id']; ?></td> 
 											<td><?php echo $grn[$i]['gi_id']; ?></td> 
 											<td><?php echo $grn[$i]['location']; ?></td> 
@@ -71,7 +74,7 @@ $mycomponent = Yii::$app->mycomponent;
 								</table>
 							</div>
 						</div>
-						<div class="tab-pane fade" id="tab2primary">
+						<!-- <div class="tab-pane fade" id="tab2primary">
 							<div class="bs-example grn-index" data-example-id="bordered-table"> 
 								<table id="example1" class="table datatable table-bordered display" cellspacing="0" width="100%">
 									<thead> 
@@ -92,27 +95,30 @@ $mycomponent = Yii::$app->mycomponent;
 										</tr>  
 									</thead>
 									<tbody> 
-										<?php for($i=0; $i<count($pending); $i++) { ?>
+										<?php //for($i=0; $i<count($pending); $i++) { ?>
 										<tr> 
-											<td style="text-align: center;" scope="row"><?php echo $i+1; ?></td> 
-											<td><a href="<?php echo Url::base() .'index.php?r=pendinggrn%2Fupdate&id='.$pending[$i]['grn_id']; ?>" >Edit </a></td> 
-											<td><?php echo $pending[$i]['grn_id']; ?></td> 
-											<td><?php echo $pending[$i]['grn_no']; ?></td> 
-											<td><?php echo $pending[$i]['vendor_name']; ?></td> 
-											<td><?php echo $pending[$i]['category_name']; ?></td> 
-											<td><?php echo $pending[$i]['po_no']; ?></td> 
-											<td><?php echo $pending[$i]['inv_nos']; ?></td> 
-											<td class="text-right"><?php echo $mycomponent->format_money($pending[$i]['net_amt'], 2); ?></td> 
-											<td class="text-right"><?php echo $mycomponent->format_money($pending[$i]['ded_amt'], 2); ?></td> 
-											<td><?php echo $pending[$i]['username']; ?></td> 
-											<td><?php echo $pending[$i]['approved_by']; ?></td> 
-											<td><a href="<?php echo Url::base() .'index.php?r=pendinggrn%2Fledger&id='.$pending[$i]['grn_id']; ?>" target="_new"> <span class="fa fa-file-pdf-o"></span> </a></td> 
+											<td style="text-align: center;" scope="row"><?php //echo $i+1; ?></td> 
+											<td>
+												<a href="<?php //echo Url::base() .'index.php?r=pendinggrn%2Fview&id='.$pending[$i]['grn_id']; ?>" >View </a>
+												<a href="<?php //echo Url::base() .'index.php?r=pendinggrn%2Fupdate&id='.$pending[$i]['grn_id']; ?>" style="<?php //if($pending[$i]['is_paid']=='1') echo 'display: none;'; ?>" >Edit </a>
+											</td> 
+											<td><?php //echo $pending[$i]['grn_id']; ?></td> 
+											<td><?php //echo $pending[$i]['grn_no']; ?></td> 
+											<td><?php //echo $pending[$i]['vendor_name']; ?></td> 
+											<td><?php //echo $pending[$i]['category_name']; ?></td> 
+											<td><?php //echo $pending[$i]['po_no']; ?></td> 
+											<td><?php //echo $pending[$i]['inv_nos']; ?></td> 
+											<td class="text-right"><?php //echo $mycomponent->format_money($pending[$i]['net_amt'], 2); ?></td> 
+											<td class="text-right"><?php //echo $mycomponent->format_money($pending[$i]['ded_amt'], 2); ?></td> 
+											<td><?php //echo $pending[$i]['username']; ?></td> 
+											<td><?php //echo $pending[$i]['approved_by']; ?></td> 
+											<td><a href="<?php //echo Url::base() .'index.php?r=pendinggrn%2Fledger&id='.$pending[$i]['grn_id']; ?>" target="_new"> <span class="fa fa-file-pdf-o"></span> </a></td> 
 										</tr> 
-										<?php } ?>
+										<?php //} ?>
 									</tbody> 
 								</table>
 							</div>
-						</div>
+						</div> -->
 						<div class="tab-pane fade" id="tab3primary">
 							<div class="bs-example grn-index" data-example-id="bordered-table"> 
 								<table id="example2" class="table datatable table-bordered display" cellspacing="0" width="100%">
@@ -137,7 +143,10 @@ $mycomponent = Yii::$app->mycomponent;
 										<?php for($i=0; $i<count($approved); $i++) { ?>
 										<tr> 
 											<td style="text-align: center;" scope="row"><?php echo $i+1; ?></td> 
-											<td><a href="<?php echo Url::base() .'index.php?r=pendinggrn%2Fupdate&id='.$approved[$i]['grn_id']; ?>" >Edit </a></td> 
+											<td>
+												<a href="<?php echo Url::base() .'index.php?r=pendinggrn%2Fview&id='.$approved[$i]['grn_id']; ?>" >View </a>
+												<a href="<?php echo Url::base() .'index.php?r=pendinggrn%2Fupdate&id='.$approved[$i]['grn_id']; ?>" style="<?php if($approved[$i]['is_paid']=='1') echo 'display: none;'; ?>" >Edit </a>
+											</td> 
 											<td><?php echo $approved[$i]['grn_id']; ?></td> 
 											<td><?php echo $approved[$i]['grn_no']; ?></td> 
 											<td><?php echo $approved[$i]['vendor_name']; ?></td> 
@@ -178,7 +187,10 @@ $mycomponent = Yii::$app->mycomponent;
 										<?php for($i=0; $i<count($all); $i++) { ?>
 										<tr> 
 											<td scope="row" style="text-align: center;"><?php echo $i+1; ?></td> 
-											<td><a href="<?php echo Url::base() .'index.php?r=pendinggrn%2Fupdate&id='.$all[$i]['grn_id']; ?>" >Post </a></td> 
+											<td>
+												<a href="<?php echo Url::base() .'index.php?r=pendinggrn%2Fview&id='.$all[$i]['grn_id']; ?>" >View </a>
+												<a href="<?php echo Url::base() .'index.php?r=pendinggrn%2Fupdate&id='.$all[$i]['grn_id']; ?>" style="<?php if($all[$i]['is_paid']=='1') echo 'display: none;'; ?>">Post </a>
+											</td> 
 											<td><?php echo $all[$i]['grn_id']; ?></td> 
 											<td><?php echo $all[$i]['grn_no']; ?></td> 
 											<td><?php echo $all[$i]['location']; ?></td> 

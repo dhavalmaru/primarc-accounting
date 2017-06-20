@@ -20,6 +20,7 @@ $this->params['breadcrumbs'][] = 'Update';
 		 
     <?= $this->render('_form', ['grn_details' => $grn_details, 'total_val' => $total_val, 'total_tax' => $total_tax, 
     							'invoice_details' => $invoice_details, 'invoice_tax' => $invoice_tax, 'narration' => $narration, 
-                                'deductions' => $deductions, 'acc_master' => $acc_master, 'acc' => $acc, 'debit_note' => $debit_note]) ?>
+                                'deductions' => $deductions, 'acc_master' => $acc_master, 'acc' => $acc, 
+                                'debit_note' => $debit_note, 'action' => $action]) ?>
  
 </div>

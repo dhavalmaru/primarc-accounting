@@ -20,6 +20,25 @@ class AccountMaster extends Model
         return $reader->readAll();
     }
 
+    public function getApprover($action){
+        $session = Yii::$app->session;
+        $session_id = $session['session_id'];
+
+        $cond = "";
+        if($action!="authorise" && $action!="view"){
+            $cond = " and A.id!='".$session_id."'";
+        } 
+
+        $sql = "select distinct A.id, A.username, C.r_approval from user A 
+                left join acc_user_roles B on (A.id = B.user_id) 
+                left join acc_user_role_options C on (B.role_id = C.role_id) 
+                where C.r_section = 'S_Account_Master' and 
+                        C.r_approval = '1' and C.r_approval is not null" . $cond;
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
     public function getAccountDetails($id="", $status=""){
         $cond = "";
         $cond2 = "";
@@ -232,6 +251,7 @@ class AccountMaster extends Model
         $category_3 = $request->post('ac_category_3');
         $department = $request->post('department');
         $remarks = $request->post('remarks');
+        $approver_id = $request->post('approver_id');
 
         $vendor_id = "";
         $pan_no = "";
@@ -328,7 +348,8 @@ class AccountMaster extends Model
                         'is_active' => '1',
                         'updated_by'=>$curusr,
                         'updated_date'=>$now,
-                        'approver_comments'=>$remarks
+                        'approver_comments'=>$remarks,
+                        'approver_id'=>$approver_id
                         );
 
         if(count($array)>0){

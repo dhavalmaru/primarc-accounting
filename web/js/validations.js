@@ -189,6 +189,9 @@ $("#account_master").validate({
         ac_category_1: {
             required: true
         },
+        approver_id: {
+            required: true
+        },
         // address_doc_file: {
         //     required: function(element) {
         //                 if($("#type").val()=="Employee" && $("#address_doc_path").val()==""){
@@ -747,6 +750,9 @@ $("#journal_voucher").validate({
     rules: {
         diff_amt: {
             required: true
+        },
+        approver_id: {
+            required: true
         }
     },
 
@@ -842,6 +848,9 @@ $("#payment_receipt").validate({
             required: true
         },
         payment_date: {
+            required: true
+        },
+        approver_id: {
             required: true
         }
     },

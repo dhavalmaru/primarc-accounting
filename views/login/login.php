@@ -16,7 +16,7 @@ use yii\bootstrap\Alert;
 /* @var $searchModel app\models\GrnSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Primac Pecan';
+$this->title = 'Primarc Pecan';
 // $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -25,7 +25,7 @@ $this->title = 'Primac Pecan';
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title> Primac Pecan </title>
+  <title> Primarc Pecan </title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <!-- Bootstrap 3.3.6 -->
@@ -54,7 +54,7 @@ $this->title = 'Primac Pecan';
 <body class="hold-transition login-page">
 	<div class="login-box">
 		<div class="login-logo">
-			<a href="#"><b>Primac</b> Pecan</a>
+			<a href="#"><b>Primarc</b> Pecan</a>
 		</div>
 	  	<!-- /.login-logo -->
 	  	<div class="login-box-body">
