@@ -191,4 +191,17 @@ class MyComponent extends Component
         }
         return $result;
     }
+
+    function get_financial_year($date){
+        $dateTime = \DateTime::createFromFormat('Y-m-d', $date);
+        $from = $dateTime->format('Y');
+        $to = $dateTime->format('Y');
+        if (date('m') > 3) {
+            $to = (int)($dateTime->format('Y')) +1;
+        } else {
+            $from = (int)($dateTime->format('Y')) -1;
+        }
+        $year = $from . '-' . substr($to, 2);
+        return $year;
+    }
 }

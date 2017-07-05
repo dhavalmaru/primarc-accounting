@@ -484,7 +484,7 @@ $(function() {
             }
         },
 
-        ignore: false,
+        ignore: ":not(:visible)",
 
         errorPlacement: function (error, element) {
             var placement = $(element).data('error');
@@ -505,7 +505,10 @@ $(function() {
 
 function addMultiInputNamingRules_form_purchase_details(){
     addMultiInputNamingRules('#form_purchase_details', 'select[name="invoice_cost_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'select[name="invoice_tax_acc_id[]"]', { required: true });
+    // addMultiInputNamingRules('#form_purchase_details', 'select[name="invoice_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="invoice_cgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="invoice_sgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="invoice_igst_acc_id[]"]', { required: true });
     addMultiInputNamingRules('#form_purchase_details', 'select[name="shortage_psku[]"]', { required: true });
     addMultiInputNamingRules('#form_purchase_details', 'select[name="shortage_invoice_no[]"]', { required: true });
     addMultiInputNamingRules('#form_purchase_details', 'select[name="shortage_cost_acc_id[]"]', { required: true });
@@ -518,10 +521,22 @@ function addMultiInputNamingRules_form_purchase_details(){
     addMultiInputNamingRules('#form_purchase_details', 'select[name="margindiff_psku[]"]', { required: true });
     addMultiInputNamingRules('#form_purchase_details', 'select[name="margindiff_invoice_no[]"]', { required: true });
     addMultiInputNamingRules('#form_purchase_details', 'select[name="margindiff_cost_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'select[name="shortage_tax_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'select[name="expiry_tax_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'select[name="damaged_tax_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_purchase_details', 'select[name="margindiff_tax_acc_id[]"]', { required: true });
+    // addMultiInputNamingRules('#form_purchase_details', 'select[name="shortage_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="shortage_cgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="shortage_sgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="shortage_igst_acc_id[]"]', { required: true });
+    // addMultiInputNamingRules('#form_purchase_details', 'select[name="expiry_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="expiry_cgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="expiry_sgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="expiry_igst_acc_id[]"]', { required: true });
+    // addMultiInputNamingRules('#form_purchase_details', 'select[name="damaged_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="damaged_cgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="damaged_sgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="damaged_igst_acc_id[]"]', { required: true });
+    // addMultiInputNamingRules('#form_purchase_details', 'select[name="margindiff_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="margindiff_cgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="margindiff_sgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_purchase_details', 'select[name="margindiff_igst_acc_id[]"]', { required: true });
     addMultiInputNamingRules('#form_purchase_details', 'input[name="shortage_qty[]"]', { required: true });
     addMultiInputNamingRules('#form_purchase_details', 'input[name="expiry_qty[]"]', { required: true });
     addMultiInputNamingRules('#form_purchase_details', 'input[name="damaged_qty[]"]', { required: true });
@@ -529,7 +544,10 @@ function addMultiInputNamingRules_form_purchase_details(){
 }
 function removeMultiInputNamingRules_form_purchase_details(){
     removeMultiInputNamingRules('#form_purchase_details', 'select[alt="invoice_cost_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="invoice_tax_acc_id[]"]');
+    // removeMultiInputNamingRules('#form_purchase_details', 'select[alt="invoice_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="invoice_cgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="invoice_sgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="invoice_igst_acc_id[]"]');
     removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_psku[]"]');
     removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_invoice_no[]"]');
     removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_cost_acc_id[]"]');
@@ -542,10 +560,22 @@ function removeMultiInputNamingRules_form_purchase_details(){
     removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_psku[]"]');
     removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_invoice_no[]"]');
     removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_cost_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_tax_acc_id[]"]');
+    // removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_cgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_sgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="shortage_igst_acc_id[]"]');
+    // removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_cgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_sgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="expiry_igst_acc_id[]"]');
+    // removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_cgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_sgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="damaged_igst_acc_id[]"]');
+    // removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_cgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_sgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_purchase_details', 'select[alt="margindiff_igst_acc_id[]"]');
     removeMultiInputNamingRules('#form_purchase_details', 'input[alt="shortage_qty[]"]');
     removeMultiInputNamingRules('#form_purchase_details', 'input[alt="expiry_qty[]"]');
     removeMultiInputNamingRules('#form_purchase_details', 'input[alt="damaged_qty[]"]');
@@ -575,6 +605,9 @@ function check_purchase_details() {
     var valid = true;
     var purchase_acc_id = [];
     var tax_acc_id = [];
+    var cgst_acc_id = [];
+    var sgst_acc_id = [];
+    var igst_acc_id = [];
     var errors = {};
 
     $("#form_purchase_details").find('select[alt="invoice_cost_acc_id[]"]').each(function(index){
@@ -582,10 +615,24 @@ function check_purchase_details() {
             purchase_acc_id.push($(this).val());
         }
     });
-
-    $("#form_purchase_details").find('select[alt="invoice_tax_acc_id[]"]').each(function(index){
+    // $("#form_purchase_details").find('select[alt="invoice_tax_acc_id[]"]').each(function(index){
+    //     if($(this).val()!=null && $(this).val()!=''){
+    //         tax_acc_id.push($(this).val());
+    //     }
+    // });
+    $("#form_purchase_details").find('select[alt="invoice_cgst_acc_id[]"]').each(function(index){
         if($(this).val()!=null && $(this).val()!=''){
-            tax_acc_id.push($(this).val());
+            cgst_acc_id.push($(this).val());
+        }
+    });
+    $("#form_purchase_details").find('select[alt="invoice_sgst_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            sgst_acc_id.push($(this).val());
+        }
+    });
+    $("#form_purchase_details").find('select[alt="invoice_igst_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            igst_acc_id.push($(this).val());
         }
     });
 
@@ -598,13 +645,46 @@ function check_purchase_details() {
             valid = false;
         }
     });
-    $("#form_purchase_details").find('select[alt="shortage_tax_acc_id[]"]').each(function(index){
-        if($.inArray($(this).val(), tax_acc_id)==-1){
-            // var errors = {};
-            var name = $(this).attr('name');
-            errors[name] = "Please select account id as per purchase.";
-            // validator.showErrors(errors);
-            valid = false;
+    // $("#form_purchase_details").find('select[alt="shortage_tax_acc_id[]"]').each(function(index){
+    //     if($.inArray($(this).val(), tax_acc_id)==-1){
+    //         // var errors = {};
+    //         var name = $(this).attr('name');
+    //         errors[name] = "Please select account id as per purchase.";
+    //         // validator.showErrors(errors);
+    //         valid = false;
+    //     }
+    // });
+    $("#form_purchase_details").find('select[alt="shortage_cgst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), cgst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTRA'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_purchase_details").find('select[alt="shortage_sgst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), sgst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTRA'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_purchase_details").find('select[alt="shortage_igst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), igst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTER'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
         }
     });
     $("#form_purchase_details").find('input[alt="shortage_qty[]"]').each(function(index){
@@ -626,13 +706,46 @@ function check_purchase_details() {
             valid = false;
         }
     });
-    $("#form_purchase_details").find('select[alt="expiry_tax_acc_id[]"]').each(function(index){
-        if($.inArray($(this).val(), tax_acc_id)==-1){
-            // var errors = {};
-            var name = $(this).attr('name');
-            errors[name] = "Please select account id as per purchase.";
-            // validator.showErrors(errors);
-            valid = false;
+    // $("#form_purchase_details").find('select[alt="expiry_tax_acc_id[]"]').each(function(index){
+    //     if($.inArray($(this).val(), tax_acc_id)==-1){
+    //         // var errors = {};
+    //         var name = $(this).attr('name');
+    //         errors[name] = "Please select account id as per purchase.";
+    //         // validator.showErrors(errors);
+    //         valid = false;
+    //     }
+    // });
+    $("#form_purchase_details").find('select[alt="expiry_cgst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), cgst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTRA'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_purchase_details").find('select[alt="expiry_sgst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), sgst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTRA'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_purchase_details").find('select[alt="expiry_igst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), igst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTER'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
         }
     });
     $("#form_purchase_details").find('input[alt="expiry_qty[]"]').each(function(index){
@@ -654,13 +767,46 @@ function check_purchase_details() {
             valid = false;
         }
     });
-    $("#form_purchase_details").find('select[alt="damaged_tax_acc_id[]"]').each(function(index){
-        if($.inArray($(this).val(), tax_acc_id)==-1){
-            // var errors = {};
-            var name = $(this).attr('name');
-            errors[name] = "Please select account id as per purchase.";
-            // validator.showErrors(errors);
-            valid = false;
+    // $("#form_purchase_details").find('select[alt="damaged_tax_acc_id[]"]').each(function(index){
+    //     if($.inArray($(this).val(), tax_acc_id)==-1){
+    //         // var errors = {};
+    //         var name = $(this).attr('name');
+    //         errors[name] = "Please select account id as per purchase.";
+    //         // validator.showErrors(errors);
+    //         valid = false;
+    //     }
+    // });
+    $("#form_purchase_details").find('select[alt="damaged_cgst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), cgst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTRA'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_purchase_details").find('select[alt="damaged_sgst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), sgst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTRA'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_purchase_details").find('select[alt="damaged_igst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), igst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTER'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
         }
     });
     $("#form_purchase_details").find('input[alt="damaged_qty[]"]').each(function(index){
@@ -682,13 +828,46 @@ function check_purchase_details() {
             valid = false;
         }
     });
-    $("#form_purchase_details").find('select[alt="margindiff_tax_acc_id[]"]').each(function(index){
-        if($.inArray($(this).val(), tax_acc_id)==-1){
-            // var errors = {};
-            var name = $(this).attr('name');
-            errors[name] = "Please select account id as per purchase.";
-            // validator.showErrors(errors);
-            valid = false;
+    // $("#form_purchase_details").find('select[alt="margindiff_tax_acc_id[]"]').each(function(index){
+    //     if($.inArray($(this).val(), tax_acc_id)==-1){
+    //         // var errors = {};
+    //         var name = $(this).attr('name');
+    //         errors[name] = "Please select account id as per purchase.";
+    //         // validator.showErrors(errors);
+    //         valid = false;
+    //     }
+    // });
+    $("#form_purchase_details").find('select[alt="margindiff_cgst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), cgst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTRA'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_purchase_details").find('select[alt="margindiff_sgst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), sgst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTRA'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_purchase_details").find('select[alt="margindiff_igst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), igst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTER'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
         }
     });
     $("#form_purchase_details").find('input[alt="margindiff_qty[]"]').each(function(index){

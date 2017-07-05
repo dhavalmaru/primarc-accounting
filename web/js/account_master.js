@@ -217,6 +217,7 @@ function get_code(){
                         $("#branch").val(vendor_details[0].branch);
                         $("#acc_no").val(vendor_details[0].account_number);
                         $("#ifsc_code").val(vendor_details[0].ifsc_code);
+                        $("#gst_id").val(vendor_details[0].gst_id);
                     }
 
                     // var bus_cat_list = '<option value="">Select</option>';

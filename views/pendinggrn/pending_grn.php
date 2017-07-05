@@ -135,7 +135,7 @@ $mycomponent = Yii::$app->mycomponent;
 											<th>Net Amount</th> 
 											<th>Ded Amount</th> 
 											<th>Updated By</th> 
-											<th>Approved By</th> 
+											<th style="display: none;">Approved By</th> 
 											<th>Ledger</th> 
 										</tr>  
 									</thead>
@@ -156,7 +156,7 @@ $mycomponent = Yii::$app->mycomponent;
 											<td class="text-right"><?php echo $mycomponent->format_money($approved[$i]['net_amt'], 2); ?></td> 
 											<td class="text-right"><?php echo $mycomponent->format_money($approved[$i]['ded_amt'], 2); ?></td> 
 											<td><?php echo $approved[$i]['username']; ?></td> 
-											<td><?php echo $approved[$i]['approved_by']; ?></td> 
+											<td style="display: none;"><?php echo $approved[$i]['approved_by']; ?></td> 
 											<td><a href="<?php echo Url::base() .'index.php?r=pendinggrn%2Fledger&id='.$approved[$i]['grn_id']; ?>" target="_new"> <span class="fa fa-file-pdf-o"></span> </a></td> 
 										</tr> 
 										<?php } ?>

@@ -83,8 +83,6 @@ class AccReport extends Model
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
-
-        return $data;
     }
 
     public function getTrialBalance($from_date, $to_date){

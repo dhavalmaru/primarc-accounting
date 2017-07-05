@@ -42,6 +42,9 @@ select {
 						<option value="Bank Account" <?php if(isset($data)) { if($data[0]['type']=="Bank Account") echo "selected"; } ?>>Bank Account</option>
 						<option value="Goods Purchase" <?php if(isset($data)) { if($data[0]['type']=="Goods Purchase") echo "selected"; } ?>>Goods Purchase</option>
 						<option value="Tax" <?php if(isset($data)) { if($data[0]['type']=="Tax") echo "selected"; } ?>>Tax</option>
+						<option value="CGST" <?php if(isset($data)) { if($data[0]['type']=="CGST") echo "selected"; } ?>>CGST</option>
+						<option value="SGST" <?php if(isset($data)) { if($data[0]['type']=="SGST") echo "selected"; } ?>>SGST</option>
+						<option value="IGST" <?php if(isset($data)) { if($data[0]['type']=="IGST") echo "selected"; } ?>>IGST</option>
 						<option value="Goods Sales" <?php if(isset($data)) { if($data[0]['type']=="Goods Sales") echo "selected"; } ?>>Goods Sales</option>
 						<option value="Employee" <?php if(isset($data)) { if($data[0]['type']=="Employee") echo "selected"; } ?>>Employee</option>
 						<option value="Others" <?php if(isset($data)) { if($data[0]['type']=="Others") echo "selected"; } ?>>Others</option>
@@ -86,6 +89,10 @@ select {
 	         	<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Details</label>
 					<input id="details" name="details" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['details']; ?>" />
+				</div>
+	         	<div class="col-md-3 col-sm-3 col-xs-6 vendor_goods">
+					<label class="control-label">GSTIN</label>
+					<input id="gst_id" name="gst_id" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['gst_id']; ?>" readonly />
 				</div>
 	         	<div class="col-md-3 col-sm-3 col-xs-6 vendor_expenses employee" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Expenses' && $data[0]['type'] != 'Employee') echo 'display: none;'; } else echo 'display: none;'; ?>">
 					<label class="control-label">Expences Type</label>

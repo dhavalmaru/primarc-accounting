@@ -144,6 +144,12 @@ class AccountMaster extends Model
             $code = "PU";
         } else if($type=="Tax"){
             $code = "TX";
+        } else if($type=="CGST"){
+            $code = "CGST";
+        } else if($type=="SGST"){
+            $code = "SGST";
+        } else if($type=="IGST"){
+            $code = "IGST";
         } else if($type=="Goods Sales"){
             $code = "GS";
         } else if($type=="Employee"){
@@ -177,6 +183,12 @@ class AccountMaster extends Model
             $code = "PU";
         } else if($type=="Tax"){
             $code = "TX";
+        } else if($type=="CGST"){
+            $code = "CGST";
+        } else if($type=="SGST"){
+            $code = "SGST";
+        } else if($type=="IGST"){
+            $code = "IGST";
         } else if($type=="Goods Sales"){
             $code = "GS";
         } else if($type=="Employee"){
@@ -267,6 +279,7 @@ class AccountMaster extends Model
         $agreement_details = "";
         $pf_esic_no = "";
         $other = "";
+        $gst_id = "";
 
         if($type=="Vendor Goods"){
             $vendor_id = $request->post('vendor_id');
@@ -277,6 +290,7 @@ class AccountMaster extends Model
             $vat_no = $request->post('vat_no');
             $bus_category = $request->post('bus_category');
             $bus_category_name = $request->post('bus_category_name');
+            $gst_id = $request->post('gst_id');
         } else if($type=="Vendor Expenses"){
             $expense_type = $request->post('expense_type');
             $location = $request->post('location');
@@ -349,7 +363,8 @@ class AccountMaster extends Model
                         'updated_by'=>$curusr,
                         'updated_date'=>$now,
                         'approver_comments'=>$remarks,
-                        'approver_id'=>$approver_id
+                        'approver_id'=>$approver_id,
+                        'gst_id'=>$gst_id
                         );
 
         if(count($array)>0){

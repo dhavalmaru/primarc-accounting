@@ -59,7 +59,7 @@
         <tr style="border:none;">
             <td width="17%" style="border:none;"><p> Ref.</p></td>
             <td width="3%" style="border:none;">:</td>
-            <td width="40%" style="border:none;"><p><b> <?php if(isset($debit_note[0]['id'])) echo $debit_note[0]['id']; ?> </b></p></td>
+            <td width="40%" style="border:none;"><p><b> <?php if(isset($debit_note[0]['debit_note_ref'])) echo $debit_note[0]['debit_note_ref']; ?> </b></p></td>
             <td width="22%" style="border:none;"><p>Posting Date</p></td>
             <td width="4%" style="border:none;">:</td>
             <td width="14%" style="border:none;">
@@ -88,10 +88,10 @@
                 </p>
             </td>
         </tr>
-        <tr valign="top">
+        <tr style="border:none;">
             <td  width="17%" style="border:none; vertical-align:top;"><p>Party's Name</p></td>
             <td  width="3%" style="border:none; vertical-align:top;">:</td>
-            <td colspan="4" style="border:none;">
+            <td  width="40%" style="border:none; vertical-align:top;">
                 <p>
                     <b> <?php if(isset($vendor_details[0]['account_holder_name'])) echo $vendor_details[0]['account_holder_name']; ?> </b> <br> 
                     <?php if(isset($vendor_details[0]['office_address_line_1'])) echo $vendor_details[0]['office_address_line_1']; ?> &nbsp;
@@ -99,6 +99,29 @@
                     <?php if(isset($vendor_details[0]['office_address_line_3'])) echo $vendor_details[0]['office_address_line_3']; ?> &nbsp; <br> 
                     <?php if(isset($vendor_details[0]['city_name'])) echo $vendor_details[0]['city_name']; ?> (<?php if(isset($vendor_details[0]['city_code'])) echo $vendor_details[0]['city_code']; ?>), &nbsp;
                     <?php if(isset($vendor_details[0]['state_name'])) echo $vendor_details[0]['state_name']; ?> (<?php if(isset($vendor_details[0]['state_code'])) echo $vendor_details[0]['state_code']; ?>), &nbsp;
+                </p>
+            </td>
+            <td width="22%" style="border:none; vertical-align:top;"><p>Warehouse</p></td>
+            <td width="4%" style="border:none; vertical-align:top;">:</td>
+            <td width="14%" style="border:none; vertical-align:top;">
+                <p>
+                    <b> 
+                        <?php if(isset($grn_details[0]['warehouse_name'])) echo $grn_details[0]['warehouse_name']; ?>
+                    </b>
+                </p>
+            </td>
+        </tr>
+        <tr style="border:none;">
+            <td width="17%" style="border:none;"><p> Party's GSTIN</p></td>
+            <td width="3%" style="border:none;">:</td>
+            <td width="40%" style="border:none;"><p><b> <?php if(isset($vendor_details[0]['gst_id'])) echo $debit_note[0]['gst_id']; ?> </b></p></td>
+            <td width="22%" style="border:none;"><p>Warehouse GSTIN</p></td>
+            <td width="4%" style="border:none;">:</td>
+            <td width="14%" style="border:none;">
+                <p>
+                    <b> 
+                        <?php if(isset($grn_details[0]['gst_id'])) echo $grn_details[0]['gst_id']; ?>
+                    </b>
                 </p>
             </td>
         </tr>
@@ -176,12 +199,19 @@
                     <td>' . $deduction_details[$i]['psku'] . '</td>
                     <td>' . $deduction_details[$i]['product_title'] . '</td>
                     <td>' . $deduction_details[$i]['ean'] . '</td>
+                    <td>' . $deduction_details[$i]['hsn_code'] . '</td>
                     <td>' . $deduction_details[$i]['qty'] . '</td>
                     <td>' . $deduction_details[$i]['box_price'] . '</td>
                     <td>' . $deduction_details[$i]['cost_excl_vat_per_unit'] . '</td>
+                    <td>' . $deduction_details[$i]['cgst_per_unit'] . '</td>
+                    <td>' . $deduction_details[$i]['sgst_per_unit'] . '</td>
+                    <td>' . $deduction_details[$i]['igst_per_unit'] . '</td>
                     <td>' . $deduction_details[$i]['tax_per_unit'] . '</td>
                     <td>' . $deduction_details[$i]['total_per_unit'] . '</td>
                     <td>' . $deduction_details[$i]['cost_excl_vat'] . '</td>
+                    <td>' . $deduction_details[$i]['cgst'] . '</td>
+                    <td>' . $deduction_details[$i]['sgst'] . '</td>
+                    <td>' . $deduction_details[$i]['igst'] . '</td>
                     <td>' . $deduction_details[$i]['tax'] . '</td>
                     <td>' . $deduction_details[$i]['total'] . '</td>' . 
                     (($ded_type=='expiry')?
@@ -195,9 +225,15 @@
                     </td>':'') . 
                     (($ded_type=='margindiff')?
                     '<td style="'.$margindiff_style.'">' . $deduction_details[$i]['po_cost_excl_vat'] . '</td>
+                    <td style="'.$margindiff_style.'">' . $deduction_details[$i]['po_cgst'] . '</td>
+                    <td style="'.$margindiff_style.'">' . $deduction_details[$i]['po_sgst'] . '</td>
+                    <td style="'.$margindiff_style.'">' . $deduction_details[$i]['po_igst'] . '</td>
                     <td style="'.$margindiff_style.'">' . $deduction_details[$i]['po_tax'] . '</td>
                     <td style="'.$margindiff_style.'">' . $deduction_details[$i]['po_total'] . '</td>
                     <td style="'.$margindiff_style.'">' . round($deduction_details[$i]['cost_excl_vat']-$deduction_details[$i]['po_cost_excl_vat'],2) . '</td>
+                    <td style="'.$margindiff_style.'">' . round($deduction_details[$i]['cgst']-$deduction_details[$i]['po_cgst'],2) . '</td>
+                    <td style="'.$margindiff_style.'">' . round($deduction_details[$i]['sgst']-$deduction_details[$i]['po_sgst'],2) . '</td>
+                    <td style="'.$margindiff_style.'">' . round($deduction_details[$i]['igst']-$deduction_details[$i]['po_igst'],2) . '</td>
                     <td style="'.$margindiff_style.'">' . round($deduction_details[$i]['tax']-$deduction_details[$i]['po_tax'],2) . '</td>
                     <td style="'.$margindiff_style.'">' . round($deduction_details[$i]['total']-$deduction_details[$i]['po_total'],2) . '</td>':'') . 
                     '<td style="word-break: break-all;">' . $deduction_details[$i]['remarks'] . '</td>
@@ -219,15 +255,15 @@
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th colspan="4" style="text-align:center;">SKU Details</th>
+                                    <th colspan="5" style="text-align:center;">SKU Details</th>
                                     <th colspan="2" style="text-align:center;">Quantity Deducted</th>
-                                    <th colspan="3" style="text-align:center;">Amount Deducted (Per Unit)</th>
-                                    <th colspan="3" style="text-align:center;">Amount Deducted (Total)</th>' . 
+                                    <th colspan="6" style="text-align:center;">Amount Deducted (Per Unit)</th>
+                                    <th colspan="6" style="text-align:center;">Amount Deducted (Total)</th>' . 
                                     (($ded_type=='expiry')?
                                     '<th colspan="2" style="'.$expiry_style.'text-align:center;">Expiry Dates</th>':'') . 
                                     (($ded_type=='margindiff')?
-                                    '<th colspan="3" style="'.$margindiff_style.'">Purchase Order Details</th>
-                                    <th colspan="3" style="'.$margindiff_style.'">Margin Difference Details</th>':'') . 
+                                    '<th colspan="6" style="'.$margindiff_style.'">Purchase Order Details</th>
+                                    <th colspan="6" style="'.$margindiff_style.'">Margin Difference Details</th>':'') . 
                                     '<th rowspan="2" style="width: 15%">Remarks</th>
                                 </tr>
                                 <tr>
@@ -235,12 +271,19 @@
                                     <th>SKU Code</th>
                                     <th>SKU Name</th>
                                     <th>EAN Code</th>
+                                    <th>HSN Code</th>
                                     <th>Quantity</th>
                                     <th>MRP</th>
                                     <th>Cost Excl Tax</th>
+                                    <th>CGST</th>
+                                    <th>SGST</th>
+                                    <th>IGST</th>
                                     <th>Tax</th>
                                     <th>Total</th>
                                     <th>Cost Excl Tax</th>
+                                    <th>CGST</th>
+                                    <th>SGST</th>
+                                    <th>IGST</th>
                                     <th>Tax</th>
                                     <th>Total</th>' . 
                                     (($ded_type=='expiry')?
@@ -248,9 +291,15 @@
                                     <th style="'.$expiry_style.'">Earliest Expected Date</th>':'') . 
                                     (($ded_type=='margindiff')?
                                     '<th style="'.$margindiff_style.'">Cost Excl Tax</th>
+                                    <th style="'.$margindiff_style.'">CGST</th>
+                                    <th style="'.$margindiff_style.'">SGST</th>
+                                    <th style="'.$margindiff_style.'">IGST</th>
                                     <th style="'.$margindiff_style.'">Tax</th>
                                     <th style="'.$margindiff_style.'">Total</th>
                                     <th style="'.$margindiff_style.'">Difference in Cost Excl Tax</th>
+                                    <th style="'.$margindiff_style.'">Difference in CGST</th>
+                                    <th style="'.$margindiff_style.'">Difference in SGST</th>
+                                    <th style="'.$margindiff_style.'">Difference in IGST</th>
                                     <th style="'.$margindiff_style.'">Difference in Tax</th>
                                     <th style="'.$margindiff_style.'">Difference in Total</th>':'') . 
                                 '</tr>

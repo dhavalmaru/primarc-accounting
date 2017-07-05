@@ -95,16 +95,14 @@ class AccreportController extends Controller
                 // return $this->render('ledger_report', ['acc_details' => $acc_details]);
     }
 
-    public function actionLedgerreport()
-    {
+    public function actionLedgerreport(){
         $report = new AccReport();
         $acc_details = $report->getAccountDetails();
         $report->setLog('LedgerReport', '', 'View', '', 'View Ledger Report', 'acc_ledger_entries', '');
         return $this->render('ledger_report', ['acc_details' => $acc_details]);
     }
 
-    public function actionTrialbalancereport()
-    {
+    public function actionTrialbalancereport(){
         $report = new AccReport();
         $acc_details = $report->getAccountDetails();
         $report->setLog('TrialBalanceReport', '', 'View', '', 'View Trial Balance Report', 'acc_ledger_entries', '');

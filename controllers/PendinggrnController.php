@@ -44,7 +44,8 @@ class PendinggrnController extends Controller
         $this->layout = false;
         return $this->render('debit_note', [
             'invoice_details' => $data['invoice_details'], 'debit_note' => $data['debit_note'], 
-            'deduction_details' => $data['deduction_details'], 'vendor_details' => $data['vendor_details']
+            'deduction_details' => $data['deduction_details'], 'vendor_details' => $data['vendor_details'], 
+            'grn_details' => $data['grn_details']
         ]);
     }
 
@@ -74,7 +75,8 @@ class PendinggrnController extends Controller
 
         return $this->render('email', [
             'invoice_details' => $data['invoice_details'], 'debit_note' => $data['debit_note'], 
-            'deduction_details' => $data['deduction_details'], 'vendor_details' => $data['vendor_details']
+            'deduction_details' => $data['deduction_details'], 'vendor_details' => $data['vendor_details'], 
+            'grn_details' => $data['grn_details']
         ]);
     }
 
@@ -180,6 +182,8 @@ class PendinggrnController extends Controller
 
         $acc_master = $model->getAccountDetails('', 'approved');
 
+        $tax_zone_code = $grn_details[0]['vat_cst'];
+
         if (count($grn_entries) > 0){
             // echo json_encode($grn_entries);
 
@@ -221,7 +225,9 @@ class PendinggrnController extends Controller
                 //     $narration['narration_total_tax'] = $grn_entries[$i]['narration'];
                 // }
 
-                if($grn_entries[$i]['particular']=="Taxable Amount" || $grn_entries[$i]['particular']=="Tax"){
+                if($grn_entries[$i]['particular']=="Taxable Amount" || $grn_entries[$i]['particular']=="Tax" || 
+                   $grn_entries[$i]['particular']=="CGST" || $grn_entries[$i]['particular']=="SGST" || 
+                   $grn_entries[$i]['particular']=="IGST"){
                     $blFlag = false;
 
                     // if($grn_entries[$i]['particular']=="Tax"){
@@ -235,7 +241,9 @@ class PendinggrnController extends Controller
                     //     $narration[$tax_num]['tax'] = $grn_entries[$i]['narration'];
                     // }
 
-                    if($grn_entries[$i]['particular']=="Taxable Amount" || $grn_entries[$i]['particular']=="Tax"){
+                    if($grn_entries[$i]['particular']=="Taxable Amount" || $grn_entries[$i]['particular']=="Tax" || 
+                       $grn_entries[$i]['particular']=="CGST" || $grn_entries[$i]['particular']=="SGST" || 
+                       $grn_entries[$i]['particular']=="IGST"){
                         for($k=0; $k<count($invoice_tax); $k++){
                             if($invoice_tax[$k]['invoice_no']==$grn_entries[$i]['invoice_no'] && 
                                 $invoice_tax[$k]['vat_cst']==$grn_entries[$i]['vat_cst'] && 
@@ -251,7 +259,7 @@ class PendinggrnController extends Controller
                                     $invoice_tax[$k]['edited_cost'] = $grn_entries[$i]['edited_val'];
                                     $invoice_tax[$k]['diff_cost'] = $grn_entries[$i]['difference_val'];
                                     $narration[$k]['cost'] = $grn_entries[$i]['narration'];
-                                } else {
+                                } else if($grn_entries[$i]['particular']=="Tax"){
                                     $invoice_tax[$k]['invoice_tax_acc_id'] = $grn_entries[$i]['acc_id'];
                                     $invoice_tax[$k]['invoice_tax_ledger_name'] = $grn_entries[$i]['ledger_name'];
                                     $invoice_tax[$k]['invoice_tax_ledger_code'] = $grn_entries[$i]['ledger_code'];
@@ -261,6 +269,36 @@ class PendinggrnController extends Controller
                                     $invoice_tax[$k]['edited_tax'] = $grn_entries[$i]['edited_val'];
                                     $invoice_tax[$k]['diff_tax'] = $grn_entries[$i]['difference_val'];
                                     $narration[$k]['tax'] = $grn_entries[$i]['narration'];
+                                } else if($grn_entries[$i]['particular']=="CGST"){
+                                    $invoice_tax[$k]['invoice_cgst_acc_id'] = $grn_entries[$i]['acc_id'];
+                                    $invoice_tax[$k]['invoice_cgst_ledger_name'] = $grn_entries[$i]['ledger_name'];
+                                    $invoice_tax[$k]['invoice_cgst_ledger_code'] = $grn_entries[$i]['ledger_code'];
+                                    // $invoice_tax[$k]['invoice_cgst_voucher_id'] = $grn_entries[$i]['voucher_id'];
+                                    // $invoice_tax[$k]['invoice_cgst_ledger_type'] = $grn_entries[$i]['ledger_type'];
+                                    $invoice_tax[$k]['invoice_cgst'] = $grn_entries[$i]['invoice_val'];
+                                    $invoice_tax[$k]['edited_cgst'] = $grn_entries[$i]['edited_val'];
+                                    $invoice_tax[$k]['diff_cgst'] = $grn_entries[$i]['difference_val'];
+                                    $narration[$k]['cgst'] = $grn_entries[$i]['narration'];
+                                } else if($grn_entries[$i]['particular']=="SGST"){
+                                    $invoice_tax[$k]['invoice_sgst_acc_id'] = $grn_entries[$i]['acc_id'];
+                                    $invoice_tax[$k]['invoice_sgst_ledger_name'] = $grn_entries[$i]['ledger_name'];
+                                    $invoice_tax[$k]['invoice_sgst_ledger_code'] = $grn_entries[$i]['ledger_code'];
+                                    // $invoice_tax[$k]['invoice_sgst_voucher_id'] = $grn_entries[$i]['voucher_id'];
+                                    // $invoice_tax[$k]['invoice_sgst_ledger_type'] = $grn_entries[$i]['ledger_type'];
+                                    $invoice_tax[$k]['invoice_sgst'] = $grn_entries[$i]['invoice_val'];
+                                    $invoice_tax[$k]['edited_sgst'] = $grn_entries[$i]['edited_val'];
+                                    $invoice_tax[$k]['diff_sgst'] = $grn_entries[$i]['difference_val'];
+                                    $narration[$k]['sgst'] = $grn_entries[$i]['narration'];
+                                } else if($grn_entries[$i]['particular']=="IGST"){
+                                    $invoice_tax[$k]['invoice_igst_acc_id'] = $grn_entries[$i]['acc_id'];
+                                    $invoice_tax[$k]['invoice_igst_ledger_name'] = $grn_entries[$i]['ledger_name'];
+                                    $invoice_tax[$k]['invoice_igst_ledger_code'] = $grn_entries[$i]['ledger_code'];
+                                    // $invoice_tax[$k]['invoice_igst_voucher_id'] = $grn_entries[$i]['voucher_id'];
+                                    // $invoice_tax[$k]['invoice_igst_ledger_type'] = $grn_entries[$i]['ledger_type'];
+                                    $invoice_tax[$k]['invoice_igst'] = $grn_entries[$i]['invoice_val'];
+                                    $invoice_tax[$k]['edited_igst'] = $grn_entries[$i]['edited_val'];
+                                    $invoice_tax[$k]['diff_igst'] = $grn_entries[$i]['difference_val'];
+                                    $narration[$k]['igst'] = $grn_entries[$i]['narration'];
                                 }
 
                                 // echo json_encode($invoice_tax);
@@ -287,7 +325,7 @@ class PendinggrnController extends Controller
                             $invoice_tax[$tax_num]['edited_cost'] = $grn_entries[$i]['edited_val'];
                             $invoice_tax[$tax_num]['diff_cost'] = $grn_entries[$i]['difference_val'];
                             $narration[$tax_num]['cost'] = $grn_entries[$i]['narration'];
-                        } else {
+                        } else if($grn_entries[$i]['particular']=="Tax"){
                             $invoice_tax[$tax_num]['invoice_tax_acc_id'] = $grn_entries[$i]['acc_id'];
                             $invoice_tax[$tax_num]['invoice_tax_ledger_name'] = $grn_entries[$i]['ledger_name'];
                             $invoice_tax[$tax_num]['invoice_tax_ledger_code'] = $grn_entries[$i]['ledger_code'];
@@ -297,6 +335,36 @@ class PendinggrnController extends Controller
                             $invoice_tax[$tax_num]['edited_tax'] = $grn_entries[$i]['edited_val'];
                             $invoice_tax[$tax_num]['diff_tax'] = $grn_entries[$i]['difference_val'];
                             $narration[$tax_num]['tax'] = $grn_entries[$i]['narration'];
+                        } else if($grn_entries[$i]['particular']=="CGST"){
+                            $invoice_tax[$tax_num]['invoice_cgst_acc_id'] = $grn_entries[$i]['acc_id'];
+                            $invoice_tax[$tax_num]['invoice_cgst_ledger_name'] = $grn_entries[$i]['ledger_name'];
+                            $invoice_tax[$tax_num]['invoice_cgst_ledger_code'] = $grn_entries[$i]['ledger_code'];
+                            // $invoice_tax[$tax_num]['invoice_cgst_voucher_id'] = $grn_entries[$i]['voucher_id'];
+                            // $invoice_tax[$tax_num]['invoice_cgst_ledger_type'] = $grn_entries[$i]['ledger_type'];
+                            $invoice_tax[$tax_num]['invoice_cgst'] = $grn_entries[$i]['invoice_val'];
+                            $invoice_tax[$tax_num]['edited_cgst'] = $grn_entries[$i]['edited_val'];
+                            $invoice_tax[$tax_num]['diff_cgst'] = $grn_entries[$i]['difference_val'];
+                            $narration[$tax_num]['cgst'] = $grn_entries[$i]['narration'];
+                        } else if($grn_entries[$i]['particular']=="SGST"){
+                            $invoice_tax[$tax_num]['invoice_sgst_acc_id'] = $grn_entries[$i]['acc_id'];
+                            $invoice_tax[$tax_num]['invoice_sgst_ledger_name'] = $grn_entries[$i]['ledger_name'];
+                            $invoice_tax[$tax_num]['invoice_sgst_ledger_code'] = $grn_entries[$i]['ledger_code'];
+                            // $invoice_tax[$tax_num]['invoice_sgst_voucher_id'] = $grn_entries[$i]['voucher_id'];
+                            // $invoice_tax[$tax_num]['invoice_sgst_ledger_type'] = $grn_entries[$i]['ledger_type'];
+                            $invoice_tax[$tax_num]['invoice_sgst'] = $grn_entries[$i]['invoice_val'];
+                            $invoice_tax[$tax_num]['edited_sgst'] = $grn_entries[$i]['edited_val'];
+                            $invoice_tax[$tax_num]['diff_sgst'] = $grn_entries[$i]['difference_val'];
+                            $narration[$tax_num]['sgst'] = $grn_entries[$i]['narration'];
+                        } else if($grn_entries[$i]['particular']=="IGST"){
+                            $invoice_tax[$tax_num]['invoice_igst_acc_id'] = $grn_entries[$i]['acc_id'];
+                            $invoice_tax[$tax_num]['invoice_igst_ledger_name'] = $grn_entries[$i]['ledger_name'];
+                            $invoice_tax[$tax_num]['invoice_igst_ledger_code'] = $grn_entries[$i]['ledger_code'];
+                            // $invoice_tax[$tax_num]['invoice_igst_voucher_id'] = $grn_entries[$i]['voucher_id'];
+                            // $invoice_tax[$tax_num]['invoice_igst_ledger_type'] = $grn_entries[$i]['ledger_type'];
+                            $invoice_tax[$tax_num]['invoice_igst'] = $grn_entries[$i]['invoice_val'];
+                            $invoice_tax[$tax_num]['edited_igst'] = $grn_entries[$i]['edited_val'];
+                            $invoice_tax[$tax_num]['diff_igst'] = $grn_entries[$i]['difference_val'];
+                            $narration[$tax_num]['igst'] = $grn_entries[$i]['narration'];
                         }
                         
                         $tax_num = $tax_num + 1;
@@ -395,7 +463,6 @@ class PendinggrnController extends Controller
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $debit_note = $reader->readAll();
-
         } else {
             $invoice_details = $model->getInvoiceDetails($id);
             // $invoice_tax = $model->getInvoiceTax($id);
@@ -458,16 +525,19 @@ class PendinggrnController extends Controller
             for($i=0; $i<count($total_tax); $i++){
                 $narration[$i]['cost'] = "";
                 $narration[$i]['tax'] = "";
+                $narration[$i]['cgst'] = "";
+                $narration[$i]['sgst'] = "";
+                $narration[$i]['igst'] = "";
             }
 
             $grn_details['isNewRecord']=1;
             $debit_note = array();
         }
 
-        $deductions['shortage'] = $this->actionGetinvoicedeductiondetails($id, "shortage");
-        $deductions['expiry'] = $this->actionGetinvoicedeductiondetails($id, "expiry");
-        $deductions['damaged'] = $this->actionGetinvoicedeductiondetails($id, "damaged");
-        $deductions['margindiff'] = $this->actionGetinvoicedeductiondetails($id, "margindiff");
+        $deductions['shortage'] = $this->actionGetinvoicedeductiondetails($id, "shortage", $tax_zone_code);
+        $deductions['expiry'] = $this->actionGetinvoicedeductiondetails($id, "expiry", $tax_zone_code);
+        $deductions['damaged'] = $this->actionGetinvoicedeductiondetails($id, "damaged", $tax_zone_code);
+        $deductions['margindiff'] = $this->actionGetinvoicedeductiondetails($id, "margindiff", $tax_zone_code);
 
         if (count($grn_details)>0) {
             return $this->render('update', ['grn_details' => $grn_details, 'total_val' => $total_val, 'total_tax' => $total_tax, 
@@ -676,10 +746,14 @@ class PendinggrnController extends Controller
             $sql = "delete from acc_grn_sku_entries where grn_id = '$gi_id'";
             Yii::$app->db->createCommand($sql)->execute();
 
-            $columnNameArray=['grn_id','vendor_id','ded_type','cost_acc_id','cost_ledger_name','cost_ledger_code','tax_acc_id','tax_ledger_name','tax_ledger_code','invoice_no','state',
-                                'vat_cst','vat_percen','ean','psku','product_title','qty','box_price','cost_excl_vat_per_unit',
-                                'tax_per_unit','total_per_unit','cost_excl_vat','tax','total','expiry_date','earliest_expected_date',
-                                'status','is_active', 'remarks','po_cost_excl_vat','po_tax','po_total'];
+            $columnNameArray=['grn_id','vendor_id','ded_type','cost_acc_id','cost_ledger_name','cost_ledger_code',
+                                'tax_acc_id','tax_ledger_name','tax_ledger_code','cgst_acc_id','cgst_ledger_name','cgst_ledger_code',
+                                'sgst_acc_id','sgst_ledger_name','sgst_ledger_code','igst_acc_id','igst_ledger_name','igst_ledger_code',
+                                'invoice_no','state','vat_cst','vat_percen','cgst_rate','sgst_rate','igst_rate','ean','hsn_code','psku',
+                                'product_title','qty','box_price','cost_excl_vat_per_unit','tax_per_unit','cgst_per_unit',
+                                'sgst_per_unit','igst_per_unit','total_per_unit','cost_excl_vat','tax','cgst','sgst','igst',
+                                'total','expiry_date','earliest_expected_date','status','is_active', 'remarks',
+                                'po_cost_excl_vat','po_tax','po_cgst','po_sgst','po_igst','po_total'];
             // below line insert all your record and return number of rows inserted
             $tableName = "acc_grn_sku_entries";
             $insertCount = Yii::$app->db->createCommand()
@@ -712,10 +786,10 @@ class PendinggrnController extends Controller
 
     public function actionGetinvoicedeductiondetailstest(){
 
-        $this->actionGetinvoicedeductiondetails('5909', 'shortage');
+        $this->actionGetinvoicedeductiondetails('5909', 'shortage', 'INTRA');
     }
 
-    public function actionGetinvoicedeductiondetails($gi_id, $ded_type){   
+    public function actionGetinvoicedeductiondetails($gi_id, $ded_type, $tax_zone_code){   
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
 
@@ -735,6 +809,7 @@ class PendinggrnController extends Controller
 
         $expiry_style = 'display: none;';
         $margindiff_style = 'display: none;';
+        $all_style = 'display: none;';
 
         if($ded_type=="shortage"){
             $col_qty = "shortage_qty";
@@ -782,6 +857,17 @@ class PendinggrnController extends Controller
         $sr_no = 1;
         // $sr_no_val = 1;
 
+        $intra_state_style = "";
+        $inter_state_style = "";
+        $colspan_no = 10;
+        if(strtoupper($tax_zone_code)=="INTRA"){
+            $inter_state_style = "display:none;";
+            $colspan_no = 6;
+        } else {
+            $intra_state_style = "display:none;";
+            $colspan_no = 4;
+        }
+
         if (count($rows)>0) {
             // $prev_invoice_no = $rows[0]["invoice_no"];
 
@@ -819,6 +905,9 @@ class PendinggrnController extends Controller
 
                 $cost_acc_list = '<option value="">Select</option>';
                 $tax_acc_list = '<option value="">Select</option>';
+                $cgst_acc_list = '<option value="">Select</option>';
+                $sgst_acc_list = '<option value="">Select</option>';
+                $igst_acc_list = '<option value="">Select</option>';
                 for($k=0; $k<count($acc_master); $k++){
                     if($acc_master[$k]['type']=="Goods Purchase") { 
                         if($rows[$i]["cost_acc_id"]==$acc_master[$k]['id']) {
@@ -832,6 +921,27 @@ class PendinggrnController extends Controller
                             $tax_acc_list = $tax_acc_list . '<option value="'.$acc_master[$k]['id'].'" selected>'.$acc_master[$k]['legal_name'].'</option>';
                         } else {
                             $tax_acc_list = $tax_acc_list . '<option value="'.$acc_master[$k]['id'].'">'.$acc_master[$k]['legal_name'].'</option>'; 
+                        }
+                    }
+                    if($acc_master[$k]['type']=="CGST") { 
+                        if($rows[$i]["cgst_acc_id"]==$acc_master[$k]['id']) {
+                            $cgst_acc_list = $cgst_acc_list . '<option value="'.$acc_master[$k]['id'].'" selected>'.$acc_master[$k]['legal_name'].'</option>';
+                        } else {
+                            $cgst_acc_list = $cgst_acc_list . '<option value="'.$acc_master[$k]['id'].'">'.$acc_master[$k]['legal_name'].'</option>'; 
+                        }
+                    }
+                    if($acc_master[$k]['type']=="SGST") { 
+                        if($rows[$i]["sgst_acc_id"]==$acc_master[$k]['id']) {
+                            $sgst_acc_list = $sgst_acc_list . '<option value="'.$acc_master[$k]['id'].'" selected>'.$acc_master[$k]['legal_name'].'</option>';
+                        } else {
+                            $sgst_acc_list = $sgst_acc_list . '<option value="'.$acc_master[$k]['id'].'">'.$acc_master[$k]['legal_name'].'</option>'; 
+                        }
+                    }
+                    if($acc_master[$k]['type']=="IGST") { 
+                        if($rows[$i]["igst_acc_id"]==$acc_master[$k]['id']) {
+                            $igst_acc_list = $igst_acc_list . '<option value="'.$acc_master[$k]['id'].'" selected>'.$acc_master[$k]['legal_name'].'</option>';
+                        } else {
+                            $igst_acc_list = $igst_acc_list . '<option value="'.$acc_master[$k]['id'].'">'.$acc_master[$k]['legal_name'].'</option>'; 
                         }
                     }
                 }
@@ -853,6 +963,9 @@ class PendinggrnController extends Controller
                 $state = $rows[$i]["tax_zone_code"];
                 $vat_cst = $rows[$i]["vat_cst"];
                 $vat_percen = floatval($rows[$i]["vat_percen"]);
+                $cgst_rate = floatval($rows[$i]["cgst_rate"]);
+                $sgst_rate = floatval($rows[$i]["sgst_rate"]);
+                $igst_rate = floatval($rows[$i]["igst_rate"]);
                 $cost_excl_tax_per_unit = 0;
                 if(count($grnAccSku)>0){
                     $cost_excl_tax_per_unit = floatval($rows[$i]["cost_excl_vat_per_unit"]);
@@ -868,17 +981,30 @@ class PendinggrnController extends Controller
                     // $po_total = $po_cost_excl_tax + $po_tax;
                 }
                 
+                $cgst_per_unit = ($cost_excl_tax_per_unit*$cgst_rate)/100;
+                $sgst_per_unit = ($cost_excl_tax_per_unit*$sgst_rate)/100;
+                $igst_per_unit = ($cost_excl_tax_per_unit*$igst_rate)/100;
                 $tax_per_unit = ($cost_excl_tax_per_unit*$vat_percen)/100;
                 $total_per_unit = $cost_excl_tax_per_unit + $tax_per_unit;
+
                 $cost_excl_tax = $qty*$cost_excl_tax_per_unit;
+                $cgst = $qty*$cgst_per_unit;
+                $sgst = $qty*$sgst_per_unit;
+                $igst = $qty*$igst_per_unit;
                 $tax = $qty*$tax_per_unit;
                 $total = $cost_excl_tax + $tax;
                 $invoice_total = $invoice_total + $total;
 
+                $po_cgst = ($po_cost_excl_tax*$cgst_rate)/100;
+                $po_sgst = ($po_cost_excl_tax*$sgst_rate)/100;
+                $po_igst = ($po_cost_excl_tax*$igst_rate)/100;
                 $po_tax = ($po_cost_excl_tax*$vat_percen)/100;
                 $po_total = $po_cost_excl_tax + $po_tax;
 
                 $diff_cost_excl_tax = round($cost_excl_tax - $po_cost_excl_tax,2);
+                $diff_cgst = round($cgst - $po_cgst,2);
+                $diff_sgst = round($sgst - $po_sgst,2);
+                $diff_igst = round($igst - $po_igst,2);
                 $diff_tax = round($tax - $po_tax,2);
                 $diff_total = round($total - $po_total,2);
 
@@ -897,6 +1023,7 @@ class PendinggrnController extends Controller
                             </td>
                             <td><input type="text" class="'.$ded_type.'_product_title_'.$sr_no.'" id="'.$ded_type.'_product_title_'.$i.'" name="'.$ded_type.'_product_title[]" value="'.$rows[$i]["product_title"].'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_ean_'.$sr_no.'" id="'.$ded_type.'_ean_'.$i.'" name="'.$ded_type.'_ean[]" value="'.$rows[$i]["ean"].'" readonly /></td>
+                            <td><input type="text" class="'.$ded_type.'_hsn_code_'.$sr_no.'" id="'.$ded_type.'_hsn_code_'.$i.'" name="'.$ded_type.'_hsn_code[]" value="'.$rows[$i]["hsn_code"].'" readonly /></td>
                             <td>
                                 <select id="'.$ded_type.'cost_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_cost_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cost_acc_id_'.$sr_no.'_error">'.$cost_acc_list.'</select>
                                 <input type="hidden" id="'.$ded_type.'cost_ledger_name_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_name[]" value="'.$rows[$i]["cost_ledger_name"].'" />
@@ -905,39 +1032,78 @@ class PendinggrnController extends Controller
                                 <div id="'.$ded_type.'cost_acc_id_'.$sr_no.'_error"></div>
                             </td>
                             <td><input type="text" id="'.$ded_type.'cost_ledger_code_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_code[]" value="'.$rows[$i]["cost_ledger_code"].'" readonly /></td>
-                            <td>
+                            <td style="'.$intra_state_style.'">
+                                <select id="'.$ded_type.'cgst_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_cgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cgst_acc_id_'.$sr_no.'_error">'.$cgst_acc_list.'</select>
+                                <input type="hidden" id="'.$ded_type.'cgst_ledger_name_'.$sr_no.'" name="'.$ded_type.'_cgst_ledger_name[]" value="'.$rows[$i]["cgst_ledger_name"].'" />
+                                <input type="hidden" id="'.$ded_type.'cgst_voucher_id_'.$sr_no.'" name="'.$ded_type.'_cgst_voucher_id[]" value="'.$voucher_id.'" />
+                                <input type="hidden" id="'.$ded_type.'cgst_ledger_type_'.$sr_no.'" name="'.$ded_type.'_cgst_ledger_type[]" value="'.$ledger_type.'" />
+                                <div id="'.$ded_type.'cgst_acc_id_'.$sr_no.'_error"></div>
+                            </td>
+                            <td style="'.$intra_state_style.'"><input type="text" id="'.$ded_type.'cgst_ledger_code_'.$sr_no.'" name="'.$ded_type.'_cgst_ledger_code[]" value="'.$rows[$i]["cgst_ledger_code"].'" readonly /></td>
+                            <td style="'.$intra_state_style.'">
+                                <select id="'.$ded_type.'sgst_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_sgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'sgst_acc_id_'.$sr_no.'_error">'.$sgst_acc_list.'</select>
+                                <input type="hidden" id="'.$ded_type.'sgst_ledger_name_'.$sr_no.'" name="'.$ded_type.'_sgst_ledger_name[]" value="'.$rows[$i]["sgst_ledger_name"].'" />
+                                <input type="hidden" id="'.$ded_type.'sgst_voucher_id_'.$sr_no.'" name="'.$ded_type.'_sgst_voucher_id[]" value="'.$voucher_id.'" />
+                                <input type="hidden" id="'.$ded_type.'sgst_ledger_type_'.$sr_no.'" name="'.$ded_type.'_sgst_ledger_type[]" value="'.$ledger_type.'" />
+                                <div id="'.$ded_type.'sgst_acc_id_'.$sr_no.'_error"></div>
+                            </td>
+                            <td style="'.$intra_state_style.'"><input type="text" id="'.$ded_type.'sgst_ledger_code_'.$sr_no.'" name="'.$ded_type.'_sgst_ledger_code[]" value="'.$rows[$i]["sgst_ledger_code"].'" readonly /></td>
+                            <td style="'.$inter_state_style.'">
+                                <select id="'.$ded_type.'igst_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_igst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'igst_acc_id_'.$sr_no.'_error">'.$igst_acc_list.'</select>
+                                <input type="hidden" id="'.$ded_type.'igst_ledger_name_'.$sr_no.'" name="'.$ded_type.'_igst_ledger_name[]" value="'.$rows[$i]["igst_ledger_name"].'" />
+                                <input type="hidden" id="'.$ded_type.'igst_voucher_id_'.$sr_no.'" name="'.$ded_type.'_igst_voucher_id[]" value="'.$voucher_id.'" />
+                                <input type="hidden" id="'.$ded_type.'igst_ledger_type_'.$sr_no.'" name="'.$ded_type.'_igst_ledger_type[]" value="'.$ledger_type.'" />
+                                <div id="'.$ded_type.'igst_acc_id_'.$sr_no.'_error"></div>
+                            </td>
+                            <td style="'.$inter_state_style.'"><input type="text" id="'.$ded_type.'igst_ledger_code_'.$sr_no.'" name="'.$ded_type.'_igst_ledger_code[]" value="'.$rows[$i]["igst_ledger_code"].'" readonly /></td>
+                            <td style="'.$all_style.'">
                                 <select id="'.$ded_type.'tax_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_tax_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'tax_acc_id_'.$sr_no.'_error">'.$tax_acc_list.'</select>
                                 <input type="hidden" id="'.$ded_type.'tax_ledger_name_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_name[]" value="'.$rows[$i]["tax_ledger_name"].'" />
                                 <input type="hidden" id="'.$ded_type.'tax_voucher_id_'.$sr_no.'" name="'.$ded_type.'_tax_voucher_id[]" value="'.$voucher_id.'" />
                                 <input type="hidden" id="'.$ded_type.'tax_ledger_type_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_type[]" value="'.$ledger_type.'" />
                                 <div id="'.$ded_type.'tax_acc_id_'.$sr_no.'_error"></div>
                             </td>
-                            <td><input type="text" id="'.$ded_type.'tax_ledger_code_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_code[]" value="'.$rows[$i]["tax_ledger_code"].'" readonly /></td>
+                            <td style="'.$all_style.'"><input type="text" id="'.$ded_type.'tax_ledger_code_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_code[]" value="'.$rows[$i]["tax_ledger_code"].'" readonly /></td>
                             <td>
                                 <select class="'.$ded_type.'_invoice_no_'.$sr_no.'" id="'.$ded_type.'_invoice_no_'.$i.'" name="'.$ded_type.'_invoice_no[]" onChange="set_sku_details(this)" data-error="'.$ded_type.'_invoice_no_'.$sr_no.'_error">' . $invoice_list . '</select>
                                 <div id="'.$ded_type.'_invoice_no_'.$sr_no.'_error"></div>
                             </td>
-                            <td>'.$rows[$i]["invoice_date"].'</td>
+                            <td id="'.$ded_type.'_invoice_date_'.$i.'">'.$rows[$i]["invoice_date"].'</td>
                             <td><input type="text" class="'.$ded_type.'_state_'.$sr_no.'" id="'.$ded_type.'_state_'.$i.'" name="'.$ded_type.'_state[]" value="'.$state.'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_vat_cst_'.$sr_no.'" id="'.$ded_type.'_vat_cst_'.$i.'" name="'.$ded_type.'_vat_cst[]" value="'.$vat_cst.'" readonly /></td>
-                            <td><input type="text" class="'.$ded_type.'_vat_percen_'.$sr_no.'" id="'.$ded_type.'_vat_percen_'.$i.'" name="'.$ded_type.'_vat_percen[]" value="'.$mycomponent->format_money($vat_percen,2).'" readonly /></td>
+                            <td><input type="text" class="'.$ded_type.'_cgst_rate_'.$sr_no.'" id="'.$ded_type.'_cgst_rate_'.$i.'" name="'.$ded_type.'_cgst_rate[]" value="'.$cgst_rate.'" readonly /></td>
+                            <td><input type="text" class="'.$ded_type.'_sgst_rate_'.$sr_no.'" id="'.$ded_type.'_sgst_rate_'.$i.'" name="'.$ded_type.'_sgst_rate[]" value="'.$sgst_rate.'" readonly /></td>
+                            <td><input type="text" class="'.$ded_type.'_igst_rate_'.$sr_no.'" id="'.$ded_type.'_igst_rate_'.$i.'" name="'.$ded_type.'_igst_rate[]" value="'.$igst_rate.'" readonly /></td>
+                            <td><input type="text" class="'.$ded_type.'_vat_percen_'.$sr_no.'" id="'.$ded_type.'_vat_percen_'.$i.'" name="'.$ded_type.'_vat_percen[]" value="'.$vat_percen.'" readonly /></td>
                             <td>
-                                <input type="text" class="'.$ded_type.'_qty_'.$sr_no.'" id="'.$ded_type.'_qty_'.$i.'" name="'.$ded_type.'_qty[]" value="' . $mycomponent->format_money($qty,2) . '" onChange="set_sku_details(this)" data-error="#'.$ded_type.'qty_'.$i.'_error" '.(($ded_type=="margindiff")?"readonly ":" ").'/>
+                                <input type="text" class="'.$ded_type.'_qty_'.$sr_no.' edit-sku" id="'.$ded_type.'_qty_'.$i.'" name="'.$ded_type.'_qty[]" value="' . $mycomponent->format_money($qty,2) . '" onChange="set_sku_details(this)" data-error="#'.$ded_type.'qty_'.$i.'_error" '.(($ded_type=="margindiff")?"readonly ":" ").'/>
                                 <div id="'.$ded_type.'qty_'.$i.'_error"></div>
                             </td>
                             <td><input type="text" class="'.$ded_type.'_box_price_'.$sr_no.'" id="'.$ded_type.'_box_price_'.$i.'" name="'.$ded_type.'_box_price[]" value="'.$mycomponent->format_money($rows[$i]["box_price"],2).'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_cost_excl_tax_per_unit_'.$sr_no.'" id="'.$ded_type.'_cost_excl_tax_per_unit_'.$i.'" name="'.$ded_type.'_cost_excl_tax_per_unit[]" value="'.$mycomponent->format_money($cost_excl_tax_per_unit,2).'" onChange="set_sku_details(this)" readonly /></td>
+                            <td><input type="text" class="'.$ded_type.'_cgst_per_unit_'.$sr_no.'" id="'.$ded_type.'_cgst_per_unit_'.$i.'" name="'.$ded_type.'_cgst_per_unit[]" value="'.$mycomponent->format_money($cgst_per_unit,2).'" readonly /></td>
+                            <td><input type="text" class="'.$ded_type.'_sgst_per_unit_'.$sr_no.'" id="'.$ded_type.'_sgst_per_unit_'.$i.'" name="'.$ded_type.'_sgst_per_unit[]" value="'.$mycomponent->format_money($sgst_per_unit,2).'" readonly /></td>
+                            <td><input type="text" class="'.$ded_type.'_igst_per_unit_'.$sr_no.'" id="'.$ded_type.'_igst_per_unit_'.$i.'" name="'.$ded_type.'_igst_per_unit[]" value="'.$mycomponent->format_money($igst_per_unit,2).'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_tax_per_unit_'.$sr_no.'" id="'.$ded_type.'_tax_per_unit_'.$i.'" name="'.$ded_type.'_tax_per_unit[]" value="'.$mycomponent->format_money($tax_per_unit,2).'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_total_per_unit_'.$sr_no.'" id="'.$ded_type.'_total_per_unit_'.$i.'" name="'.$ded_type.'_total_per_unit[]" value="'.$mycomponent->format_money($total_per_unit,2).'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_cost_excl_tax_'.$sr_no.'" id="'.$ded_type.'_cost_excl_tax_'.$i.'" name="'.$ded_type.'_cost_excl_tax[]" value="'.$mycomponent->format_money($cost_excl_tax,2).'" readonly /></td>
+                            <td><input type="text" class="'.$ded_type.'_cgst_'.$sr_no.'" id="'.$ded_type.'_cgst_'.$i.'" name="'.$ded_type.'_cgst[]" value="'.$mycomponent->format_money($cgst,2).'" readonly /></td>
+                            <td><input type="text" class="'.$ded_type.'_sgst_'.$sr_no.'" id="'.$ded_type.'_sgst_'.$i.'" name="'.$ded_type.'_sgst[]" value="'.$mycomponent->format_money($sgst,2).'" readonly /></td>
+                            <td><input type="text" class="'.$ded_type.'_igst_'.$sr_no.'" id="'.$ded_type.'_igst_'.$i.'" name="'.$ded_type.'_igst[]" value="'.$mycomponent->format_money($igst,2).'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_tax_'.$sr_no.'" id="'.$ded_type.'_tax_'.$i.'" name="'.$ded_type.'_tax[]" value="'.$mycomponent->format_money($tax,2).'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_total_'.$sr_no.'" id="'.$ded_type.'_total_'.$i.'" name="'.$ded_type.'_total[]" value="'.$mycomponent->format_money($total,2).'" readonly /></td>
                             <td style="'.$expiry_style.'"><input type="text" class="'.$ded_type.'_expiry_date_'.$sr_no.'" id="'.$ded_type.'_expiry_date_'.$i.'" name="'.$ded_type.'_expiry_date[]" value="'.$rows[$i]["expiry_date"].'" readonly /></td>
                             <td style="'.$expiry_style.'"><input type="text" class="'.$ded_type.'_earliest_expected_date_'.$sr_no.'" id="'.$ded_type.'_earliest_expected_date_'.$i.'" name="'.$ded_type.'_earliest_expected_date[]" value="'.$rows[$i]["earliest_expected_date"].'" readonly /></td>
                             <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_cost_excl_tax_'.$sr_no.'" id="'.$ded_type.'_po_cost_excl_tax_'.$i.'" name="'.$ded_type.'_po_cost_excl_tax[]" value="'.$mycomponent->format_money($po_cost_excl_tax,2).'" onChange="set_sku_details(this)" /></td>
+                            <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_cgst_'.$sr_no.'" id="'.$ded_type.'_po_cgst_'.$i.'" name="'.$ded_type.'_po_cgst[]" value="'.$mycomponent->format_money($po_cgst,2).'" readonly /></td>
+                            <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_sgst_'.$sr_no.'" id="'.$ded_type.'_po_sgst_'.$i.'" name="'.$ded_type.'_po_sgst[]" value="'.$mycomponent->format_money($po_sgst,2).'" readonly /></td>
+                            <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_igst_'.$sr_no.'" id="'.$ded_type.'_po_igst_'.$i.'" name="'.$ded_type.'_po_igst[]" value="'.$mycomponent->format_money($po_igst,2).'" readonly /></td>
                             <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_tax_'.$sr_no.'" id="'.$ded_type.'_po_tax_'.$i.'" name="'.$ded_type.'_po_tax[]" value="'.$mycomponent->format_money($po_tax,2).'" readonly /></td>
                             <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_total_'.$sr_no.'" id="'.$ded_type.'_po_total_'.$i.'" name="'.$ded_type.'_po_total[]" value="'.$mycomponent->format_money($po_total,2).'" readonly /></td>
                             <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_diff_cost_excl_tax_'.$sr_no.'" id="'.$ded_type.'_diff_cost_excl_tax_'.$i.'" name="'.$ded_type.'_diff_cost_excl_tax[]" value="'.$mycomponent->format_money($diff_cost_excl_tax,2).'" readonly /></td>
+                            <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_diff_cgst_'.$sr_no.'" id="'.$ded_type.'_diff_cgst_'.$i.'" name="'.$ded_type.'_diff_cgst[]" value="'.$mycomponent->format_money($diff_cgst,2).'" readonly /></td>
+                            <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_diff_sgst_'.$sr_no.'" id="'.$ded_type.'_diff_sgst_'.$i.'" name="'.$ded_type.'_diff_sgst[]" value="'.$mycomponent->format_money($diff_sgst,2).'" readonly /></td>
+                            <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_diff_igst_'.$sr_no.'" id="'.$ded_type.'_diff_igst_'.$i.'" name="'.$ded_type.'_diff_igst[]" value="'.$mycomponent->format_money($diff_igst,2).'" readonly /></td>
                             <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_diff_tax_'.$sr_no.'" id="'.$ded_type.'_diff_tax_'.$i.'" name="'.$ded_type.'_diff_tax[]" value="'.$mycomponent->format_money($diff_tax,2).'" readonly /></td>
                             <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_diff_total_'.$sr_no.'" id="'.$ded_type.'_diff_total_'.$i.'" name="'.$ded_type.'_diff_total[]" value="'.$mycomponent->format_money($diff_total,2).'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_remarks_'.$sr_no.'" id="'.$ded_type.'_remarks_'.$i.'" name="'.$ded_type.'_remarks[]" value="' . $remarks . '" maxlength="500" /></td>
@@ -1002,6 +1168,22 @@ class PendinggrnController extends Controller
                     <td></td>
                     <td></td>
                     <td></td>
+                    <td style="'.$intra_state_style.'"></td>
+                    <td style="'.$intra_state_style.'"></td>
+                    <td style="'.$intra_state_style.'"></td>
+                    <td style="'.$intra_state_style.'"></td>
+                    <td style="'.$inter_state_style.'"></td>
+                    <td style="'.$inter_state_style.'"></td>
+                    <td style="'.$all_style.'"></td>
+                    <td style="'.$all_style.'"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -1020,7 +1202,13 @@ class PendinggrnController extends Controller
                     <td style="'.$expiry_style.'"></td>
                     <td style="'.$margindiff_style.'"></td>
                     <td style="'.$margindiff_style.'"></td>
+                    <td style="'.$margindiff_style.'"></td>
+                    <td style="'.$margindiff_style.'"></td>
+                    <td style="'.$margindiff_style.'"></td>
                     <td style="'.$margindiff_style.'" id="'.$ded_type.'_po_grand_total">' . $mycomponent->format_money($po_grand_total,2) . '</td>
+                    <td style="'.$margindiff_style.'"></td>
+                    <td style="'.$margindiff_style.'"></td>
+                    <td style="'.$margindiff_style.'"></td>
                     <td style="'.$margindiff_style.'"></td>
                     <td style="'.$margindiff_style.'"></td>
                     <td style="'.$margindiff_style.'" id="'.$ded_type.'_diff_grand_total">' . $mycomponent->format_money($diff_grand_total,2) . '</td>
@@ -1032,16 +1220,16 @@ class PendinggrnController extends Controller
         $table = '<table class="table table-bordered" id="'.$ded_type.'_sku_details">
                     <thead>
                         <tr>
-                            <th colspan="4">SKU Details</th>
-                            <th colspan="4">Account Details</th>
+                            <th colspan="5">SKU Details</th>
+                            <th colspan="'.$colspan_no.'">Account Details</th>
                             <th colspan="2">Invoice Details</th>
-                            <th colspan="3">Purchase Ledger</th>
+                            <th colspan="6">Purchase Ledger</th>
                             <th colspan="2">Quantity Deducted</th>
-                            <th colspan="3">Amount Deducted (Per Unit)</th>
-                            <th colspan="3">Amount Deducted (Total)</th>
+                            <th colspan="6">Amount Deducted (Per Unit)</th>
+                            <th colspan="6">Amount Deducted (Total)</th>
                             <th colspan="2" style="'.$expiry_style.'">Expiry Dates</th>
-                            <th colspan="3" style="'.$margindiff_style.'">Purchase Order Details</th>
-                            <th colspan="3" style="'.$margindiff_style.'">Margin Difference Details</th>
+                            <th colspan="6" style="'.$margindiff_style.'">Purchase Order Details</th>
+                            <th colspan="6" style="'.$margindiff_style.'">Margin Difference Details</th>
                             <th rowspan="2">Remarks</th>
                         </tr>
                         <tr>
@@ -1050,29 +1238,51 @@ class PendinggrnController extends Controller
                             <th>SKU Code</th>
                             <th>SKU Name</th>
                             <th>EAN Code</th>
+                            <th>HSN Code</th>
                             <th>Cost Ledger Name</th>
                             <th>Cost Ledger Code</th>
-                            <th>Tax Ledger Name</th>
-                            <th>Tax Ledger Code</th>
+                            <th style="'.$intra_state_style.'">CGST Ledger Name</th>
+                            <th style="'.$intra_state_style.'">CGST Ledger Code</th>
+                            <th style="'.$intra_state_style.'">SGST Ledger Name</th>
+                            <th style="'.$intra_state_style.'">SGST Ledger Code</th>
+                            <th style="'.$inter_state_style.'">IGST Ledger Name</th>
+                            <th style="'.$inter_state_style.'">IGST Ledger Code</th>
+                            <th style="'.$all_style.'">Tax Ledger Name</th>
+                            <th style="'.$all_style.'">Tax Ledger Code</th>
                             <th>Invoice Number</th>
                             <th>Invoice Date</th>
                             <th>Purchase State</th>
                             <th>Tax</th>
-                            <th>Tax Rate</th>
+                            <th>CGST Rate</th>
+                            <th>SGST Rate</th>
+                            <th>IGST Rate</th>
+                            <th>Total Tax Rate</th>
                             <th>Quantity</th>
                             <th>MRP</th>
                             <th>Cost Excl Tax</th>
-                            <th>Tax</th>
-                            <th>Total</th>
+                            <th>CGST</th>
+                            <th>SGST</th>
+                            <th>IGST</th>
+                            <th>Total Tax</th>
+                            <th>Total Amount</th>
                             <th>Cost Excl Tax</th>
-                            <th>Tax</th>
-                            <th>Total</th>
+                            <th>CGST</th>
+                            <th>SGST</th>
+                            <th>IGST</th>
+                            <th>Total Tax</th>
+                            <th>Total Amount</th>
                             <th style="'.$expiry_style.'">Date Received</th>
                             <th style="'.$expiry_style.'">Earliest Expected Date</th>
                             <th style="'.$margindiff_style.'">Cost Excl Tax</th>
-                            <th style="'.$margindiff_style.'">Tax</th>
-                            <th style="'.$margindiff_style.'">Total</th>
+                            <th style="'.$margindiff_style.'">CGST</th>
+                            <th style="'.$margindiff_style.'">SGST</th>
+                            <th style="'.$margindiff_style.'">IGST</th>
+                            <th style="'.$margindiff_style.'">Total Tax</th>
+                            <th style="'.$margindiff_style.'">Total Amount</th>
                             <th style="'.$margindiff_style.'">Difference in Cost Excl Tax</th>
+                            <th style="'.$margindiff_style.'">CGST</th>
+                            <th style="'.$margindiff_style.'">SGST</th>
+                            <th style="'.$margindiff_style.'">IGST</th>
                             <th style="'.$margindiff_style.'">Difference in Tax</th>
                             <th style="'.$margindiff_style.'">Difference in Total</th>
                         </tr>
@@ -1095,10 +1305,11 @@ class PendinggrnController extends Controller
         $gi_id = $request->post('grn_id');
         $ded_type = $request->post('ded_type');
         $sr_no = $request->post('sr_no');
+        $tax_zone_code = $request->post('tax_zone_code');
 
-        // $gi_id = 28;
+        // $gi_id = 6293;
         // $ded_type = "shortage";
-        // $sr_no = 2;
+        // $sr_no = 1;
 
         // $gi_id = 5386;
         // $ded_type = "Shortage";
@@ -1113,6 +1324,7 @@ class PendinggrnController extends Controller
 
         $expiry_style = 'display: none;';
         $margindiff_style = 'display: none;';
+        $all_style = 'display: none;';
 
         if($ded_type=="shortage"){
             $col_qty = "shortage_qty";
@@ -1122,7 +1334,7 @@ class PendinggrnController extends Controller
         } else if($ded_type=="damaged"){
             $col_qty = "damaged_qty";
         } else if($ded_type=="margindiff"){
-            $col_qty = "mrp_issue_qty";
+            $col_qty = "margindiff_qty";
             $margindiff_style = '';
         }
 
@@ -1157,14 +1369,26 @@ class PendinggrnController extends Controller
             $invoice_list = $invoice_list . '<option value="'.$data[$k]['invoice_no'].'">'.$data[$k]['invoice_no'].'</option>';
         }
 
-        $purchase_acc_list = '<option value="">Select</option>';
+        $cost_acc_list = '<option value="">Select</option>';
         $tax_acc_list = '<option value="">Select</option>';
-        for($k=0; $k<count($acc_master); $k++){
+        $cgst_acc_list = '<option value="">Select</option>';
+        $sgst_acc_list = '<option value="">Select</option>';
+        $igst_acc_list = '<option value="">Select</option>';
+        for($k=0; $k<count($acc_master); $k++){ 
             if($acc_master[$k]['type']=="Goods Purchase") { 
-                $purchase_acc_list = $purchase_acc_list . '<option value="'.$acc_master[$k]['id'].'">'.$acc_master[$k]['legal_name'].'</option>';
+                $cost_acc_list = $cost_acc_list . '<option value="'.$acc_master[$k]['id'].'">'.$acc_master[$k]['legal_name'].'</option>';
             }
             if($acc_master[$k]['type']=="Tax") { 
                 $tax_acc_list = $tax_acc_list . '<option value="'.$acc_master[$k]['id'].'">'.$acc_master[$k]['legal_name'].'</option>';
+            }
+            if($acc_master[$k]['type']=="CGST") { 
+                $cgst_acc_list = $cgst_acc_list . '<option value="'.$acc_master[$k]['id'].'">'.$acc_master[$k]['legal_name'].'</option>'; 
+            }
+            if($acc_master[$k]['type']=="SGST") { 
+                $sgst_acc_list = $sgst_acc_list . '<option value="'.$acc_master[$k]['id'].'">'.$acc_master[$k]['legal_name'].'</option>'; 
+            }
+            if($acc_master[$k]['type']=="IGST") { 
+                $igst_acc_list = $igst_acc_list . '<option value="'.$acc_master[$k]['id'].'">'.$acc_master[$k]['legal_name'].'</option>'; 
             }
         }
 
@@ -1174,17 +1398,60 @@ class PendinggrnController extends Controller
         $state = "";
         $vat_cst = "";
         $vat_percen = 0;
+        $cgst_rate = 0;
+        $sgst_rate = 0;
+        $igst_rate = 0;
         $cost_excl_tax_per_unit = 0;
         
+        $cgst_per_unit = ($cost_excl_tax_per_unit*$cgst_rate)/100;
+        $sgst_per_unit = ($cost_excl_tax_per_unit*$sgst_rate)/100;
+        $igst_per_unit = ($cost_excl_tax_per_unit*$igst_rate)/100;
         $tax_per_unit = ($cost_excl_tax_per_unit*$vat_percen)/100;
         $total_per_unit = $cost_excl_tax_per_unit + $tax_per_unit;
+
         $cost_excl_tax = $qty*$cost_excl_tax_per_unit;
+        $cgst = $qty*$cgst_per_unit;
+        $sgst = $qty*$sgst_per_unit;
+        $igst = $qty*$igst_per_unit;
         $tax = $qty*$tax_per_unit;
         $total = $cost_excl_tax + $tax;
         $invoice_total = $invoice_total + $total;
         $grand_total = $grand_total + $total;
 
         $i = $sr_no - 1;
+
+
+        
+        
+
+
+        // $po_cgst = ($po_cost_excl_tax*$cgst_rate)/100;
+        // $po_sgst = ($po_cost_excl_tax*$sgst_rate)/100;
+        // $po_igst = ($po_cost_excl_tax*$igst_rate)/100;
+        // $po_tax = ($po_cost_excl_tax*$vat_percen)/100;
+        // $po_total = $po_cost_excl_tax + $po_tax;
+
+        // $diff_cost_excl_tax = round($cost_excl_tax - $po_cost_excl_tax,2);
+        // $diff_cgst = round($cgst - $po_cgst,2);
+        // $diff_sgst = round($sgst - $po_sgst,2);
+        // $diff_igst = round($igst - $po_igst,2);
+        // $diff_tax = round($tax - $po_tax,2);
+        // $diff_total = round($total - $po_total,2);
+
+        // $grand_total = $grand_total + $total;
+        // $po_grand_total = $po_grand_total + $po_total;
+        // $diff_grand_total = $diff_grand_total + $diff_total;
+
+        // $remarks = $rows[$i]["remarks"];
+
+
+        $intra_state_style = "";
+        $inter_state_style = "";
+        if(strtoupper($tax_zone_code)=="INTRA"){
+            $inter_state_style = "display:none;";
+        } else {
+            $intra_state_style = "display:none;";
+        }
 
         $row = '<tr id="'.$ded_type.'_row_'.$i.'">
                     <td style="text-align: center;"><button type="button" class="btn btn-sm btn-success" id="'.$ded_type.'_delete_row_'.$i.'" onClick="delete_row(this);">-</button></td>
@@ -1195,41 +1462,89 @@ class PendinggrnController extends Controller
                     </td>
                     <td><input type="text" class="'.$ded_type.'_product_title_'.$sr_no.'" id="'.$ded_type.'_product_title_'.$i.'" name="'.$ded_type.'_product_title[]" value="" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_ean_'.$sr_no.'" id="'.$ded_type.'_ean_'.$i.'" name="'.$ded_type.'_ean[]" value="" readonly /></td>
+                    <td><input type="text" class="'.$ded_type.'_hsn_code_'.$sr_no.'" id="'.$ded_type.'_hsn_code_'.$i.'" name="'.$ded_type.'_hsn_code[]" value="" readonly /></td>
                     <td>
-                        <select id="'.$ded_type.'cost_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_cost_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cost_acc_id_'.$sr_no.'_error">'.$purchase_acc_list.'</select>
+                        <select id="'.$ded_type.'cost_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_cost_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cost_acc_id_'.$sr_no.'_error">'.$cost_acc_list.'</select>
                         <input type="hidden" id="'.$ded_type.'cost_ledger_name_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_name[]" value="" />
+                        <input type="hidden" id="'.$ded_type.'cost_voucher_id_'.$sr_no.'" name="'.$ded_type.'_cost_voucher_id[]" value="" />
+                        <input type="hidden" id="'.$ded_type.'cost_ledger_type_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_type[]" value="" />
                         <div id="'.$ded_type.'cost_acc_id_'.$sr_no.'_error"></div>
                     </td>
                     <td><input type="text" id="'.$ded_type.'cost_ledger_code_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_code[]" value="" readonly /></td>
-                    <td>
+                    <td style="'.$intra_state_style.'">
+                        <select id="'.$ded_type.'cgst_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_cgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cgst_acc_id_'.$sr_no.'_error">'.$cgst_acc_list.'</select>
+                        <input type="hidden" id="'.$ded_type.'cgst_ledger_name_'.$sr_no.'" name="'.$ded_type.'_cgst_ledger_name[]" value="" />
+                        <input type="hidden" id="'.$ded_type.'cgst_voucher_id_'.$sr_no.'" name="'.$ded_type.'_cgst_voucher_id[]" value="" />
+                        <input type="hidden" id="'.$ded_type.'cgst_ledger_type_'.$sr_no.'" name="'.$ded_type.'_cgst_ledger_type[]" value="" />
+                        <div id="'.$ded_type.'cgst_acc_id_'.$sr_no.'_error"></div>
+                    </td>
+                    <td style="'.$intra_state_style.'"><input type="text" id="'.$ded_type.'cgst_ledger_code_'.$sr_no.'" name="'.$ded_type.'_cgst_ledger_code[]" value="" readonly /></td>
+                    <td style="'.$intra_state_style.'">
+                        <select id="'.$ded_type.'sgst_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_sgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'sgst_acc_id_'.$sr_no.'_error">'.$sgst_acc_list.'</select>
+                        <input type="hidden" id="'.$ded_type.'sgst_ledger_name_'.$sr_no.'" name="'.$ded_type.'_sgst_ledger_name[]" value="" />
+                        <input type="hidden" id="'.$ded_type.'sgst_voucher_id_'.$sr_no.'" name="'.$ded_type.'_sgst_voucher_id[]" value="" />
+                        <input type="hidden" id="'.$ded_type.'sgst_ledger_type_'.$sr_no.'" name="'.$ded_type.'_sgst_ledger_type[]" value="" />
+                        <div id="'.$ded_type.'sgst_acc_id_'.$sr_no.'_error"></div>
+                    </td>
+                    <td style="'.$intra_state_style.'"><input type="text" id="'.$ded_type.'sgst_ledger_code_'.$sr_no.'" name="'.$ded_type.'_sgst_ledger_code[]" value="" readonly /></td>
+                    <td style="'.$inter_state_style.'">
+                        <select id="'.$ded_type.'igst_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_igst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'igst_acc_id_'.$sr_no.'_error">'.$igst_acc_list.'</select>
+                        <input type="hidden" id="'.$ded_type.'igst_ledger_name_'.$sr_no.'" name="'.$ded_type.'_igst_ledger_name[]" value="" />
+                        <input type="hidden" id="'.$ded_type.'igst_voucher_id_'.$sr_no.'" name="'.$ded_type.'_igst_voucher_id[]" value="" />
+                        <input type="hidden" id="'.$ded_type.'igst_ledger_type_'.$sr_no.'" name="'.$ded_type.'_igst_ledger_type[]" value="" />
+                        <div id="'.$ded_type.'igst_acc_id_'.$sr_no.'_error"></div>
+                    </td>
+                    <td style="'.$inter_state_style.'"><input type="text" id="'.$ded_type.'igst_ledger_code_'.$sr_no.'" name="'.$ded_type.'_igst_ledger_code[]" value="" readonly /></td>
+                    <td style="'.$all_style.'">
                         <select id="'.$ded_type.'tax_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_tax_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'tax_acc_id_'.$sr_no.'_error">'.$tax_acc_list.'</select>
                         <input type="hidden" id="'.$ded_type.'tax_ledger_name_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_name[]" value="" />
+                        <input type="hidden" id="'.$ded_type.'tax_voucher_id_'.$sr_no.'" name="'.$ded_type.'_tax_voucher_id[]" value="" />
+                        <input type="hidden" id="'.$ded_type.'tax_ledger_type_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_type[]" value="" />
                         <div id="'.$ded_type.'tax_acc_id_'.$sr_no.'_error"></div>
                     </td>
-                    <td><input type="text" id="'.$ded_type.'tax_ledger_code_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_code[]" value="" readonly /></td>
+                    <td style="'.$all_style.'"><input type="text" id="'.$ded_type.'tax_ledger_code_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_code[]" value="" readonly /></td>
                     <td>
-                        <select class="'.$ded_type.'_invoice_no_'.$sr_no.'" id="'.$ded_type.'_invoice_no_'.$i.'" name="'.$ded_type.'_invoice_no[]" onChange="set_sku_details(this)" data-error="#'.$ded_type.'_invoice_no_'.$sr_no.'_error">' . $invoice_list . '</select>
+                        <select class="'.$ded_type.'_invoice_no_'.$sr_no.'" id="'.$ded_type.'_invoice_no_'.$i.'" name="'.$ded_type.'_invoice_no[]" onChange="set_sku_details(this)" data-error="'.$ded_type.'_invoice_no_'.$sr_no.'_error">' . $invoice_list . '</select>
                         <div id="'.$ded_type.'_invoice_no_'.$sr_no.'_error"></div>
                     </td>
-                    <td></td>
+                    <td id="'.$ded_type.'_invoice_date_'.$i.'"></td>
                     <td><input type="text" class="'.$ded_type.'_state_'.$sr_no.'" id="'.$ded_type.'_state_'.$i.'" name="'.$ded_type.'_state[]" value="'.$state.'" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_vat_cst_'.$sr_no.'" id="'.$ded_type.'_vat_cst_'.$i.'" name="'.$ded_type.'_vat_cst[]" value="'.$vat_cst.'" readonly /></td>
+                    <td><input type="text" class="'.$ded_type.'_cgst_rate_'.$sr_no.'" id="'.$ded_type.'_cgst_rate_'.$i.'" name="'.$ded_type.'_cgst_rate[]" value="'.$mycomponent->format_money($cgst_rate,2).'" readonly /></td>
+                    <td><input type="text" class="'.$ded_type.'_sgst_rate_'.$sr_no.'" id="'.$ded_type.'_sgst_rate_'.$i.'" name="'.$ded_type.'_sgst_rate[]" value="'.$mycomponent->format_money($sgst_rate,2).'" readonly /></td>
+                    <td><input type="text" class="'.$ded_type.'_igst_rate_'.$sr_no.'" id="'.$ded_type.'_igst_rate_'.$i.'" name="'.$ded_type.'_igst_rate[]" value="'.$mycomponent->format_money($igst_rate,2).'" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_vat_percen_'.$sr_no.'" id="'.$ded_type.'_vat_percen_'.$i.'" name="'.$ded_type.'_vat_percen[]" value="'.$mycomponent->format_money($vat_percen,2).'" readonly /></td>
                     <td>
-                        <input type="text" class="'.$ded_type.'_qty_'.$sr_no.'" id="'.$ded_type.'_qty_'.$i.'" name="'.$ded_type.'_qty[]" value="' . $mycomponent->format_money($qty,2) . '" onChange="set_sku_details(this);" data-error="#'.$ded_type.'qty_'.$i.'_error" />
+                        <input type="text" class="'.$ded_type.'_qty_'.$sr_no.' edit-sku" id="'.$ded_type.'_qty_'.$i.'" name="'.$ded_type.'_qty[]" value="' . $mycomponent->format_money($qty,2) . '" onChange="set_sku_details(this)" data-error="#'.$ded_type.'qty_'.$i.'_error" '.(($ded_type=="margindiff")?"readonly ":" ").'/>
                         <div id="'.$ded_type.'qty_'.$i.'_error"></div>
                     </td>
                     <td><input type="text" class="'.$ded_type.'_box_price_'.$sr_no.'" id="'.$ded_type.'_box_price_'.$i.'" name="'.$ded_type.'_box_price[]" value="" readonly /></td>
-                    <td><input type="text" class="'.$ded_type.'_cost_excl_tax_per_unit_'.$sr_no.'" id="'.$ded_type.'_cost_excl_tax_per_unit_'.$i.'" name="'.$ded_type.'_cost_excl_tax_per_unit[]" value="'.$mycomponent->format_money($cost_excl_tax_per_unit,2).'" onChange="set_sku_details(this);" readonly /></td>
+                    <td><input type="text" class="'.$ded_type.'_cost_excl_tax_per_unit_'.$sr_no.'" id="'.$ded_type.'_cost_excl_tax_per_unit_'.$i.'" name="'.$ded_type.'_cost_excl_tax_per_unit[]" value="'.$mycomponent->format_money($cost_excl_tax_per_unit,2).'" onChange="set_sku_details(this)" readonly /></td>
+                    <td><input type="text" class="'.$ded_type.'_cgst_per_unit_'.$sr_no.'" id="'.$ded_type.'_cgst_per_unit_'.$i.'" name="'.$ded_type.'_cgst_per_unit[]" value="'.$mycomponent->format_money($cgst_per_unit,2).'" readonly /></td>
+                    <td><input type="text" class="'.$ded_type.'_sgst_per_unit_'.$sr_no.'" id="'.$ded_type.'_sgst_per_unit_'.$i.'" name="'.$ded_type.'_sgst_per_unit[]" value="'.$mycomponent->format_money($sgst_per_unit,2).'" readonly /></td>
+                    <td><input type="text" class="'.$ded_type.'_igst_per_unit_'.$sr_no.'" id="'.$ded_type.'_igst_per_unit_'.$i.'" name="'.$ded_type.'_igst_per_unit[]" value="'.$mycomponent->format_money($igst_per_unit,2).'" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_tax_per_unit_'.$sr_no.'" id="'.$ded_type.'_tax_per_unit_'.$i.'" name="'.$ded_type.'_tax_per_unit[]" value="'.$mycomponent->format_money($tax_per_unit,2).'" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_total_per_unit_'.$sr_no.'" id="'.$ded_type.'_total_per_unit_'.$i.'" name="'.$ded_type.'_total_per_unit[]" value="'.$mycomponent->format_money($total_per_unit,2).'" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_cost_excl_tax_'.$sr_no.'" id="'.$ded_type.'_cost_excl_tax_'.$i.'" name="'.$ded_type.'_cost_excl_tax[]" value="'.$mycomponent->format_money($cost_excl_tax,2).'" readonly /></td>
+                    <td><input type="text" class="'.$ded_type.'_cgst_'.$sr_no.'" id="'.$ded_type.'_cgst_'.$i.'" name="'.$ded_type.'_cgst[]" value="'.$mycomponent->format_money($cgst,2).'" readonly /></td>
+                    <td><input type="text" class="'.$ded_type.'_sgst_'.$sr_no.'" id="'.$ded_type.'_sgst_'.$i.'" name="'.$ded_type.'_sgst[]" value="'.$mycomponent->format_money($sgst,2).'" readonly /></td>
+                    <td><input type="text" class="'.$ded_type.'_igst_'.$sr_no.'" id="'.$ded_type.'_igst_'.$i.'" name="'.$ded_type.'_igst[]" value="'.$mycomponent->format_money($igst,2).'" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_tax_'.$sr_no.'" id="'.$ded_type.'_tax_'.$i.'" name="'.$ded_type.'_tax[]" value="'.$mycomponent->format_money($tax,2).'" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_total_'.$sr_no.'" id="'.$ded_type.'_total_'.$i.'" name="'.$ded_type.'_total[]" value="'.$mycomponent->format_money($total,2).'" readonly /></td>
                     <td style="'.$expiry_style.'"><input type="text" class="'.$ded_type.'_expiry_date_'.$sr_no.'" id="'.$ded_type.'_expiry_date_'.$i.'" name="'.$ded_type.'_expiry_date[]" value="" readonly /></td>
                     <td style="'.$expiry_style.'"><input type="text" class="'.$ded_type.'_earliest_expected_date_'.$sr_no.'" id="'.$ded_type.'_earliest_expected_date_'.$i.'" name="'.$ded_type.'_earliest_expected_date[]" value="" readonly /></td>
-                    <td style="'.$margindiff_style.'"></td>
-                    <td style="'.$margindiff_style.'"></td>
+                    <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_cost_excl_tax_'.$sr_no.'" id="'.$ded_type.'_po_cost_excl_tax_'.$i.'" name="'.$ded_type.'_po_cost_excl_tax[]" value="" onChange="set_sku_details(this)" /></td>
+                    <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_cgst_'.$sr_no.'" id="'.$ded_type.'_po_cgst_'.$i.'" name="'.$ded_type.'_po_cgst[]" value="" readonly /></td>
+                    <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_sgst_'.$sr_no.'" id="'.$ded_type.'_po_sgst_'.$i.'" name="'.$ded_type.'_po_sgst[]" value="" readonly /></td>
+                    <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_igst_'.$sr_no.'" id="'.$ded_type.'_po_igst_'.$i.'" name="'.$ded_type.'_po_igst[]" value="" readonly /></td>
+                    <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_tax_'.$sr_no.'" id="'.$ded_type.'_po_tax_'.$i.'" name="'.$ded_type.'_po_tax[]" value="" readonly /></td>
+                    <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_total_'.$sr_no.'" id="'.$ded_type.'_po_total_'.$i.'" name="'.$ded_type.'_po_total[]" value="" readonly /></td>
+                    <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_diff_cost_excl_tax_'.$sr_no.'" id="'.$ded_type.'_diff_cost_excl_tax_'.$i.'" name="'.$ded_type.'_diff_cost_excl_tax[]" value="" readonly /></td>
+                    <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_diff_cgst_'.$sr_no.'" id="'.$ded_type.'_diff_cgst_'.$i.'" name="'.$ded_type.'_diff_cgst[]" value="" readonly /></td>
+                    <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_diff_sgst_'.$sr_no.'" id="'.$ded_type.'_diff_sgst_'.$i.'" name="'.$ded_type.'_diff_sgst[]" value="" readonly /></td>
+                    <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_diff_igst_'.$sr_no.'" id="'.$ded_type.'_diff_igst_'.$i.'" name="'.$ded_type.'_diff_igst[]" value="" readonly /></td>
+                    <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_diff_tax_'.$sr_no.'" id="'.$ded_type.'_diff_tax_'.$i.'" name="'.$ded_type.'_diff_tax[]" value="" readonly /></td>
+                    <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_diff_total_'.$sr_no.'" id="'.$ded_type.'_diff_total_'.$i.'" name="'.$ded_type.'_diff_total[]" value="" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_remarks_'.$sr_no.'" id="'.$ded_type.'_remarks_'.$i.'" name="'.$ded_type.'_remarks[]" value="" maxlength="500" /></td>
                 </tr>';
 
