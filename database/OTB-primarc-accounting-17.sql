@@ -1,0 +1,2 @@
+INSERT INTO `acc_user_roles` (`user_id`, `role_id`, `status`, `is_active`, `created_by`, `created_date`, `updated_by`, `updated_date`) VALUES
+(16, 1, 'approved', 1, 16, '2017-07-10 10:50:24', 16, '2017-07-10 10:50:24');
