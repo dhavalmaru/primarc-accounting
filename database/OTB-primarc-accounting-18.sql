@@ -1,0 +1,1 @@
+update acc_master set status='approved';
