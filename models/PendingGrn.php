@@ -419,9 +419,9 @@ class PendingGrn extends Model
                         case when round(ifnull((B.invoice_qty*B.cost_excl_vat),0)-ifnull((B.invoice_qty*D.cost_price_exc_tax),0), 2) < 0 
                             then 0 else round(ifnull((B.invoice_qty*B.cost_excl_vat),0)-ifnull((B.invoice_qty*D.cost_price_exc_tax),0), 2) end as margindiff_cost 
                 from grn A 
-                left join grn_entries B on (A.grn_id = B.grn_id) 
-                left join purchase_order C on (A.po_no = C.po_no) 
-                left join purchase_order_items D on (C.purchase_order_id = D.purchase_order_id and B.psku = D.psku) 
+                    left join grn_entries B on (A.grn_id = B.grn_id) 
+                    left join purchase_order C on (A.po_no = C.po_no) 
+                    left join purchase_order_items D on (C.purchase_order_id = D.purchase_order_id and B.psku = D.psku) 
                 where A.status = 'approved' and A.is_active = '1' and A.grn_id = '$id' and B.is_active = '1' and B.grn_id = '$id' and B.invoice_no is not null) AA 
                 left join 
                 (select id, tax_zone_code, tax_zone_name, parent_id, tax_rate, 
@@ -433,10 +433,10 @@ class PendingGrn extends Model
                     E.tax_category as child_tax_category, E.tax_type_code as child_tax_type_code, 
                     E.tax_type_name as child_tax_type_name 
                 from tax_zone_master A 
-                left join tax_rate_master B on (A.id = B.tax_zone_id) 
-                left join tax_component C on (B.id = C.parent_id) 
-                left join tax_rate_master D on (C.child_id = D.id) 
-                left join tax_type_master E on (D.tax_type_id = E.id)) C 
+                    left join tax_rate_master B on (A.id = B.tax_zone_id) 
+                    left join tax_component C on (B.id = C.parent_id) 
+                    left join tax_rate_master D on (C.child_id = D.id) 
+                    left join tax_type_master E on (D.tax_type_id = E.id)) C 
                 where child_tax_rate != 0
                 group by id, tax_zone_code, tax_zone_name, parent_id, tax_rate) BB 
                 on (AA.vat_cst = BB.tax_zone_code and round(AA.vat_percen,4)=round(BB.tax_rate,4))) CC 
@@ -636,7 +636,7 @@ class PendingGrn extends Model
                 left join grn_entries B on (A.grn_id = B.grn_id) 
                 left join tax_zone_master D on (A.vat_cst = D.tax_zone_code) 
                 left join goods_inward_outward_invoices E on (A.gi_id = E.gi_go_ref_no and B.invoice_no = E.invoice_no) 
-                left join purchase_order F on (A.po_no = F.po_no) 
+                left join purchase_order F on (A.po_no = F.po_no and A.vendor_id = F.vendor_id) 
                 left join purchase_order_items G on (F.purchase_order_id = G.purchase_order_id and B.psku = G.psku) 
                 where A.grn_id = '$id' and B.grn_id = '$id' and A.is_active = '1' and B.is_active = '1' and 
                     D.is_active = '1' and B.invoice_no is not null) AA) BB 
@@ -1136,7 +1136,7 @@ class PendingGrn extends Model
                 'vendor_id'=>$vendor_id,
                 'particular'=>$particular[$i],
                 'sub_particular'=>$sub_particular_val[$i],
-                'acc_id'=>$acc_id[$i],
+                'acc_id'=>($acc_id[$i]!='')?$acc_id[$i]:null,
                 'ledger_name'=>$ledger_name[$i],
                 'ledger_code'=>$ledger_code[$i],
                 'voucher_id'=>$voucher_id[$i],
@@ -1461,7 +1461,7 @@ class PendingGrn extends Model
                                     'entry_type'=>$particular[$i],
                                     'invoice_no'=>$invoice_no_val[$i],
                                     'vendor_id'=>$vendor_id,
-                                    'acc_id'=>$acc_id[$i],
+                                    'acc_id'=>($acc_id[$i]!='')?$acc_id[$i]:null,
                                     'ledger_name'=>$ledger_name[$i],
                                     'ledger_code'=>$ledger_code[$i],
                                     'voucher_id'=>$voucher_id[$i],
@@ -1642,27 +1642,27 @@ class PendingGrn extends Model
                             'grn_id'=>$gi_id,
                             'vendor_id'=>$vendor_id,
                             'ded_type'=>$ded_type,
-                            'cost_acc_id'=>$cost_acc_id[$i],
+                            'cost_acc_id'=>($cost_acc_id[$i]!='')?$cost_acc_id[$i]:null,
                             'cost_ledger_name'=>$cost_ledger_name[$i],
                             'cost_ledger_code'=>$cost_ledger_code[$i],
                             // 'cost_voucher_id'=>$voucher_id,
                             // 'cost_ledger_type'=>'Sub Entry',
-                            'tax_acc_id'=>$tax_acc_id[$i],
+                            'tax_acc_id'=>($tax_acc_id[$i]!='')?$tax_acc_id[$i]:null,
                             'tax_ledger_name'=>$tax_ledger_name[$i],
                             'tax_ledger_code'=>$tax_ledger_code[$i],
                             // 'tax_voucher_id'=>$voucher_id,
                             // 'tax_ledger_type'=>'Sub Entry',
-                            'cgst_acc_id'=>$cgst_acc_id[$i],
+                            'cgst_acc_id'=>($cgst_acc_id[$i]!='')?$cgst_acc_id[$i]:null,
                             'cgst_ledger_name'=>$cgst_ledger_name[$i],
                             'cgst_ledger_code'=>$cgst_ledger_code[$i],
                             // 'cgst_voucher_id'=>$voucher_id,
                             // 'cgst_ledger_type'=>'Sub Entry',
-                            'sgst_acc_id'=>$sgst_acc_id[$i],
+                            'sgst_acc_id'=>($sgst_acc_id[$i]!='')?$sgst_acc_id[$i]:null,
                             'sgst_ledger_name'=>$sgst_ledger_name[$i],
                             'sgst_ledger_code'=>$sgst_ledger_code[$i],
                             // 'sgst_voucher_id'=>$voucher_id,
                             // 'sgst_ledger_type'=>'Sub Entry',
-                            'igst_acc_id'=>$igst_acc_id[$i],
+                            'igst_acc_id'=>($igst_acc_id[$i]!='')?$igst_acc_id[$i]:null,
                             'igst_ledger_name'=>$igst_ledger_name[$i],
                             'igst_ledger_code'=>$igst_ledger_code[$i],
                             // 'igst_voucher_id'=>$voucher_id,
@@ -1692,7 +1692,7 @@ class PendingGrn extends Model
                             'sgst'=>$mycomponent->format_number($sgst[$i],2),
                             'igst'=>$mycomponent->format_number($igst[$i],2),
                             'total'=>$mycomponent->format_number($total[$i],2),
-                            'expiry_date'=>$expiry_date[$i],
+                            'expiry_date'=>($expiry_date[$i]!='')?$expiry_date[$i]:null,
                             'earliest_expected_date'=>$earliest_expected_date[$i],
                             'status'=>'approved',
                             'is_active'=>'1',
@@ -1728,7 +1728,7 @@ class PendingGrn extends Model
                                     'entry_type'=>$ded_type.'_cost',
                                     'invoice_no'=>$invoice_no[$i],
                                     'vendor_id'=>$vendor_id,
-                                    'acc_id'=>$cost_acc_id[$i],
+                                    'acc_id'=>($cost_acc_id[$i]!='')?$cost_acc_id[$i]:null,
                                     'ledger_name'=>$cost_ledger_name[$i],
                                     'ledger_code'=>$cost_ledger_code[$i],
                                     'voucher_id'=>$voucher_id,
@@ -1810,7 +1810,7 @@ class PendingGrn extends Model
                                     'entry_type'=>$ded_type.'_cgst',
                                     'invoice_no'=>$invoice_no[$i],
                                     'vendor_id'=>$vendor_id,
-                                    'acc_id'=>$cgst_acc_id[$i],
+                                    'acc_id'=>($cgst_acc_id[$i]!='')?$cgst_acc_id[$i]:null,
                                     'ledger_name'=>$cgst_ledger_name[$i],
                                     'ledger_code'=>$cgst_ledger_code[$i],
                                     'voucher_id'=>$voucher_id,
@@ -1851,7 +1851,7 @@ class PendingGrn extends Model
                                     'entry_type'=>$ded_type.'_sgst',
                                     'invoice_no'=>$invoice_no[$i],
                                     'vendor_id'=>$vendor_id,
-                                    'acc_id'=>$sgst_acc_id[$i],
+                                    'acc_id'=>($sgst_acc_id[$i]!='')?$sgst_acc_id[$i]:null,
                                     'ledger_name'=>$sgst_ledger_name[$i],
                                     'ledger_code'=>$sgst_ledger_code[$i],
                                     'voucher_id'=>$voucher_id,
@@ -1892,7 +1892,7 @@ class PendingGrn extends Model
                                     'entry_type'=>$ded_type.'_igst',
                                     'invoice_no'=>$invoice_no[$i],
                                     'vendor_id'=>$vendor_id,
-                                    'acc_id'=>$igst_acc_id[$i],
+                                    'acc_id'=>($igst_acc_id[$i]!='')?$igst_acc_id[$i]:null,
                                     'ledger_name'=>$igst_ledger_name[$i],
                                     'ledger_code'=>$igst_ledger_code[$i],
                                     'voucher_id'=>$voucher_id,
@@ -2206,6 +2206,38 @@ class PendingGrn extends Model
                         'table_id' => $table_id);
         $count = Yii::$app->db->createCommand()
                             ->insert("acc_user_log", $array)
+                            ->execute();
+
+        return true;
+    }
+
+    public function setEmailLog($vendor_name, $from_email_id, $to_recipient, $reference_number, $email_content, 
+                                $email_attachment, $attachment_type, $email_sent_status, $error_message, $company_id)
+    {
+        $session = Yii::$app->session;
+        $curusr = $session['session_id'];
+        $username = $session['username'];
+        $now = date('Y-m-d H:i:s');
+
+        $array = array('module' => 'DN', 
+                        'email_type' => 'Debit Note Email', 
+                        'warehouse_code' => '', 
+                        'vendor_name' => $vendor_name, 
+                        'from_email_id' => $from_email_id, 
+                        'to_recipient' => $to_recipient, 
+                        'cc_recipient' => '', 
+                        'supporting_user' => $username, 
+                        'reference_number' => $reference_number, 
+                        'reference_status' => 'approved', 
+                        'email_date' => $now, 
+                        'email_content' => $email_content, 
+                        'email_attachment' => $email_attachment, 
+                        'attachment_type' => $attachment_type, 
+                        'email_sent_status' => $email_sent_status, 
+                        'error_message' => $error_message, 
+                        'company_id' => $company_id);
+        $count = Yii::$app->db->createCommand()
+                            ->insert("acc_email_log", $array)
                             ->execute();
 
         return true;

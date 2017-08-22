@@ -17,7 +17,7 @@
         p{ padding:0; margin:0; font-size:13px; line-height:21px; }
         table  { margin:10px 0;   }
         table tr td  { border:1px solid #999; padding:3px 10px;  }
-        .table-bordered { font-size:12px;  border-collapse:collapse; width:100%;}
+        .table-bordered { font-size:13px;  border-collapse:collapse; width:100%;}
         .table {   border-collapse:collapse; width:100%;}
         .table-bordered tr th{ border:1px solid #999; padding:3px 7px; border-collapse:collapse;  }
         .modal-body-inside { padding:10px; }
@@ -201,19 +201,19 @@
                     <td>' . $deduction_details[$i]['ean'] . '</td>
                     <td>' . $deduction_details[$i]['hsn_code'] . '</td>
                     <td>' . $deduction_details[$i]['qty'] . '</td>
-                    <td>' . $deduction_details[$i]['box_price'] . '</td>
-                    <td>' . $deduction_details[$i]['cost_excl_vat_per_unit'] . '</td>
-                    <td>' . $deduction_details[$i]['cgst_per_unit'] . '</td>
-                    <td>' . $deduction_details[$i]['sgst_per_unit'] . '</td>
-                    <td>' . $deduction_details[$i]['igst_per_unit'] . '</td>
-                    <td>' . $deduction_details[$i]['tax_per_unit'] . '</td>
-                    <td>' . $deduction_details[$i]['total_per_unit'] . '</td>
-                    <td>' . $deduction_details[$i]['cost_excl_vat'] . '</td>
-                    <td>' . $deduction_details[$i]['cgst'] . '</td>
-                    <td>' . $deduction_details[$i]['sgst'] . '</td>
-                    <td>' . $deduction_details[$i]['igst'] . '</td>
-                    <td>' . $deduction_details[$i]['tax'] . '</td>
-                    <td>' . $deduction_details[$i]['total'] . '</td>' . 
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['box_price'],0) . '</td>
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['cost_excl_vat_per_unit'],0) . '</td>
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['cgst_per_unit'],0) . '</td>
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['sgst_per_unit'],0) . '</td>
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['igst_per_unit'],0) . '</td>
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['tax_per_unit'],0) . '</td>
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['total_per_unit'],0) . '</td>
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['cost_excl_vat'],0) . '</td>
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['cgst'],0) . '</td>
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['sgst'],0) . '</td>
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['igst'],0) . '</td>
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['tax'],0) . '</td>
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['total'],0) . '</td>' . 
                     (($ded_type=='expiry')?
                     '<td style="'.$expiry_style.'">' . 
                                 (($deduction_details[$i]['expiry_date']!=null && $deduction_details[$i]['expiry_date']!='')?
@@ -224,18 +224,18 @@
                                 date('d/m/Y',strtotime($deduction_details[$i]['earliest_expected_date'])):'') . '
                     </td>':'') . 
                     (($ded_type=='margindiff')?
-                    '<td style="'.$margindiff_style.'">' . $deduction_details[$i]['po_cost_excl_vat'] . '</td>
-                    <td style="'.$margindiff_style.'">' . $deduction_details[$i]['po_cgst'] . '</td>
-                    <td style="'.$margindiff_style.'">' . $deduction_details[$i]['po_sgst'] . '</td>
-                    <td style="'.$margindiff_style.'">' . $deduction_details[$i]['po_igst'] . '</td>
-                    <td style="'.$margindiff_style.'">' . $deduction_details[$i]['po_tax'] . '</td>
-                    <td style="'.$margindiff_style.'">' . $deduction_details[$i]['po_total'] . '</td>
-                    <td style="'.$margindiff_style.'">' . round($deduction_details[$i]['cost_excl_vat']-$deduction_details[$i]['po_cost_excl_vat'],2) . '</td>
-                    <td style="'.$margindiff_style.'">' . round($deduction_details[$i]['cgst']-$deduction_details[$i]['po_cgst'],2) . '</td>
-                    <td style="'.$margindiff_style.'">' . round($deduction_details[$i]['sgst']-$deduction_details[$i]['po_sgst'],2) . '</td>
-                    <td style="'.$margindiff_style.'">' . round($deduction_details[$i]['igst']-$deduction_details[$i]['po_igst'],2) . '</td>
-                    <td style="'.$margindiff_style.'">' . round($deduction_details[$i]['tax']-$deduction_details[$i]['po_tax'],2) . '</td>
-                    <td style="'.$margindiff_style.'">' . round($deduction_details[$i]['total']-$deduction_details[$i]['po_total'],2) . '</td>':'') . 
+                    '<td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['po_cost_excl_vat'],0) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['po_cgst'],0) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['po_sgst'],0) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['po_igst'],0) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['po_tax'],0) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['po_total'],0) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money(round($deduction_details[$i]['cost_excl_vat']-$deduction_details[$i]['po_cost_excl_vat'],2),0) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money(round($deduction_details[$i]['cgst']-$deduction_details[$i]['po_cgst'],2),0) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money(round($deduction_details[$i]['sgst']-$deduction_details[$i]['po_sgst'],2),0) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money(round($deduction_details[$i]['igst']-$deduction_details[$i]['po_igst'],2),0) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money(round($deduction_details[$i]['tax']-$deduction_details[$i]['po_tax'],2),0) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money(round($deduction_details[$i]['total']-$deduction_details[$i]['po_total'],2),0) . '</td>':'') . 
                     '<td style="word-break: break-all;">' . $deduction_details[$i]['remarks'] . '</td>
                 </tr>';
 

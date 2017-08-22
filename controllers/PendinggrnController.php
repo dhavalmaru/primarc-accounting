@@ -114,12 +114,24 @@ class PendinggrnController extends Controller
         $response = $message->send();
         if($response=='1'){
             $data['response'] = 'Mail Sent.';
+            $email_sent_status = '1';
+            $error_message = '';
         } else {
             $data['response'] = 'Mail Sending Failed.';
+            $email_sent_status = '0';
+            $error_message = $response;
         }
         $data['id'] = $id;
         $data['grn_id'] = $grn_id;
         $data['invoice_id'] = $invoice_id;
+
+        
+        $attachment_type = 'PDF';
+        $vendor_name = $request->post('vendor_name');
+        $company_id = $request->post('company_id');
+        $model = new PendingGrn();
+        $model->setEmailLog($vendor_name, $from, $to, $id, $body, $attachment, 
+                                $attachment_type, $email_sent_status, $error_message, $company_id);
 
         return $this->render('email_response', ['data' => $data]);
     }
