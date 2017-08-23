@@ -634,21 +634,46 @@ class PaymentReceipt extends Model
             }
 
             if($payment_details[0]['payment_type']=='Knock off'){
-                $sql = "select B.id, B.invoice_no, B.vendor_id, B.acc_id as account_id, B.ledger_name as account_name, 
+                // $sql = "select B.id, B.invoice_no, B.vendor_id, B.acc_id as account_id, B.ledger_name as account_name, 
+                //             B.ledger_code as account_code, B.ledger_name, 
+                //             B.type, B.amount, B.is_paid, B.payment_ref, B.ref_type as ledger_type, 
+                //             C.gi_date, D.invoice_date from acc_ledger_entries A 
+                //         left join acc_ledger_entries B on(A.sub_ref_id=B.id) 
+                //         left join grn C on(B.ref_id = C.grn_id and B.ref_type = 'purchase') 
+                //         left join goods_inward_outward_invoices D on(B.invoice_no = D.invoice_no and 
+                //             B.ref_type = 'purchase' and C.gi_id = D.gi_go_ref_no) 
+                //         where A.is_active = '1' and A.ref_type = 'payment_receipt' and 
+                //             A.ref_id = '$id' and A.entry_type != 'payment_entry' and B.is_active = '1'";
+
+                $sql = "select sr_no, ledger_type, type, ref_no, ref_date, sum(amount) as tot_amount from 
+                        (select B.id, B.invoice_no as ref_no, B.vendor_id, B.acc_id as account_id, B.ledger_name as account_name, 
                             B.ledger_code as account_code, B.ledger_name, 
-                            B.type, B.amount, B.is_paid, B.payment_ref, B.ref_type as ledger_type, 
-                            C.gi_date, D.invoice_date from acc_ledger_entries A 
+                            B.type, B.amount, B.is_paid, B.payment_ref, B.ref_type as ledger_type, C.gi_date, 
+                            case when B.ref_type ='purchase' then D.invoice_date when B.ref_type ='journal_voucher' then E.jv_date 
+                                when B.ref_type ='payment_receipt' then F.payment_date else D.invoice_date end as ref_date, 
+                            case when B.ref_type ='purchase' then 1 when B.ref_type ='journal_voucher' then 2 
+                                when B.ref_type ='payment_receipt' then 3 else 4 end as sr_no 
+                        from acc_ledger_entries A 
                         left join acc_ledger_entries B on(A.sub_ref_id=B.id) 
                         left join grn C on(B.ref_id = C.grn_id and B.ref_type = 'purchase') 
                         left join goods_inward_outward_invoices D on(B.invoice_no = D.invoice_no and 
                             B.ref_type = 'purchase' and C.gi_id = D.gi_go_ref_no) 
+                        left join acc_jv_details E on(B.ref_id = E.id and B.ref_type = 'journal_voucher') 
+                        left join acc_payment_receipt F on(B.ref_id = F.id and B.ref_type = 'payment_receipt') 
                         where A.is_active = '1' and A.ref_type = 'payment_receipt' and 
-                            A.ref_id = '$id' and A.entry_type != 'payment_entry' and B.is_active = '1'";
+                            A.ref_id = '$id' and A.entry_type != 'payment_entry' and B.is_active = '1') C 
+                        group by sr_no, ledger_type, type, ref_no, ref_date 
+                        order by sr_no, ledger_type, type, ref_no, ref_date";
             } else {
-                $sql = "select A.id, null as invoice_no, null as vendor_id, A.account_id, A.account_name, 
-                            A.account_code, A.account_name as ledger_name, 
-                            null as type, A.amount, A.is_paid, A.payment_ref, null as ledger_type, 
-                            null as gi_date, null as invoice_date from acc_payment_receipt A 
+                // $sql = "select A.id, null as invoice_no, null as vendor_id, A.account_id, A.account_name, 
+                //             A.account_code, A.account_name as ledger_name, 
+                //             null as type, A.amount, A.is_paid, A.payment_ref, null as ledger_type, 
+                //             null as gi_date, null as invoice_date from acc_payment_receipt A 
+                //         where A.is_active = '1' and A.id = '$id'";
+
+                $sql = "select A.id as sr_no, 'payment_receipt' as ledger_type, 
+                                case when A.trans_type='Payment' then 'Debit' else 'Credit' end as type, 
+                                A.ref_no, A.payment_date as ref_date, A.amount as tot_amount from acc_payment_receipt A 
                         where A.is_active = '1' and A.id = '$id'";
             }
             $command = Yii::$app->db->createCommand($sql);
@@ -679,48 +704,51 @@ class PaymentReceipt extends Model
                             ->insert("acc_payment_advices", $array)
                             ->execute();
                 $ref_id = Yii::$app->db->getLastInsertID();
-
-                $sql = "select * from acc_payment_advices where is_active = '1' and id = '$ref_id'";
-                $command = Yii::$app->db->createCommand($sql);
-                $reader = $command->query();
-                $payment_advice = $reader->readAll();
-                
-                $mpdf=new mPDF();
-                $mpdf->WriteHTML(Yii::$app->controller->renderPartial('payment_advice', [
-                    'payment_details' => $payment_details,
-                    'entry_details' => $entry_details,
-                    'vendor_details' => $vendor_details
-                ]));
-
-                $upload_path = './uploads';
-                if(!is_dir($upload_path)) {
-                    mkdir($upload_path, 0777, TRUE);
-                }
-                $upload_path = './uploads/acc_payment_advices';
-                if(!is_dir($upload_path)) {
-                    mkdir($upload_path, 0777, TRUE);
-                }
-
-                $file_name = $upload_path . '/payment_advice_' . $id . '.pdf';
-                $file_path = 'uploads/acc_payment_advices/payment_advice_' . $id . '.pdf';
-
-                // $mpdf->Output('MyPDF.pdf', 'D');
-                $mpdf->Output($file_name, 'F');
-                // exit;
-
-                $sql = "update acc_payment_advices set payment_advice_path = '$file_path' where id = '$ref_id'";
-                $command = Yii::$app->db->createCommand($sql);
-                $count = $command->execute();
-
-                $sql = "select * from acc_payment_advices where is_active = '1' and id = '$ref_id'";
-                $command = Yii::$app->db->createCommand($sql);
-                $reader = $command->query();
-                $payment_advice = $reader->readAll();
             } else {
+                $ref_id = $payment_advice[0]['id'];
+
                 $sql = "update acc_payment_advices set status = '$status' where is_active = '1' and payment_id = '$id'";
                 $command = Yii::$app->db->createCommand($sql);
                 $count = $command->execute();
             }
+
+            $sql = "select * from acc_payment_advices where is_active = '1' and id = '$ref_id'";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $payment_advice = $reader->readAll();
+            
+            $mpdf=new mPDF();
+            $mpdf->WriteHTML(Yii::$app->controller->renderPartial('payment_advice', [
+                'payment_details' => $payment_details,
+                'entry_details' => $entry_details,
+                'vendor_details' => $vendor_details
+            ]));
+
+            $upload_path = './uploads';
+            if(!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, TRUE);
+            }
+            $upload_path = './uploads/acc_payment_advices';
+            if(!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, TRUE);
+            }
+
+            $file_name = $upload_path . '/payment_advice_' . $id . '.pdf';
+            $file_path = 'uploads/acc_payment_advices/payment_advice_' . $id . '.pdf';
+
+            // $mpdf->Output('MyPDF.pdf', 'D');
+            $mpdf->Output($file_name, 'F');
+            // exit;
+
+            $sql = "update acc_payment_advices set payment_advice_path = '$file_path' where id = '$ref_id'";
+            $command = Yii::$app->db->createCommand($sql);
+            $count = $command->execute();
+
+            $sql = "select * from acc_payment_advices where is_active = '1' and id = '$ref_id'";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $payment_advice = $reader->readAll();
+
         } else {
             $payment_advice = array();
             $vendor_details = array();
