@@ -403,6 +403,7 @@ class AccountMaster extends Model
                                                     'is_active' => '1',
                                                     'created_by'=>$curusr,
                                                     'created_date'=>$now,
+                                                    'updated_date'=>$now,
                                                     'updated_by'=>$curusr,
                                                     'updated_date'=>$now,
                                                     'approver_comments'=>$remarks

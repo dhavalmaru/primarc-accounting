@@ -20,23 +20,20 @@ class MyComponent extends Component
         $number = floatval(str_replace(',', '', $number));
         $number = round($number, $decimal);
 
-        $decimal_digits="";
+        $decimal="";
         
         if(strpos($number, '.')!==false){
-            $decimal_digits = substr($number, strpos($number, '.'));
+            $decimal = substr($number, strpos($number, '.'));
             $number = substr($number, 0, strpos($number, '.'));
         } else {
-            $decimal_digits=".";
+            $decimal=".";
         }
         
-        if($decimal>0){
-            $decimal_digits = str_pad($decimal_digits, $decimal+1, "0", STR_PAD_RIGHT);
-            // echo $decimal . '<br/>';
-            // echo $number . '<br/>';
-        } else {
-            $decimal_digits = '';
-        }
-        
+        $decimal = str_pad($decimal, 3, "0", STR_PAD_RIGHT);
+
+        // echo $decimal . '<br/>';
+        // echo $number . '<br/>';
+
         $len = strlen($number);
         $m = '';
         $number = strrev($number);
@@ -48,7 +45,7 @@ class MyComponent extends Component
         }
 
         $number = strrev($m);
-        $number = $number . $decimal_digits;
+        $number = $number . $decimal;
 
         if($negative==true){
             $number = '-' . $number;

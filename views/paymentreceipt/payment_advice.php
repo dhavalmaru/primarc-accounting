@@ -72,112 +72,56 @@
                 <td colspan="4" style="border:none; padding:0;">&nbsp;    </td>
             </tr>
             <tr>
-                <td colspan="4" height="10" style="border:none;"> 
-                    <p style="margin-bottom:5px;">Dear Sir/Madam,</p>
-                    <p>Please find beleow the payment details.</p>
-                </td>
-            </tr>
-            <tr>
+             <td colspan="4" height="10" style="border:none;"> <p style="margin-bottom:5px;">Dear Sir/Madam,</p>
+                 <p>Please find beleow the payment details.</p></td>
+             </tr>
+             <tr>
                 <td colspan="4" height="0" style="border:none; padding:0;">&nbsp;</td>
             </tr>
 
             <tr valign="bottom" >
-                <td colspan="4" style="border:none;  "> 
-                <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
-                <tr style="text-align:center;">
+                <td colspan="4" style="border:none;  "> <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+                  <tr style="text-align:center;">
                     <td width="25%"><p> <b>Particulars </b></p></td>
-                    <td width="25%"><p> <b>Reference No. </b></p></td>
-                    <td width="25%"> <p> <b>Reference Date </b></p> </td>
+                    <td width="25%"><p> <b>Invoice No. </b></p></td>
+                    <td width="25%"> <p> <b>Invoice Date </b></p> </td>
                     <td width="25%"> <p> <b>Amount </b></p></td>
                 </tr>
-                <?php $credit_amt = 0; $debit_amt = 0; $blFlag = false; ?>
                 <?php for($i=0; $i<count($entry_details); $i++) { ?>
-                    <?php 
-                        if($entry_details[$i]['type']=='Credit') {
-                            $credit_amt = $credit_amt + $entry_details[$i]['tot_amount'];
-                        } else if($entry_details[$i]['type']=='Debit') {
-                            $debit_amt = $debit_amt + $entry_details[$i]['tot_amount'];
-                        }
-
-                        if($i==count($entry_details)-1) {
-                            $blFlag = true;
-                        } else if($entry_details[$i]['ledger_type']!=$entry_details[$i+1]['ledger_type'] || $entry_details[$i]['ref_no']!=$entry_details[$i+1]['ref_no']) {
-                            $blFlag = true;
-                        }
-                    ?>
-                    <?php if($blFlag == true) { ?>
-                        <?php 
-                            if($credit_amt>$debit_amt) {
-                                $tot_amount = $credit_amt - $debit_amt;
-                                $particular = 'Total Receivable Amount';
-                            } else {
-                                $tot_amount = $debit_amt - $credit_amt;
-                                $particular = 'Total Payble Amount';
-                            }
-                            $ref_no = $entry_details[$i]['ref_no'];
-                            if(isset($entry_details[$i]['ref_date'])) {
-                                $ref_date = (($entry_details[$i]['ref_date']!=null && $entry_details[$i]['ref_date']!='')?date('d/m/Y',strtotime($entry_details[$i]['ref_date'])):'');
-                            } else {
-                                $ref_date = '';
-                            }
-                        ?>
-                        <?php if($entry_details[$i]['ledger_type']=='purchase') { ?>
-                        <tr style="text-align:right;">
-                            <td style="text-align:left;"><p> Total Amount </p></td>
-                            <td style="text-align:left;"><p style="text-align:left;"> <?php echo $ref_no; ?> </p></td>
-                            <td style="text-align:left;"><p> <?php echo $ref_date; ?> </p></td>
-                            <td style="text-align:right;"><p style="text-align:right;"> <?php echo $mycomponent->format_money($debit_amt,2); ?> </p></td>
-                        </tr>
-                        <tr style="text-align:right;">
-                            <td style="text-align:left;"><p> Total Deduction </p></td>
-                            <td style="text-align:left;"><p style="text-align:left;"> <?php echo $ref_no; ?> </p></td>
-                            <td style="text-align:left;"><p> <?php echo $ref_date; ?> </p></td>
-                            <td style="text-align:right;"><p style="text-align:right;"> <?php echo $mycomponent->format_money($credit_amt,2); ?> </p></td>
-                        </tr>
-                        <?php } ?>
-                        <tr style="text-align:right;">
-                            <td style="text-align:left;"><p> <?php echo $particular; ?> </p></td>
-                            <td style="text-align:left;"><p style="text-align:left;"> <?php echo $ref_no; ?> </p></td>
-                            <td style="text-align:left;"><p> <?php echo $ref_date; ?> </p></td>
-                            <td style="text-align:right;"><p style="text-align:right;"> <?php echo $mycomponent->format_money($tot_amount,2); ?> </p></td>
-                        </tr>
-                        <?php $credit_amt = 0; $debit_amt = 0; $blFlag = false; ?>
-                    <?php } ?>
+                    <tr style="text-align:right;">
+                        <td style="text-align:left;"><p> <?php echo $entry_details[$i]['ledger_name']; ?> </p> </td>
+                        <td style="text-align:left;"><p style="text-align:left;"> <?php echo $entry_details[$i]['invoice_no']; ?> </p></td>
+                        <td style="text-align:left;">
+                            <p> 
+                                <?php if(isset($entry_details[$i]['invoice_date'])) 
+                                echo (($entry_details[$i]['invoice_date']!=null && $entry_details[$i]['invoice_date']!='')?
+                                date('d/m/Y',strtotime($entry_details[$i]['invoice_date'])):''); ?> 
+                            </p>
+                        </td>
+                        <td style="text-align:right;"><p style="text-align:right;"> <?php echo $mycomponent->format_money($entry_details[$i]['amount'],2); ?> </p></td>
+                    </tr>
                 <?php } ?>
+            </table>
+        </td>
+    </tr >
+    <tr valign="bottom"  >
+      <td style="border:none;"><p style="margin-bottom:5px;">Kindly Acknowlede the receipt,</p>
+         <p>Thanking You</p></td>
+         <td valign="bottom" colspan="3" style="border:none; text-align:right; ">&nbsp;</td>
+     </tr>
+     <tr valign="bottom"  >
+      <td style="border:none;">&nbsp;</td>
+      <td valign="bottom" colspan="3" style="border:none; text-align:right; ">&nbsp;</td>
+  </tr>
+  <tr valign="bottom"  >
+    <td style="border:none;"> <p> <strong>Receiver's Signature</strong></p> </td>
+    <td valign="bottom" colspan="3" style="border:none; text-align:right; "><p > <b>Authorised Signatory</b></p></td>
+</tr>
+<tr valign="bottom" >
+    <td colspan="4" style="border:none;">&nbsp;   </td>
+</tr>
+</table>
 
-                <!-- <tr style="text-align:right;">
-                    <td style="text-align:left;"><p> <?php //echo $entry_details[$i]['ledger_name']; ?> </p> </td>
-                    <td style="text-align:left;"><p style="text-align:left;"> <?php //echo $entry_details[$i]['invoice_no']; ?> </p></td>
-                    <td style="text-align:left;">
-                        <p> 
-                            <?php //if(isset($entry_details[$i]['invoice_date'])) 
-                            //echo (($entry_details[$i]['invoice_date']!=null && $entry_details[$i]['invoice_date']!='')?
-                            //date('d/m/Y',strtotime($entry_details[$i]['invoice_date'])):''); ?> 
-                        </p>
-                    </td>
-                    <td style="text-align:right;"><p style="text-align:right;"> <?php //echo $mycomponent->format_money($entry_details[$i]['amount'],2); ?> </p></td>
-                </tr> -->
-
-                </table>
-                </td>
-            </tr>
-            <tr valign="bottom"  >
-                <td style="border:none;"><p style="margin-bottom:5px;">Kindly Acknowlede the receipt,</p>
-                <p>Thanking You</p></td>
-                <td valign="bottom" colspan="3" style="border:none; text-align:right; ">&nbsp;</td>
-            </tr>
-            <tr valign="bottom"  >
-                <td style="border:none;">&nbsp;</td>
-                <td valign="bottom" colspan="3" style="border:none; text-align:right; ">&nbsp;</td>
-            </tr>
-            <tr valign="bottom"  >
-                <td style="border:none;"> <p> <strong>Receiver's Signature</strong></p> </td>
-                <td valign="bottom" colspan="3" style="border:none; text-align:right; "><p > <b>Authorised Signatory</b></p></td>
-            </tr>
-            <tr valign="bottom" >
-                <td colspan="4" style="border:none;">&nbsp;   </td>
-            </tr>
-        </table>
-    </div>
+</div>
 </body>
 </html>
