@@ -4,8 +4,8 @@ $(document).ready(function(){
     set_acc_type();
 
 	addMultiInputNamingRules('#acc_category_master', 'input[name="category_1[]"]', { required: true });
-    addMultiInputNamingRules('#acc_category_master', 'input[name="category_2[]"]', { required: true });
-    addMultiInputNamingRules('#acc_category_master', 'input[name="category_3[]"]', { required: true });
+    // addMultiInputNamingRules('#acc_category_master', 'input[name="category_2[]"]', { required: true });
+    // addMultiInputNamingRules('#acc_category_master', 'input[name="category_3[]"]', { required: true });
 
     get_categories();
     set_view();
@@ -339,12 +339,12 @@ $("#repeat_category").click(function(){
 	$("#category_body").append(tr);
 
 	removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_1[]"]');
-    removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_2[]"]');
-    removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_3[]"]');
+    // removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_2[]"]');
+    // removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_3[]"]');
 
     addMultiInputNamingRules('#acc_category_master', 'input[name="category_1[]"]', { required: true });
-    addMultiInputNamingRules('#acc_category_master', 'input[name="category_2[]"]', { required: true });
-    addMultiInputNamingRules('#acc_category_master', 'input[name="category_3[]"]', { required: true });
+    // addMultiInputNamingRules('#acc_category_master', 'input[name="category_2[]"]', { required: true });
+    // addMultiInputNamingRules('#acc_category_master', 'input[name="category_3[]"]', { required: true });
 
 	cat_cnt++;
 })
@@ -380,6 +380,7 @@ function save_categories(){
 		    // }
 		    set_categories(data);
 		    $("#account_category_modal").modal('hide');
+            get_categories();
         },
         error: function (xhr, ajaxOptions, thrownError) {
             alert(xhr.status);
@@ -421,9 +422,15 @@ function update_categories(data){
 	                				'<td><input type="text" class="form-control" name="category_3[]" id="category_3_'+i+'" value="'+cat_data.category_3+'" readonly /></td>' + 
 	                			'</tr>';
 
-    	category_1 = category_1 + '<option value="'+cat_data.category_1+'">'+cat_data.category_1+'</option>';
-    	category_2 = category_2 + '<option value="'+cat_data.category_2+'">'+cat_data.category_2+'</option>';
-    	category_3 = category_3 + '<option value="'+cat_data.category_3+'">'+cat_data.category_3+'</option>';
+        if(cat_data.category_1!=null && cat_data.category_1!=''){
+            category_1 = category_1 + '<option value="'+cat_data.category_1+'">'+cat_data.category_1+'</option>';
+        }
+    	if(cat_data.category_2!=null && cat_data.category_2!=''){
+    	   category_2 = category_2 + '<option value="'+cat_data.category_2+'">'+cat_data.category_2+'</option>';
+        }
+        if(cat_data.category_3!=null && cat_data.category_3!=''){
+    	   category_3 = category_3 + '<option value="'+cat_data.category_3+'">'+cat_data.category_3+'</option>';
+        }
     }
 
     $("#category_body").html(category);
@@ -454,9 +461,15 @@ function set_categories(data){
         //                             '<td><input type="text" class="form-control" name="category_3[]" id="category_3_'+i+'" value="'+cat_data.category_3+'" readonly /></td>' + 
         //                         '</tr>';
 
-        category_1 = category_1 + '<option value="'+cat_data.category_1+'">'+cat_data.category_1+'</option>';
-        category_2 = category_2 + '<option value="'+cat_data.category_2+'">'+cat_data.category_2+'</option>';
-        category_3 = category_3 + '<option value="'+cat_data.category_3+'">'+cat_data.category_3+'</option>';
+        if(cat_data.category_1!=null && cat_data.category_1!=''){
+            category_1 = category_1 + '<option value="'+cat_data.category_1+'">'+cat_data.category_1+'</option>';
+        }
+        if(cat_data.category_2!=null && cat_data.category_2!=''){
+           category_2 = category_2 + '<option value="'+cat_data.category_2+'">'+cat_data.category_2+'</option>';
+        }
+        if(cat_data.category_3!=null && cat_data.category_3!=''){
+           category_3 = category_3 + '<option value="'+cat_data.category_3+'">'+cat_data.category_3+'</option>';
+        }
     }
 
     // $("#category_body").html(category);

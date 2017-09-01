@@ -144,6 +144,9 @@ $session = Yii::$app->session;
             <li style="<?php if(isset($session['S_Payment_Receipt'])) {if($session['S_Payment_Receipt']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
                 <a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Findex"><i class="fa fa-money"></i> <span>Payment / Receipt</span></a>
             </li> 
+            <li style="<?php if(isset($session['S_Email_Log'])) {if($session['S_Email_Log']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="<?php echo Url::base(); ?>index.php?r=emaillog%2Findex"><i class="fa fa-money"></i> <span>Email Log</span></a>
+            </li> 
             <li class="treeview" style="<?php if(isset($session['S_User_Roles'])) {if($session['S_User_Roles']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
                 <a href="#">
                     <i class="fa fa-bug"></i> <span>User Roles</span>

@@ -9,12 +9,6 @@ use yii\jui\DatePicker;
 use yii\web\JsExpression;
 use yii\db\Query;
 
-// use kartik\date\DatePicker;
-
-/* @var $this yii\web\View */
-/* @var $searchModel app\models\GrnSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
-
 $this->title = 'Email Debit Note: ' . $debit_note[0]['id'];
 $this->params['breadcrumbs'][] = ['label' => 'Grns', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $debit_note[0]['grn_id'], 'url' => ['update', 'id' => $debit_note[0]['grn_id']]];
@@ -40,11 +34,9 @@ select {
 			<input type="hidden" name="id" value="<?php echo $debit_note[0]['id']; ?>" />
 			<input type="hidden" name="grn_id" value="<?php echo $debit_note[0]['grn_id']; ?>" />
 			<input type="hidden" name="invoice_id" value="<?php echo $debit_note[0]['invoice_id']; ?>" />
+			<input type="hidden" name="vendor_name" value="<?php echo $vendor_details[0]['vendor_name']; ?>" />
+			<input type="hidden" name="company_id" value="<?php echo $vendor_details[0]['company_id']; ?>" />
 			<div class="form-group">
-				<!-- <div class="col-md-6 col-sm-6 col-xs-6">
-					<label class="control-label">From</label>
-					<input type="text" class="form-control" id="from" name="from" value="" />
-				</div> -->
 				<div class="col-md-6 col-sm-6 col-xs-6">
 					<label class="control-label">To</label>
 					<input type="text" class="form-control" id="to" name="to" value="<?php echo $vendor_details[0]['contact_email']; ?>" />
