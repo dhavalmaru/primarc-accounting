@@ -660,6 +660,9 @@ class PendinggrnController extends Controller
                             <td colspan="6" style="text-align:left;">Purchase Entry</td>
                         </tr>' . $rows;
 
+                $debit_amt = round($debit_amt,2);
+                $credit_amt = round($credit_amt,2);
+
                 $table = '<div class="diversion"><h4 class=" ">Invoice No: ' . $acc_ledger_entries[$i]["invoice_no"] . '</h4>
                         <table class="table table-bordered">
                             <tr class="table-head">
@@ -764,8 +767,9 @@ class PendinggrnController extends Controller
                                 'invoice_no','state','vat_cst','vat_percen','cgst_rate','sgst_rate','igst_rate','ean','hsn_code','psku',
                                 'product_title','qty','box_price','cost_excl_vat_per_unit','tax_per_unit','cgst_per_unit',
                                 'sgst_per_unit','igst_per_unit','total_per_unit','cost_excl_vat','tax','cgst','sgst','igst',
-                                'total','expiry_date','earliest_expected_date','status','is_active', 'remarks',
-                                'po_cost_excl_vat','po_tax','po_cgst','po_sgst','po_igst','po_total'];
+                                'total','expiry_date','earliest_expected_date','status','is_active', 'remarks','po_mrp',
+                                'po_cost_excl_vat','po_tax','po_cgst','po_sgst','po_igst','po_total','margin_diff_excl_tax',
+                                'margin_diff_cgst','margin_diff_sgst','margin_diff_igst','margin_diff_tax','margin_diff_total'];
             // below line insert all your record and return number of rows inserted
             $tableName = "acc_grn_sku_entries";
             $insertCount = Yii::$app->db->createCommand()
@@ -817,7 +821,7 @@ class PendinggrnController extends Controller
         // $gi_id = 4;
         // $ded_type = "Shortage";
 
-        // $col_qty = "invoice_qty";
+        // $col_qty = "proper_qty";
 
         $expiry_style = 'display: none;';
         $margindiff_style = 'display: none;';
@@ -988,11 +992,16 @@ class PendinggrnController extends Controller
                 } else {
                     $cost_excl_tax_per_unit = floatval($rows[$i]["cost_excl_vat"]);
 
-                    $po_cost_excl_tax = $qty*floatval($rows[$i]["po_unit_rate_excl_tax"]);
+                    // $po_cost_excl_tax = $qty*floatval($rows[$i]["po_unit_rate_excl_tax"]);
+                    $po_cost_excl_tax = floatval($rows[$i]["po_unit_rate_excl_tax"]);
+
                     // $po_tax = $qty*floatval($rows[$i]["po_unit_tax"]);
                     // $po_total = $po_cost_excl_tax + $po_tax;
                 }
                 
+                $box_price = floatval($rows[$i]["box_price"]);
+                $po_mrp = floatval($rows[$i]["po_mrp"]);
+
                 $cgst_per_unit = ($cost_excl_tax_per_unit*$cgst_rate)/100;
                 $sgst_per_unit = ($cost_excl_tax_per_unit*$sgst_rate)/100;
                 $igst_per_unit = ($cost_excl_tax_per_unit*$igst_rate)/100;
@@ -1013,12 +1022,22 @@ class PendinggrnController extends Controller
                 $po_tax = ($po_cost_excl_tax*$vat_percen)/100;
                 $po_total = $po_cost_excl_tax + $po_tax;
 
-                $diff_cost_excl_tax = round($cost_excl_tax - $po_cost_excl_tax,2);
-                $diff_cgst = round($cgst - $po_cgst,2);
-                $diff_sgst = round($sgst - $po_sgst,2);
-                $diff_igst = round($igst - $po_igst,2);
-                $diff_tax = round($tax - $po_tax,2);
-                $diff_total = round($total - $po_total,2);
+                // $diff_cost_excl_tax = round($cost_excl_tax - $po_cost_excl_tax,2);
+                // $diff_cgst = round($cgst - $po_cgst,2);
+                // $diff_sgst = round($sgst - $po_sgst,2);
+                // $diff_igst = round($igst - $po_igst,2);
+                // $diff_tax = round($tax - $po_tax,2);
+                // $diff_total = round($total - $po_total,2);
+
+                $margin_from_po = floor((($po_mrp-$po_total)/$po_mrp*100)*100)/100;
+                $margin_from_scan = floor((($box_price-$total_per_unit)/$box_price*100)*100)/100;
+
+                $diff_cost_excl_tax = (($margin_from_po-$margin_from_scan)/100*$box_price*$qty)/(1+($vat_percen/100));
+                $diff_cgst = ($diff_cost_excl_tax*$cgst_rate)/100;
+                $diff_sgst = ($diff_cost_excl_tax*$sgst_rate)/100;
+                $diff_igst = ($diff_cost_excl_tax*$igst_rate)/100;
+                $diff_tax = ($diff_cost_excl_tax*$vat_percen)/100;
+                $diff_total = $diff_cost_excl_tax + $diff_tax;
 
                 $grand_total = $grand_total + $total;
                 $po_grand_total = $po_grand_total + $po_total;
@@ -1106,6 +1125,7 @@ class PendinggrnController extends Controller
                             <td><input type="text" class="'.$ded_type.'_total_'.$sr_no.'" id="'.$ded_type.'_total_'.$i.'" name="'.$ded_type.'_total[]" value="'.$mycomponent->format_money($total,2).'" readonly /></td>
                             <td style="'.$expiry_style.'"><input type="text" class="'.$ded_type.'_expiry_date_'.$sr_no.'" id="'.$ded_type.'_expiry_date_'.$i.'" name="'.$ded_type.'_expiry_date[]" value="'.$rows[$i]["expiry_date"].'" readonly /></td>
                             <td style="'.$expiry_style.'"><input type="text" class="'.$ded_type.'_earliest_expected_date_'.$sr_no.'" id="'.$ded_type.'_earliest_expected_date_'.$i.'" name="'.$ded_type.'_earliest_expected_date[]" value="'.$rows[$i]["earliest_expected_date"].'" readonly /></td>
+                            <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_mrp_'.$sr_no.'" id="'.$ded_type.'_po_mrp_'.$i.'" name="'.$ded_type.'_po_mrp[]" value="'.$mycomponent->format_money($rows[$i]["po_mrp"],2).'" readonly /></td>
                             <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_cost_excl_tax_'.$sr_no.'" id="'.$ded_type.'_po_cost_excl_tax_'.$i.'" name="'.$ded_type.'_po_cost_excl_tax[]" value="'.$mycomponent->format_money($po_cost_excl_tax,2).'" onChange="set_sku_details(this)" /></td>
                             <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_cgst_'.$sr_no.'" id="'.$ded_type.'_po_cgst_'.$i.'" name="'.$ded_type.'_po_cgst[]" value="'.$mycomponent->format_money($po_cgst,2).'" readonly /></td>
                             <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_sgst_'.$sr_no.'" id="'.$ded_type.'_po_sgst_'.$i.'" name="'.$ded_type.'_po_sgst[]" value="'.$mycomponent->format_money($po_sgst,2).'" readonly /></td>
@@ -1217,6 +1237,7 @@ class PendinggrnController extends Controller
                     <td style="'.$margindiff_style.'"></td>
                     <td style="'.$margindiff_style.'"></td>
                     <td style="'.$margindiff_style.'"></td>
+                    <td style="'.$margindiff_style.'"></td>
                     <td style="'.$margindiff_style.'" id="'.$ded_type.'_po_grand_total">' . $mycomponent->format_money($po_grand_total,2) . '</td>
                     <td style="'.$margindiff_style.'"></td>
                     <td style="'.$margindiff_style.'"></td>
@@ -1240,7 +1261,7 @@ class PendinggrnController extends Controller
                             <th colspan="6">Amount Deducted (Per Unit)</th>
                             <th colspan="6">Amount Deducted (Total)</th>
                             <th colspan="2" style="'.$expiry_style.'">Expiry Dates</th>
-                            <th colspan="6" style="'.$margindiff_style.'">Purchase Order Details</th>
+                            <th colspan="7" style="'.$margindiff_style.'">Purchase Order Details (Per Unit)</th>
                             <th colspan="6" style="'.$margindiff_style.'">Margin Difference Details</th>
                             <th rowspan="2">Remarks</th>
                         </tr>
@@ -1285,6 +1306,7 @@ class PendinggrnController extends Controller
                             <th>Total Amount</th>
                             <th style="'.$expiry_style.'">Date Received</th>
                             <th style="'.$expiry_style.'">Earliest Expected Date</th>
+                            <th style="'.$margindiff_style.'">MRP</th>
                             <th style="'.$margindiff_style.'">Cost Excl Tax</th>
                             <th style="'.$margindiff_style.'">CGST</th>
                             <th style="'.$margindiff_style.'">SGST</th>
@@ -1332,7 +1354,7 @@ class PendinggrnController extends Controller
         // $gi_id = 4;
         // $ded_type = "Shortage";
 
-        // $col_qty = "invoice_qty";
+        // $col_qty = "proper_qty";
 
         $expiry_style = 'display: none;';
         $margindiff_style = 'display: none;';
@@ -1545,6 +1567,7 @@ class PendinggrnController extends Controller
                     <td><input type="text" class="'.$ded_type.'_total_'.$sr_no.'" id="'.$ded_type.'_total_'.$i.'" name="'.$ded_type.'_total[]" value="'.$mycomponent->format_money($total,2).'" readonly /></td>
                     <td style="'.$expiry_style.'"><input type="text" class="'.$ded_type.'_expiry_date_'.$sr_no.'" id="'.$ded_type.'_expiry_date_'.$i.'" name="'.$ded_type.'_expiry_date[]" value="" readonly /></td>
                     <td style="'.$expiry_style.'"><input type="text" class="'.$ded_type.'_earliest_expected_date_'.$sr_no.'" id="'.$ded_type.'_earliest_expected_date_'.$i.'" name="'.$ded_type.'_earliest_expected_date[]" value="" readonly /></td>
+                    <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_mrp_'.$sr_no.'" id="'.$ded_type.'_po_mrp_'.$i.'" name="'.$ded_type.'_po_mrp[]" value="" readonly /></td>
                     <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_cost_excl_tax_'.$sr_no.'" id="'.$ded_type.'_po_cost_excl_tax_'.$i.'" name="'.$ded_type.'_po_cost_excl_tax[]" value="" onChange="set_sku_details(this)" /></td>
                     <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_cgst_'.$sr_no.'" id="'.$ded_type.'_po_cgst_'.$i.'" name="'.$ded_type.'_po_cgst[]" value="" readonly /></td>
                     <td style="'.$margindiff_style.'"><input type="text" class="'.$ded_type.'_po_sgst_'.$sr_no.'" id="'.$ded_type.'_po_sgst_'.$i.'" name="'.$ded_type.'_po_sgst[]" value="" readonly /></td>

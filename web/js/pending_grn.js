@@ -62,10 +62,13 @@ function getDifference(elem){
 
         var editedAmt = get_number($("#"+id).val(),2);
 
-        var cgstAmt = Math.round(((editedAmt*cgst_rate)/100)*100)/100;
-        var sgstAmt = Math.round(((editedAmt*sgst_rate)/100)*100)/100;
-        var igstAmt = Math.round(((editedAmt*igst_rate)/100)*100)/100;
+        // var cgstAmt = Math.round(((editedAmt*cgst_rate)/100)*100)/100;
+        // var sgstAmt = Math.round(((editedAmt*sgst_rate)/100)*100)/100;
+        // var igstAmt = Math.round(((editedAmt*igst_rate)/100)*100)/100;
         // var taxAmt = (editedAmt*vat_percen)/100;
+        var cgstAmt = (editedAmt*cgst_rate)/100;
+        var sgstAmt = (editedAmt*sgst_rate)/100;
+        var igstAmt = (editedAmt*igst_rate)/100;
         var taxAmt = cgstAmt+sgstAmt+igstAmt;
 
         var editedTaxId = id.replace("cost", "tax");
@@ -397,10 +400,13 @@ function get_sku_details(elem){
 
                     var cost_excl_tax_per_unit = 0;
                     cost_excl_tax_per_unit = parseFloat(data[0].cost_excl_vat);
-                    var cgst_per_unit = Math.round(((cost_excl_tax_per_unit*cgst_rate)/100)*100)/100;
-                    var sgst_per_unit = Math.round(((cost_excl_tax_per_unit*sgst_rate)/100)*100)/100;
-                    var igst_per_unit = Math.round(((cost_excl_tax_per_unit*igst_rate)/100)*100)/100;
+                    // var cgst_per_unit = Math.round(((cost_excl_tax_per_unit*cgst_rate)/100)*100)/100;
+                    // var sgst_per_unit = Math.round(((cost_excl_tax_per_unit*sgst_rate)/100)*100)/100;
+                    // var igst_per_unit = Math.round(((cost_excl_tax_per_unit*igst_rate)/100)*100)/100;
                     // var tax_per_unit = (cost_excl_tax_per_unit*vat_percen)/100;
+                    var cgst_per_unit = (cost_excl_tax_per_unit*cgst_rate)/100;
+                    var sgst_per_unit = (cost_excl_tax_per_unit*sgst_rate)/100;
+                    var igst_per_unit = (cost_excl_tax_per_unit*igst_rate)/100;
                     var tax_per_unit = cgst_per_unit+sgst_per_unit+igst_per_unit;
                     var total_per_unit = cost_excl_tax_per_unit + tax_per_unit;
 
@@ -410,6 +416,18 @@ function get_sku_details(elem){
                     var igst = qty*igst_per_unit;
                     var tax = qty*tax_per_unit;
                     var total = cost_excl_tax + tax;
+
+                    var po_mrp = parseFloat(data[0].po_mrp);
+                    var po_cost_excl_tax = parseFloat(data[0].po_unit_rate_excl_tax);
+                    // var po_cgst = Math.round(((po_cost_excl_tax*cgst_rate)/100)*100)/100;
+                    // var po_sgst = Math.round(((po_cost_excl_tax*sgst_rate)/100)*100)/100;
+                    // var po_igst = Math.round(((po_cost_excl_tax*igst_rate)/100)*100)/100;
+                    // var tax_per_unit = (po_cost_excl_tax*vat_percen)/100;
+                    var po_cgst = (po_cost_excl_tax*cgst_rate)/100;
+                    var po_sgst = (po_cost_excl_tax*sgst_rate)/100;
+                    var po_igst = (po_cost_excl_tax*igst_rate)/100;
+                    var po_tax = po_cgst+po_sgst+po_igst;
+                    var po_total = po_cost_excl_tax + po_tax;
 
                     // console.log(state);
 
@@ -439,6 +457,14 @@ function get_sku_details(elem){
                     $('#'+ded_type+'_tax_'+index_val).val(format_money(tax,2));
                     $('#'+ded_type+'_total_'+index_val).val(format_money(total,2));
 
+                    $('#'+ded_type+'_po_mrp_'+index_val).val(format_money(po_mrp,2));
+                    $('#'+ded_type+'_po_cost_excl_tax_'+index_val).val(format_money(po_cost_excl_tax,2));
+                    $('#'+ded_type+'_po_cgst_'+index_val).val(format_money(po_cgst,2));
+                    $('#'+ded_type+'_po_sgst_'+index_val).val(format_money(po_sgst,2));
+                    $('#'+ded_type+'_po_igst_'+index_val).val(format_money(po_igst,2));
+                    $('#'+ded_type+'_po_tax_'+index_val).val(format_money(po_tax,2));
+                    $('#'+ded_type+'_po_total_'+index_val).val(format_money(po_total,2));
+
                     set_sku_details(document.getElementById(ded_type+'_qty_'+index_val));
                 }
                 // if(data != null){
@@ -467,33 +493,33 @@ function set_sku_details(elem){
         var sgst_rate = get_number($("#"+ded_type+"_sgst_rate_"+index).val(),2);
         var igst_rate = get_number($("#"+ded_type+"_igst_rate_"+index).val(),2);
         var vat_percen = get_number($("#"+ded_type+"_vat_percen_"+index).val(),2);
+
         var po_cost_excl_tax = get_number($("#"+ded_type+"_po_cost_excl_tax_"+index).val(),2);
 
         if (sku_qty==0) sku_qty=0;
         if (sku_per_unit_cost==0) sku_per_unit_cost=0;
         if (vat_percen==0) vat_percen=0;
 
-        var sku_per_unit_cgst = Math.round(((sku_per_unit_cost*cgst_rate)/100)*100)/100;
-        var sku_per_unit_sgst = Math.round(((sku_per_unit_cost*sgst_rate)/100)*100)/100;
-        var sku_per_unit_igst = Math.round(((sku_per_unit_cost*igst_rate)/100)*100)/100;
+        // var sku_per_unit_cgst = Math.round(((sku_per_unit_cost*cgst_rate)/100)*100)/100;
+        // var sku_per_unit_sgst = Math.round(((sku_per_unit_cost*sgst_rate)/100)*100)/100;
+        // var sku_per_unit_igst = Math.round(((sku_per_unit_cost*igst_rate)/100)*100)/100;
         // var sku_per_unit_tax = (sku_per_unit_cost*vat_percen)/100;
+        var sku_per_unit_cgst = (sku_per_unit_cost*cgst_rate)/100;
+        var sku_per_unit_sgst = (sku_per_unit_cost*sgst_rate)/100;
+        var sku_per_unit_igst = (sku_per_unit_cost*igst_rate)/100;
         var sku_per_unit_tax = sku_per_unit_cgst+sku_per_unit_sgst+sku_per_unit_igst;
         var sku_per_unit_total = sku_per_unit_cost + sku_per_unit_tax;
 
         var sku_cost = sku_qty * sku_per_unit_cost;
-        var sku_cgst = Math.round(((sku_cost*cgst_rate)/100)*100)/100;
-        var sku_sgst = Math.round(((sku_cost*sgst_rate)/100)*100)/100;
-        var sku_igst = Math.round(((sku_cost*igst_rate)/100)*100)/100;
+        // var sku_cgst = Math.round(((sku_cost*cgst_rate)/100)*100)/100;
+        // var sku_sgst = Math.round(((sku_cost*sgst_rate)/100)*100)/100;
+        // var sku_igst = Math.round(((sku_cost*igst_rate)/100)*100)/100;
         // var sku_tax = Math.round(((sku_cost*vat_percen)/100;
+        var sku_cgst = (sku_cost*cgst_rate)/100;
+        var sku_sgst = (sku_cost*sgst_rate)/100;
+        var sku_igst = (sku_cost*igst_rate)/100;
         var sku_tax = sku_cgst+sku_sgst+sku_igst;
         var sku_total = sku_cost + sku_tax;
-
-        var po_cgst = Math.round(((po_cost_excl_tax*cgst_rate)/100)*100)/100;
-        var po_sgst = Math.round(((po_cost_excl_tax*sgst_rate)/100)*100)/100;
-        var po_igst = Math.round(((po_cost_excl_tax*igst_rate)/100)*100)/100;
-        // var po_tax = (po_cost_excl_tax*vat_percen)/100;
-        var po_tax = po_cgst+po_sgst+po_igst;
-        var po_total = po_cost_excl_tax + po_tax;
 
         $("#"+ded_type+"_tax_per_unit_"+index).val(format_money(sku_per_unit_tax,2));
         $("#"+ded_type+"_total_per_unit_"+index).val(format_money(sku_per_unit_total,2));
@@ -504,6 +530,26 @@ function set_sku_details(elem){
         $("#"+ded_type+"_tax_"+index).val(format_money(sku_tax,2));
         $("#"+ded_type+"_total_"+index).val(format_money(sku_total,2));
 
+        // console.log(sku_cost-po_cost_excl_tax);
+        // console.log(Math.round(sku_cost-po_cost_excl_tax,4));
+
+        // $("#"+ded_type+"_diff_cost_excl_tax_"+index).val(format_money(Math.round((sku_cost-po_cost_excl_tax)*100)/100,2));
+        // $("#"+ded_type+"_diff_cgst_"+index).val(format_money(Math.round((sku_cgst-po_cgst)*100)/100,2));
+        // $("#"+ded_type+"_diff_sgst_"+index).val(format_money(Math.round((sku_sgst-po_sgst)*100)/100,2));
+        // $("#"+ded_type+"_diff_igst_"+index).val(format_money(Math.round((sku_igst-po_igst)*100)/100,2));
+        // $("#"+ded_type+"_diff_tax_"+index).val(format_money(Math.round((sku_tax-po_tax)*100)/100,2));
+        // $("#"+ded_type+"_diff_total_"+index).val(format_money(Math.round((sku_total-po_total)*100)/100,2));
+
+        // var po_cgst = Math.round(((po_cost_excl_tax*cgst_rate)/100)*100)/100;
+        // var po_sgst = Math.round(((po_cost_excl_tax*sgst_rate)/100)*100)/100;
+        // var po_igst = Math.round(((po_cost_excl_tax*igst_rate)/100)*100)/100;
+        // var po_tax = (po_cost_excl_tax*vat_percen)/100;
+        var po_cgst = (po_cost_excl_tax*cgst_rate)/100;
+        var po_sgst = (po_cost_excl_tax*sgst_rate)/100;
+        var po_igst = (po_cost_excl_tax*igst_rate)/100;
+        var po_tax = po_cgst+po_sgst+po_igst;
+        var po_total = po_cost_excl_tax + po_tax;
+
         $("#"+ded_type+"_po_cost_excl_tax_"+index).val(format_money(po_cost_excl_tax,2));
         $("#"+ded_type+"_po_cgst_"+index).val(format_money(po_cgst,2));
         $("#"+ded_type+"_po_sgst_"+index).val(format_money(po_sgst,2));
@@ -511,15 +557,34 @@ function set_sku_details(elem){
         $("#"+ded_type+"_po_tax_"+index).val(format_money(po_tax,2));
         $("#"+ded_type+"_po_total_"+index).val(format_money(po_total,2));
 
-        // console.log(sku_cost-po_cost_excl_tax);
-        // console.log(Math.round(sku_cost-po_cost_excl_tax,4));
+        var po_mrp = get_number($("#"+ded_type+"_po_mrp_"+index).val(),2);
+        var box_price = get_number($("#"+ded_type+"_box_price_"+index).val(),2);
 
-        $("#"+ded_type+"_diff_cost_excl_tax_"+index).val(format_money(Math.round((sku_cost-po_cost_excl_tax)*100)/100,2));
-        $("#"+ded_type+"_diff_cgst_"+index).val(format_money(Math.round((sku_cgst-po_cgst)*100)/100,2));
-        $("#"+ded_type+"_diff_sgst_"+index).val(format_money(Math.round((sku_sgst-po_sgst)*100)/100,2));
-        $("#"+ded_type+"_diff_igst_"+index).val(format_money(Math.round((sku_igst-po_igst)*100)/100,2));
-        $("#"+ded_type+"_diff_tax_"+index).val(format_money(Math.round((sku_tax-po_tax)*100)/100,2));
-        $("#"+ded_type+"_diff_total_"+index).val(format_money(Math.round((sku_total-po_total)*100)/100,2));
+        var margin_from_po = Math.floor(((po_mrp-po_total)/po_mrp*100)*100)/100;
+        var margin_from_scan = Math.floor(((box_price-sku_per_unit_total)/box_price*100)*100)/100;
+
+        // console.log(po_mrp);
+        // console.log(po_cost_excl_tax);
+        // console.log(box_price);
+        // console.log(sku_per_unit_cost);
+        // console.log(sku_qty);
+        // console.log(vat_percen);
+        // console.log(margin_from_po);
+        // console.log(margin_from_scan);
+
+        var diff_cost_excl_tax = ((margin_from_po-margin_from_scan)/100*box_price*sku_qty)/(1+(vat_percen/100));
+        var diff_cgst = (diff_cost_excl_tax*cgst_rate)/100;
+        var diff_sgst = (diff_cost_excl_tax*sgst_rate)/100;
+        var diff_igst = (diff_cost_excl_tax*igst_rate)/100;
+        var diff_tax = (diff_cost_excl_tax*vat_percen)/100;
+        var diff_total = diff_cost_excl_tax + diff_tax;
+
+        $("#"+ded_type+"_diff_cost_excl_tax_"+index).val(format_money(Math.round((diff_cost_excl_tax)*100)/100,2));
+        $("#"+ded_type+"_diff_cgst_"+index).val(format_money(Math.round((diff_cgst)*100)/100,2));
+        $("#"+ded_type+"_diff_sgst_"+index).val(format_money(Math.round((diff_sgst)*100)/100,2));
+        $("#"+ded_type+"_diff_igst_"+index).val(format_money(Math.round((diff_igst)*100)/100,2));
+        $("#"+ded_type+"_diff_tax_"+index).val(format_money(Math.round((diff_tax)*100)/100,2));
+        $("#"+ded_type+"_diff_total_"+index).val(format_money(Math.round((diff_total)*100)/100,2));
 
         setDeductionTotal(ded_type);
 

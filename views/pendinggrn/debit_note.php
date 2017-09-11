@@ -224,18 +224,19 @@
                                 date('d/m/Y',strtotime($deduction_details[$i]['earliest_expected_date'])):'') . '
                     </td>':'') . 
                     (($ded_type=='margindiff')?
-                    '<td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['po_cost_excl_vat'],0) . '</td>
+                    '<td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['po_mrp'],0) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['po_cost_excl_vat'],0) . '</td>
                     <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['po_cgst'],0) . '</td>
                     <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['po_sgst'],0) . '</td>
                     <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['po_igst'],0) . '</td>
                     <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['po_tax'],0) . '</td>
                     <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['po_total'],0) . '</td>
-                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money(round($deduction_details[$i]['cost_excl_vat']-$deduction_details[$i]['po_cost_excl_vat'],2),0) . '</td>
-                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money(round($deduction_details[$i]['cgst']-$deduction_details[$i]['po_cgst'],2),0) . '</td>
-                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money(round($deduction_details[$i]['sgst']-$deduction_details[$i]['po_sgst'],2),0) . '</td>
-                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money(round($deduction_details[$i]['igst']-$deduction_details[$i]['po_igst'],2),0) . '</td>
-                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money(round($deduction_details[$i]['tax']-$deduction_details[$i]['po_tax'],2),0) . '</td>
-                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money(round($deduction_details[$i]['total']-$deduction_details[$i]['po_total'],2),0) . '</td>':'') . 
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['margin_diff_excl_tax'],0) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['margin_diff_cgst'],0) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['margin_diff_sgst'],0) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['margin_diff_igst'],0) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['margin_diff_tax'],0) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['margin_diff_total'],0) . '</td>':'') . 
                     '<td style="word-break: break-all;">' . $deduction_details[$i]['remarks'] . '</td>
                 </tr>';
 
@@ -263,7 +264,7 @@
                                     '<th colspan="2" style="'.$expiry_style.'text-align:center;">Expiry Dates</th>':'') . 
                                     (($ded_type=='margindiff')?
                                     '<th colspan="6" style="'.$margindiff_style.'">Purchase Order Details</th>
-                                    <th colspan="6" style="'.$margindiff_style.'">Margin Difference Details</th>':'') . 
+                                    <th colspan="7" style="'.$margindiff_style.'">Margin Difference Details</th>':'') . 
                                     '<th rowspan="2" style="width: 15%">Remarks</th>
                                 </tr>
                                 <tr>
@@ -296,6 +297,7 @@
                                     <th style="'.$margindiff_style.'">IGST</th>
                                     <th style="'.$margindiff_style.'">Tax</th>
                                     <th style="'.$margindiff_style.'">Total</th>
+                                    <th style="'.$margindiff_style.'">MRP</th>
                                     <th style="'.$margindiff_style.'">Difference in Cost Excl Tax</th>
                                     <th style="'.$margindiff_style.'">Difference in CGST</th>
                                     <th style="'.$margindiff_style.'">Difference in SGST</th>
