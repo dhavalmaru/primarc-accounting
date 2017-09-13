@@ -46,7 +46,7 @@ $mycomponent = Yii::$app->mycomponent;
 #margindiff_sku_details tr td input { border: none; outline: none; }
 #margindiff_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
 #margindiff_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-#margindiff_sku_details tr td:nth-child(42) input, #margindiff_sku_details tr td:nth-child(54) input { border: 1px solid #ddd!important; outline: none; }
+#margindiff_sku_details tr td:nth-child(47) input, #margindiff_sku_details tr td:nth-child(54) input { border: 1px solid #ddd!important; outline: none; }
 #margindiff_sku_details tr td:nth-child(54) { width: 400px; }
 /*----------------------*/
 #ledger_details .modal-body .table   {  }

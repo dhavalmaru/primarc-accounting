@@ -263,8 +263,8 @@
                                     (($ded_type=='expiry')?
                                     '<th colspan="2" style="'.$expiry_style.'text-align:center;">Expiry Dates</th>':'') . 
                                     (($ded_type=='margindiff')?
-                                    '<th colspan="6" style="'.$margindiff_style.'">Purchase Order Details</th>
-                                    <th colspan="7" style="'.$margindiff_style.'">Margin Difference Details</th>':'') . 
+                                    '<th colspan="7" style="'.$margindiff_style.'">Purchase Order Details</th>
+                                    <th colspan="6" style="'.$margindiff_style.'">Margin Difference Details</th>':'') . 
                                     '<th rowspan="2" style="width: 15%">Remarks</th>
                                 </tr>
                                 <tr>
@@ -291,13 +291,13 @@
                                     '<th style="'.$expiry_style.'">Date Received</th>
                                     <th style="'.$expiry_style.'">Earliest Expected Date</th>':'') . 
                                     (($ded_type=='margindiff')?
-                                    '<th style="'.$margindiff_style.'">Cost Excl Tax</th>
+                                    '<th style="'.$margindiff_style.'">MRP</th>
+                                    <th style="'.$margindiff_style.'">Cost Excl Tax</th>
                                     <th style="'.$margindiff_style.'">CGST</th>
                                     <th style="'.$margindiff_style.'">SGST</th>
                                     <th style="'.$margindiff_style.'">IGST</th>
                                     <th style="'.$margindiff_style.'">Tax</th>
                                     <th style="'.$margindiff_style.'">Total</th>
-                                    <th style="'.$margindiff_style.'">MRP</th>
                                     <th style="'.$margindiff_style.'">Difference in Cost Excl Tax</th>
                                     <th style="'.$margindiff_style.'">Difference in CGST</th>
                                     <th style="'.$margindiff_style.'">Difference in SGST</th>

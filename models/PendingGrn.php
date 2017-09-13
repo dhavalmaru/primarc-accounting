@@ -140,21 +140,25 @@ class PendingGrn extends Model
                     margindiff_amount, total_deduction, (total_amount-total_deduction) as total_payable_amount from 
                 (select invoice_no, total_cost, total_tax, (total_cost+total_tax) as total_amount, excess_amount, shortage_amount, expiry_amount, 
                     damaged_amount, margindiff_amount, (shortage_amount+expiry_amount+damaged_amount+margindiff_amount) as total_deduction from 
-                (select invoice_no, (total_cost+shortage_cost+expiry_cost+damaged_cost+margindiff_cost-excess_cost) as total_cost, 
-                    (total_tax+shortage_tax+expiry_tax+damaged_tax+margindiff_tax-excess_tax) as total_tax, 
+                (select invoice_no, (total_cost) as total_cost, 
+                    (total_tax) as total_tax, 
                     (excess_cost+excess_tax) as excess_amount, (shortage_cost+shortage_tax) as shortage_amount, 
                     (expiry_cost+expiry_tax) as expiry_amount, (damaged_cost+damaged_tax) as damaged_amount, 
                     (margindiff_cost+margindiff_tax) as margindiff_amount from 
-                (select invoice_no, ifnull((proper_qty*cost_excl_vat),0) as total_cost, ifnull((proper_qty*cost_excl_vat*vat_percen)/100,0) as total_tax, 
+                (select invoice_no, ifnull((proper_qty*cost_excl_vat),0) as total_cost, 
+                    ifnull(proper_qty*round(cost_excl_vat*vat_percen/100,2),0) as total_tax, 
                     ifnull((excess_qty*cost_excl_vat),0) as excess_cost, ifnull((excess_qty*cost_excl_vat*vat_percen)/100,0) as excess_tax, 
                     ifnull((shortage_qty*cost_excl_vat),0) as shortage_cost, ifnull((shortage_qty*cost_excl_vat*vat_percen)/100,0) as shortage_tax, 
                     ifnull((expiry_qty*cost_excl_vat),0) as expiry_cost, ifnull((expiry_qty*cost_excl_vat*vat_percen)/100,0) as expiry_tax, 
                     ifnull((damaged_qty*cost_excl_vat),0) as damaged_cost, ifnull((damaged_qty*cost_excl_vat*vat_percen)/100,0) as damaged_tax, 
-                    ifnull(margindiff_cost,0) as margindiff_cost, round(ifnull((margindiff_cost*vat_percen)/100,0),2) as margindiff_tax from 
+                    case when margindiff_cost<=0 then 0 else margindiff_cost end as margindiff_cost, 
+                    case when margindiff_cost<=0 then 0 else ifnull((margindiff_cost*vat_percen)/100,0) end as margindiff_tax from 
                 (select *, case when ifnull(box_price,0)=0 then 0 
-                                when ifnull(proper_qty,0)=0 then 0 
-                                else round(((margin_from_po-margin_from_scan)/100*box_price*proper_qty)/(1+(ifnull(vat_percen,0)/100)),2) end as margindiff_cost from 
-                (select A.grn_id, A.vat_cst, B.invoice_no, B.box_price, B.cost_excl_vat, B.vat_percen, B.proper_qty, B.excess_qty, B.shortage_qty, B.expiry_qty, B.damaged_qty, 
+                                 when ifnull(proper_qty,0)=0 then 0 
+                                 when (ifnull(proper_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))<=0 then 0 
+                                 else ifnull(ifnull(((margin_from_po-margin_from_scan)/100*box_price*(ifnull(proper_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))) / (1+(ifnull(vat_percen,0)/100)),0),0) end as margindiff_cost from 
+                (select A.grn_id, A.vat_cst, B.invoice_no, B.box_price, B.cost_excl_vat, B.vat_percen, B.proper_qty, B.excess_qty, 
+                        B.shortage_qty, B.expiry_qty, B.damaged_qty, 
                         case when ifnull(B.box_price,0) = 0 then 0 
                             else truncate((ifnull(B.box_price,0)-ifnull(B.cost_incl_vat_cst,0))/ifnull(B.box_price,0)*100,2) end as margin_from_scan, 
                         case when ifnull(D.mrp,0) = 0 then 0 
@@ -204,12 +208,8 @@ class PendingGrn extends Model
                         DD.expiry_igst, DD.damaged_cost, DD.damaged_tax, DD.damaged_cgst, DD.damaged_sgst, 
                         DD.damaged_igst, DD.margindiff_cost, DD.margindiff_tax, DD.margindiff_cgst, 
                         DD.margindiff_sgst, DD.margindiff_igst from 
-                (select CC.grn_id, CC.tax_zone_code, CC.tax_zone_name, CC.invoice_no, CC.vat_cst, CC.vat_percen, 
-                    sum(CC.total_cost+CC.shortage_cost+CC.expiry_cost+CC.damaged_cost+CC.margindiff_cost-CC.excess_cost) as total_cost, 
-                    sum(CC.total_tax+CC.shortage_tax+CC.expiry_tax+CC.damaged_tax+CC.margindiff_tax-CC.excess_tax) as total_tax, 
-                    sum(CC.total_cgst+CC.shortage_cgst+CC.expiry_cgst+CC.damaged_cgst+CC.margindiff_cgst-CC.excess_cgst) as total_cgst, 
-                    sum(CC.total_sgst+CC.shortage_sgst+CC.expiry_sgst+CC.damaged_sgst+CC.margindiff_sgst-CC.excess_sgst) as total_sgst, 
-                    sum(CC.total_igst+CC.shortage_igst+CC.expiry_igst+CC.damaged_igst+CC.margindiff_igst-CC.excess_igst) as total_igst, 
+                (select CC.grn_id, CC.tax_zone_code, CC.tax_zone_name, CC.invoice_no, CC.vat_cst, CC.vat_percen, sum(CC.total_cost) as total_cost, 
+                    sum(CC.total_tax) as total_tax, sum(CC.total_cgst) as total_cgst, sum(CC.total_sgst) as total_sgst, sum(CC.total_igst) as total_igst, 
                     sum(excess_cost) as excess_cost, sum(excess_tax) as excess_tax, sum(excess_cgst) as excess_cgst, 
                     sum(excess_sgst) as excess_sgst, sum(excess_igst) as excess_igst, 
                     sum(shortage_cost) as shortage_cost, sum(shortage_tax) as shortage_tax, sum(shortage_cgst) as shortage_cgst, 
@@ -221,9 +221,9 @@ class PendingGrn extends Model
                     sum(margindiff_cost) as margindiff_cost, sum(margindiff_tax) as margindiff_tax, sum(margindiff_cgst) as margindiff_cgst, 
                     sum(margindiff_sgst) as margindiff_sgst, sum(margindiff_igst) as margindiff_igst from 
                 (select AA.grn_id, BB.tax_zone_code, BB.tax_zone_name, AA.invoice_no, AA.vat_cst, AA.vat_percen, BB.cgst_rate, BB.sgst_rate, BB.igst_rate, 
-                    ifnull((AA.proper_qty*AA.cost_excl_vat),0) as total_cost, ifnull((AA.proper_qty*AA.cost_excl_vat*AA.vat_percen)/100,0) as total_tax, 
-                    ifnull((AA.proper_qty*AA.cost_excl_vat*BB.cgst_rate)/100,0) as total_cgst, ifnull((AA.proper_qty*AA.cost_excl_vat*BB.sgst_rate)/100,0) as total_sgst, 
-                    ifnull((AA.proper_qty*AA.cost_excl_vat*BB.igst_rate)/100,0) as total_igst, 
+                    ifnull((AA.proper_qty*AA.cost_excl_vat),0) as total_cost, ifnull(AA.proper_qty*round(AA.cost_excl_vat*AA.vat_percen/100,2),0) as total_tax, 
+                    ifnull(AA.proper_qty*round(AA.cost_excl_vat*BB.cgst_rate/100,2),0) as total_cgst, ifnull(AA.proper_qty*round(AA.cost_excl_vat*BB.sgst_rate/100,2),0) as total_sgst, 
+                    ifnull(AA.proper_qty*round(AA.cost_excl_vat*BB.igst_rate/100,2),0) as total_igst, 
                     ifnull((AA.excess_qty*AA.cost_excl_vat),0) as excess_cost, ifnull((AA.excess_qty*AA.cost_excl_vat*AA.vat_percen)/100,0) as excess_tax, 
                     ifnull((AA.excess_qty*AA.cost_excl_vat*BB.cgst_rate)/100,0) as excess_cgst, ifnull((AA.excess_qty*AA.cost_excl_vat*BB.sgst_rate)/100,0) as excess_sgst, 
                     ifnull((AA.excess_qty*AA.cost_excl_vat*BB.igst_rate)/100,0) as excess_igst, 
@@ -236,12 +236,15 @@ class PendingGrn extends Model
                     ifnull((AA.damaged_qty*AA.cost_excl_vat),0) as damaged_cost, ifnull((AA.damaged_qty*AA.cost_excl_vat*AA.vat_percen)/100,0) as damaged_tax, 
                     ifnull((AA.damaged_qty*AA.cost_excl_vat*BB.cgst_rate)/100,0) as damaged_cgst, ifnull((AA.damaged_qty*AA.cost_excl_vat*BB.sgst_rate)/100,0) as damaged_sgst, 
                     ifnull((AA.damaged_qty*AA.cost_excl_vat*BB.igst_rate)/100,0) as damaged_igst, 
-                    AA.margindiff_cost as margindiff_cost, ifnull((AA.margindiff_cost*AA.vat_percen)/100,0) as margindiff_tax, 
-                    ifnull((AA.margindiff_cost*BB.cgst_rate)/100,0) as margindiff_cgst, ifnull((AA.margindiff_cost*BB.sgst_rate)/100,0) as margindiff_sgst, 
-                    ifnull((AA.margindiff_cost*BB.igst_rate)/100,0) as margindiff_igst from 
+                    case when AA.margindiff_cost<=0 then 0 else AA.margindiff_cost end as margindiff_cost, 
+                    case when AA.margindiff_cost<=0 then 0 else ifnull((AA.margindiff_cost*AA.vat_percen)/100,0) end as margindiff_tax, 
+                    case when AA.margindiff_cost<=0 then 0 else ifnull((AA.margindiff_cost*BB.cgst_rate)/100,0) end as margindiff_cgst, 
+                    case when AA.margindiff_cost<=0 then 0 else ifnull((AA.margindiff_cost*BB.sgst_rate)/100,0) end as margindiff_sgst, 
+                    case when AA.margindiff_cost<=0 then 0 else ifnull((AA.margindiff_cost*BB.igst_rate)/100,0) end as margindiff_igst from 
                 (select *, case when ifnull(box_price,0)=0 then 0 
                                 when ifnull(proper_qty,0)=0 then 0 
-                                else round(((margin_from_po-margin_from_scan)/100*box_price*proper_qty)/(1+(ifnull(vat_percen,0)/100)),2) end as margindiff_cost from 
+                                when (ifnull(proper_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))<=0 then 0 
+                                else ifnull(ifnull(((margin_from_po-margin_from_scan)/100*box_price*(ifnull(proper_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))) / (1+(ifnull(vat_percen,0)/100)),0),0) end as margindiff_cost from 
                 (select A.grn_id, A.vat_cst, B.invoice_no, B.box_price, B.cost_excl_vat, B.vat_percen, B.proper_qty, B.excess_qty, B.shortage_qty, B.expiry_qty, B.damaged_qty, 
                         case when ifnull(B.box_price,0) = 0 then 0 
                             else truncate((ifnull(B.box_price,0)-ifnull(B.cost_incl_vat_cst,0))/ifnull(B.box_price,0)*100,2) end as margin_from_scan, 
@@ -297,11 +300,11 @@ class PendingGrn extends Model
                     null as invoice_igst_acc_id, null as invoice_igst_ledger_name, null as invoice_igst_ledger_code from 
                 (select CC.grn_id, CC.tax_zone_code, CC.tax_zone_name, CC.vat_cst, CC.vat_percen, 
                     CC.cgst_rate, CC.sgst_rate, CC.igst_rate, 
-                    sum(CC.total_cost+CC.shortage_cost+CC.expiry_cost+CC.damaged_cost+CC.margindiff_cost-CC.excess_cost) as total_cost, 
-                    sum(CC.total_tax+CC.shortage_tax+CC.expiry_tax+CC.damaged_tax+CC.margindiff_tax-CC.excess_tax) as total_tax, 
-                    sum(CC.total_cgst+CC.shortage_cgst+CC.expiry_cgst+CC.damaged_cgst+CC.margindiff_cgst-CC.excess_cgst) as total_cgst, 
-                    sum(CC.total_sgst+CC.shortage_sgst+CC.expiry_sgst+CC.damaged_sgst+CC.margindiff_sgst-CC.excess_sgst) as total_sgst, 
-                    sum(CC.total_igst+CC.shortage_igst+CC.expiry_igst+CC.damaged_igst+CC.margindiff_igst-CC.excess_igst) as total_igst, 
+                    sum(CC.total_cost) as total_cost, 
+                    sum(CC.total_tax) as total_tax, 
+                    sum(CC.total_cgst) as total_cgst, 
+                    sum(CC.total_sgst) as total_sgst, 
+                    sum(CC.total_igst) as total_igst, 
                     sum(excess_cost) as excess_cost, sum(excess_tax) as excess_tax, sum(excess_cgst) as excess_cgst, 
                     sum(excess_sgst) as excess_sgst, sum(excess_igst) as excess_igst, 
                     sum(shortage_cost) as shortage_cost, sum(shortage_tax) as shortage_tax, sum(shortage_cgst) as shortage_cgst, 
@@ -314,9 +317,9 @@ class PendingGrn extends Model
                     sum(margindiff_sgst) as margindiff_sgst, sum(margindiff_igst) as margindiff_igst from 
                 (select AA.grn_id, BB.tax_zone_code, BB.tax_zone_name, AA.invoice_no, AA.vat_cst, AA.vat_percen, 
                     BB.cgst_rate, BB.sgst_rate, BB.igst_rate, 
-                    ifnull((AA.proper_qty*AA.cost_excl_vat),0) as total_cost, ifnull((AA.proper_qty*AA.cost_excl_vat*AA.vat_percen)/100,0) as total_tax, 
-                    ifnull((AA.proper_qty*AA.cost_excl_vat*BB.cgst_rate)/100,0) as total_cgst, ifnull((AA.proper_qty*AA.cost_excl_vat*BB.sgst_rate)/100,0) as total_sgst, 
-                    ifnull((AA.proper_qty*AA.cost_excl_vat*BB.igst_rate)/100,0) as total_igst, 
+                    ifnull((AA.proper_qty*AA.cost_excl_vat),0) as total_cost, ifnull(AA.proper_qty*round(cost_excl_vat*vat_percen/100,2),0) as total_tax, 
+                    ifnull(AA.proper_qty*round(AA.cost_excl_vat*BB.cgst_rate/100,2),0) as total_cgst, ifnull(AA.proper_qty*round(AA.cost_excl_vat*BB.sgst_rate/100,2),0) as total_sgst, 
+                    ifnull(AA.proper_qty*round(AA.cost_excl_vat*BB.igst_rate/100,2),0) as total_igst, 
                     ifnull((AA.excess_qty*AA.cost_excl_vat),0) as excess_cost, ifnull((AA.excess_qty*AA.cost_excl_vat*AA.vat_percen)/100,0) as excess_tax, 
                     ifnull((AA.excess_qty*AA.cost_excl_vat*BB.cgst_rate)/100,0) as excess_cgst, ifnull((AA.excess_qty*AA.cost_excl_vat*BB.sgst_rate)/100,0) as excess_sgst, 
                     ifnull((AA.excess_qty*AA.cost_excl_vat*BB.igst_rate)/100,0) as excess_igst, 
@@ -329,12 +332,15 @@ class PendingGrn extends Model
                     ifnull((AA.damaged_qty*AA.cost_excl_vat),0) as damaged_cost, ifnull((AA.damaged_qty*AA.cost_excl_vat*AA.vat_percen)/100,0) as damaged_tax, 
                     ifnull((AA.damaged_qty*AA.cost_excl_vat*BB.cgst_rate)/100,0) as damaged_cgst, ifnull((AA.damaged_qty*AA.cost_excl_vat*BB.sgst_rate)/100,0) as damaged_sgst, 
                     ifnull((AA.damaged_qty*AA.cost_excl_vat*BB.igst_rate)/100,0) as damaged_igst, 
-                    AA.margindiff_cost as margindiff_cost, ifnull((AA.margindiff_cost*AA.vat_percen)/100,0) as margindiff_tax, 
-                    ifnull((AA.margindiff_cost*BB.cgst_rate)/100,0) as margindiff_cgst, ifnull((AA.margindiff_cost*BB.sgst_rate)/100,0) as margindiff_sgst, 
-                    ifnull((AA.margindiff_cost*BB.igst_rate)/100,0) as margindiff_igst from 
+                    case when AA.margindiff_cost<=0 then 0 else AA.margindiff_cost end as margindiff_cost, 
+                    case when AA.margindiff_cost<=0 then 0 else ifnull((AA.margindiff_cost*AA.vat_percen)/100,0) end as margindiff_tax, 
+                    case when AA.margindiff_cost<=0 then 0 else ifnull((AA.margindiff_cost*BB.cgst_rate)/100,0) end as margindiff_cgst, 
+                    case when AA.margindiff_cost<=0 then 0 else ifnull((AA.margindiff_cost*BB.sgst_rate)/100,0) end as margindiff_sgst, 
+                    case when AA.margindiff_cost<=0 then 0 else ifnull((AA.margindiff_cost*BB.igst_rate)/100,0) end as margindiff_igst from 
                 (select *, case when ifnull(box_price,0)=0 then 0 
                                 when ifnull(proper_qty,0)=0 then 0 
-                                else round(((margin_from_po-margin_from_scan)/100*box_price*proper_qty)/(1+(ifnull(vat_percen,0)/100)),2) end as margindiff_cost from 
+                                when (ifnull(proper_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))<=0 then 0 
+                                else ifnull(ifnull(((margin_from_po-margin_from_scan)/100*box_price*(ifnull(proper_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))) / (1+(ifnull(vat_percen,0)/100)),0),0) end as margindiff_cost from 
                 (select A.grn_id, A.vat_cst, B.invoice_no, B.box_price, B.cost_excl_vat, B.vat_percen, B.proper_qty, B.excess_qty, B.shortage_qty, B.expiry_qty, B.damaged_qty, 
                         case when ifnull(B.box_price,0) = 0 then 0 
                             else truncate((ifnull(B.box_price,0)-ifnull(B.cost_incl_vat_cst,0))/ifnull(B.box_price,0)*100,2) end as margin_from_scan, 
@@ -390,11 +396,11 @@ class PendingGrn extends Model
                         null as invoice_sgst_acc_id, null as invoice_sgst_ledger_name, null as invoice_sgst_ledger_code, 
                         null as invoice_igst_acc_id, null as invoice_igst_ledger_name, null as invoice_igst_ledger_code from 
                 (select CC.grn_id, CC.tax_zone_code, CC.tax_zone_name, CC.invoice_no, CC.vat_cst, CC.vat_percen, 
-                    sum(CC.total_cost+CC.shortage_cost+CC.expiry_cost+CC.damaged_cost+CC.margindiff_cost-CC.excess_cost) as total_cost, 
-                    sum(CC.total_tax+CC.shortage_tax+CC.expiry_tax+CC.damaged_tax+CC.margindiff_tax-CC.excess_tax) as total_tax, 
-                    sum(CC.total_cgst+CC.shortage_cgst+CC.expiry_cgst+CC.damaged_cgst+CC.margindiff_cgst-CC.excess_cgst) as total_cgst, 
-                    sum(CC.total_sgst+CC.shortage_sgst+CC.expiry_sgst+CC.damaged_sgst+CC.margindiff_sgst-CC.excess_sgst) as total_sgst, 
-                    sum(CC.total_igst+CC.shortage_igst+CC.expiry_igst+CC.damaged_igst+CC.margindiff_igst-CC.excess_igst) as total_igst, 
+                    sum(CC.total_cost) as total_cost, 
+                    sum(CC.total_tax) as total_tax, 
+                    sum(CC.total_cgst) as total_cgst, 
+                    sum(CC.total_sgst) as total_sgst, 
+                    sum(CC.total_igst) as total_igst, 
                     sum(excess_cost) as excess_cost, sum(excess_tax) as excess_tax, sum(excess_cgst) as excess_cgst, 
                     sum(excess_sgst) as excess_sgst, sum(excess_igst) as excess_igst, 
                     sum(shortage_cost) as shortage_cost, sum(shortage_tax) as shortage_tax, sum(shortage_cgst) as shortage_cgst, 
@@ -406,9 +412,9 @@ class PendingGrn extends Model
                     sum(margindiff_cost) as margindiff_cost, sum(margindiff_tax) as margindiff_tax, sum(margindiff_cgst) as margindiff_cgst, 
                     sum(margindiff_sgst) as margindiff_sgst, sum(margindiff_igst) as margindiff_igst from 
                 (select AA.grn_id, BB.tax_zone_code, BB.tax_zone_name, AA.invoice_no, AA.vat_cst, AA.vat_percen, BB.cgst_rate, BB.sgst_rate, BB.igst_rate, 
-                    ifnull((AA.proper_qty*AA.cost_excl_vat),0) as total_cost, ifnull((AA.proper_qty*AA.cost_excl_vat*AA.vat_percen)/100,0) as total_tax, 
-                    ifnull((AA.proper_qty*AA.cost_excl_vat*BB.cgst_rate)/100,0) as total_cgst, ifnull((AA.proper_qty*AA.cost_excl_vat*BB.sgst_rate)/100,0) as total_sgst, 
-                    ifnull((AA.proper_qty*AA.cost_excl_vat*BB.igst_rate)/100,0) as total_igst, 
+                    ifnull((AA.proper_qty*AA.cost_excl_vat),0) as total_cost, ifnull(AA.proper_qty*round(AA.cost_excl_vat*AA.vat_percen/100,2),0) as total_tax, 
+                    ifnull(AA.proper_qty*round(AA.cost_excl_vat*BB.cgst_rate/100,2),0) as total_cgst, ifnull(AA.proper_qty*round(AA.cost_excl_vat*BB.sgst_rate/100,2),0) as total_sgst, 
+                    ifnull(AA.proper_qty*round(AA.cost_excl_vat*BB.igst_rate/100,2),0) as total_igst, 
                     ifnull((AA.excess_qty*AA.cost_excl_vat),0) as excess_cost, ifnull((AA.excess_qty*AA.cost_excl_vat*AA.vat_percen)/100,0) as excess_tax, 
                     ifnull((AA.excess_qty*AA.cost_excl_vat*BB.cgst_rate)/100,0) as excess_cgst, ifnull((AA.excess_qty*AA.cost_excl_vat*BB.sgst_rate)/100,0) as excess_sgst, 
                     ifnull((AA.excess_qty*AA.cost_excl_vat*BB.igst_rate)/100,0) as excess_igst, 
@@ -421,12 +427,15 @@ class PendingGrn extends Model
                     ifnull((AA.damaged_qty*AA.cost_excl_vat),0) as damaged_cost, ifnull((AA.damaged_qty*AA.cost_excl_vat*AA.vat_percen)/100,0) as damaged_tax, 
                     ifnull((AA.damaged_qty*AA.cost_excl_vat*BB.cgst_rate)/100,0) as damaged_cgst, ifnull((AA.damaged_qty*AA.cost_excl_vat*BB.sgst_rate)/100,0) as damaged_sgst, 
                     ifnull((AA.damaged_qty*AA.cost_excl_vat*BB.igst_rate)/100,0) as damaged_igst, 
-                    AA.margindiff_cost as margindiff_cost, ifnull((AA.margindiff_cost*AA.vat_percen)/100,0) as margindiff_tax, 
-                    ifnull((AA.margindiff_cost*BB.cgst_rate)/100,0) as margindiff_cgst, ifnull((AA.margindiff_cost*BB.sgst_rate)/100,0) as margindiff_sgst, 
-                    ifnull((AA.margindiff_cost*BB.igst_rate)/100,0) as margindiff_igst from 
+                    case when AA.margindiff_cost<=0 then 0 else AA.margindiff_cost end as margindiff_cost, 
+                    case when AA.margindiff_cost<=0 then 0 else ifnull((AA.margindiff_cost*AA.vat_percen)/100,0) end as margindiff_tax, 
+                    case when AA.margindiff_cost<=0 then 0 else ifnull((AA.margindiff_cost*BB.cgst_rate)/100,0) end as margindiff_cgst, 
+                    case when AA.margindiff_cost<=0 then 0 else ifnull((AA.margindiff_cost*BB.sgst_rate)/100,0) end as margindiff_sgst, 
+                    case when AA.margindiff_cost<=0 then 0 else ifnull((AA.margindiff_cost*BB.igst_rate)/100,0) end as margindiff_igst from 
                 (select *, case when ifnull(box_price,0)=0 then 0 
                                 when ifnull(proper_qty,0)=0 then 0 
-                                else round(((margin_from_po-margin_from_scan)/100*box_price*proper_qty)/(1+(ifnull(vat_percen,0)/100)),2) end as margindiff_cost from 
+                                when (ifnull(proper_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))<=0 then 0 
+                                else ifnull(ifnull(((margin_from_po-margin_from_scan)/100*box_price*(ifnull(proper_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))) / (1+(ifnull(vat_percen,0)/100)),0),0) end as margindiff_cost from 
                 (select A.grn_id, A.vat_cst, B.invoice_no, B.box_price, B.cost_excl_vat, B.vat_percen, B.proper_qty, B.excess_qty, B.shortage_qty, B.expiry_qty, B.damaged_qty, 
                         case when ifnull(B.box_price,0) = 0 then 0 
                             else truncate((ifnull(B.box_price,0)-ifnull(B.cost_incl_vat_cst,0))/ifnull(B.box_price,0)*100,2) end as margin_from_scan, 
@@ -495,10 +504,11 @@ class PendingGrn extends Model
     public function getInvoiceDeductionDetails($id, $col_qty){
         $sql = "select AA.*, BB.cgst_rate, BB.sgst_rate, BB.igst_rate from 
                 (select * from 
-                (select I.*, case when I.margindiff_amount>0 then I.proper_qty else 0 end as margindiff_qty from 
-                (select H.*, case when ifnull(H.box_price,0)=0 then 0 
-                                    when ifnull(H.proper_qty,0)=0 then 0 
-                                    else round(((H.margin_from_po-H.margin_from_scan)/100*H.box_price*H.proper_qty)/(1+(ifnull(H.vat_percen,0)/100)),2) end as margindiff_amount from 
+                (select I.*, case when I.margindiff_cost<=0 then 0 else I.proper_qty end as margindiff_qty from 
+                (select H.*, case when ifnull(box_price,0)=0 then 0 
+                                when ifnull(proper_qty,0)=0 then 0 
+                                when (ifnull(proper_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))<=0 then 0 
+                                else ifnull(ifnull(((margin_from_po-margin_from_scan)/100*box_price*(ifnull(proper_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))) / (1+(ifnull(vat_percen,0)/100)),0),0) end as margindiff_cost from 
                 (select B.*, D.tax_zone_code, D.tax_zone_name, E.invoice_date, A.gi_date, 
                     date_add(A.gi_date, interval ifnull(B.min_no_of_months_shelf_life_required,0) month) as earliest_expected_date, 
                     null as cost_acc_id, null as cost_ledger_name, null as cost_ledger_code, 
@@ -1022,12 +1032,12 @@ class PendingGrn extends Model
                 'voucher_id'=>$voucher_id[$i],
                 'ledger_type'=>$ledger_type[$i],
                 'vat_cst'=>$vat_cst_val[$i],
-                'vat_percen'=>$mycomponent->format_number($vat_percen_val[$i],2),
+                'vat_percen'=>$mycomponent->format_number($vat_percen_val[$i],4),
                 'invoice_no'=>$invoice_no_val[$i],
-                'total_val'=>$mycomponent->format_number($total_val[$i],2),
-                'invoice_val'=>$mycomponent->format_number($invoice_val[$i],2),
-                'edited_val'=>$mycomponent->format_number($edited_val[$i],2),
-                'difference_val'=>$mycomponent->format_number($difference_val[$i],2),
+                'total_val'=>$mycomponent->format_number($total_val[$i],4),
+                'invoice_val'=>$mycomponent->format_number($invoice_val[$i],4),
+                'edited_val'=>$mycomponent->format_number($edited_val[$i],4),
+                'difference_val'=>$mycomponent->format_number($difference_val[$i],4),
                 'narration'=>$narration_val[$i],
                 'status'=>'approved',
                 'is_active'=>'1',
@@ -1085,7 +1095,7 @@ class PendingGrn extends Model
                     $result = $this->getSkuEntries($gi_id, $request, $invoice_no_val[$i], 'shortage', $voucher_id[$i], $narration_val[$i]);
                     $grnAccEntries = array_merge($grnAccEntries, $result['bulkInsertArray']);
                     // $ledgerArray = array_merge($ledgerArray, $result['ledgerArray']);
-                    $bl_flag = true;
+                    // $bl_flag = true;
                     // echo json_encode($result['ledgerArray']);
                     // echo '<br/>';
                     // echo count($result['ledgerArray']);
@@ -1099,6 +1109,9 @@ class PendingGrn extends Model
                     // echo '<br/>';
 
                     for($l=0; $l<count($result['ledgerArray']); $l++){
+
+                        $bl_flag = true;
+                        
                         for($m=0; $m<count($ledgerArray); $m++){
                             // echo count($ledgerArray);
                             // echo '<br/>';
@@ -1154,7 +1167,7 @@ class PendingGrn extends Model
                     $result = $this->getSkuEntries($gi_id, $request, $invoice_no_val[$i], 'expiry', $voucher_id[$i], $narration_val[$i]);
                     $grnAccEntries = array_merge($grnAccEntries, $result['bulkInsertArray']);
                     // $ledgerArray = array_merge($ledgerArray, $result['ledgerArray']);
-                    $bl_flag = true;
+                    // $bl_flag = true;
                     // echo json_encode($result['ledgerArray']);
                     // echo '<br/>';
                     // echo count($result['ledgerArray']);
@@ -1165,6 +1178,9 @@ class PendingGrn extends Model
                     // echo '<br/>';
 
                     for($l=0; $l<count($result['ledgerArray']); $l++){
+
+                        $bl_flag = true;
+                        
                         for($m=0; $m<count($ledgerArray); $m++){
                             if($ledgerArray[$m]['ref_id']==$result['ledgerArray'][$l]['ref_id'] && 
                                 $ledgerArray[$m]['ref_type']==$result['ledgerArray'][$l]['ref_type'] && 
@@ -1207,8 +1223,11 @@ class PendingGrn extends Model
                     $result = $this->getSkuEntries($gi_id, $request, $invoice_no_val[$i], 'damaged', $voucher_id[$i], $narration_val[$i]);
                     $grnAccEntries = array_merge($grnAccEntries, $result['bulkInsertArray']);
                     // $ledgerArray = array_merge($ledgerArray, $result['ledgerArray']);
-                    $bl_flag = true;
+                    // $bl_flag = true;
                     for($l=0; $l<count($result['ledgerArray']); $l++){
+
+                        $bl_flag = true;
+                        
                         for($m=0; $m<count($ledgerArray); $m++){
                             if($ledgerArray[$m]['ref_id']==$result['ledgerArray'][$l]['ref_id'] && 
                                 $ledgerArray[$m]['ref_type']==$result['ledgerArray'][$l]['ref_type'] && 
@@ -1251,8 +1270,11 @@ class PendingGrn extends Model
                     $result = $this->getSkuEntries($gi_id, $request, $invoice_no_val[$i], 'margindiff', $voucher_id[$i], $narration_val[$i]);
                     $grnAccEntries = array_merge($grnAccEntries, $result['bulkInsertArray']);
                     // $ledgerArray = array_merge($ledgerArray, $result['ledgerArray']);
-                    $bl_flag = true;
+                    // $bl_flag = true;
                     for($l=0; $l<count($result['ledgerArray']); $l++){
+
+                        $bl_flag = true;
+
                         for($m=0; $m<count($ledgerArray); $m++){
                             if($ledgerArray[$m]['ref_id']==$result['ledgerArray'][$l]['ref_id'] && 
                                 $ledgerArray[$m]['ref_type']==$result['ledgerArray'][$l]['ref_type'] && 
@@ -1335,6 +1357,13 @@ class PendingGrn extends Model
                     }
 
                     if($bl_flag == true){
+                        // echo $particular[$i];
+                        // echo '<br/>';
+                        // echo $edited_val[$i];
+                        // echo '<br/>';
+                        // echo $mycomponent->format_number($edited_val[$i],2);
+                        // echo '<br/>';
+                        
                         $ledgerArray[$k]=[
                                     'ref_id'=>$gi_id,
                                     'ref_type'=>'purchase',
@@ -1347,7 +1376,7 @@ class PendingGrn extends Model
                                     'voucher_id'=>$voucher_id[$i],
                                     'ledger_type'=>$ledger_type[$i],
                                     'type'=>$ledg_type,
-                                    'amount'=>$mycomponent->format_number($edited_val[$i],2),
+                                    'amount'=>$mycomponent->format_number($edited_val[$i],4),
                                     'narration'=>$narration_val[$i],
                                     'status'=>'approved',
                                     'is_active'=>'1',
@@ -1561,51 +1590,51 @@ class PendingGrn extends Model
                             'psku'=>$psku[$i],
                             'product_title'=>$product_title[$i],
                             'qty'=>$qty_val,
-                            'box_price'=>$mycomponent->format_number($box_price[$i],2),
-                            'cost_excl_vat_per_unit'=>$mycomponent->format_number($cost_excl_tax_per_unit[$i],2),
-                            'tax_per_unit'=>$mycomponent->format_number($tax_per_unit[$i],2),
-                            'cgst_per_unit'=>$mycomponent->format_number($cgst_per_unit[$i],2),
-                            'sgst_per_unit'=>$mycomponent->format_number($sgst_per_unit[$i],2),
-                            'igst_per_unit'=>$mycomponent->format_number($igst_per_unit[$i],2),
-                            'total_per_unit'=>$mycomponent->format_number($total_per_unit[$i],2),
-                            'cost_excl_vat'=>$mycomponent->format_number($cost_excl_tax[$i],2),
-                            'tax'=>$mycomponent->format_number($tax[$i],2),
-                            'cgst'=>$mycomponent->format_number($cgst[$i],2),
-                            'sgst'=>$mycomponent->format_number($sgst[$i],2),
-                            'igst'=>$mycomponent->format_number($igst[$i],2),
-                            'total'=>$mycomponent->format_number($total[$i],2),
+                            'box_price'=>$mycomponent->format_number($box_price[$i],4),
+                            'cost_excl_vat_per_unit'=>$mycomponent->format_number($cost_excl_tax_per_unit[$i],4),
+                            'tax_per_unit'=>$mycomponent->format_number($tax_per_unit[$i],4),
+                            'cgst_per_unit'=>$mycomponent->format_number($cgst_per_unit[$i],4),
+                            'sgst_per_unit'=>$mycomponent->format_number($sgst_per_unit[$i],4),
+                            'igst_per_unit'=>$mycomponent->format_number($igst_per_unit[$i],4),
+                            'total_per_unit'=>$mycomponent->format_number($total_per_unit[$i],4),
+                            'cost_excl_vat'=>$mycomponent->format_number($cost_excl_tax[$i],4),
+                            'tax'=>$mycomponent->format_number($tax[$i],4),
+                            'cgst'=>$mycomponent->format_number($cgst[$i],4),
+                            'sgst'=>$mycomponent->format_number($sgst[$i],4),
+                            'igst'=>$mycomponent->format_number($igst[$i],4),
+                            'total'=>$mycomponent->format_number($total[$i],4),
                             'expiry_date'=>($expiry_date[$i]!='')?$expiry_date[$i]:null,
-                            'earliest_expected_date'=>$earliest_expected_date[$i],
+                            'earliest_expected_date'=>($earliest_expected_date[$i]!='')?$earliest_expected_date[$i]:null,
                             'status'=>'approved',
                             'is_active'=>'1',
                             'remarks'=>$remarks[$i],
-                            'po_mrp'=>$mycomponent->format_number($po_mrp[$i],2),
-                            'po_cost_excl_vat'=>$mycomponent->format_number($po_cost_excl_tax[$i],2),
-                            'po_tax'=>$mycomponent->format_number($po_tax[$i],2),
-                            'po_cgst'=>$mycomponent->format_number($po_cgst[$i],2),
-                            'po_sgst'=>$mycomponent->format_number($po_sgst[$i],2),
-                            'po_igst'=>$mycomponent->format_number($po_igst[$i],2),
-                            'po_total'=>$mycomponent->format_number($po_total[$i],2),
-                            'margin_diff_excl_tax'=>$mycomponent->format_number($diff_cost_excl_tax[$i],2),
-                            'margin_diff_cgst'=>$mycomponent->format_number($diff_cgst[$i],2),
-                            'margin_diff_sgst'=>$mycomponent->format_number($diff_sgst[$i],2),
-                            'margin_diff_igst'=>$mycomponent->format_number($diff_igst[$i],2),
-                            'margin_diff_tax'=>$mycomponent->format_number($diff_tax[$i],2),
-                            'margin_diff_total'=>$mycomponent->format_number($diff_total[$i],2)
+                            'po_mrp'=>$mycomponent->format_number($po_mrp[$i],4),
+                            'po_cost_excl_vat'=>$mycomponent->format_number($po_cost_excl_tax[$i],4),
+                            'po_tax'=>$mycomponent->format_number($po_tax[$i],4),
+                            'po_cgst'=>$mycomponent->format_number($po_cgst[$i],4),
+                            'po_sgst'=>$mycomponent->format_number($po_sgst[$i],4),
+                            'po_igst'=>$mycomponent->format_number($po_igst[$i],4),
+                            'po_total'=>$mycomponent->format_number($po_total[$i],4),
+                            'margin_diff_excl_tax'=>$mycomponent->format_number($diff_cost_excl_tax[$i],4),
+                            'margin_diff_cgst'=>$mycomponent->format_number($diff_cgst[$i],4),
+                            'margin_diff_sgst'=>$mycomponent->format_number($diff_sgst[$i],4),
+                            'margin_diff_igst'=>$mycomponent->format_number($diff_igst[$i],4),
+                            'margin_diff_tax'=>$mycomponent->format_number($diff_tax[$i],4),
+                            'margin_diff_total'=>$mycomponent->format_number($diff_total[$i],4)
                         ];
 
                 if($ded_type=='margindiff'){
-                    $cost_excl_tax_amt = $mycomponent->format_number($diff_cost_excl_tax[$i],2);
-                    $tax_amt = $mycomponent->format_number($diff_tax[$i],2);
-                    $cgst_amt = $mycomponent->format_number($diff_cgst[$i],2);
-                    $sgst_amt = $mycomponent->format_number($diff_sgst[$i],2);
-                    $igst_amt = $mycomponent->format_number($diff_igst[$i],2);
+                    $cost_excl_tax_amt = $mycomponent->format_number($diff_cost_excl_tax[$i],4);
+                    $tax_amt = $mycomponent->format_number($diff_tax[$i],4);
+                    $cgst_amt = $mycomponent->format_number($diff_cgst[$i],4);
+                    $sgst_amt = $mycomponent->format_number($diff_sgst[$i],4);
+                    $igst_amt = $mycomponent->format_number($diff_igst[$i],4);
                 } else {
-                    $cost_excl_tax_amt = $mycomponent->format_number($cost_excl_tax[$i],2);
-                    $tax_amt = $mycomponent->format_number($tax[$i],2);
-                    $cgst_amt = $mycomponent->format_number($cgst[$i],2);
-                    $sgst_amt = $mycomponent->format_number($sgst[$i],2);
-                    $igst_amt = $mycomponent->format_number($igst[$i],2);
+                    $cost_excl_tax_amt = $mycomponent->format_number($cost_excl_tax[$i],4);
+                    $tax_amt = $mycomponent->format_number($tax[$i],4);
+                    $cgst_amt = $mycomponent->format_number($cgst[$i],4);
+                    $sgst_amt = $mycomponent->format_number($sgst[$i],4);
+                    $igst_amt = $mycomponent->format_number($igst[$i],4);
                 }
 
                 if($cost_excl_tax_amt!=0){
@@ -1820,6 +1849,8 @@ class PendingGrn extends Model
 
         // echo json_encode($result);
         // echo '<br/>';
+        // echo json_encode($result['ledgerArray']);
+        // echo '<br/>';
 
         return $result;
     }
@@ -1856,9 +1887,10 @@ class PendingGrn extends Model
         // $grn_id = '6293';
 
         $sql = "select AA.*, BB.tax_rate, BB.cgst_rate, BB.sgst_rate, BB.igst_rate from 
-                (select A.*, case when ifnull(A.box_price,0)=0 then 0 
-                                    when ifnull(A.proper_qty,0)=0 then 0 
-                                    else round(((A.margin_from_po-A.margin_from_scan)/100*A.box_price*A.proper_qty)/(1+(ifnull(A.vat_percen,0)/100)),2) end as margindiff_amount from 
+                (select A.*, case when ifnull(box_price,0)=0 then 0 
+                                 when ifnull(proper_qty,0)=0 then 0 
+                                 when (ifnull(proper_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))<=0 then 0 
+                                 else ifnull(ifnull(((margin_from_po-margin_from_scan)/100*box_price*(ifnull(proper_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))) / (1+(ifnull(vat_percen,0)/100)),0),0) end as margindiff_cost from 
                 (select A.vat_cst as tx_zn_cd, B.*, D.tax_zone_code, D.tax_zone_name, E.invoice_date, A.gi_date, 
                     date_add(A.gi_date, interval ifnull(min_no_of_months_shelf_life_required,0) month) as earliest_expected_date, 
                     null as cost_acc_id, null as cost_ledger_name, null as cost_ledger_code, 
@@ -1925,7 +1957,7 @@ class PendingGrn extends Model
             $ded_type = '';
 
             $sql = "select * from acc_grn_sku_entries where status = 'approved' and is_active = '1' and 
-                    grn_id = '$grn_id' and invoice_no = '$invoice_no' order by ded_type";
+                    grn_id = '$grn_id' and invoice_no = '".str_replace('\\','\\\\',$invoice_no)."' order by ded_type";
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $deduction_details = $reader->readAll();
@@ -1951,18 +1983,12 @@ class PendingGrn extends Model
             $reader = $command->query();
             $vendor_details = $reader->readAll();
 
-            // $sql = "select sum(A.qty) as total_qty, sum(A.total) as total_deduction, 
-            //         group_concat(distinct(CONCAT(UCASE(SUBSTRING(A.ded_type, 1, 1)),LOWER(SUBSTRING(A.ded_type, 2))))) as ded_type from 
-            //         (select qty, case when ded_type='margindiff' then round(total-po_total,2) else total end as total, 
-            //             case when ded_type='margindiff' then 'margin difference' else ded_type end as ded_type from 
-            //             acc_grn_sku_entries where status = 'approved' and is_active = '1' and 
-            //             grn_id = '$grn_id' and invoice_no = '$invoice_no' order by ded_type) A order by A.ded_type";
             $sql = "select sum(A.qty) as total_qty, sum(A.total) as total_deduction, 
                     group_concat(distinct(CONCAT(UCASE(SUBSTRING(A.ded_type, 1, 1)),LOWER(SUBSTRING(A.ded_type, 2))))) as ded_type from 
-                    (select qty, case when ded_type='margindiff' then round(margin_diff_total,2) else total end as total, 
+                    (select qty, case when ded_type='margindiff' then margin_diff_total else total end as total, 
                         case when ded_type='margindiff' then 'margin difference' else ded_type end as ded_type from 
                         acc_grn_sku_entries where status = 'approved' and is_active = '1' and 
-                        grn_id = '$grn_id' and invoice_no = '$invoice_no' order by ded_type) A order by A.ded_type";
+                        grn_id = '$grn_id' and invoice_no = '".str_replace('\\','\\\\',$invoice_no)."' order by ded_type) A order by A.ded_type";
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $deductions = $reader->readAll();
@@ -1992,7 +2018,7 @@ class PendingGrn extends Model
             $tableName = "acc_grn_debit_notes";
 
             $sql = "select * from acc_grn_debit_notes where status = 'approved' and is_active = '1' and 
-                    grn_id = '$grn_id' and invoice_no = '$invoice_no'";
+                    grn_id = '$grn_id' and invoice_no = '".str_replace('\\','\\\\',$invoice_no)."'";
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $debit_note = $reader->readAll();
@@ -2060,7 +2086,7 @@ class PendingGrn extends Model
             $count = $command->execute();
 
             $sql = "select * from acc_grn_debit_notes where status = 'approved' and is_active = '1' and 
-                    grn_id = '$grn_id' and invoice_no = '$invoice_no'";
+                    grn_id = '$grn_id' and invoice_no = '".str_replace('\\','\\\\',$invoice_no)."'";
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $debit_note = $reader->readAll();
