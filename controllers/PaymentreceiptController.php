@@ -435,7 +435,7 @@ class PaymentreceiptController extends Controller
         $id = $request->post('id');
         $payment_id = $request->post('payment_id');
         // $from = $request->post('from');
-        $from = 'dhaval.maru@otbconsulting.co.in';
+        $from = 'accounts@primarcpecan.com';
         $to = $request->post('to');
         // $to = 'prasad.bhisale@otbconsulting.co.in';
         $subject = $request->post('subject');
@@ -443,7 +443,7 @@ class PaymentreceiptController extends Controller
         $body = $request->post('body');
 
         // $grn_id = '28';
-        // $from = 'dhaval.maru@otbconsulting.co.in';
+        // $from = 'accounts@primarcpecan.com';
         // $to = 'prasad.bhisale@otbconsulting.co.in';
         // $subject = 'Test Email';
         // $attachment = 'uploads/debit_notes/28/debit_note_invoice_90.pdf';

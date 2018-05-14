@@ -66,7 +66,7 @@ class AccountMaster extends Model
     }
 
     public function getVendors($vendor_id=""){
-        $sql = "select * from vendor_master where is_active = '1' and 
+        $sql = "select * from vendor_master where is_active = '1' and company_id = '1' and 
                 id not in (select distinct vendor_id from acc_master where vendor_id != '$vendor_id') order by vendor_name";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();

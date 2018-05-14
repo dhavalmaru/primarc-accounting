@@ -85,6 +85,64 @@ class AccReport extends Model
         return $reader->readAll();
     }
 
+    public function getsummeryledger($acc_id, $from_date, $to_date){
+        $status = "approved";
+        
+         $sql = "Select A.type, A.voucher_id, A.ref_type, A.ref_date, A.ref_id, A.invoice_no, 
+                    ROUND(ifnull(sum(A.amount1),0),2) as amount, GROUP_CONCAT(A.payment_ref) as group_payemt_ref from 
+                (select * from 
+                (select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
+                    A.amount as amount1, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, 
+                    A.narration, A.ref_date, B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and 
+                    ref_type = 'purchase' and ledger_type != 'Main Entry') A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and 
+                    ref_type = 'purchase' and ledger_type = 'Main Entry') B 
+                on (A.voucher_id = B.cp_voucher_id) 
+                union all 
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount as amount1, A.status, 
+                    A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, 
+                    A.narration, A.ref_date, B.acc_id as cp_acc_id, B.ledger_name as cp_ledger_name, 
+                    B.ledger_code as cp_ledger_code from 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and 
+                    ref_type = 'journal_voucher' and acc_id!='$acc_id') A 
+                left join 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and 
+                    ref_type = 'journal_voucher' and acc_id='$acc_id') B 
+                on(A.ref_id=B.ref_id) 
+                union all 
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
+                    A.amount as amount1, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, 
+                    A.narration, A.ref_date, B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and 
+                    ref_type = 'payment_receipt' and ledger_type = 'Main Entry') A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and 
+                    ref_type = 'payment_receipt' and ledger_type = 'Sub Entry') B 
+                on (A.voucher_id = B.cp_voucher_id)) AA 
+                where AA.acc_id = '$acc_id' or AA.cp_acc_id = '$acc_id' 
+                order by AA.ref_date, AA.id ) A 
+                GROUP BY A.type, A.voucher_id, A.ref_type, A.ref_date, A.ref_id, A.invoice_no";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
     public function getTrialBalance($from_date, $to_date){
         $status = "approved";
         
@@ -114,6 +172,20 @@ class AccReport extends Model
         return $reader->readAll();
     }
     
+    public function get_ledger_totalamount($from_date, $to_date){
+         $sql = "Select * from (
+                SELECT ae.acc_id,ae.ledger_name,sum(case when ae.type='Credit' then amount else 0 end) as debit_amount,
+                sum(case when ae.type='Debit' then amount else 0 end) as credit_amount
+                from acc_ledger_entries ae
+                left join acc_master am on am.id=ae.acc_id
+                WHERE  ae.`status`='approved' and am.type='Vendor Goods' and 
+                date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date')
+                GROUP BY ae.acc_id,ae.ledger_name ) A";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
     public function setLog($module_name, $sub_module, $action, $vendor_id, $description, $table_name, $table_id) {
         $session = Yii::$app->session;
         $curusr = $session['session_id'];

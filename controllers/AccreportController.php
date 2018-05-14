@@ -518,6 +518,79 @@ class AccreportController extends Controller
                                                 'from_date' => $from_date, 'to_date' => $to_date, 'narration' => $narration]);
     }
 
+    public function actionGetsummeryreport() {   
+        $request = Yii::$app->request;
+        $mycomponent = Yii::$app->mycomponent;
+
+        $account = $request->post('account');
+        $from_date = $request->post('from_date');
+        $to_date = $request->post('to_date');
+        $narration = $request->post('narration');
+
+        if($from_date==''){
+            $from_date=NULL;
+        } else {
+            $from_date=$mycomponent->formatdate($from_date);
+        }
+
+        if($to_date==''){
+            $to_date=NULL;
+        } else {
+            $to_date=$mycomponent->formatdate($to_date);
+        }
+        
+        // echo $from_date;
+        // echo $to_date;
+
+        $report = new AccReport();
+
+        $opening_bal = 0;
+        $opening_bal_type = 'Cr';
+        $balance = 0;
+        $result = $report->getOpeningBal($account, $from_date);
+        if(count($result)>0){
+            $opening_bal = floatval($result[0]['opening_bal']);
+        }
+
+        $data = $report->getsummeryledger($account, $from_date, $to_date);
+        $acc_details = $report->getAccountDetails();
+
+        // echo json_encode($data);
+
+        $report->setLog('LedgerSummaryReport', '', 'Generate', '', 'Generate Ledger Report', 'acc_ledger_entries', $account);
+        return $this->render('summery_ledger_report.php', ['acc_details' => $acc_details, 'opening_bal' => $opening_bal, 
+                                                'data' => $data, 'account' => $account, 
+                                                'from_date' => $from_date, 'to_date' => $to_date, 'narration' => $narration]);
+    }
+
+    public function actionGetledgertotalreport() {   
+        $request = Yii::$app->request;
+        $mycomponent = Yii::$app->mycomponent;
+
+        $account = $request->post('account');
+        $from_date = $request->post('from_date');
+        $to_date = $request->post('to_date');
+        if($from_date==''){
+            $from_date=NULL;
+        } else {
+            $from_date=$mycomponent->formatdate($from_date);
+        }
+
+        if($to_date==''){
+            $to_date=NULL;
+        } else {
+            $to_date=$mycomponent->formatdate($to_date);
+        }
+
+        $report = new AccReport();
+        $data = $report->get_ledger_totalamount($from_date, $to_date);
+        $acc_details = $report->getAccountDetails();
+
+        $report->setLog('LedgerTotalReport', '', 'Generate', '', 'Generate Ledger Report', 'acc_ledger_entries', $account);
+        return $this->render('total_ledger_amount.php', ['acc_details' => $acc_details,'data' => $data, 'account' => $account, 
+            'from_date' => $from_date, 'to_date' => $to_date]);
+    }
+
     public function actionGettrialbalance() {   
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;

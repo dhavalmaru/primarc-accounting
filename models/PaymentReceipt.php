@@ -75,7 +75,7 @@ class PaymentReceipt extends Model
     }
 
     public function getVendors(){
-        $sql = "select * from vendor_master where is_active = '1'";
+        $sql = "select * from vendor_master where is_active = '1' and company_id = '1'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();

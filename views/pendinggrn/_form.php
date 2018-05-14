@@ -25,29 +25,29 @@ $mycomponent = Yii::$app->mycomponent;
 #shortage_sku_details tr td input { border: none; outline: none; }
 #shortage_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
 #shortage_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-#shortage_sku_details tr td:nth-child(25) input, #shortage_sku_details tr td:nth-child(53) input { border: 1px solid #ddd!important; outline: none; }
-#shortage_sku_details tr td:nth-child(53) { width: 400px; }
+#shortage_sku_details tr td:nth-child(25) input, #shortage_sku_details tr td:nth-child(54) input { border: 1px solid #ddd!important; outline: none; }
+#shortage_sku_details tr td:nth-child(54) { width: 400px; }
 /*-----------------------*/
 #expiry_sku_details { width: 2500px; }
 #expiry_sku_details tr td input { border: none; outline: none; }
 #expiry_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
 #expiry_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-#expiry_sku_details tr td:nth-child(25) input, #expiry_sku_details tr td:nth-child(53) input { border: 1px solid #ddd!important; outline: none; }
-#expiry_sku_details tr td:nth-child(53) { width: 400px; }
+#expiry_sku_details tr td:nth-child(25) input, #expiry_sku_details tr td:nth-child(54) input { border: 1px solid #ddd!important; outline: none; }
+#expiry_sku_details tr td:nth-child(54) { width: 400px; }
 /*----------------------*/
 #damaged_sku_details { width: 2500px; }
 #damaged_sku_details tr td input { border: none; outline: none; }
 #damaged_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
 #damaged_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-#damaged_sku_details tr td:nth-child(25) input, #damaged_sku_details tr td:nth-child(53) input { border: 1px solid #ddd!important; outline: none; }
-#damaged_sku_details tr td:nth-child(53) { width: 400px; }
+#damaged_sku_details tr td:nth-child(25) input, #damaged_sku_details tr td:nth-child(54) input { border: 1px solid #ddd!important; outline: none; }
+#damaged_sku_details tr td:nth-child(54) { width: 400px; }
 /*----------------------*/
 #margindiff_sku_details { width: 3000px; }
 #margindiff_sku_details tr td input { border: none; outline: none; }
 #margindiff_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
 #margindiff_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-#margindiff_sku_details tr td:nth-child(41) input, #margindiff_sku_details tr td:nth-child(53) input { border: 1px solid #ddd!important; outline: none; }
-#margindiff_sku_details tr td:nth-child(53) { width: 400px; }
+#margindiff_sku_details tr td:nth-child(47) input, #margindiff_sku_details tr td:nth-child(54) input { border: 1px solid #ddd!important; outline: none; }
+#margindiff_sku_details tr td:nth-child(54) { width: 400px; }
 /*----------------------*/
 #ledger_details .modal-body .table   {  }
 
@@ -152,6 +152,9 @@ table {width: 1200px;}
 
         <div class="row    row-container">
             <div class="form-group">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <?php //echo json_encode($invoice_tax); ?>
+                </div>
     			<div class="col-md-2 col-sm-2 col-xs-6">
                     <label class=" control-label">Posting Date </label> 
                     <div class=" "> 

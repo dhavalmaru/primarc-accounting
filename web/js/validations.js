@@ -352,19 +352,19 @@ $("#acc_category_master").validate({
 
 $('#acc_category_master').submit(function() {
     removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_1[]"]');
-    removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_2[]"]');
-    removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_3[]"]');
+    // removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_2[]"]');
+    // removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_3[]"]');
 
     addMultiInputNamingRules('#acc_category_master', 'input[name="category_1[]"]', { required: true });
-    addMultiInputNamingRules('#acc_category_master', 'input[name="category_2[]"]', { required: true });
-    addMultiInputNamingRules('#acc_category_master', 'input[name="category_3[]"]', { required: true });
+    // addMultiInputNamingRules('#acc_category_master', 'input[name="category_2[]"]', { required: true });
+    // addMultiInputNamingRules('#acc_category_master', 'input[name="category_3[]"]', { required: true });
 
     if (!$("#acc_category_master").valid()) {
         return false;
     } else {
         removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_1[]"]');
-        removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_2[]"]');
-        removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_3[]"]');
+        // removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_2[]"]');
+        // removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_3[]"]');
 
         return true;
     }

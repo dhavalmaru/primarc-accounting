@@ -157,6 +157,9 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                     }
                 }
                 
+                $debit_amt = round($debit_amt,2);
+                $credit_amt = round($credit_amt,2);
+
                 $table = '<div class="diversion">
                             <div class="pull-left">Invoice No: ' . $acc_ledger_entries[$i]["invoice_no"] . '</div>
                             <div class="pull-right">Invoice Date: ' . $invoice_date . '</div>

@@ -49,9 +49,9 @@ return [
                 // 'password' => 'Vaibhav@12345',
                 // 'port' => '587',
 
-                'host' => 'smtp.rediffmailpro.com',
-                'username' => 'dhaval.maru@otbconsulting.co.in',
-                'password' => '55921721dNM@',
+                'host' => 'smtp.googlemail.com',
+                'username' => 'accounts@primarcpecan.com',
+                'password' => 'Primarcaccounts',
                 'port' => '465',
                 'encryption' => 'ssl',
 
