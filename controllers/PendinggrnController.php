@@ -313,8 +313,9 @@ class PendinggrnController extends Controller
         // echo '<br/>';   
 
         if(count($result)>0){
-            $total_val[0]['other_charges'] = 0;
-            $total_val[0]['total_amount'] = 0;
+            $other_charge = floatval($result[0]['other_charge']);
+            $total_val[0]['other_charges'] = $other_charge;
+            $total_val[0]['total_amount'] = $other_charge;
             $total_val[0]['shortage_amount'] = 0;
             $total_val[0]['expiry_amount'] = 0;
             $total_val[0]['damaged_amount'] = 0;
@@ -381,7 +382,8 @@ class PendinggrnController extends Controller
             $invoice_details[$k]['invoice_no'] = $result[0]['invoice_no'];
             $invoice_details[$k]['invoice_total_cost'] = 0;
             $invoice_details[$k]['invoice_total_tax'] = 0;
-            $invoice_details[$k]['invoice_total_amount'] = 0;
+            $invoice_details[$k]['invoice_other_charges'] = $other_charge;
+            $invoice_details[$k]['invoice_total_amount'] = $other_charge;
             $invoice_details[$k]['invoice_excess_amount'] = 0;
             $invoice_details[$k]['invoice_shortage_amount'] = 0;
             $invoice_details[$k]['invoice_expiry_amount'] = 0;
@@ -391,7 +393,8 @@ class PendinggrnController extends Controller
             $invoice_details[$k]['invoice_total_payable_amount'] = 0;
             $invoice_details[$k]['edited_total_cost'] = 0;
             $invoice_details[$k]['edited_total_tax'] = 0;
-            $invoice_details[$k]['edited_total_amount'] = 0;
+            $invoice_details[$k]['edited_other_charges'] = $other_charge;
+            $invoice_details[$k]['edited_total_amount'] = $other_charge;
             $invoice_details[$k]['edited_excess_amount'] = 0;
             $invoice_details[$k]['edited_shortage_amount'] = 0;
             $invoice_details[$k]['edited_expiry_amount'] = 0;
@@ -409,8 +412,6 @@ class PendinggrnController extends Controller
             $invoice_details[$k]['diff_margindiff_amount'] = 0;
             $invoice_details[$k]['diff_total_deduction'] = 0;
             $invoice_details[$k]['diff_total_payable_amount'] = 0;
-            $invoice_details[$k]['invoice_other_charges'] = 0;
-            $invoice_details[$k]['edited_other_charges'] = 0;
             $invoice_details[$k]['diff_other_charges'] = 0;
             $invoice_details[$k]['total_amount_voucher_id'] = null;
             $invoice_details[$k]['total_amount_ledger_type'] = null;
@@ -909,10 +910,12 @@ class PendinggrnController extends Controller
                     $invoice_details[$k]['total_deduction_ledger_type'] = null;
                 } else {
                     $k = count($invoice_details);
+                    $other_charge = floatval($result[$i]['other_charge']);
                     $invoice_details[$k]['invoice_no'] = $result[$i]['invoice_no'];
                     $invoice_details[$k]['invoice_total_cost'] = $tot_cost;
                     $invoice_details[$k]['invoice_total_tax'] = $tot_tax;
-                    $invoice_details[$k]['invoice_total_amount'] = $tot_cost + $tot_tax;
+                    $invoice_details[$k]['invoice_other_charges'] = $other_charge;
+                    $invoice_details[$k]['invoice_total_amount'] = $tot_cost + $tot_tax + $other_charge;
                     $invoice_details[$k]['invoice_excess_amount'] = $excess_cost + $excess_tax;
                     $invoice_details[$k]['invoice_shortage_amount'] = $shortage_cost + $shortage_tax;
                     $invoice_details[$k]['invoice_expiry_amount'] = $expiry_cost + $expiry_tax;
@@ -922,7 +925,8 @@ class PendinggrnController extends Controller
                     $invoice_details[$k]['invoice_total_payable_amount'] = $invoice_details[$k]['invoice_total_amount'] - floatval($invoice_details[$k]['invoice_total_deduction']);
                     $invoice_details[$k]['edited_total_cost'] = $tot_cost;
                     $invoice_details[$k]['edited_total_tax'] = $tot_tax;
-                    $invoice_details[$k]['edited_total_amount'] = $tot_cost + $tot_tax;
+                    $invoice_details[$k]['edited_other_charges'] = $other_charge;
+                    $invoice_details[$k]['edited_total_amount'] = $tot_cost + $tot_tax + $other_charge;
                     $invoice_details[$k]['edited_excess_amount'] = $excess_cost + $excess_tax;
                     $invoice_details[$k]['edited_shortage_amount'] = $shortage_cost + $shortage_tax;
                     $invoice_details[$k]['edited_expiry_amount'] = $expiry_cost + $expiry_tax;
@@ -940,13 +944,14 @@ class PendinggrnController extends Controller
                     $invoice_details[$k]['diff_margindiff_amount'] = 0;
                     $invoice_details[$k]['diff_total_deduction'] = 0;
                     $invoice_details[$k]['diff_total_payable_amount'] = 0;
-                    $invoice_details[$k]['invoice_other_charges'] = 0;
-                    $invoice_details[$k]['edited_other_charges'] = 0;
                     $invoice_details[$k]['diff_other_charges'] = 0;
                     $invoice_details[$k]['total_amount_voucher_id'] = null;
                     $invoice_details[$k]['total_amount_ledger_type'] = null;
                     $invoice_details[$k]['total_deduction_voucher_id'] = null;
                     $invoice_details[$k]['total_deduction_ledger_type'] = null;
+
+                    $total_val[0]['other_charges'] = $total_val[0]['other_charges'] + $other_charge;
+                    $total_val[0]['total_amount'] = $total_val[0]['total_amount'] + $other_charge;
                 }
 
                 $blFlag = false;
@@ -1619,6 +1624,15 @@ class PendinggrnController extends Controller
             $acc['other_charges_ledger_code'] = "";
             // $acc['other_charges_voucher_id'] = "";
             // $acc['other_charges_ledger_type'] = "";
+
+            $tax_code = 'Profit And Loss A/c';
+            $result2 = $model->getAccountDetails('','',$tax_code);
+            if(count($result2)>0){
+                $acc['other_charges_acc_id'] = $result2[0]['id'];
+                $acc['other_charges_ledger_name'] = $result2[0]['legal_name'];
+                $acc['other_charges_ledger_code'] = $result2[0]['code'];
+            }
+
             $acc['total_amount_acc_id'] = "";
             $acc['total_amount_ledger_name'] = "";
             $acc['total_amount_ledger_code'] = "";

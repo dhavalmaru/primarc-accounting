@@ -171,7 +171,7 @@ $session = Yii::$app->session;
                 </a>
                 <ul class="treeview-menu">
                     <li class="active"><a href="<?php echo Url::base(); ?>index.php?r=accreport%2Fledgerreport"><i class="fa fa-circle-o"></i> Ledger</a></li>
-                    <li class="active"><a href="<?php echo Url::base(); ?>index.php?r=accreport%2Fgetsummeryreport"><i class="fa fa-circle-o"></i> Ledger Summery</a></li>
+                    <li class="active"><a href="<?php echo Url::base(); ?>index.php?r=accreport%2Fgetsummeryreport"><i class="fa fa-circle-o"></i> Ledger Summary</a></li>
                     <li class="active"><a href="<?php echo Url::base(); ?>index.php?r=accreport%2Fgetledgertotalreport"><i class="fa fa-circle-o"></i>Vendor Credit/Debit</a></li>
                     <li><a href="<?php echo Url::base(); ?>index.php?r=accreport%2Ftrialbalancereport"><i class="fa fa-circle-o"></i> Trial Balance </a></li>
                 </ul>

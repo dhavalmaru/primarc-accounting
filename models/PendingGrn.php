@@ -873,7 +873,7 @@ class PendingGrn extends Model
                                 else ifnull(ifnull(((margin_from_po-margin_from_scan)/100*box_price*(ifnull(invoice_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))) / (1+(ifnull(vat_percen,0)/100)),0),0) end as margindiff_cost from 
                 (select A.grn_id, A.vendor_id, A.warehouse_id, B.psku, A.vat_cst, B.invoice_no, B.box_price, B.cost_excl_vat, B.vat_percen, 
                         B.cost_incl_vat_cst, B.invoice_qty, B.excess_qty, B.shortage_qty, B.expiry_qty, B.damaged_qty, 
-                        D.purchase_order_id, D.mrp as po_mrp, D.cost_price_inc_tax as po_cost_price_inc_tax, 
+                        D.purchase_order_id, D.mrp as po_mrp, D.cost_price_inc_tax as po_cost_price_inc_tax, E.other_charge, 
                         case when ifnull(B.box_price,0) = 0 then 0 
                             else truncate((ifnull(B.box_price,0)-ifnull(B.cost_incl_vat_cst,0))/ifnull(B.box_price,0)*100,2) end as margin_from_scan, 
                         case when D.purchase_order_id is not null then 
@@ -885,6 +885,7 @@ class PendingGrn extends Model
                     left join grn_entries B on (A.grn_id = B.grn_id) 
                     left join purchase_order C on (A.po_no = C.po_no and A.vendor_id = C.vendor_id) 
                     left join purchase_order_items D on (C.purchase_order_id = D.purchase_order_id and B.psku = D.psku) 
+                    left join goods_inward_outward_invoices E on (A.gi_id = E.gi_go_ref_no and B.invoice_no = E.invoice_no) 
                 where A.status = 'approved' and A.is_active = '1' and A.grn_id = '$id' and 
                         B.is_active = '1' and B.grn_id = '$id' and B.invoice_no is not null and 
                         C.is_active = '1') A) AA 
