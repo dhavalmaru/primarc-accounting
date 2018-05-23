@@ -201,12 +201,17 @@ class PendingGrn extends Model
                 left join 
                 (select * from user) E 
                 on (D.updated_by = E.id) 
+<<<<<<< HEAD
                 order by UNIX_TIMESTAMP(D.updated_date) desc ".$len;
+=======
+                order by UNIX_TIMESTAMP(D.updated_date) desc";
+>>>>>>> ec6c0311c2555e4382fa21681f33234faadc8dfb
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
     }
 
+<<<<<<< HEAD
     public function getCountPurchaseDetails($status=""){
         $cond = "";
         $len='';
@@ -253,6 +258,8 @@ class PendingGrn extends Model
         return $result[0]['count'];
     }
 
+=======
+>>>>>>> ec6c0311c2555e4382fa21681f33234faadc8dfb
     // public function getTotalValue($id){
     //     // $sql = "select sum(total_cost) as total_cost, sum(total_tax) as total_tax, 0 as other_charges, sum(total_amount) as total_amount, 
     //     //             sum(excess_amount) as excess_amount, sum(shortage_amount) as shortage_amount, sum(expiry_amount) as expiry_amount, 
@@ -871,7 +878,11 @@ class PendingGrn extends Model
                                 when ifnull(invoice_qty,0)=0 then 0 
                                 when (ifnull(invoice_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))<=0 then 0 
                                 else ifnull(ifnull(((margin_from_po-margin_from_scan)/100*box_price*(ifnull(invoice_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))) / (1+(ifnull(vat_percen,0)/100)),0),0) end as margindiff_cost from 
+<<<<<<< HEAD
                 (select A.grn_id, A.vendor_id, A.warehouse_id, B.psku, A.vat_cst, B.invoice_no, B.box_price, B.cost_excl_vat, B.vat_percen, 
+=======
+                (select A.grn_id, A.vendor_id, B.psku, A.vat_cst, B.invoice_no, B.box_price, B.cost_excl_vat, B.vat_percen, 
+>>>>>>> ec6c0311c2555e4382fa21681f33234faadc8dfb
                         B.cost_incl_vat_cst, B.invoice_qty, B.excess_qty, B.shortage_qty, B.expiry_qty, B.damaged_qty, 
                         D.purchase_order_id, D.mrp as po_mrp, D.cost_price_inc_tax as po_cost_price_inc_tax, 
                         case when ifnull(B.box_price,0) = 0 then 0 
@@ -996,7 +1007,11 @@ class PendingGrn extends Model
                                     when ifnull(invoice_qty,0)=0 then 0 
                                     when (ifnull(invoice_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))<=0 then 0 
                                     else ifnull(ifnull(((margin_from_po-margin_from_scan)/100*box_price*(ifnull(invoice_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))) / (1+(ifnull(vat_percen,0)/100)),0),0) end as margindiff_cost from 
+<<<<<<< HEAD
                     (select A.vendor_id, A.warehouse_id, B.*, D.tax_zone_code, D.tax_zone_name, E.invoice_date, A.gi_date, 
+=======
+                    (select A.vendor_id, B.*, D.tax_zone_code, D.tax_zone_name, E.invoice_date, A.gi_date, 
+>>>>>>> ec6c0311c2555e4382fa21681f33234faadc8dfb
                         date_add(A.gi_date, interval ifnull(B.min_no_of_months_shelf_life_required,0) month) as earliest_expected_date, 
                         null as cost_acc_id, null as cost_ledger_name, null as cost_ledger_code, 
                         null as tax_acc_id, null as tax_ledger_name, null as tax_ledger_code, 
@@ -1044,10 +1059,17 @@ class PendingGrn extends Model
                     on (AA.tax_zone_code = BB.tax_zone_code and round(AA.vat_percen,4)=round(BB.tax_rate,4))";
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
+<<<<<<< HEAD
             $result = $reader->readAll();
         } else {
             $sql = "select AA.*, BB.cgst_rate, BB.sgst_rate, BB.igst_rate from 
                     (select A.vendor_id, A.warehouse_id, B.*, D.tax_zone_code, D.tax_zone_name, E.invoice_date, A.gi_date, 
+=======
+            $data = $reader->readAll();
+        } else {
+            $sql = "select AA.*, BB.cgst_rate, BB.sgst_rate, BB.igst_rate from 
+                    (select A.vendor_id, B.*, D.tax_zone_code, D.tax_zone_name, E.invoice_date, A.gi_date, 
+>>>>>>> ec6c0311c2555e4382fa21681f33234faadc8dfb
                         date_add(A.gi_date, interval ifnull(B.min_no_of_months_shelf_life_required,0) month) as earliest_expected_date, 
                         null as cost_acc_id, null as cost_ledger_name, null as cost_ledger_code, 
                         null as tax_acc_id, null as tax_ledger_name, null as tax_ledger_code, 
@@ -1087,6 +1109,7 @@ class PendingGrn extends Model
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $result = $reader->readAll();
+<<<<<<< HEAD
         }
 
         $data = array();
@@ -1222,6 +1245,53 @@ class PendingGrn extends Model
                             $margin_from_po = intval((($product_mrp-$landed_cost)/$product_mrp*100)*100)/100;
                         }
 
+=======
+
+            $data = array();
+            $j = 0;
+
+            if(count($result)>0){
+                for($i=0; $i<count($result); $i++){
+                    if($result[$i]['purchase_order_id']!=null && $result[$i]['purchase_order_id']!=''){
+                        $box_price = floatval($result[$i]['box_price']);
+                        $cost_incl_vat_cst = floatval($result[$i]['cost_incl_vat_cst']);
+                        $proper_qty = floatval($result[$i]['proper_qty']);
+                        $invoice_qty = floatval($result[$i]['invoice_qty']);
+                        $shortage_qty = floatval($result[$i]['shortage_qty']);
+                        $expiry_qty = floatval($result[$i]['expiry_qty']);
+                        $damaged_qty = floatval($result[$i]['damaged_qty']);
+                        $vat_percen = floatval($result[$i]['vat_percen']);
+                        $cgst_rate = floatval($result[$i]['cgst_rate']);
+                        $sgst_rate = floatval($result[$i]['sgst_rate']);
+                        $igst_rate = floatval($result[$i]['igst_rate']);
+                        $product_mrp = floatval($result[$i]['po_mrp']);
+                        $cost_price_exc_tax = floatval($result[$i]['po_unit_rate_excl_tax']);
+                        $vat_cst_tax_amount = floatval($result[$i]['po_unit_tax']);
+                        $landed_cost = floatval($result[$i]['po_unit_rate_incl_tax']);
+
+                        if($box_price==0){
+                            $margin_from_scan = 0;
+                        } else {
+                            // $margin_from_scan = ($box_price-$cost_incl_vat_cst)/$box_price*100;
+                            // $margin_from_scan = intval($margin_from_scan*100)/100;
+                            $margin_from_scan = intval((($box_price-$cost_incl_vat_cst)/$box_price*100)*100)/100;
+                        }
+                        // echo $box_price;
+                        // echo '<br/>';
+                        // echo $cost_incl_vat_cst;
+                        // echo '<br/>';
+                        // echo $margin_from_scan;
+                        // echo '<br/>';
+
+                        if($product_mrp==0){
+                            $margin_from_po = 0;
+                        } else {
+                            // $margin_from_po = ($product_mrp-$landed_cost)/$product_mrp*100;
+                            // $margin_from_po = intval($margin_from_po*100)/100;
+                            $margin_from_po = intval((($product_mrp-$landed_cost)/$product_mrp*100)*100)/100;
+                        }
+
+>>>>>>> ec6c0311c2555e4382fa21681f33234faadc8dfb
                         if($box_price==0){
                             $margindiff_cost = 0;
                         } else if($invoice_qty==0){
@@ -1260,11 +1330,16 @@ class PendingGrn extends Model
                         }
                     }
                 }
+<<<<<<< HEAD
                 
             }
         }
 
         // echo json_encode($data);
+=======
+            }
+        }
+>>>>>>> ec6c0311c2555e4382fa21681f33234faadc8dfb
         
         return $data;
     }
