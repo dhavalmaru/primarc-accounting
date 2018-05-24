@@ -76,15 +76,24 @@ class PendingGrn extends Model
             $length = $request->post('length'); 
             $len = "LIMIT ".$start.", ".$length;  
         }
+        $wheresearch = '';
+        if($request->post('search')!=null)
+        {
+           $search_value1 =  $request->post('search');
+           $search = $search_value1['value'];
+            if($search!="") {
+                    $wheresearch = "AND ( c.grn_id like '%$search%' or c.gi_id like '%$search%' or c.location like '%$search%' or c.vendor_name like '%$search%' or c.invoice_val_after_tax like '%$search%' or c.gi_date like '%$search%' or c.status like '%$search%' or c.user_name  like '%$search%' or c.approver_name like '%$search%')";
+            } 
+        }
 
-        $sql = "select * from 
+       $sql = "select * from 
                 (select A.*, B.grn_id as b_grn_id from 
                 (select A.*, B.username from grn A left join user B on(A.updated_by = B.id) 
                     where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-07-01')) A 
                 left join 
                 (select distinct grn_id from acc_grn_entries) B 
                 on (A.grn_id = B.grn_id)) C 
-                where b_grn_id is null order by UNIX_TIMESTAMP(updated_date) desc ".$len;
+                where b_grn_id is null ".$wheresearch." order by UNIX_TIMESTAMP(updated_date) desc ".$len;
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -97,14 +106,24 @@ class PendingGrn extends Model
         $start = $request->post('start');
         $length = $request->post('length');
 
+           $wheresearch = '';
+        if($request->post('search')!=null)
+        {
+           $search_value1 =  $request->post('search');
+           $search = $search_value1['value'];
+            if($search!="") {
+                    $wheresearch = "AND ( c.grn_id like '%$search%' or c.gi_id like '%$search%' or c.location like '%$search%' or c.vendor_name like '%$search%' or c.invoice_val_after_tax like '%$search%' or c.gi_date like '%$search%' or c.status like '%$search%' or c.user_name  like '%$search%' or c.approver_name like '%$search%')";
+            } 
+        }
+
         $sql = "select count(*) as count  from 
                 (select A.*, B.grn_id as b_grn_id from 
                 (select A.*, B.username from grn A left join user B on(A.updated_by = B.id) 
                     where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-07-01')) A 
                 left join 
                 (select distinct grn_id from acc_grn_entries) B 
-                on (A.grn_id = B.grn_id)) C 
-                where b_grn_id is null order by UNIX_TIMESTAMP(updated_date) desc";
+                on (A.grn_id = B.grn_id)) c 
+                where b_grn_id is null ".$wheresearch."order by UNIX_TIMESTAMP(updated_date) desc";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $result =  $reader->readAll();
@@ -120,7 +139,19 @@ class PendingGrn extends Model
             $start = $request->post('start');
             $length = $request->post('length'); 
             $len = "LIMIT ".$start.", ".$length;  
-        }  
+        } 
+
+        $wheresearch = '';
+        if($request->post('search')!=null)
+        {
+           $search_value1 =  $request->post('search');
+           $search = $search_value1['value'];
+            if($search!="") {
+                    $wheresearch = "Where ( c.grn_id like '%$search%' or c.gi_id like '%$search%' or c.location like '%$search%' or c.vendor_name like '%$search%' or c.invoice_val_after_tax like '%$search%' or c.gi_date like '%$search%' or c.status like '%$search%' or c.user_name  like '%$search%' or c.approver_name like '%$search%')";
+            } 
+        }
+
+
          $sql = "select * from 
                 (select A.*, B.status as grn_status from 
                 (select distinct A.*, B.username, C.is_paid from grn A left join user B on(A.updated_by = B.id) 
@@ -129,15 +160,26 @@ class PendingGrn extends Model
                     where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-07-01')) A 
                 left join 
                 (select distinct grn_id, status from acc_grn_entries) B 
-                on (A.grn_id = B.grn_id)) C order by UNIX_TIMESTAMP(updated_date) desc ".$len;
+                on (A.grn_id = B.grn_id)) c ".$wheresearch." order by UNIX_TIMESTAMP(updated_date) desc ".$len;
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
     }
 
     public function getCountAllGrnDetails(){
+            $request = Yii::$app->request;
+            $wheresearch = '';
+            if($request->post('search')!=null)
+            {
+               $search_value1 =  $request->post('search');
+               $search = $search_value1['value'];
+                if($search!="") {
+                        $wheresearch = "Where ( c.grn_id like '%$search%' or c.gi_id like '%$search%' or c.location like '%$search%' or c.vendor_name like '%$search%' or c.invoice_val_after_tax like '%$search%' or c.gi_date like '%$search%' or c.status like '%$search%' or c.user_name  like '%$search%' or c.approver_name like '%$search%')";
+                } 
+            }
 
-        $sql = "select count(*) as count  from 
+
+            $sql = "select count(*) as count  from 
                 (select A.*, B.status as grn_status from 
                 (select distinct A.*, B.username, C.is_paid from grn A left join user B on(A.updated_by = B.id) 
                     left join acc_ledger_entries C on (A.grn_id = C.ref_id and 'purchase' = C.ref_type and 
@@ -145,11 +187,11 @@ class PendingGrn extends Model
                     where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-07-01')) A 
                 left join 
                 (select distinct grn_id, status from acc_grn_entries) B 
-                on (A.grn_id = B.grn_id)) C order by UNIX_TIMESTAMP(updated_date) desc ";
-        $command = Yii::$app->db->createCommand($sql);
-        $reader = $command->query();
-        $result =  $reader->readAll();
-        return $result[0]['count'];
+                on (A.grn_id = B.grn_id)) c ".$wheresearch." order by UNIX_TIMESTAMP(updated_date) desc ";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $result =  $reader->readAll();
+            return $result[0]['count'];
     }
 
 	public function getGrnDetails($id){
@@ -176,7 +218,18 @@ class PendingGrn extends Model
             $length = $request->post('length'); 
             $len = "LIMIT ".$start.", ".$length;  
         }
-        $sql = "select D.*, E.username from 
+
+            $wheresearch = '';
+            if($request->post('search')!=null)
+            {
+               $search_value1 =  $request->post('search');
+               $search = $search_value1['value'];
+                if($search!="") {
+                        $wheresearch = "Where ( c.grn_no like '%$search%' or c.vendor_name like '%$search%' or c.category_name like '%$search%' or c.po_no like '%$search%' or c.inv_nos like '%$search%' or c.ded_amt like '%$search%' or c.net_amt  like '%$search%' or c.username like '%$search%')";
+                } 
+            }
+
+        $sql = "Select * from (select D.*, E.username from 
                 (select B.*, C.grn_no, C.vendor_name, C.category_name, C.po_no from 
                 (select grn_id, inv_nos, (taxable_amt+tax_amt+other_amt) as net_amt, 
                     (shortage_amt+expiry_amt+damaged_amt+magrin_diff_amt) as ded_amt, 
@@ -200,8 +253,8 @@ class PendingGrn extends Model
                 on (B.grn_id = C.grn_id)) D 
                 left join 
                 (select * from user) E 
-                on (D.updated_by = E.id) 
-                order by UNIX_TIMESTAMP(D.updated_date) desc ".$len;
+                on (D.updated_by = E.id) ) c ".$wheresearch."
+                order by UNIX_TIMESTAMP(c.updated_date) desc ".$len;
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -221,6 +274,17 @@ class PendingGrn extends Model
             $length = $request->post('length'); 
             $len = "LIMIT ".$start.", ".$length;  
         }
+
+        $wheresearch = '';
+        if($request->post('search')!=null)
+        {
+           $search_value1 =  $request->post('search');
+           $search = $search_value1['value'];
+            if($search!="") {
+                    $wheresearch = "Where ( c.grn_no like '%$search%' or c.vendor_name like '%$search%' or c.category_name like '%$search%' or c.po_no like '%$search%' or c.inv_nos like '%$search%' or c.ded_amt like '%$search%' or c.net_amt  like '%$search%' or c.username like '%$search%')";
+            } 
+        }
+
          $sql = "Select count(*) as count from (select D.*, E.username from 
                 (select B.*, C.grn_no, C.vendor_name, C.category_name, C.po_no from 
                 (select grn_id, inv_nos, (taxable_amt+tax_amt+other_amt) as net_amt, 
@@ -246,7 +310,7 @@ class PendingGrn extends Model
                 left join 
                 (select * from user) E 
                 on (D.updated_by = E.id) 
-                order by UNIX_TIMESTAMP(D.updated_date) desc) E ";
+                ) c ".$wheresearch. " order by UNIX_TIMESTAMP(c.updated_date) desc";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $result =  $reader->readAll();
