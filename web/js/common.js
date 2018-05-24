@@ -22,7 +22,8 @@ var csrfToken = $('meta[name="csrf-token"]').attr("content");
         "aLengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
         "buttons": [ 'excel', 'csv', 'print'  ],
         "dom" : 'lBfrtip',
-        //"serverSide": true,
+        "searchDelay": 3000,
+        "serverSide": true,
         "bProcessing": true,
         "ajax":{
                     url :BASE_URL+'index.php?r=pendinggrn%2Fgetgrn',
@@ -49,6 +50,7 @@ var csrfToken = $('meta[name="csrf-token"]').attr("content");
         "buttons": [ 'excel', 'csv', 'print'  ],
         "dom" : 'lBfrtip',
         "bProcessing": true,
+        "searchDelay": 3000,
         "serverSide": true,
         "ajax":{
                     url :BASE_URL+'index.php?r=pendinggrn%2Fgetapprovedgrn',
@@ -75,6 +77,7 @@ var csrfToken = $('meta[name="csrf-token"]').attr("content");
         "buttons": [ 'excel', 'csv', 'print'  ],
         "dom" : 'lBfrtip',
         "bProcessing": true,
+        "searchDelay": 3000,
         "serverSide": true,
         "ajax":{
                     url :BASE_URL+'index.php?r=pendinggrn%2Fgetallgrn',
