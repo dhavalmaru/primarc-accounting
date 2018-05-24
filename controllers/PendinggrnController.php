@@ -308,13 +308,10 @@ class PendinggrnController extends Controller
         $model = new PendingGrn();
         $result = $model->getGrnPostingDetails($id);
 
-<<<<<<< HEAD
         // echo json_encode($result);
         // echo '<br/>';
         // echo '<br/>';   
 
-=======
->>>>>>> ec6c0311c2555e4382fa21681f33234faadc8dfb
         if(count($result)>0){
             $total_val[0]['other_charges'] = 0;
             $total_val[0]['total_amount'] = 0;
@@ -605,12 +602,9 @@ class PendinggrnController extends Controller
                     }
                 }
                 if($blFlag==true){
-<<<<<<< HEAD
                     // echo 'true';
                     // echo '<br/>';
 
-=======
->>>>>>> ec6c0311c2555e4382fa21681f33234faadc8dfb
                     $total_tax[$j]['total_cost'] = floatval($total_tax[$j]['total_cost']) + $tot_cost;
                     $total_tax[$j]['total_tax'] = floatval($total_tax[$j]['total_tax']) + $tot_tax;
                     $total_tax[$j]['total_cgst'] = floatval($total_tax[$j]['total_cgst']) + $tot_cgst;
@@ -641,7 +635,6 @@ class PendinggrnController extends Controller
                     $total_tax[$j]['margindiff_cgst'] = floatval($total_tax[$j]['margindiff_cgst']) + $margindiff_cgst;
                     $total_tax[$j]['margindiff_sgst'] = floatval($total_tax[$j]['margindiff_sgst']) + $margindiff_sgst;
                     $total_tax[$j]['margindiff_igst'] = floatval($total_tax[$j]['margindiff_igst']) + $margindiff_igst;
-<<<<<<< HEAD
 
                     // echo 'total_tax';
                     // echo '<br/>';
@@ -730,9 +723,6 @@ class PendinggrnController extends Controller
                     // echo 'false';
                     // echo '<br/>';
 
-=======
-                } else {
->>>>>>> ec6c0311c2555e4382fa21681f33234faadc8dfb
                     $j = count($total_tax);
                     $total_tax[$j]['grn_id'] = $result[$i]['grn_id'];
                     $total_tax[$j]['tax_zone_code'] = $result[$i]['tax_zone_code'];
@@ -772,10 +762,7 @@ class PendinggrnController extends Controller
                     $total_tax[$j]['margindiff_cgst'] = $margindiff_cgst;
                     $total_tax[$j]['margindiff_sgst'] = $margindiff_sgst;
                     $total_tax[$j]['margindiff_igst'] = $margindiff_igst;
-<<<<<<< HEAD
 
-=======
->>>>>>> ec6c0311c2555e4382fa21681f33234faadc8dfb
                     $total_tax[$j]['invoice_cost_acc_id'] = null;
                     $total_tax[$j]['invoice_cost_ledger_name'] = null;
                     $total_tax[$j]['invoice_cost_ledger_code'] = null;
@@ -791,7 +778,6 @@ class PendinggrnController extends Controller
                     $total_tax[$j]['invoice_igst_acc_id'] = null;
                     $total_tax[$j]['invoice_igst_ledger_name'] = null;
                     $total_tax[$j]['invoice_igst_ledger_code'] = null;
-<<<<<<< HEAD
 
                     // echo 'total_tax';
                     // echo '<br/>';
@@ -876,8 +862,6 @@ class PendinggrnController extends Controller
                             $total_tax[$j]['invoice_igst_ledger_code'] = $result2[0]['code'];
                         }
                     }
-=======
->>>>>>> ec6c0311c2555e4382fa21681f33234faadc8dfb
                 }
                 
                 $blFlag = false;
@@ -1023,7 +1007,6 @@ class PendinggrnController extends Controller
                     $invoice_tax[$l]['margindiff_cgst'] = floatval($invoice_tax[$l]['margindiff_cgst']) + $margindiff_cgst;
                     $invoice_tax[$l]['margindiff_sgst'] = floatval($invoice_tax[$l]['margindiff_sgst']) + $margindiff_sgst;
                     $invoice_tax[$l]['margindiff_igst'] = floatval($invoice_tax[$l]['margindiff_igst']) + $margindiff_igst;
-<<<<<<< HEAD
                     
                     // echo 'invoice_tax';
                     // echo '<br/>';
@@ -1112,8 +1095,6 @@ class PendinggrnController extends Controller
                             $invoice_tax[$l]['invoice_igst_ledger_code'] = $result2[0]['code'];
                         }
                     }
-=======
->>>>>>> ec6c0311c2555e4382fa21681f33234faadc8dfb
                 } else {
                     $l = count($invoice_tax);
                     $invoice_tax[$l]['grn_id'] = $result[$i]['grn_id'];
@@ -1185,7 +1166,6 @@ class PendinggrnController extends Controller
                     $invoice_tax[$l]['invoice_igst_acc_id'] = null;
                     $invoice_tax[$l]['invoice_igst_ledger_name'] = null;
                     $invoice_tax[$l]['invoice_igst_ledger_code'] = null;
-<<<<<<< HEAD
 
                     // echo 'invoice_tax';
                     // echo '<br/>';
@@ -1274,8 +1254,6 @@ class PendinggrnController extends Controller
                             $invoice_tax[$l]['invoice_igst_ledger_code'] = $result2[0]['code'];
                         }
                     }
-=======
->>>>>>> ec6c0311c2555e4382fa21681f33234faadc8dfb
                 }
             }
 
@@ -1314,11 +1292,8 @@ class PendinggrnController extends Controller
         $total_val = $data['total_val'];
         $total_tax = $data['total_tax'];
 
-<<<<<<< HEAD
         // echo json_encode($data);
 
-=======
->>>>>>> ec6c0311c2555e4382fa21681f33234faadc8dfb
         $acc_master = $model->getAccountDetails('', 'approved');
         $tax_zone_code = $grn_details[0]['vat_cst'];
 
@@ -1607,12 +1582,9 @@ class PendinggrnController extends Controller
 
             $invoice_details = $data['invoice_details'];
             $invoice_tax = $data['invoice_tax'];
-<<<<<<< HEAD
 
             // echo json_encode($invoice_tax);
             // echo '<br/>';
-=======
->>>>>>> ec6c0311c2555e4382fa21681f33234faadc8dfb
 
             for($i=0; $i<count($invoice_details); $i++) {
                 $series = 2;
