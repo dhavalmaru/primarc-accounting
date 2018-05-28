@@ -15,11 +15,14 @@ class PendinggrnController extends Controller
 {
     public function actionIndex(){
         $grn_cnt = new PendingGrn();
-        /*$grn = $grn_cnt->getNewGrnDetails();*/
+        // $grn = $grn_cnt->getNewGrnDetails();
         $grn = [];
-        $pending = $grn_cnt->getPurchaseDetails('pending');
-        $approved = $grn_cnt->getPurchaseDetails('approved');
-        $all = [];//$grn_cnt->getAllGrnDetails();
+        // $pending = $grn_cnt->getPurchaseDetails('pending');
+        $pending = [];
+        // $approved = $grn_cnt->getPurchaseDetails('approved');
+        $approved = [];
+        // $all = $grn_cnt->getAllGrnDetails();
+        $all = [];
         return $this->render('pending_grn', [
             'grn' => $grn, 'pending' => $pending, 'approved' => $approved, 'all' => $all
         ]);

@@ -196,6 +196,17 @@ class PendingGrn extends Model
             return $result[0]['count'];
     }
 
+    public function getGrnDetails($id){
+        $sql = "select A.*, B.vendor_code, C.gi_date as grn_date from grn A left join vendor_master B on (A.vendor_id = B.id) 
+                left join acc_grn_entries C on (A.grn_id = C.grn_id and C.status = 'approved' and C.is_active='1' and 
+                C.particular = 'Total Amount') where A.grn_id = '$id' and 
+                A.status = 'approved' and A.is_active='1'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
+
     public function getPurchaseDetails($status=""){
         $cond = "";
         $len='';
@@ -309,51 +320,51 @@ class PendingGrn extends Model
         return $result[0]['count'];
     }
 
-    public function getCountPurchaseDetails($status=""){
-        $cond = "";
-        $len='';
-        if($status!=""){
-            $cond = " and A.status = '$status'";
-        }
-        $request = Yii::$app->request;
-        if($request->post('start'))
-        {
-            $mycomponent = Yii::$app->mycomponent;   
-            $start = $request->post('start');
-            $length = $request->post('length'); 
-            $len = "LIMIT ".$start.", ".$length;  
-        }
-         $sql = "Select count(*) as count from (select D.*, E.username from 
-                (select B.*, C.grn_no, C.vendor_name, C.category_name, C.po_no from 
-                (select grn_id, inv_nos, (taxable_amt+tax_amt+other_amt) as net_amt, 
-                    (shortage_amt+expiry_amt+damaged_amt+magrin_diff_amt) as ded_amt, 
-                    updated_date, updated_by, approved_by, is_paid from 
-                (select distinct A.grn_id, GROUP_CONCAT(distinct A.invoice_no) as inv_nos, 
-                        sum(case when A.particular='Taxable Amount' then A.edited_val else 0 end) as taxable_amt, 
-                        sum(case when A.particular='Tax' then A.edited_val else 0 end) as tax_amt, 
-                        sum(case when A.particular='Other Charges' then A.edited_val else 0 end) as other_amt, 
-                        sum(case when A.particular='Shortage Amount' then A.edited_val else 0 end) as shortage_amt, 
-                        sum(case when A.particular='Expiry Amount' then A.edited_val else 0 end) as expiry_amt, 
-                        sum(case when A.particular='Damaged Amount' then A.edited_val else 0 end) as damaged_amt, 
-                        sum(case when A.particular='Margin Diff Amount' then A.edited_val else 0 end) as magrin_diff_amt, 
-                        max(A.updated_date) as updated_date, max(A.updated_by) as updated_by, max(A.approved_by) as approved_by, 
-                        B.is_paid 
-                from acc_grn_entries A 
-                    left join acc_ledger_entries B on (A.grn_id = B.ref_id and 'purchase' = B.ref_type and 
-                        '1' = B.is_active and 'Approved' = B.status and '1' = B.is_paid) 
-                where A.is_active = '1' ".$cond." group by grn_id) A) B 
-                left join 
-                (select * from grn where status = 'approved') C 
-                on (B.grn_id = C.grn_id)) D 
-                left join 
-                (select * from user) E 
-                on (D.updated_by = E.id) 
-                order by UNIX_TIMESTAMP(D.updated_date) desc) E ";
-        $command = Yii::$app->db->createCommand($sql);
-        $reader = $command->query();
-        $result =  $reader->readAll();
-        return $result[0]['count'];
-    }
+    // public function getCountPurchaseDetails($status=""){
+    //     $cond = "";
+    //     $len='';
+    //     if($status!=""){
+    //         $cond = " and A.status = '$status'";
+    //     }
+    //     $request = Yii::$app->request;
+    //     if($request->post('start'))
+    //     {
+    //         $mycomponent = Yii::$app->mycomponent;   
+    //         $start = $request->post('start');
+    //         $length = $request->post('length'); 
+    //         $len = "LIMIT ".$start.", ".$length;  
+    //     }
+    //      $sql = "Select count(*) as count from (select D.*, E.username from 
+    //             (select B.*, C.grn_no, C.vendor_name, C.category_name, C.po_no from 
+    //             (select grn_id, inv_nos, (taxable_amt+tax_amt+other_amt) as net_amt, 
+    //                 (shortage_amt+expiry_amt+damaged_amt+magrin_diff_amt) as ded_amt, 
+    //                 updated_date, updated_by, approved_by, is_paid from 
+    //             (select distinct A.grn_id, GROUP_CONCAT(distinct A.invoice_no) as inv_nos, 
+    //                     sum(case when A.particular='Taxable Amount' then A.edited_val else 0 end) as taxable_amt, 
+    //                     sum(case when A.particular='Tax' then A.edited_val else 0 end) as tax_amt, 
+    //                     sum(case when A.particular='Other Charges' then A.edited_val else 0 end) as other_amt, 
+    //                     sum(case when A.particular='Shortage Amount' then A.edited_val else 0 end) as shortage_amt, 
+    //                     sum(case when A.particular='Expiry Amount' then A.edited_val else 0 end) as expiry_amt, 
+    //                     sum(case when A.particular='Damaged Amount' then A.edited_val else 0 end) as damaged_amt, 
+    //                     sum(case when A.particular='Margin Diff Amount' then A.edited_val else 0 end) as magrin_diff_amt, 
+    //                     max(A.updated_date) as updated_date, max(A.updated_by) as updated_by, max(A.approved_by) as approved_by, 
+    //                     B.is_paid 
+    //             from acc_grn_entries A 
+    //                 left join acc_ledger_entries B on (A.grn_id = B.ref_id and 'purchase' = B.ref_type and 
+    //                     '1' = B.is_active and 'Approved' = B.status and '1' = B.is_paid) 
+    //             where A.is_active = '1' ".$cond." group by grn_id) A) B 
+    //             left join 
+    //             (select * from grn where status = 'approved') C 
+    //             on (B.grn_id = C.grn_id)) D 
+    //             left join 
+    //             (select * from user) E 
+    //             on (D.updated_by = E.id) 
+    //             order by UNIX_TIMESTAMP(D.updated_date) desc) E ";
+    //     $command = Yii::$app->db->createCommand($sql);
+    //     $reader = $command->query();
+    //     $result =  $reader->readAll();
+    //     return $result[0]['count'];
+    // }
 
     // public function getTotalValue($id){
     //     // $sql = "select sum(total_cost) as total_cost, sum(total_tax) as total_tax, 0 as other_charges, sum(total_amount) as total_amount, 
