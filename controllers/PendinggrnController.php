@@ -17,8 +17,10 @@ class PendinggrnController extends Controller
         $grn_cnt = new PendingGrn();
         /*$grn = $grn_cnt->getNewGrnDetails();*/
         $grn = [];
-        $pending = $grn_cnt->getPurchaseDetails('pending');
-        $approved = $grn_cnt->getPurchaseDetails('approved');
+        //$pending = $grn_cnt->getPurchaseDetails('pending');
+		$pending = [];
+		$approved = [];
+        //$approved = $grn_cnt->getPurchaseDetails('approved');
         $all = [];//$grn_cnt->getAllGrnDetails();
         return $this->render('pending_grn', [
             'grn' => $grn, 'pending' => $pending, 'approved' => $approved, 'all' => $all
