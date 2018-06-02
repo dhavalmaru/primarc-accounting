@@ -37,11 +37,14 @@ ALTER TABLE `acc_payment_advices` CHANGE `company_id` `company_id` BIGINT(11) NU
 ALTER TABLE `acc_payment_receipt` ADD `company_id` BIGINT(11) NOT NULL DEFAULT '1' AFTER `approver_id`;
 ALTER TABLE `acc_payment_receipt` CHANGE `company_id` `company_id` BIGINT(11) NULL DEFAULT NULL;
 
+ALTER TABLE `acc_series_master` ADD `company_id` BIGINT(11) NOT NULL DEFAULT '1' AFTER `series`;
+ALTER TABLE `acc_series_master` CHANGE `company_id` `company_id` BIGINT(11) NULL DEFAULT NULL;
+
 ALTER TABLE `acc_user_log` ADD `company_id` BIGINT(11) NOT NULL DEFAULT '1' AFTER `table_id`;
 ALTER TABLE `acc_user_log` CHANGE `company_id` `company_id` BIGINT(11) NULL DEFAULT NULL;
 
+ALTER TABLE `acc_user_log_history` ADD `company_id` BIGINT(11) NOT NULL DEFAULT '1' AFTER `id`;
+ALTER TABLE `acc_user_log_history` CHANGE `company_id` `company_id` BIGINT(11) NULL DEFAULT NULL;
+
 ALTER TABLE `acc_user_roles` ADD `company_id` BIGINT(11) NOT NULL DEFAULT '1' AFTER `role_id`;
 ALTER TABLE `acc_user_roles` CHANGE `company_id` `company_id` BIGINT(11) NULL DEFAULT NULL;
-
-ALTER TABLE `acc_series_master` ADD `company_id` BIGINT(11) NOT NULL DEFAULT '1' AFTER `series`;
-ALTER TABLE `acc_series_master` CHANGE `company_id` `company_id` BIGINT(11) NULL DEFAULT NULL;
