@@ -21,7 +21,10 @@ class EmailLog extends Model
     }
 
     public function getDetails(){
-        $sql = "select * from acc_email_log order by id desc";
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $sql = "select * from acc_email_log where company_id = '$company_id' order by id desc";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -31,6 +34,7 @@ class EmailLog extends Model
         $session = Yii::$app->session;
         $curusr = $session['session_id'];
         $now = date('Y-m-d H:i:s');
+        $company_id = $session['company_id'];
 
         $array = array('module_name' => $module_name, 
                         'sub_module' => $sub_module, 
@@ -40,7 +44,8 @@ class EmailLog extends Model
                         'description' => $description, 
                         'log_activity_date' => $now, 
                         'table_name' => $table_name, 
-                        'table_id' => $table_id);
+                        'table_id' => $table_id,
+                        'company_id' => $company_id);
         $count = Yii::$app->db->createCommand()
                             ->insert("acc_user_log", $array)
                             ->execute();

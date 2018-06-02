@@ -42,6 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
 											</th> 
 											<th>User</th>
 											<th>Role</th> 
+											<th>Company</th> 
 											<th>Status</th> 
 											<th>Updated By</th> 
 											<th>Updated Date</th> 
@@ -56,6 +57,7 @@ $this->params['breadcrumbs'][] = $this->title;
 											</td> 
 											<td><?php echo $data[$i]['user_name']; ?></td> 
 											<td><?php echo $data[$i]['role']; ?></td> 
+											<td><?php echo $data[$i]['company_short_name']; ?></td> 
 											<td><?php echo $data[$i]['status']; ?></td> 
 											<td><?php echo $data[$i]['username']; ?></td> 
 											<td><?php if(isset($data)) echo (($data[$i]['updated_date']!=null && $data[$i]['updated_date']!='')?date('d/m/Y',strtotime($data[$i]['updated_date'])):date('d/m/Y')); else echo date('d/m/Y'); ?></td>

@@ -43,7 +43,8 @@ class AssignroleController extends Controller
             if($access[0]['r_insert']==1) {
                 $users = $assign_role->getUsers();
                 $roles = $assign_role->getRoles();
-                return $this->render('assignrole_details', ['users'=>$users, 'roles'=> $roles]);
+                $company = $assign_role->getCompany();
+                return $this->render('assignrole_details', ['users'=>$users, 'roles'=> $roles, 'company'=> $company]);
             } else {
                 return $this->render('/message', [
                     'title'  => \Yii::t('user', 'Access Denied'),
@@ -69,8 +70,9 @@ class AssignroleController extends Controller
                 $data = $assign_role->getDetails($id);
                 $users = $assign_role->getUsers($id);
                 $roles = $assign_role->getRoles();
+                $company = $assign_role->getCompany();
                 
-                return $this->render('assignrole_details', ['access' => $access, 'data' => $data, 'users'=>$users, 'roles'=> $roles]);
+                return $this->render('assignrole_details', ['access' => $access, 'data' => $data, 'users'=>$users, 'roles'=> $roles, 'company'=> $company]);
             } else {
                 return $this->render('/message', [
                     'title'  => \Yii::t('user', 'Access Denied'),
@@ -112,9 +114,9 @@ class AssignroleController extends Controller
         }
     }
 
-    public function actionCheckuserroleavailablity(){
+    public function actionCheckuserroleavailability(){
         $assign_role = new AssignRole();
-        $result = $assign_role->checkUserRoleAvailablity();
+        $result = $assign_role->checkUserRoleAvailability();
         echo $result;
     }
 }

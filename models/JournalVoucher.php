@@ -23,6 +23,7 @@ class JournalVoucher extends Model
     public function getApprover($action){
         $session = Yii::$app->session;
         $session_id = $session['session_id'];
+        $company_id = $session['company_id'];
 
         $cond = "";
         if($action!="authorise" && $action!="view"){
@@ -32,7 +33,7 @@ class JournalVoucher extends Model
         $sql = "select distinct A.id, A.username, C.r_approval from user A 
                 left join acc_user_roles B on (A.id = B.user_id) 
                 left join acc_user_role_options C on (B.role_id = C.role_id) 
-                where C.r_section = 'S_Journal_Voucher' and 
+                where B.company_id = '$company_id' and C.r_section = 'S_Journal_Voucher' and 
                         C.r_approval = '1' and C.r_approval is not null" . $cond;
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
@@ -48,23 +49,33 @@ class JournalVoucher extends Model
             $cond = $cond . " and A.status = '$status'";
         }
 
-        $sql = "select A.*, B.username as updater, C.username as approver from 
-                acc_jv_details A left join user B on (A.updated_by = B.id) left join user C on (A.approved_by = C.id) 
-                where A.is_active='1'" . $cond . " order by UNIX_TIMESTAMP(A.updated_date) desc, A.id desc";
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $sql = "select A.*, B.username as updater, C.username as approver 
+                from acc_jv_details A left join user B on (A.updated_by = B.id) left join user C on (A.approved_by = C.id) 
+                where A.is_active='1' and A.company_id = '$company_id' " . $cond . " 
+                order by UNIX_TIMESTAMP(A.updated_date) desc, A.id desc";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
     }
 
     public function gerJournalVoucherEntries($id){
-        $sql = "select * from acc_jv_entries where jv_id='$id' and is_active='1' order by id";
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $sql = "select * from acc_jv_entries where jv_id='$id' and company_id = '$company_id' and is_active='1' order by id";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
     }
 
     public function gerJournalVoucherDocs($id){
-        $sql = "select * from acc_jv_docs where jv_id='$id' and is_active='1' order by id";
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $sql = "select * from acc_jv_docs where jv_id='$id' and company_id = '$company_id' and is_active='1' order by id";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -76,7 +87,10 @@ class JournalVoucher extends Model
             $cond = " and id = '$id'";
         }
 
-        $sql = "select * from acc_master where is_active = '1' and status = 'approved'".$cond." order by legal_name";
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $sql = "select * from acc_master where is_active = '1' and status = 'approved' and company_id = '$company_id' ".$cond." order by legal_name";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -109,6 +123,7 @@ class JournalVoucher extends Model
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
         $session = Yii::$app->session;
+        $company_id = $session['company_id'];
 
         $curusr = $session['session_id'];
         $now = date('Y-m-d H:i:s');
@@ -192,7 +207,8 @@ class JournalVoucher extends Model
                         'updated_date'=>$now,
                         'jv_date'=>$jv_date,
                         'approver_comments'=>$remarks,
-                        'approver_id'=>$approver_id
+                        'approver_id'=>$approver_id,
+                        'company_id'=>$company_id
                         );
 
         if(count($array)>0){
@@ -236,7 +252,8 @@ class JournalVoucher extends Model
                                     'is_active' => '1',
                                     'updated_by'=>$curusr,
                                     'updated_date'=>$now,
-                                    'approver_comments'=>$remarks
+                                    'approver_comments'=>$remarks,
+                                    'company_id'=>$company_id
                                 );
 
             $acc_jv_entries['created_by'] = $curusr;
@@ -267,26 +284,27 @@ class JournalVoucher extends Model
             }
 
             $ledgerArray=[
-                                'ref_id'=>$id,
-                                'sub_ref_id'=>$entry_id[$i],
-                                'ref_type'=>'journal_voucher',
-                                'entry_type'=>'Journal Voucher',
-                                'invoice_no'=>$reference,
-                                // 'vendor_id'=>$vendor_id,
-                                'voucher_id' => $voucher_id, 
-                                'ledger_type' => $ledger_type, 
-                                'acc_id'=>$acc_id[$i],
-                                'ledger_name'=>$legal_name[$i],
-                                'ledger_code'=>$acc_code[$i],
-                                'type'=>$transaction[$i],
-                                'amount'=>$mycomponent->format_number($amount,2),
-                                'status'=>'pending',
-                                'is_active'=>'1',
-                                'updated_by'=>$curusr,
-                                'updated_date'=>$now,
-                                'ref_date'=>$jv_date,
-                                'approver_comments'=>$remarks
-                            ];
+                            'ref_id'=>$id,
+                            'sub_ref_id'=>$entry_id[$i],
+                            'ref_type'=>'journal_voucher',
+                            'entry_type'=>'Journal Voucher',
+                            'invoice_no'=>$reference,
+                            // 'vendor_id'=>$vendor_id,
+                            'voucher_id' => $voucher_id, 
+                            'ledger_type' => $ledger_type, 
+                            'acc_id'=>$acc_id[$i],
+                            'ledger_name'=>$legal_name[$i],
+                            'ledger_code'=>$acc_code[$i],
+                            'type'=>$transaction[$i],
+                            'amount'=>$mycomponent->format_number($amount,2),
+                            'status'=>'pending',
+                            'is_active'=>'1',
+                            'updated_by'=>$curusr,
+                            'updated_date'=>$now,
+                            'ref_date'=>$jv_date,
+                            'approver_comments'=>$remarks,
+                            'company_id'=>$company_id
+                        ];
 
             $ledgerArray['created_by'] = $curusr;
             $ledgerArray['created_date'] = $now;
@@ -355,7 +373,8 @@ class JournalVoucher extends Model
                                         'is_active' => '1',
                                         'updated_by'=>$curusr,
                                         'updated_date'=>$now,
-                                        'approver_comments'=>$remarks
+                                        'approver_comments'=>$remarks,
+                                        'company_id'=>$company_id
                                     );
 
                     $acc_jv_docs['created_by'] = $curusr;
@@ -427,6 +446,7 @@ class JournalVoucher extends Model
     public function setLog($module_name, $sub_module, $action, $vendor_id, $description, $table_name, $table_id) {
         $session = Yii::$app->session;
         $curusr = $session['session_id'];
+        $company_id = $session['company_id'];
         $now = date('Y-m-d H:i:s');
 
         $array = array('module_name' => $module_name, 
@@ -437,7 +457,8 @@ class JournalVoucher extends Model
                         'description' => $description, 
                         'log_activity_date' => $now, 
                         'table_name' => $table_name, 
-                        'table_id' => $table_id);
+                        'table_id' => $table_id,
+                        'company_id'=>$company_id);
         $count = Yii::$app->db->createCommand()
                             ->insert("acc_user_log", $array)
                             ->execute();

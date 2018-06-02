@@ -83,7 +83,11 @@ class SecurityController extends BaseSecurityController {
                 $session['session_id'] = $data[0]['id'];
                 $session['username'] = $data[0]['username'];
                 $session['role_id'] = $data[0]['role_id'];
+                $session['company_id'] = $data[0]['company_id'];
 
+                $company = $login->getCompany();
+                $session['company'] = $company;
+                
                 for($i=0; $i<count($data); $i++){
                     $session[$data[$i]['r_section']] = $data[$i]['r_view'];
                 }

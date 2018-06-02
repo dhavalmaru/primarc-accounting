@@ -193,6 +193,7 @@ function get_code(){
             type: 'post',
             data: {
                     vendor_id : $("#vendor_id").val(),
+                    company_id : $("#company_id").val(),
                     _csrf : csrfToken
                 },
             dataType: 'json',
@@ -270,6 +271,7 @@ function get_code(){
             type: 'post',
             data: {
                     type : $("#type").val(),
+                    company_id : $("#company_id").val(),
                     _csrf : csrfToken
                 },
             success: function (data) {

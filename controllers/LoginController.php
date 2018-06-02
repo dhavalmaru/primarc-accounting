@@ -3,7 +3,7 @@
 namespace app\controllers;
 
 use Yii;
-// use app\models\Login;
+use app\models\Login;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -66,7 +66,11 @@ class LoginController extends Controller
             $session['session_id'] = $data[0]['id'];
             $session['temp_temp'] = $data[0]['id'];
             $session['username'] = $data[0]['username'];
-            // $session['role_id'] = $data[0]['role_id'];
+            $session['role_id'] = $data[0]['role_id'];
+            $session['company_id'] = $data[0]['company_id'];
+
+            $company = $login->getCompany();
+            $session['company'] = $company;
 
             // $user_role = new UserRole();
             // $data = $user_role->getAccess();
@@ -75,10 +79,42 @@ class LoginController extends Controller
                 $session[$data[$i]['r_section']] = $data[$i]['r_view'];
             }
 
-            // echo json_encode($data);
+            // echo json_encode($session);
             $this->redirect(array('welcome/index'));
         } else {
             $this->redirect(array('login/index'));
         }
     }
+
+    public function actionSetcompany() {
+        $request = Yii::$app->request;
+        $company_id = $request->post('company_id');
+
+        $session = Yii::$app->session;
+        $curusr = $session['session_id'];
+
+        $login = new Login();
+        $data = $login->getDetailsByCompany($curusr, $company_id);
+
+        if(count($data)>0){
+            $session['session_id'] = $data[0]['id'];
+            $session['temp_temp'] = $data[0]['id'];
+            $session['username'] = $data[0]['username'];
+            $session['role_id'] = $data[0]['role_id'];
+            $session['company_id'] = $data[0]['company_id'];
+
+            $company = $login->getCompany();
+            $session['company'] = $company;
+
+            // $user_role = new UserRole();
+            // $data = $user_role->getAccess();
+
+            for($i=0; $i<count($data); $i++){
+                $session[$data[$i]['r_section']] = $data[$i]['r_view'];
+            }
+
+            echo 1;
+        }
+    }
+
 }

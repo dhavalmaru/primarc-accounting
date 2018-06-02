@@ -1856,7 +1856,7 @@ class PendinggrnController extends Controller
             $columnNameArray=['grn_id','vendor_id','particular','sub_particular','acc_id','ledger_name','ledger_code',
                                 'voucher_id','ledger_type','vat_cst','vat_percen','invoice_no','total_val',
                                 'invoice_val','edited_val','difference_val','narration','status','is_active',
-                                'updated_by','updated_date', 'gi_date'];
+                                'updated_by','updated_date', 'gi_date', 'company_id'];
             // below line insert all your record and return number of rows inserted
             $tableName = "acc_grn_entries";
             $insertCount = Yii::$app->db->createCommand()
@@ -1876,7 +1876,7 @@ class PendinggrnController extends Controller
 
             $columnNameArray=['ref_id','ref_type','entry_type','invoice_no','vendor_id','acc_id','ledger_name','ledger_code',
                                 'voucher_id','ledger_type','type','amount','narration','status','is_active',
-                                'updated_by','updated_date', 'ref_date'];
+                                'updated_by','updated_date', 'ref_date', 'company_id'];
             // below line insert all your record and return number of rows inserted
             $tableName = "acc_ledger_entries";
             $insertCount = Yii::$app->db->createCommand()
@@ -1907,7 +1907,7 @@ class PendinggrnController extends Controller
                                 'sgst_per_unit','igst_per_unit','total_per_unit','cost_excl_vat','tax','cgst','sgst','igst',
                                 'total','expiry_date','earliest_expected_date','status','is_active', 'remarks','po_mrp',
                                 'po_cost_excl_vat','po_tax','po_cgst','po_sgst','po_igst','po_total','margin_diff_excl_tax',
-                                'margin_diff_cgst','margin_diff_sgst','margin_diff_igst','margin_diff_tax','margin_diff_total'];
+                                'margin_diff_cgst','margin_diff_sgst','margin_diff_igst','margin_diff_tax','margin_diff_total','company_id'];
             // below line insert all your record and return number of rows inserted
             $tableName = "acc_grn_sku_entries";
             $insertCount = Yii::$app->db->createCommand()

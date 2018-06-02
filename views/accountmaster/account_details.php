@@ -8,17 +8,19 @@ use yii\jui\Autocomplete;
 use yii\jui\DatePicker;
 use yii\web\JsExpression;
 use yii\db\Query;
+use yii\web\Session;
 
 $this->title = 'Account Details';
 $this->params['breadcrumbs'][] = $this->title;
+$session = Yii::$app->session;
 ?>
 <style type="text/css">
 input:-webkit-autofill {
     background-color: white !important;
 }
-select {
+/*select {
 	width: 100%;
-}
+}*/
 .form-horizontal .control-label { font-size: 12px; letter-spacing: .5px; margin-top:5px; }
 .form-devident { margin-top: 10px; }
 .form-devident h4 { border-bottom: 1px dashed #ddd; padding-bottom: 10px; }
@@ -33,6 +35,7 @@ select {
 					<label class="control-label">Type</label>
 					<input type="hidden" id="action" name="action" value="<?php if(isset($action)) echo $action; ?>">
 					<input type="hidden" id="id" name="id" value="<?php if(isset($data)) echo $data[0]['id']; ?>" />
+					<input type="hidden" id="company_id" name="company_id" value="<?php if(isset($data)) echo $data[0]['company_id']; else if(isset($session['company_id'])) echo $session['company_id']; ?>" />
 					<input type="hidden" id="status" name="status" value="<?php if(isset($data)) echo $data[0]['status']; ?>" />
 					<input type="hidden" id="type_val" name="type_val" value="<?php if(isset($data)) echo $data[0]['type']; ?>" />
 					<select class="form-control" id="type" name="type" <?php if(isset($data)) echo 'disabled'; ?>>
@@ -426,6 +429,7 @@ select {
 			  	<div class="modal-body-inside">
 			  		<form id="acc_category_master" class="form-horizontal"> 
 			  			<input type="hidden" name="_csrf" value="<?=Yii::$app->request->getCsrfToken()?>" />
+			  			<input type="hidden" name="company_id" value="<?php if(isset($data)) echo $data[0]['company_id']; else if(isset($session['company_id'])) echo $session['company_id']; ?>" />
 			  			<!-- <div class="bs-example grn-index" data-example-id="bordered-table"> -->
 	                	<table class="table table-bordered">
 	                		<thead>

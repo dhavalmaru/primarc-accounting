@@ -23,6 +23,7 @@ class AccountMaster extends Model
     public function getApprover($action){
         $session = Yii::$app->session;
         $session_id = $session['session_id'];
+        $company_id = $session['company_id'];
 
         $cond = "";
         if($action!="authorise" && $action!="view"){
@@ -32,7 +33,7 @@ class AccountMaster extends Model
         $sql = "select distinct A.id, A.username, C.r_approval from user A 
                 left join acc_user_roles B on (A.id = B.user_id) 
                 left join acc_user_role_options C on (B.role_id = C.role_id) 
-                where C.r_section = 'S_Account_Master' and 
+                where B.company_id = '$company_id' and C.r_section = 'S_Account_Master' and 
                         C.r_approval = '1' and C.r_approval is not null" . $cond;
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
@@ -51,10 +52,13 @@ class AccountMaster extends Model
             $cond = $cond . " and A.status = '$status'";
         }
         
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
         $sql = "select A.*, concat_ws(',', A.category_1, A.category_2, A.category_3) as acc_category, B.bus_category from 
                 (select A.*, B.username as updater, C.username as approver from 
                     acc_master A left join user B on (A.updated_by = B.id) left join user C on (A.approved_by = C.id) 
-                    where A.is_active = '1'" . $cond . ") A 
+                    where A.is_active = '1'" . $cond . " and A.company_id = '$company_id') A 
                 left join 
                 (select acc_id, GROUP_CONCAT(category_name) as bus_category from acc_categories where is_active = '1'" . $cond2 . " 
                     group by acc_id) B 
@@ -66,7 +70,10 @@ class AccountMaster extends Model
     }
 
     public function getVendors($vendor_id=""){
-        $sql = "select * from vendor_master where is_active = '1' and company_id = '1' and 
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $sql = "select * from vendor_master where is_active = '1' and company_id = '$company_id' and 
                 id not in (select distinct vendor_id from acc_master where vendor_id != '$vendor_id') order by vendor_name";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
@@ -76,6 +83,7 @@ class AccountMaster extends Model
     public function getVendorDetails(){
         $request = Yii::$app->request;
         $vendor_id = $request->post('vendor_id');
+        $company_id = $request->post('company_id');
 
         $sql = "select A.*, B.* from 
                 (select AA.*, BB.legal_entity_name from vendor_master AA left join legal_entity_type_master BB 
@@ -92,8 +100,7 @@ class AccountMaster extends Model
         $reader = $command->query();
         $data['vendor_details'] = $reader->readAll();
 
-        $sql = "select distinct id, category_name from product_main_category 
-                    where company_id = '1' and is_active = '1'";
+        $sql = "select distinct id, category_name from product_main_category where company_id = '$company_id' and is_active = '1'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $data['category_details'] = $reader->readAll();
@@ -118,15 +125,21 @@ class AccountMaster extends Model
     }
 
     public function getAccCategories($id){
-        $sql = "select * from acc_categories where acc_id='$id' and is_active='1' order by id";
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $sql = "select * from acc_categories where acc_id='$id' and is_active='1' and company_id = '$company_id' order by id";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
     }
 
     public function getBusinessCategories(){
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
         $sql = "select distinct id, category_name from product_main_category 
-                    where company_id = '1' and is_active = '1'";
+                    where company_id = '$company_id' and is_active = '1'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -135,6 +148,7 @@ class AccountMaster extends Model
     public function getCode(){
         $request = Yii::$app->request;
         $type = $request->post('type');
+        $company_id = $request->post('company_id');
 
         if($type=="Vendor Expenses"){
             $code = "VE";
@@ -158,7 +172,7 @@ class AccountMaster extends Model
             $code = "OT";
         }
 
-        $sql = "select * from acc_series_master where type = '$code'";
+        $sql = "select * from acc_series_master where type = '$code' and company_id = '$company_id'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $data = $reader->readAll();
@@ -197,7 +211,10 @@ class AccountMaster extends Model
             $code = "OT";
         }
 
-        $sql = "select * from acc_series_master where type = '$code'";
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $sql = "select * from acc_series_master where type = '$code' and company_id = '$company_id'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $data = $reader->readAll();
@@ -205,13 +222,13 @@ class AccountMaster extends Model
         if (count($data)>0){
             $series = intval($data[0]['series']) + 1;
 
-            $sql = "update acc_series_master set series = '$series' where type = '$code'";
+            $sql = "update acc_series_master set series = '$series' where type = '$code' and company_id = '$company_id'";
             $command = Yii::$app->db->createCommand($sql);
             $count = $command->execute();
         } else {
             $series = 1;
 
-            $sql = "insert into acc_series_master (type, series) values ('".$code."', '".$series."')";
+            $sql = "insert into acc_series_master (type, series, company_id) values ('".$code."', '".$series."', '".$company_id."')";
             $command = Yii::$app->db->createCommand($sql);
             $count = $command->execute();
         }
@@ -264,6 +281,7 @@ class AccountMaster extends Model
         $department = $request->post('department');
         $remarks = $request->post('remarks');
         $approver_id = $request->post('approver_id');
+        $company_id = $request->post('company_id');
 
         $vendor_id = "";
         $pan_no = "";
@@ -327,7 +345,7 @@ class AccountMaster extends Model
 
         if (!isset($id) || $id==""){
             if ($type!="Vendor Goods"){
-                $code = $this->setCode($type);
+                $code = $this->setCode($type, $company_id);
             }
         }
 
@@ -364,7 +382,8 @@ class AccountMaster extends Model
                         'updated_date'=>$now,
                         'approver_comments'=>$remarks,
                         'approver_id'=>$approver_id,
-                        'gst_id'=>$gst_id
+                        'gst_id'=>$gst_id,
+                        'company_id'=>$company_id
                         );
 
         if(count($array)>0){
@@ -405,7 +424,8 @@ class AccountMaster extends Model
                                                     'created_date'=>$now,
                                                     'updated_by'=>$curusr,
                                                     'updated_date'=>$now,
-                                                    'approver_comments'=>$remarks
+                                                    'approver_comments'=>$remarks,
+                                                    'company_id'=>$company_id
                                                 );
                     }
                 }
@@ -417,7 +437,7 @@ class AccountMaster extends Model
 
                 $columnNameArray=['acc_id', 'category_id', 'category_name', 'status', 'is_active', 
                                     'created_by', 'created_date', 'updated_by', 'updated_date', 
-                                    'approver_comments'];
+                                    'approver_comments', 'company_id'];
                 $tableName = "acc_categories";
                 $insertCount = Yii::$app->db->createCommand()
                                 ->batchInsert($tableName, $columnNameArray, $acc_categories)
@@ -559,7 +579,10 @@ class AccountMaster extends Model
     }
 
     public function getAccountCategories(){
-        $sql = "select * from acc_category_master where status = 'approved'";
+        $request = Yii::$app->request;
+        $company_id = $request->post('company_id');
+
+        $sql = "select * from acc_category_master where status = 'approved' and company_id = '$company_id'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -572,6 +595,7 @@ class AccountMaster extends Model
         $category_1 = $request->post('category_1');
         $category_2 = $request->post('category_2');
         $category_3 = $request->post('category_3');
+        $company_id = $request->post('company_id');
 
         for($i=0; $i<count($category_id); $i++){
             if(isset($category_1[$i]) || isset($category_2[$i]) || isset($category_3[$i])){
@@ -579,7 +603,8 @@ class AccountMaster extends Model
                     $array = array('category_1' => $category_1[$i], 
                                 'category_2' => $category_2[$i], 
                                 'category_3' => $category_3[$i],
-                                'status' => 'approved');
+                                'status' => 'approved',
+                                'company_id' => $company_id);
 
                     $tableName = "acc_category_master";
 
@@ -601,11 +626,11 @@ class AccountMaster extends Model
 
     public function checkLegalNameAvailablity(){
         $request = Yii::$app->request;
-
         $id = $request->post('id');
         $legal_name = $request->post('legal_name');
+        $company_id = $request->post('company_id');
 
-        $sql = "SELECT * FROM acc_master WHERE id!='".$id."' and legal_name='".$legal_name."'";
+        $sql = "SELECT * FROM acc_master WHERE id!='".$id."' and legal_name='".$legal_name."' and company_id='".$company_id."'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $data = $reader->readAll();
@@ -620,6 +645,7 @@ class AccountMaster extends Model
         $session = Yii::$app->session;
         $curusr = $session['session_id'];
         $now = date('Y-m-d H:i:s');
+        $company_id = $session['company_id'];
 
         $array = array('module_name' => $module_name, 
                         'sub_module' => $sub_module, 
@@ -629,7 +655,8 @@ class AccountMaster extends Model
                         'description' => $description, 
                         'log_activity_date' => $now, 
                         'table_name' => $table_name, 
-                        'table_id' => $table_id);
+                        'table_id' => $table_id, 
+                        'company_id' => $company_id);
         $count = Yii::$app->db->createCommand()
                             ->insert("acc_user_log", $array)
                             ->execute();

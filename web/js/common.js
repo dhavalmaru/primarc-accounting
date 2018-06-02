@@ -12,9 +12,8 @@ $(document).ready(function(){
     $('#loader').fadeOut(400);
 });
 
- $(document).ready(function(){
-
-var csrfToken = $('meta[name="csrf-token"]').attr("content");
+$(document).ready(function(){
+    var csrfToken = $('meta[name="csrf-token"]').attr("content");
 
     $('#example').DataTable({
         // lengthChange: false,

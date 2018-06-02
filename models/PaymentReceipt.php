@@ -23,6 +23,7 @@ class PaymentReceipt extends Model
     public function getApprover($action){
         $session = Yii::$app->session;
         $session_id = $session['session_id'];
+        $company_id = $session['company_id'];
 
         $cond = "";
         if($action!="authorise" && $action!="view"){
@@ -32,7 +33,7 @@ class PaymentReceipt extends Model
         $sql = "select distinct A.id, A.username, C.r_approval from user A 
                 left join acc_user_roles B on (A.id = B.user_id) 
                 left join acc_user_role_options C on (B.role_id = C.role_id) 
-                where C.r_section = 'S_Payment_Receipt' and 
+                where B.company_id = '$company_id' and C.r_section = 'S_Payment_Receipt' and 
                         C.r_approval = '1' and C.r_approval is not null" . $cond;
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
@@ -42,19 +43,22 @@ class PaymentReceipt extends Model
     public function getDetails($trans_id="", $status=""){
         $cond = "";
         if($trans_id!=""){
-            $cond = " Where A.id = '$trans_id'";
+            $cond = " and A.id = '$trans_id'";
         }
         if($status!=""){
             if($cond==""){
-                $cond = " Where A.status = '$status'";
+                $cond = " and A.status = '$status'";
             } else {
                 $cond = $cond . " and A.status = '$status'";
             }
         }
 
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
         $sql = "select A.*, B.username as updater, C.username as approver from acc_payment_receipt A 
                 left join user B on (A.updated_by = B.id) 
-                left join user C on (A.approved_by = C.id)" . $cond . " 
+                left join user C on (A.approved_by = C.id) where A.company_id = '$company_id' " . $cond . " 
                 order by UNIX_TIMESTAMP(A.updated_date) desc, A.id desc";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
@@ -67,15 +71,21 @@ class PaymentReceipt extends Model
             $cond = " and id = '$id'";
         }
 
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
         $sql = "select * from acc_master where is_active = '1' and status = 'approved' and 
-                type = 'Vendor Goods'".$cond." order by legal_name";
+                type = 'Vendor Goods' and company_id = '$company_id' ".$cond." order by legal_name";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
     }
 
     public function getVendors(){
-        $sql = "select * from vendor_master where is_active = '1' and company_id = '1'";
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $sql = "select * from vendor_master where is_active = '1' and company_id = '$company_id'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -87,7 +97,10 @@ class PaymentReceipt extends Model
             $cond = " and id = '$id'";
         }
 
-        $sql = "select * from acc_master where is_active = '1' and status = 'approved' and 
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $sql = "select * from acc_master where is_active = '1' and status = 'approved' and company_id = '$company_id' and 
                 type = 'Bank Account'".$cond." order by legal_name";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
@@ -96,6 +109,9 @@ class PaymentReceipt extends Model
 
     public function getLedger($id, $acc_id){
         $status = 'approved';
+
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
 
         $sql = "select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
                     A.ledger_code, A.type, A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, A.voucher_id, A.ledger_type, 
@@ -110,15 +126,14 @@ class PaymentReceipt extends Model
                     B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
                 (select A.*, B.gi_date, C.invoice_date, D.due_date from acc_ledger_entries A 
                     left join grn B on(A.ref_id = B.grn_id and A.ref_type = 'purchase') 
-                    left join goods_inward_outward_invoices C on(A.invoice_no = C.invoice_no and 
-                     A.ref_type = 'purchase' and B.gi_id = C.gi_go_ref_no) 
+                    left join goods_inward_outward_invoices C on(A.invoice_no = C.invoice_no and A.ref_type = 'purchase' and B.gi_id = C.gi_go_ref_no) 
                     left join invoice_tracker D on(A.ref_id=D.gi_id and A.invoice_no=D.invoice_id) 
                     where A.status = '$status' and A.is_active = '1' and B.status = 'Approved' and B.is_active = '1' and 
-                          A.ref_type = 'purchase' and A.ledger_type != 'Main Entry') A 
+                        A.ref_type = 'purchase' and A.ledger_type != 'Main Entry' and A.company_id = '$company_id' and B.company_id = '$company_id') A 
                 left join 
                 (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
                     ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
-                    ref_type = 'purchase' and ledger_type = 'Main Entry') B 
+                    ref_type = 'purchase' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
                 on (A.voucher_id = B.cp_voucher_id) 
                 union all 
                 select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
@@ -128,10 +143,10 @@ class PaymentReceipt extends Model
                     null as gi_date, null as invoice_date, null as due_date, 
                     B.acc_id as cp_acc_id, B.ledger_name as cp_ledger_name, B.ledger_code as cp_ledger_code from 
                 (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
-                    ref_type = 'journal_voucher' and acc_id!='$acc_id') A 
+                    ref_type = 'journal_voucher' and acc_id!='$acc_id' and company_id = '$company_id') A 
                 left join 
                 (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
-                    ref_type = 'journal_voucher' and acc_id='$acc_id') B 
+                    ref_type = 'journal_voucher' and acc_id='$acc_id' and company_id = '$company_id') B 
                 on (A.ref_id=B.ref_id) 
                 union all 
                 select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
@@ -141,17 +156,17 @@ class PaymentReceipt extends Model
                     null as gi_date, null as invoice_date, null as due_date, 
                     B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
                 (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
-                    ref_type = 'payment_receipt' and ledger_type = 'Sub Entry') A 
+                    ref_type = 'payment_receipt' and ledger_type = 'Sub Entry' and company_id = '$company_id') A 
                 left join 
                 (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
                     ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
-                    ref_type = 'payment_receipt' and ledger_type = 'Main Entry') B 
+                    ref_type = 'payment_receipt' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
                 on (A.voucher_id = B.cp_voucher_id)) AA 
                 where (AA.acc_id = '$acc_id' or AA.cp_acc_id = '$acc_id') and AA.amount!=0 and 
                         (AA.ref_type!='payment_receipt' or AA.entry_type='Bank Entry' or AA.entry_type='Payment' or AA.entry_type='Receipt') and 
                         (AA.is_paid is null or AA.is_paid!='1' or AA.payment_ref='$id')) A 
                 left join 
-                (select * from acc_ledger_entries where is_active = '1' and ref_id = '$id' and ref_type = 'payment_receipt') B 
+                (select * from acc_ledger_entries where is_active = '1' and ref_id = '$id' and ref_type = 'payment_receipt' and company_id = '$company_id') B 
                 on (A.id = B.sub_ref_id) 
                 order by A.ref_date, A.id";
         $command = Yii::$app->db->createCommand($sql);
@@ -186,6 +201,7 @@ class PaymentReceipt extends Model
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
         $session = Yii::$app->session;
+        $company_id = $session['company_id'];
 
         $curusr = $session['session_id'];
         $now = date('Y-m-d H:i:s');
@@ -270,7 +286,8 @@ class PaymentReceipt extends Model
                 'updated_date'=>$now,
                 'payment_date'=>$payment_date,
                 'approver_comments'=>$remarks,
-                'approver_id'=>$approver_id
+                'approver_id'=>$approver_id,
+                'company_id'=>$company_id
             ];
 
         if (isset($id) && $id!=""){
@@ -322,7 +339,8 @@ class PaymentReceipt extends Model
                             'updated_by'=>$curusr,
                             'updated_date'=>$now,
                             'ref_date'=>$payment_date,
-                            'approver_comments'=>$remarks
+                            'approver_comments'=>$remarks,
+                            'company_id'=>$company_id
                         ];
 
             $count = Yii::$app->db->createCommand()
@@ -372,7 +390,8 @@ class PaymentReceipt extends Model
                             'updated_by'=>$curusr,
                             'updated_date'=>$now,
                             'ref_date'=>$payment_date,
-                            'approver_comments'=>$remarks
+                            'approver_comments'=>$remarks,
+                            'company_id'=>$company_id
                         ];
 
             $count = Yii::$app->db->createCommand()
@@ -433,7 +452,8 @@ class PaymentReceipt extends Model
                                             'updated_by'=>$curusr,
                                             'updated_date'=>$now,
                                             'ref_date'=>$payment_date,
-                                            'approver_comments'=>$remarks
+                                            'approver_comments'=>$remarks,
+                                            'company_id'=>$company_id
                                         ];
 
                         $count = Yii::$app->db->createCommand()
@@ -497,7 +517,8 @@ class PaymentReceipt extends Model
                             'updated_date'=>$now,
                             'ref_date'=>$payment_date,
                             'payment_ref'=>$id,
-                            'approver_comments'=>$remarks
+                            'approver_comments'=>$remarks,
+                            'company_id'=>$company_id
                         ];
 
             $count = Yii::$app->db->createCommand()
@@ -580,6 +601,7 @@ class PaymentReceipt extends Model
         $session = Yii::$app->session;
         $curusr = $session['session_id'];
         $now = date('Y-m-d H:i:s');
+        $company_id = $session['company_id'];
 
         $array = array('module_name' => $module_name, 
                         'sub_module' => $sub_module, 
@@ -589,7 +611,8 @@ class PaymentReceipt extends Model
                         'description' => $description, 
                         'log_activity_date' => $now, 
                         'table_name' => $table_name, 
-                        'table_id' => $table_id);
+                        'table_id' => $table_id,
+                        'company_id' => $company_id);
         $count = Yii::$app->db->createCommand()
                             ->insert("acc_user_log", $array)
                             ->execute();
@@ -598,7 +621,10 @@ class PaymentReceipt extends Model
     }
 
     public function getPaymentAdviceDetails($id){
-        $sql = "select * from acc_payment_receipt where id = '$id'";
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $sql = "select * from acc_payment_receipt where id = '$id' and company_id = '$company_id'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $payment_details = $reader->readAll();
@@ -612,7 +638,7 @@ class PaymentReceipt extends Model
                 $sql = "select C.*, D.contact_name, D.contact_email, D.contact_phone, D.contact_mobile, D.contact_fax from 
                         (select A.*, B.* from 
                         (select AA.*, BB.legal_entity_name from vendor_master AA left join legal_entity_type_master BB 
-                            on (AA.legal_entity_type_id = BB.id) where AA.id = '$vendor_id' and BB.is_active = '1') A 
+                            on (AA.legal_entity_type_id = BB.id) where AA.id = '$vendor_id' and AA.company_id = '$company_id' and BB.is_active = '1') A 
                         left join 
                         (select AA.vendor_id, AA.office_address_line_1, AA.office_address_line_2, AA.office_address_line_3, 
                                 AA.pincode, BB.city_code, BB.city_name, CC.state_code, CC.state_name, 
@@ -656,11 +682,10 @@ class PaymentReceipt extends Model
                         from acc_ledger_entries A 
                         left join acc_ledger_entries B on(A.sub_ref_id=B.id) 
                         left join grn C on(B.ref_id = C.grn_id and B.ref_type = 'purchase') 
-                        left join goods_inward_outward_invoices D on(B.invoice_no = D.invoice_no and 
-                            B.ref_type = 'purchase' and C.gi_id = D.gi_go_ref_no) 
+                        left join goods_inward_outward_invoices D on(B.invoice_no = D.invoice_no and B.ref_type = 'purchase' and C.gi_id = D.gi_go_ref_no) 
                         left join acc_jv_details E on(B.ref_id = E.id and B.ref_type = 'journal_voucher') 
                         left join acc_payment_receipt F on(B.ref_id = F.id and B.ref_type = 'payment_receipt') 
-                        where A.is_active = '1' and A.ref_type = 'payment_receipt' and 
+                        where A.is_active = '1' and A.ref_type = 'payment_receipt' and A.company_id = '$company_id' and 
                             A.ref_id = '$id' and A.entry_type != 'payment_entry' and B.is_active = '1') C 
                         group by sr_no, ledger_type, type, ref_no, ref_date 
                         order by sr_no, ledger_type, type, ref_no, ref_date";
@@ -674,14 +699,14 @@ class PaymentReceipt extends Model
                 $sql = "select A.id as sr_no, 'payment_receipt' as ledger_type, 
                                 case when A.trans_type='Payment' then 'Debit' else 'Credit' end as type, 
                                 A.ref_no, A.payment_date as ref_date, A.amount as tot_amount from acc_payment_receipt A 
-                        where A.is_active = '1' and A.id = '$id'";
+                        where A.is_active = '1' and A.id = '$id' and A.company_id = '$company_id'";
             }
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $entry_details = $reader->readAll();
             
 
-            $sql = "select * from acc_payment_advices where is_active = '1' and payment_id = '$id'";
+            $sql = "select * from acc_payment_advices where is_active = '1' and payment_id = '$id' and company_id = '$company_id'";
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $payment_advice = $reader->readAll();
@@ -697,7 +722,8 @@ class PaymentReceipt extends Model
                     'status'=>$status,
                     'is_active'=>'1',
                     'updated_by'=>$curusr,
-                    'updated_date'=>$now
+                    'updated_date'=>$now,
+                    'company_id'=>$company_id
                 ];
 
                 $count = Yii::$app->db->createCommand()
@@ -712,7 +738,7 @@ class PaymentReceipt extends Model
                 $count = $command->execute();
             }
 
-            $sql = "select * from acc_payment_advices where is_active = '1' and id = '$ref_id'";
+            $sql = "select * from acc_payment_advices where is_active = '1' and id = '$ref_id' and company_id = '$company_id'";
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $payment_advice = $reader->readAll();
@@ -770,6 +796,7 @@ class PaymentReceipt extends Model
         $curusr = $session['session_id'];
         $username = $session['username'];
         $now = date('Y-m-d H:i:s');
+        $company_id = $session['company_id'];
 
         $array = array('module' => 'PA', 
                         'email_type' => 'Payment Advice Email', 

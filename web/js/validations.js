@@ -1217,9 +1217,15 @@ function checkRole() {
 // ----------------- ASSIGN ROLE DETAILS FORM VALIDATION -------------------------------------
 $("#assign_role").validate({
     rules: {
-        role: {
+        user_id: {
             required: true,
             checkUserRoleAvailability: true
+        },
+        role_id: {
+            required: true
+        },
+        company_id: {
+            required: true
         }
     },
 
@@ -1240,7 +1246,7 @@ $.validator.addMethod("checkUserRoleAvailability", function (value, element) {
     var result = 1;
 
     $.ajax({
-        url: BASE_URL+'index.php?r=userrole%2Fcheckroleavailablity',
+        url: BASE_URL+'index.php?r=assignrole%2Fcheckuserroleavailability',
         data: $("#assign_role").serialize(),
         type: "POST",
         dataType: 'html',
@@ -1260,7 +1266,7 @@ $.validator.addMethod("checkUserRoleAvailability", function (value, element) {
     } else {
         return true;
     }
-}, 'User Role already exist.');
+}, 'User already have a role in selected company.');
 
 $('#assign_role').submit(function() {
     if (!$("#assign_role").valid()) {

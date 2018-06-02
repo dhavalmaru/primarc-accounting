@@ -46,7 +46,7 @@ $session = Yii::$app->session;
                 <li class="dropdown user user-menu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                         <img src="dist/img/boxed-bg.jpg" class="user-image" alt="User Image">
-                        <span class="hidden-xs"><?php echo $session['username'];?></span>
+                        <span class="hidden-xs"><?php echo $session['username']; ?> <?php $company = $session['company']; ?></span>
                     </a>
                     <ul class="dropdown-menu">
                         <!-- User image -->
@@ -73,6 +73,12 @@ $session = Yii::$app->session;
                 <!-- Control Sidebar Toggle Button -->
             </ul>
         </div>
+
+        <select name="session_company" id="session_company" style="height:25px; font-weight:bolder; font-size:14px; float:right; margin-top: 10px;">
+            <?php if(isset($company)) { for ($i=0; $i < count($company) ; $i++) { ?>
+            <option value="<?php echo $company[$i]['id']; ?>" <?php if($company[$i]['id']==$session['company_id']) echo 'selected'; ?>><?php echo $company[$i]['company_short_name']; ?></option>
+            <?php }} ?>
+        </select>
     </nav>
 </header>
 
@@ -245,6 +251,33 @@ $session = Yii::$app->session;
 
 </div>
 <?php $this->endBody() ?>
+
+<script>
+    $('#session_company').change(function(){
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+        $.ajax({
+            url: '<?php echo Url::base(); ?>index.php?r=login%2Fsetcompany',
+            type: 'post',
+            data: {
+                    company_id : $('#session_company').val(),
+                    _csrf : csrfToken
+                 },
+            dataType: 'html',
+            global: false,
+            async: false,
+            success: function (data) {
+                if(data == 1){
+                    location.reload();
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.log(xhr.status);
+                console.log(thrownError);
+            }
+        });
+    });
+
+</script>
 </body>
 </html>
 <?php $this->endPage() ?>

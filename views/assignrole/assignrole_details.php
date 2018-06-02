@@ -57,7 +57,7 @@ table tr td { border: 1px solid #eee!important; }
 							</div>
 						</div>
 					</div>
-					<div class=" col-md-6 col-sm-6 col-xs-12">
+					<div class=" col-md-3 col-sm-3 col-xs-12">
 						<label class="control-label">Role</label>
 						<div class=" ">
 							<div class=" ">  
@@ -65,6 +65,19 @@ table tr td { border: 1px solid #eee!important; }
 									<option value="">Select</option>
 									<?php for($i=0; $i<count($roles); $i++) { ?>
 										<option value="<?php echo $roles[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['role_id']==$roles[$i]['id']) echo "selected"; } ?>><?php echo $roles[$i]['role']; ?></option>
+									<?php } ?>
+								</select>
+							</div>
+						</div>
+					</div>
+					<div class=" col-md-3 col-sm-3 col-xs-12">
+						<label class="control-label">Company</label>
+						<div class=" ">
+							<div class=" ">  
+								<select id="company_id" name="company_id" class="form-control">
+									<option value="">Select</option>
+									<?php for($i=0; $i<count($company); $i++) { ?>
+										<option value="<?php echo $company[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['company_id']==$company[$i]['id']) echo "selected"; } ?>><?php echo $company[$i]['company_short_name']; ?></option>
 									<?php } ?>
 								</select>
 							</div>

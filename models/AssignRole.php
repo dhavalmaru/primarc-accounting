@@ -27,23 +27,26 @@ class AssignRole extends Model
             $cond = $cond . " and A.status = '$status'";
         }
 
-        $sql = "select A.*, B.username as user_name, C.role, D.username from acc_user_roles A 
+        $sql = "select A.*, B.username as user_name, C.role, D.username, E.company_short_name 
+                from acc_user_roles A 
                 left join user B on(A.user_id = B.id) 
                 left join acc_user_role_master C on(A.role_id = C.id) 
                 left join user D on(A.updated_by = D.id) 
-                where A.is_active='1'" . $cond . " order by A.updated_date desc";
+                left join company_master E on(A.company_id = E.id) 
+                where A.is_active='1' " . $cond . " order by A.updated_date desc";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
     }
 
     public function getUsers($id=""){
-        $cond = "";
-        if($id!=""){
-            $cond = " and id != '$id'";
-        }
-        $sql = "select A.* from user A where A.id not in (select distinct user_id from acc_user_roles 
-                    where is_active = '1' ".$cond.") order by A.username";
+        // $cond = "";
+        // if($id!=""){
+        //     $cond = " and id != '$id'";
+        // }
+        // $sql = "select A.* from user A where A.id not in (select distinct user_id from acc_user_roles 
+        //             where is_active = '1' ".$cond.") order by A.username";
+        $sql = "select A.* from user A order by A.username";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -51,6 +54,13 @@ class AssignRole extends Model
 
     public function getRoles(){
         $sql = "select A.* from acc_user_role_master A where A.is_active='1' and A.status = 'approved' order by A.role";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
+    public function getCompany(){
+        $sql = "select A.* from company_master A where A.is_active='1' and A.id<3 order by A.id";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -66,6 +76,7 @@ class AssignRole extends Model
         $array = array(
                     'user_id' => $request->post('user_id'),
                     'role_id' => $request->post('role_id'),
+                    'company_id' => $request->post('company_id'),
                     'status' => 'approved',
                     'is_active' => '1',
                     'updated_by' => $curusr,
@@ -90,17 +101,20 @@ class AssignRole extends Model
         return true;
     }
 
-    public function checkUserRoleAvailablity(){
+    public function checkUserRoleAvailability(){
         $request = Yii::$app->request;
 
         $id = $request->post('id');
         $user_id = $request->post('user_id');
         // $role_id = $request->post('role_id');
+        $company_id = $request->post('company_id');
 
         // $id = '127';
-        // $role = 'Admin';
+        // $user_id = '1';
+        // $role_id = '1';
+        // $company_id = '1';
 
-        $sql = "SELECT * FROM acc_user_role_master WHERE id!='".$id."' and user_id='".$user_id."'";
+        $sql = "select * from acc_user_roles where id!='".$id."' and user_id='".$user_id."' and company_id='".$company_id."'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $data = $reader->readAll();
