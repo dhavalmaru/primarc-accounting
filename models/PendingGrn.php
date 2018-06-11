@@ -90,7 +90,6 @@ class PendingGrn extends Model
         }
 
         $company_id = $session['company_id'];
-
         $sql = "select * from 
                 (select A.*, B.grn_id as b_grn_id from 
                 (select A.*, B.username from grn A left join user B on(A.updated_by = B.id) 
@@ -111,7 +110,7 @@ class PendingGrn extends Model
         $start = $request->post('start');
         $length = $request->post('length');
 
-       $wheresearch = '';
+        $wheresearch = '';
         if($request->post('search')!=null)
         {
            $search_value1 =  $request->post('search');
@@ -122,7 +121,6 @@ class PendingGrn extends Model
         }
 
         $company_id = $session['company_id'];
-
         $sql = "select count(*) as count  from 
                 (select A.*, B.grn_id as b_grn_id from 
                 (select A.*, B.username from grn A left join user B on(A.updated_by = B.id) 
