@@ -54,7 +54,7 @@ class PendinggrnController extends Controller
                         ) ;
            $grn_data[] = $row;
            $start = $start+1;
-       }
+        }
         $json_data = array(
                 "draw"            => intval($request->post('draw')),   
                 "recordsTotal"    => intval($grn_count),  
@@ -62,7 +62,7 @@ class PendinggrnController extends Controller
                 "data"            => $grn_data
                 );
 
-         echo json_encode($json_data);
+        echo json_encode($json_data);
     }
 
     public function actionGetapprovedgrn(){
@@ -92,7 +92,7 @@ class PendinggrnController extends Controller
                         ) ;
            $grn_data[] = $row;
            $start = $start+1;
-       }
+        }
         $json_data = array(
                 "draw"            => intval($request->post('draw')),   
                 "recordsTotal"    => intval($grn_count),  
@@ -100,7 +100,7 @@ class PendinggrnController extends Controller
                 "data"            => $grn_data
                 );
 
-         echo json_encode($json_data);
+        echo json_encode($json_data);
     }
 
     public function actionGetallgrn(){
@@ -110,7 +110,7 @@ class PendinggrnController extends Controller
         $request = Yii::$app->request;
         $grn_data = array();
         $mycomponent = Yii::$app->mycomponent;
-        $start = $request->post('approved');    
+        $start = $request->post('start');    
         //$params['start'].", ".$params['length']
         for($i=0; $i<count($grn); $i++) { 
            $row = array(
@@ -130,7 +130,7 @@ class PendinggrnController extends Controller
                         ) ;
            $grn_data[] = $row;
            $start = $start+1;
-       }
+        }
         $json_data = array(
                 "draw"            => intval($request->post('draw')),   
                 "recordsTotal"    => intval($grn_count),  
@@ -138,7 +138,7 @@ class PendinggrnController extends Controller
                 "data"            => $grn_data
                 );
 
-         echo json_encode($json_data);
+        echo json_encode($json_data);
     }
 
 

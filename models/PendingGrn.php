@@ -77,7 +77,7 @@ class PendingGrn extends Model
             $mycomponent = Yii::$app->mycomponent;   
             $start = $request->post('start');
             $length = $request->post('length'); 
-            $len = "LIMIT ".$start.", ".$length;  
+            $len = " LIMIT ".$start.", ".$length;  
         }
         $wheresearch = '';
         if($request->post('search')!=null)
@@ -85,11 +85,15 @@ class PendingGrn extends Model
            $search_value1 =  $request->post('search');
            $search = $search_value1['value'];
             if($search!="") {
-                    $wheresearch = "AND ( c.grn_id like '%$search%' or c.gi_id like '%$search%' or c.location like '%$search%' or c.vendor_name like '%$search%' or c.invoice_val_after_tax like '%$search%' or c.gi_date like '%$search%' or c.status like '%$search%' or c.user_name  like '%$search%' or c.approver_name like '%$search%')";
+                    $wheresearch = " and (C.grn_id like '%$search%' or C.gi_id like '%$search%' or C.location like '%$search%' or 
+                                    C.vendor_name like '%$search%' or C.invoice_val_after_tax like '%$search%' or 
+                                    C.gi_date like '%$search%' or C.status like '%$search%' or C.user_name  like '%$search%' or 
+                                    C.approver_name like '%$search%') ";
             } 
         }
 
         $company_id = $session['company_id'];
+
         $sql = "select * from 
                 (select A.*, B.grn_id as b_grn_id from 
                 (select A.*, B.username from grn A left join user B on(A.updated_by = B.id) 
@@ -97,7 +101,7 @@ class PendingGrn extends Model
                 left join 
                 (select distinct grn_id from acc_grn_entries) B 
                 on (A.grn_id = B.grn_id)) C 
-                where b_grn_id is null ".$wheresearch." order by UNIX_TIMESTAMP(updated_date) desc ".$len;
+                where C.b_grn_id is null ".$wheresearch." order by UNIX_TIMESTAMP(C.updated_date) desc ".$len;
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -116,19 +120,23 @@ class PendingGrn extends Model
            $search_value1 =  $request->post('search');
            $search = $search_value1['value'];
             if($search!="") {
-                    $wheresearch = "AND ( c.grn_id like '%$search%' or c.gi_id like '%$search%' or c.location like '%$search%' or c.vendor_name like '%$search%' or c.invoice_val_after_tax like '%$search%' or c.gi_date like '%$search%' or c.status like '%$search%' or c.user_name  like '%$search%' or c.approver_name like '%$search%')";
+                    $wheresearch = " and (C.grn_id like '%$search%' or C.gi_id like '%$search%' or C.location like '%$search%' or 
+                                    C.vendor_name like '%$search%' or C.invoice_val_after_tax like '%$search%' or 
+                                    C.gi_date like '%$search%' or C.status like '%$search%' or C.user_name  like '%$search%' or 
+                                    C.approver_name like '%$search%')";
             } 
         }
 
         $company_id = $session['company_id'];
+
         $sql = "select count(*) as count  from 
                 (select A.*, B.grn_id as b_grn_id from 
                 (select A.*, B.username from grn A left join user B on(A.updated_by = B.id) 
                     where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-07-01') and A.company_id='$company_id') A 
                 left join 
                 (select distinct grn_id from acc_grn_entries) B 
-                on (A.grn_id = B.grn_id)) c 
-                where b_grn_id is null ".$wheresearch."order by UNIX_TIMESTAMP(updated_date) desc";
+                on (A.grn_id = B.grn_id)) C 
+                where C.b_grn_id is null ".$wheresearch." order by UNIX_TIMESTAMP(C.updated_date) desc";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $result =  $reader->readAll();
@@ -152,22 +160,39 @@ class PendingGrn extends Model
            $search_value1 =  $request->post('search');
            $search = $search_value1['value'];
             if($search!="") {
-                    $wheresearch = "Where ( c.grn_id like '%$search%' or c.gi_id like '%$search%' or c.location like '%$search%' or c.vendor_name like '%$search%' or c.invoice_val_after_tax like '%$search%' or c.gi_date like '%$search%' or c.status like '%$search%' or c.user_name  like '%$search%' or c.approver_name like '%$search%')";
+                $wheresearch = " where (C.grn_id like '%$search%' or C.gi_id like '%$search%' or C.location like '%$search%' or 
+                                C.vendor_name like '%$search%' or C.invoice_val_after_tax like '%$search%' or 
+                                C.gi_date like '%$search%' or C.status like '%$search%' or C.user_name  like '%$search%' or 
+                                C.approver_name like '%$search%') ";
             } 
         }
 
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-        $sql = "select * from 
+        // $sql = "select * from 
+        //         (select A.*, B.status as grn_status from 
+        //         (select distinct A.*, B.username, C.is_paid from grn A left join user B on(A.updated_by = B.id) 
+        //             left join acc_ledger_entries C on (A.grn_id = C.ref_id and 'purchase' = C.ref_type and 
+        //                 '1' = C.is_active and 'Approved' = C.status and '1' = C.is_paid) 
+        //             where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-07-01') and A.company_id='$company_id') A 
+        //         left join 
+        //         (select distinct grn_id, status from acc_grn_entries) B 
+        //         on (A.grn_id = B.grn_id)) c ".$wheresearch." order by UNIX_TIMESTAMP(updated_date) desc ".$len;
+
+        $sql = "select C.*, D.is_paid from 
                 (select A.*, B.status as grn_status from 
-                (select distinct A.*, B.username, C.is_paid from grn A left join user B on(A.updated_by = B.id) 
-                    left join acc_ledger_entries C on (A.grn_id = C.ref_id and 'purchase' = C.ref_type and 
-                        '1' = C.is_active and 'Approved' = C.status and '1' = C.is_paid) 
-                    where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-07-01') and A.company_id='$company_id') A 
+                (select distinct A.*, B.username from grn A left join user B on(A.updated_by = B.id) 
+                where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-07-01') and A.company_id='$company_id') A 
                 left join 
                 (select distinct grn_id, status from acc_grn_entries) B 
-                on (A.grn_id = B.grn_id)) c ".$wheresearch." order by UNIX_TIMESTAMP(updated_date) desc ".$len;
+                on (A.grn_id = B.grn_id)) C 
+                left join 
+                (select distinct ref_id, is_paid from acc_ledger_entries 
+                    where ref_type = 'purchase' and is_active = '1' and status = 'Approved' and is_paid = '1') D 
+                on (C.grn_id = D.ref_id) ".$wheresearch." 
+                order by UNIX_TIMESTAMP(C.updated_date) desc ".$len;
+
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -181,22 +206,33 @@ class PendingGrn extends Model
            $search_value1 =  $request->post('search');
            $search = $search_value1['value'];
             if($search!="") {
-                    $wheresearch = "Where ( c.grn_id like '%$search%' or c.gi_id like '%$search%' or c.location like '%$search%' or c.vendor_name like '%$search%' or c.invoice_val_after_tax like '%$search%' or c.gi_date like '%$search%' or c.status like '%$search%' or c.user_name  like '%$search%' or c.approver_name like '%$search%')";
+                    $wheresearch = " where (C.grn_id like '%$search%' or C.gi_id like '%$search%' or C.location like '%$search%' or 
+                                    C.vendor_name like '%$search%' or C.invoice_val_after_tax like '%$search%' or 
+                                    C.gi_date like '%$search%' or C.status like '%$search%' or C.user_name  like '%$search%' or 
+                                    C.approver_name like '%$search%') ";
             } 
         }
 
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
+        // $sql = "select count(*) as count  from 
+        //     (select A.*, B.status as grn_status from 
+        //     (select distinct A.*, B.username, C.is_paid from grn A left join user B on(A.updated_by = B.id) 
+        //         left join acc_ledger_entries C on (A.grn_id = C.ref_id and 'purchase' = C.ref_type and 
+        //             '1' = C.is_active and 'Approved' = C.status and '1' = C.is_paid) 
+        //         where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-07-01') and A.company_id='$company_id') A 
+        //     left join 
+        //     (select distinct grn_id, status from acc_grn_entries) B 
+        //     on (A.grn_id = B.grn_id)) c ".$wheresearch." order by UNIX_TIMESTAMP(updated_date) desc ";
+
         $sql = "select count(*) as count  from 
-            (select A.*, B.status as grn_status from 
-            (select distinct A.*, B.username, C.is_paid from grn A left join user B on(A.updated_by = B.id) 
-                left join acc_ledger_entries C on (A.grn_id = C.ref_id and 'purchase' = C.ref_type and 
-                    '1' = C.is_active and 'Approved' = C.status and '1' = C.is_paid) 
+                (select A.*, B.status as grn_status from 
+                (select distinct A.*, B.username from grn A left join user B on(A.updated_by = B.id) 
                 where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-07-01') and A.company_id='$company_id') A 
-            left join 
-            (select distinct grn_id, status from acc_grn_entries) B 
-            on (A.grn_id = B.grn_id)) c ".$wheresearch." order by UNIX_TIMESTAMP(updated_date) desc ";
+                left join 
+                (select distinct grn_id, status from acc_grn_entries) B 
+                on (A.grn_id = B.grn_id)) C  ".$wheresearch;
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $result =  $reader->readAll();
@@ -236,18 +272,22 @@ class PendingGrn extends Model
            $search_value1 =  $request->post('search');
            $search = $search_value1['value'];
             if($search!="") {
-                    $wheresearch = "Where ( c.grn_no like '%$search%' or c.vendor_name like '%$search%' or c.category_name like '%$search%' or c.po_no like '%$search%' or c.inv_nos like '%$search%' or c.ded_amt like '%$search%' or c.net_amt  like '%$search%' or c.username like '%$search%')";
+                    $wheresearch = " where (G.grn_no like '%$search%' or G.vendor_name like '%$search%' or 
+                                    G.category_name like '%$search%' or G.po_no like '%$search%' or G.inv_nos like '%$search%' or 
+                                    G.ded_amt like '%$search%' or G.net_amt  like '%$search%' or G.username like '%$search%') ";
             } 
         }
 
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-        $sql = "Select * from (select D.*, E.username from 
-                (select B.*, C.grn_no, C.vendor_name, C.category_name, C.po_no from 
+        $sql = "select * from 
+                (select E.*, F.username from 
+                (select C.*, D.grn_no, D.vendor_name, D.category_name, D.po_no from 
+                (select A.*, B.is_paid from 
                 (select grn_id, inv_nos, (taxable_amt+tax_amt+other_amt) as net_amt, 
                     (shortage_amt+expiry_amt+damaged_amt+magrin_diff_amt) as ded_amt, 
-                    updated_date, updated_by, approved_by, is_paid from 
+                    updated_date, updated_by, approved_by from 
                 (select distinct A.grn_id, GROUP_CONCAT(distinct A.invoice_no) as inv_nos, 
                         sum(case when A.particular='Taxable Amount' then A.edited_val else 0 end) as taxable_amt, 
                         sum(case when A.particular='Tax' then A.edited_val else 0 end) as tax_amt, 
@@ -256,19 +296,18 @@ class PendingGrn extends Model
                         sum(case when A.particular='Expiry Amount' then A.edited_val else 0 end) as expiry_amt, 
                         sum(case when A.particular='Damaged Amount' then A.edited_val else 0 end) as damaged_amt, 
                         sum(case when A.particular='Margin Diff Amount' then A.edited_val else 0 end) as magrin_diff_amt, 
-                        max(A.updated_date) as updated_date, max(A.updated_by) as updated_by, max(A.approved_by) as approved_by, 
-                        B.is_paid 
-                from acc_grn_entries A 
-                    left join acc_ledger_entries B on (A.grn_id = B.ref_id and 'purchase' = B.ref_type and 
-                        '1' = B.is_active and 'Approved' = B.status and '1' = B.is_paid) 
-                where A.is_active = '1' and A.company_id = '$company_id' ".$cond." group by grn_id) A) B 
+                        max(A.updated_date) as updated_date, max(A.updated_by) as updated_by, max(A.approved_by) as approved_by 
+                from acc_grn_entries A where A.is_active = '1' and A.company_id = '$company_id' ".$cond." group by A.grn_id) AA) A 
                 left join 
-                (select * from grn where status = 'approved') C 
-                on (B.grn_id = C.grn_id)) D 
+                (select distinct ref_id, is_paid from acc_ledger_entries where ref_type = 'purchase' and is_active = '1' and status = 'Approved' and is_paid = '1') B 
+                on (A.grn_id = B.ref_id)) C 
                 left join 
-                (select * from user) E 
-                on (D.updated_by = E.id) ) c ".$wheresearch."
-                order by UNIX_TIMESTAMP(c.updated_date) desc ".$len;
+                (select * from grn where status = 'approved') D 
+                on (C.grn_id = D.grn_id)) E 
+                left join 
+                (select * from user) F 
+                on (E.updated_by = F.id)) G ".$wheresearch."
+                order by UNIX_TIMESTAMP(G.updated_date) desc ".$len;
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -295,18 +334,22 @@ class PendingGrn extends Model
            $search_value1 =  $request->post('search');
            $search = $search_value1['value'];
             if($search!="") {
-                    $wheresearch = "Where ( c.grn_no like '%$search%' or c.vendor_name like '%$search%' or c.category_name like '%$search%' or c.po_no like '%$search%' or c.inv_nos like '%$search%' or c.ded_amt like '%$search%' or c.net_amt  like '%$search%' or c.username like '%$search%')";
+                $wheresearch = " where (G.grn_no like '%$search%' or G.vendor_name like '%$search%' or 
+                                G.category_name like '%$search%' or G.po_no like '%$search%' or G.inv_nos like '%$search%' or 
+                                G.ded_amt like '%$search%' or G.net_amt  like '%$search%' or G.username like '%$search%') ";
             } 
         }
 
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-        $sql = "Select count(*) as count from (select D.*, E.username from 
-                (select B.*, C.grn_no, C.vendor_name, C.category_name, C.po_no from 
+        $sql = "select count(*) as count from 
+                (select E.*, F.username from 
+                (select C.*, D.grn_no, D.vendor_name, D.category_name, D.po_no from 
+                (select A.*, B.is_paid from 
                 (select grn_id, inv_nos, (taxable_amt+tax_amt+other_amt) as net_amt, 
                     (shortage_amt+expiry_amt+damaged_amt+magrin_diff_amt) as ded_amt, 
-                    updated_date, updated_by, approved_by, is_paid from 
+                    updated_date, updated_by, approved_by from 
                 (select distinct A.grn_id, GROUP_CONCAT(distinct A.invoice_no) as inv_nos, 
                         sum(case when A.particular='Taxable Amount' then A.edited_val else 0 end) as taxable_amt, 
                         sum(case when A.particular='Tax' then A.edited_val else 0 end) as tax_amt, 
@@ -315,19 +358,17 @@ class PendingGrn extends Model
                         sum(case when A.particular='Expiry Amount' then A.edited_val else 0 end) as expiry_amt, 
                         sum(case when A.particular='Damaged Amount' then A.edited_val else 0 end) as damaged_amt, 
                         sum(case when A.particular='Margin Diff Amount' then A.edited_val else 0 end) as magrin_diff_amt, 
-                        max(A.updated_date) as updated_date, max(A.updated_by) as updated_by, max(A.approved_by) as approved_by, 
-                        B.is_paid 
-                from acc_grn_entries A 
-                    left join acc_ledger_entries B on (A.grn_id = B.ref_id and 'purchase' = B.ref_type and 
-                        '1' = B.is_active and 'Approved' = B.status and '1' = B.is_paid) 
-                where A.is_active = '1' and A.company_id = '$company_id' ".$cond." group by grn_id) A) B 
+                        max(A.updated_date) as updated_date, max(A.updated_by) as updated_by, max(A.approved_by) as approved_by 
+                from acc_grn_entries A where A.is_active = '1' and A.company_id = '$company_id' ".$cond." group by A.grn_id) AA) A 
                 left join 
-                (select * from grn where status = 'approved') C 
-                on (B.grn_id = C.grn_id)) D 
+                (select distinct ref_id, is_paid from acc_ledger_entries where ref_type = 'purchase' and is_active = '1' and status = 'Approved' and is_paid = '1') B 
+                on (A.grn_id = B.ref_id)) C 
                 left join 
-                (select * from user) E 
-                on (D.updated_by = E.id) 
-                ) c ".$wheresearch. " order by UNIX_TIMESTAMP(c.updated_date) desc";
+                (select * from grn where status = 'approved') D 
+                on (C.grn_id = D.grn_id)) E 
+                left join 
+                (select * from user) F 
+                on (E.updated_by = F.id)) G ".$wheresearch;
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $result =  $reader->readAll();
