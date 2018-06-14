@@ -191,13 +191,13 @@ class AccReport extends Model
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-         $sql = "Select * from (
+        $sql = "Select * from (
                 SELECT ae.acc_id,ae.ledger_name,sum(case when ae.type='Credit' then amount else 0 end) as debit_amount,
                 sum(case when ae.type='Debit' then amount else 0 end) as credit_amount
                 from acc_ledger_entries ae
                 left join acc_master am on am.id=ae.acc_id
                 WHERE  ae.`status`='approved' and am.type='Vendor Goods' and 
-                date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and company_id = '$company_id' 
+                date(ae.ref_date) >= date('$from_date') and date(ae.ref_date) <= date('$to_date') and ae.company_id = '$company_id' 
                 GROUP BY ae.acc_id,ae.ledger_name ) A";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
