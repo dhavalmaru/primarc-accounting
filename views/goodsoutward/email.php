@@ -9,9 +9,9 @@ use yii\jui\DatePicker;
 use yii\web\JsExpression;
 use yii\db\Query;
 
-$this->title = 'Email Debit Note: ' . $debit_note[0]['id'];
-$this->params['breadcrumbs'][] = ['label' => 'Grns', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $debit_note[0]['grn_id'], 'url' => ['update', 'id' => $debit_note[0]['grn_id']]];
+$this->title = 'Email Debit Note: ' . $debit_note[0]['gi_go_id'];
+$this->params['breadcrumbs'][] = ['label' => 'Debit Note', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => $debit_note[0]['gi_go_id'], 'url' => ['edit', 'id' => $debit_note[0]['gi_go_id']]];
 $this->params['breadcrumbs'][] = 'Email';
 $mycomponent = Yii::$app->mycomponent;
 ?>
@@ -26,30 +26,28 @@ input:-webkit-autofill {
 </style>
 <div class="grn-index">
 	<div class=" col-md-12">  
-		<form id="account_master" class="form-horizontal" action="<?php echo Url::base(); ?>index.php?r=pendinggrn%2Femail" method="post" enctype="multipart/form-data" onkeypress="return event.keyCode != 13;"> 
+		<form id="account_master" class="form-horizontal" action="<?php echo Url::base(); ?>index.php?r=goodsoutward%2Femail" method="post" enctype="multipart/form-data" onkeypress="return event.keyCode != 13;"> 
 			<input type="hidden" name="_csrf" value="<?=Yii::$app->request->getCsrfToken()?>" />
-			<input type="hidden" name="id" value="<?php echo $debit_note[0]['id']; ?>" />
-			<input type="hidden" name="grn_id" value="<?php echo $debit_note[0]['grn_id']; ?>" />
-			<input type="hidden" name="invoice_id" value="<?php echo $debit_note[0]['invoice_id']; ?>" />
-			<input type="hidden" name="vendor_name" value="<?php echo $vendor_details[0]['vendor_name']; ?>" />
-			<input type="hidden" name="company_id" value="<?php echo $vendor_details[0]['company_id']; ?>" />
+			<input type="hidden" name="id" value="<?php echo $debit_note[0]['gi_go_id']; ?>" />
+			<input type="hidden" name="vendor_name" value="<?php echo $go_details[0]['to_party']; ?>" />
+			<input type="hidden" name="company_id" value="<?php echo $debit_note[0]['company_id']; ?>" />
 			<div class="form-group">
 				<div class="col-md-6 col-sm-6 col-xs-6">
 					<label class="control-label">To</label>
-					<input type="text" class="form-control" id="to" name="to" value="<?php echo $vendor_details[0]['contact_email']; ?>" />
+					<input type="text" class="form-control" id="to" name="to" value="<?php echo $go_details[0]['to_party_email']; ?>" />
 				</div>
 			</div>
 			<div class="form-group">
 				<div class="col-md-12 col-sm-12 col-xs-6">
 					<label class="control-label">Subject</label>
-					<input type="text" class="form-control" id="subject" name="subject" value="Debit Note For Invoice No - <?php echo $debit_note[0]['invoice_id']; ?> - Primarc Pecan Retail Pvt Ltd" />
+					<input type="text" class="form-control" id="subject" name="subject" value="Debit Note - Primarc Pecan Retail Pvt Ltd" />
 				</div>
 			</div>
 			<div class="form-group">
 				<div class="col-md-6 col-sm-6 col-xs-6">
 					<label class="control-label">Attachment</label>
 					<input type="hidden" name="attachment" value="<?php echo $debit_note[0]['debit_note_path']; ?>" />
-					<a class="form-control" href="<?php echo Url::base(); ?>index.php?r=pendinggrn%2Fdownload&invoice_id=<?php echo $debit_note[0]['invoice_id']; ?>" target="_blank">
+					<a class="form-control" href="<?php echo Url::base(); ?>index.php?r=goodsoutward%2Fdownloaddebitnote&id=<?php echo $debit_note[0]['gi_go_id']; ?>" target="_blank">
 						<?php 
 						$debit_note_path = $debit_note[0]['debit_note_path'];
 						if(isset($debit_note_path)) { 
@@ -65,7 +63,7 @@ input:-webkit-autofill {
 					<label class="control-label">Body</label>
 					<textarea class="form-control" id="body" name="body" rows="12">Hi, 
 
-PFA with debit note of invoice no - <?php echo $debit_note[0]['invoice_id']; ?>. 
+PFA with <?php echo $debit_note[0]['trans_type']; ?> note. 
 
 Regards, 
 Team Primarc</textarea>
@@ -76,7 +74,7 @@ Team Primarc</textarea>
 			<div class="form-group btn-container"> 
 				<div class="col-md-12">
 					<button type="submit" class="btn btn-success btn-sm" id="btn_submit"> Send </button>
-					<a href="<?php echo Url::base(); ?>index.php?r=pendinggrn%2Fupdate&id=<?php echo $debit_note[0]['grn_id']; ?>" class="btn btn-danger btn-sm" >Cancel</a>
+					<a href="<?php echo Url::base(); ?>index.php?r=goodsoutward%2Fedit&id=<?php echo $debit_note[0]['gi_go_id']; ?>" class="btn btn-danger btn-sm" >Cancel</a>
 					<!-- <button type="submit" class="btn btn-danger btn-sm" >Cancel </button> -->
 				</div>
 			</div>

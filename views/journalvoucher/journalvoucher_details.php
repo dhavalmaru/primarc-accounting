@@ -18,9 +18,9 @@ $mycomponent = Yii::$app->mycomponent;
 input:-webkit-autofill {
     background-color: white !important;
 }
-select{
+/*select{
 	width: 100%;
-}
+}*/
 .form-devident { margin-top: 10px; }
 .form-horizontal .control-label {font-size: 12px; letter-spacing: .5px; margin-top:5px; }
 .form-devident { margin-top: 10px; }

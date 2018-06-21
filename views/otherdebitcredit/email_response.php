@@ -15,10 +15,10 @@ use yii\db\Query;
 /* @var $searchModel app\models\GrnSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Email Debit Note: ' . $data['id'];
-$this->params['breadcrumbs'][] = ['label' => 'Grns', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $data['grn_id'], 'url' => ['update', 'id' => $data['grn_id']]];
-$this->params['breadcrumbs'][] = ['label' => 'Email', 'url' => ['emaildebitnote', 'invoice_id' => $data['invoice_id']]];;
+$this->title = 'Email Debit Credit Note: ' . $data['id'];
+$this->params['breadcrumbs'][] = ['label' => 'Debit Credit Notes', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => $data['id'], 'url' => ['edit', 'id' => $data['id']]];
+$this->params['breadcrumbs'][] = ['label' => 'Email', 'url' => ['emaildebitcreditnote', 'id' => $data['id']]];;
 $mycomponent = Yii::$app->mycomponent;
 ?>
 <style type="text/css">

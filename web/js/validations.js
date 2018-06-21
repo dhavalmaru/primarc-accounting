@@ -986,7 +986,7 @@ function check_acc_jv_details() {
     if (parseFloat(get_number($('#diff_amt').val(),2))!=0) {
         var errors = {};
         var name = "diff_amt";
-        errors[name] = "Differenace should be zero.";
+        errors[name] = "Difference should be zero.";
         validator.showErrors(errors);
         valid = false;
     }
@@ -1275,3 +1275,154 @@ $('#assign_role').submit(function() {
         return true;
     }
 });
+
+
+
+
+
+// ----------------- GOODS OUTWARD DEBIT DETAILS FORM VALIDATION -------------------------------------
+$("#go_debit_details").validate({
+    rules: {
+        diff_amt: {
+            required: true
+        },
+        // approver_id: {
+        //     required: true
+        // }
+    },
+
+    ignore: false,
+    onkeyup: false,
+
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
+
+$('#go_debit_details').submit(function() {
+    removeMultiInputNamingRules('#go_debit_details', 'select[alt="acc_id[]"]');
+    removeMultiInputNamingRules('#go_debit_details', 'input[alt="acc_code[]"]');
+    removeMultiInputNamingRules('#go_debit_details', 'select[alt="transaction[]"]');
+    removeMultiInputNamingRules('#go_debit_details', 'input[alt="debit_amt[]"]');
+    removeMultiInputNamingRules('#go_debit_details', 'input[alt="credit_amt[]"]');
+
+    addMultiInputNamingRules('#go_debit_details', 'select[name="acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#go_debit_details', 'input[name="acc_code[]"]', { required: true });
+    addMultiInputNamingRules('#go_debit_details', 'select[name="transaction[]"]', { required: true });
+    addMultiInputNamingRules('#go_debit_details', 'input[name="debit_amt[]"]', { required: true });
+    addMultiInputNamingRules('#go_debit_details', 'input[name="credit_amt[]"]', { required: true });
+
+    if (!$("#go_debit_details").valid()) {
+
+        return false;
+    } else {
+        if (check_acc_jv_details()==false) {
+            return false;
+        } else {
+            removeMultiInputNamingRules('#go_debit_details', 'select[alt="acc_id[]"]');
+            removeMultiInputNamingRules('#go_debit_details', 'input[alt="acc_code[]"]');
+            removeMultiInputNamingRules('#go_debit_details', 'select[alt="transaction[]"]');
+            removeMultiInputNamingRules('#go_debit_details', 'input[alt="debit_amt[]"]');
+            removeMultiInputNamingRules('#go_debit_details', 'input[alt="credit_amt[]"]');
+
+            return true;
+        }
+    }
+});
+
+function check_acc_jv_details() {
+    var validator = $("#go_debit_details").validate();
+    var valid = true;
+
+    if (parseFloat(get_number($('#diff_amt').val(),2))!=0) {
+        var errors = {};
+        var name = "diff_amt";
+        errors[name] = "Difference should be zero.";
+        validator.showErrors(errors);
+        valid = false;
+    }
+
+    return valid;
+}
+
+
+
+
+
+// ----------------- OTHER DEBIT CREDIT FORM VALIDATION -------------------------------------
+$("#other_debit_credit").validate({
+    rules: {
+        date_of_transaction: {
+            required: true
+        },
+        transaction: {
+            required: true
+        },
+        diff_amt: {
+            required: true
+        }
+    },
+
+    ignore: false,
+    onkeyup: false,
+
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
+
+$('#other_debit_credit').submit(function() {
+    removeMultiInputNamingRules('#other_debit_credit', 'select[alt="acc_id[]"]');
+    removeMultiInputNamingRules('#other_debit_credit', 'input[alt="acc_code[]"]');
+    removeMultiInputNamingRules('#other_debit_credit', 'select[alt="transaction[]"]');
+    removeMultiInputNamingRules('#other_debit_credit', 'input[alt="debit_amt[]"]');
+    removeMultiInputNamingRules('#other_debit_credit', 'input[alt="credit_amt[]"]');
+
+    addMultiInputNamingRules('#other_debit_credit', 'select[name="acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#other_debit_credit', 'input[name="acc_code[]"]', { required: true });
+    addMultiInputNamingRules('#other_debit_credit', 'select[name="transaction[]"]', { required: true });
+    addMultiInputNamingRules('#other_debit_credit', 'input[name="debit_amt[]"]', { required: true });
+    addMultiInputNamingRules('#other_debit_credit', 'input[name="credit_amt[]"]', { required: true });
+
+    if (!$("#other_debit_credit").valid()) {
+
+        return false;
+    } else {
+        if (check_acc_other_debit_credit_details()==false) {
+            return false;
+        } else {
+            removeMultiInputNamingRules('#other_debit_credit', 'select[alt="acc_id[]"]');
+            removeMultiInputNamingRules('#other_debit_credit', 'input[alt="acc_code[]"]');
+            removeMultiInputNamingRules('#other_debit_credit', 'select[alt="transaction[]"]');
+            removeMultiInputNamingRules('#other_debit_credit', 'input[alt="debit_amt[]"]');
+            removeMultiInputNamingRules('#other_debit_credit', 'input[alt="credit_amt[]"]');
+
+            return true;
+        }
+    }
+});
+
+function check_acc_other_debit_credit_details() {
+    var validator = $("#other_debit_credit").validate();
+    var valid = true;
+
+    if (parseFloat(get_number($('#diff_amt').val(),2))!=0) {
+        var errors = {};
+        var name = "diff_amt";
+        errors[name] = "Difference should be zero.";
+        validator.showErrors(errors);
+        valid = false;
+    }
+
+    return valid;
+}

@@ -118,7 +118,9 @@ class PaymentReceipt extends Model
                     A.narration, A.ref_date, A.gi_date, A.invoice_date, A.due_date, A.cp_acc_id, A.cp_ledger_name, A.cp_ledger_code, 
                     case when B.id is not null then '1' else '' end as is_paid, B.ref_id as payment_ref from 
                 (select * from 
-                (select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                (
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
                     A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
                     A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
                     A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
@@ -135,7 +137,9 @@ class PaymentReceipt extends Model
                     ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
                     ref_type = 'purchase' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
                 on (A.voucher_id = B.cp_voucher_id) 
+
                 union all 
+
                 select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
                     A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
                     A.created_by, A.updated_by, A.created_date, A.updated_date, 
@@ -148,7 +152,9 @@ class PaymentReceipt extends Model
                 (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
                     ref_type = 'journal_voucher' and acc_id='$acc_id' and company_id = '$company_id') B 
                 on (A.ref_id=B.ref_id) 
+
                 union all 
+
                 select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
                     A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
                     A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
@@ -161,13 +167,34 @@ class PaymentReceipt extends Model
                 (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
                     ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
                     ref_type = 'payment_receipt' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
-                on (A.voucher_id = B.cp_voucher_id)) AA 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    A.gi_date, A.invoice_date, A.due_date, 
+                    B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.date_of_transaction as gi_date, null as invoice_date, null as due_date from acc_ledger_entries A 
+                    left join acc_go_debit_details B on(A.ref_id = B.gi_go_id and A.ref_type = 'go_debit_details') 
+                    where A.status = '$status' and A.is_active = '1' and B.status = 'Approved' and B.is_active = '1' and 
+                        A.ref_type = 'go_debit_details' and A.ledger_type != 'Main Entry' and A.company_id = '$company_id' and B.company_id = '$company_id') A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'go_debit_details' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                ) AA 
                 where (AA.acc_id = '$acc_id' or AA.cp_acc_id = '$acc_id') and AA.amount!=0 and 
                         (AA.ref_type!='payment_receipt' or AA.entry_type='Bank Entry' or AA.entry_type='Payment' or AA.entry_type='Receipt') and 
                         (AA.is_paid is null or AA.is_paid!='1' or AA.payment_ref='$id')) A 
                 left join 
                 (select * from acc_ledger_entries where is_active = '1' and ref_id = '$id' and ref_type = 'payment_receipt' and company_id = '$company_id') B 
-                on (A.id = B.sub_ref_id) 
+                on (A.id = B.sub_ref_id)
+
                 order by A.ref_date, A.id";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();

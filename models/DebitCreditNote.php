@@ -6,7 +6,7 @@ use Yii;
 use yii\base\Model;
 
 class DebitCreditNote extends Model
-{
+{   
     public function getDetails($trans_id="", $status=""){
         $cond = "";
         if($trans_id!=""){

@@ -25,17 +25,17 @@ $(document).ready(function(){
         "serverSide": true,
         "bProcessing": true,
         "ajax":{
-                    url :BASE_URL+'index.php?r=pendinggrn%2Fgetgrn',
+                    url :BASE_URL+'index.php?r=goodsoutward%2Fgetgo',
                     type: "post",  // type of method  ,GET/POST/DELETE
                     data: function(data) {
-                                            data._csrf = csrfToken;
-                                        },
+                        data._csrf = csrfToken;
+                    },
                     "dataSrc": function ( json ) {
                         //Make your callback here.
                         // console.log(json.recordsTotal);
                         $('.tab1primary').empty().append("Not Posted (" +json.recordsTotal+")" );
                         return json.data;
-                     } ,                      
+                    } ,                      
                     error: function(){
                         $("#example_processing").css("display","none");
                     }
@@ -52,7 +52,7 @@ $(document).ready(function(){
         "searchDelay": 3000,
         "serverSide": true,
         "ajax":{
-                    url :BASE_URL+'index.php?r=pendinggrn%2Fgetapprovedgrn',
+                    url :BASE_URL+'index.php?r=goodsoutward%2Fgetapprovedgrn',
                     type: "post",  // type of method  ,GET/POST/DELETE
                     data: function(data) {
                                             data._csrf = csrfToken;
@@ -79,17 +79,17 @@ $(document).ready(function(){
         "searchDelay": 3000,
         "serverSide": true,
         "ajax":{
-                    url :BASE_URL+'index.php?r=pendinggrn%2Fgetallgrn',
+                    url :BASE_URL+'index.php?r=goodsoutward%2Fgetallgo',
                     type: "post",  // type of method  ,GET/POST/DELETE
                     data: function(data) {
-                                            data._csrf = csrfToken;
-                                        },
+                        data._csrf = csrfToken;
+                    },
                     "dataSrc": function ( json ) {
                         //Make your callback here.
                         // console.log(json.recordsTotal);
                         $('.tab4primary').empty().append("ALL (" +json.recordsTotal+")" );
                         return json.data;
-                     } ,           
+                    },           
                     error: function(){
                         $("#example_processing").css("display","none");
                     }

@@ -150,7 +150,7 @@ table {width: 1200px;}
     
         <input type="hidden" name="_csrf" value="<?=Yii::$app->request->getCsrfToken()?>" />
 
-        <div class="row    row-container">
+        <div class="row row-container">
             <div class="form-group">
                 <div class="col-md-12 col-sm-12 col-xs-12">
                     <?php //echo json_encode($invoice_tax); ?>

@@ -153,6 +153,19 @@ $session = Yii::$app->session;
             <li style="<?php if(isset($session['S_Email_Log'])) {if($session['S_Email_Log']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
                 <a href="<?php echo Url::base(); ?>index.php?r=emaillog%2Findex"><i class="fa fa-money"></i> <span>Email Log</span></a>
             </li> 
+            <li class="treeview" style="<?php if(isset($session['S_Purchase'])) {if($session['S_Purchase']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="#">
+                    <i class="fa fa-bug"></i> <span>Debit Credit</span>
+                    <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li class="active"><a href="<?php echo Url::base(); ?>index.php?r=goodsoutward%2Findex"><i class="fa fa-circle-o"></i> Goods Outward</a></li>
+                    <li><a href="<?php echo Url::base(); ?>index.php?r=debitcredit%2Findex"><i class="fa fa-circle-o"></i> Promotion </a></li>
+                    <li><a href="<?php echo Url::base(); ?>index.php?r=otherdebitcredit%2Findex"><i class="fa fa-circle-o"></i> Other </a></li>
+                </ul>
+            </li>
             <li class="treeview" style="<?php if(isset($session['S_User_Roles'])) {if($session['S_User_Roles']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
                 <a href="#">
                     <i class="fa fa-bug"></i> <span>User Roles</span>
