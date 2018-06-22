@@ -47,7 +47,7 @@ function set_view(){
 }
 
 $("#repeat_row").click(function(){
-	var $tableBody = $('#acc_jv_details').find("tbody"),
+	var $tableBody = $('#other_debit_credit').find("tbody"),
 	$trLast = $tableBody.find("tr:last"),
 	$trNew = $trLast.clone();
 
