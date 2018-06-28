@@ -7,7 +7,7 @@ use yii\base\Model;
 use yii\web\Session;
 use mPDF;
 
-class Goodsoutward extends Model
+class GoodsOutward extends Model
 {
     public function getAccess(){
         $session = Yii::$app->session;
@@ -417,20 +417,20 @@ class Goodsoutward extends Model
 
         if(!isset($voucher_id) || $voucher_id==''){
             $series = 1;
-            $sql = "select * from acc_series_master where type = 'Voucher'";
+            $sql = "select * from acc_series_master where type = 'Voucher' and company_id = '$company_id'";
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $data = $reader->readAll();
             if (count($data)>0){
                 $series = intval($data[0]['series']) + 1;
 
-                $sql = "update acc_series_master set series = '$series' where type = 'Voucher'";
+                $sql = "update acc_series_master set series = '$series' where type = 'Voucher' and company_id = '$company_id'";
                 $command = Yii::$app->db->createCommand($sql);
                 $count = $command->execute();
             } else {
                 $series = 1;
 
-                $sql = "insert into acc_series_master (type, series) values ('Voucher', '".$series."')";
+                $sql = "insert into acc_series_master (type, series, company_id) values ('Voucher', '".$series."', '".$company_id."')";
                 $command = Yii::$app->db->createCommand($sql);
                 $count = $command->execute();
             }
@@ -617,20 +617,20 @@ class Goodsoutward extends Model
 
         $code = $year . "/" . $month . "/" . $state_code;
 
-        $sql = "select * from acc_series_master where type = '$code' and company_id = '$company_id'";
+        $sql = "select * from acc_series_master where type = 'debit_note' and company_id = '$company_id'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $data = $reader->readAll();
         if (count($data)>0){
             $series = intval($data[0]['series']) + 1;
 
-            $sql = "update acc_series_master set series = '$series' where type = '$code' and company_id = '$company_id'";
+            $sql = "update acc_series_master set series = '$series' where type = 'debit_note' and company_id = '$company_id'";
             $command = Yii::$app->db->createCommand($sql);
             $count = $command->execute();
         } else {
             $series = 1;
 
-            $sql = "insert into acc_series_master (type, series, company_id) values ('".$code."', '".$series."', '".$company_id."')";
+            $sql = "insert into acc_series_master (type, series, company_id) values ('debit_note', '".$series."', '".$company_id."')";
             $command = Yii::$app->db->createCommand($sql);
             $count = $command->execute();
         }

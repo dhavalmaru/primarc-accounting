@@ -2234,6 +2234,10 @@ class PendingGrn extends Model
             $vendor_id = $invoice_details[0]['vendor_id'];
             $total_deduction = $invoice_details[0]['total_deduction'];
             $total_qty = 0;
+            $total_cgst = 0;
+            $total_sgst = 0;
+            $total_igst = 0;
+            $total_tax = 0;
             $ded_type = '';
 
             $sql = "select * from acc_grn_sku_entries where status = 'approved' and is_active = '1' and company_id = '$company_id' and 
@@ -2263,9 +2267,15 @@ class PendingGrn extends Model
             $reader = $command->query();
             $vendor_details = $reader->readAll();
 
-            $sql = "select sum(A.qty) as total_qty, sum(A.total) as total_deduction, 
-                    group_concat(distinct(CONCAT(UCASE(SUBSTRING(A.ded_type, 1, 1)),LOWER(SUBSTRING(A.ded_type, 2))))) as ded_type from 
-                    (select qty, case when ded_type='margindiff' then margin_diff_total else total end as total, 
+            $sql = "select sum(A.qty) as total_qty, sum(A.cost_excl_tax) as total_without_tax, sum(A.total) as total_deduction, 
+                        sum(A.cgst) as total_cgst, sum(A.sgst) as total_sgst, sum(A.igst) as total_igst, sum(A.tax) as total_tax, 
+                        group_concat(distinct(CONCAT(UCASE(SUBSTRING(A.ded_type, 1, 1)),LOWER(SUBSTRING(A.ded_type, 2))))) as ded_type from 
+                    (select qty, case when ded_type='margindiff' then margin_diff_excl_tax else cost_excl_vat end as cost_excl_tax, 
+                        case when ded_type='margindiff' then margin_diff_total else total end as total, 
+                        case when ded_type='margindiff' then margin_diff_cgst else cgst end as cgst, 
+                        case when ded_type='margindiff' then margin_diff_sgst else sgst end as sgst, 
+                        case when ded_type='margindiff' then margin_diff_igst else igst end as igst, 
+                        case when ded_type='margindiff' then margin_diff_tax else tax end as tax, 
                         case when ded_type='margindiff' then 'margin difference' else ded_type end as ded_type from 
                         acc_grn_sku_entries where status = 'approved' and is_active = '1' and company_id = '$company_id' and 
                         grn_id = '$grn_id' and invoice_no = '".str_replace('\\','\\\\',$invoice_no)."' order by ded_type) A order by A.ded_type";
@@ -2274,6 +2284,11 @@ class PendingGrn extends Model
             $deductions = $reader->readAll();
             if(count($deductions)>0){
                 $total_qty = $deductions[0]['total_qty'];
+                $total_without_tax = $deductions[0]['total_without_tax'];
+                $total_cgst = $deductions[0]['total_cgst'];
+                $total_sgst = $deductions[0]['total_sgst'];
+                $total_igst = $deductions[0]['total_igst'];
+                $total_tax = $deductions[0]['total_tax'];
                 $total_deduction = $deductions[0]['total_deduction'];
                 $ded_type = $deductions[0]['ded_type'];
             }
@@ -2288,6 +2303,11 @@ class PendingGrn extends Model
                 'invoice_date'=>$invoice_date,
                 'ded_type'=>$ded_type,
                 'total_qty'=>$total_qty,
+                'total_without_tax'=>$total_without_tax,
+                'total_cgst'=>$total_cgst,
+                'total_sgst'=>$total_sgst,
+                'total_igst'=>$total_igst,
+                'total_tax'=>$total_tax,
                 'total_deduction'=>$total_deduction,
                 'status'=>'approved',
                 'is_active'=>'1',
@@ -2297,6 +2317,7 @@ class PendingGrn extends Model
             ];
 
             $tableName = "acc_grn_debit_notes";
+            $debit_note_ref = "";
 
             $sql = "select * from acc_grn_debit_notes where status = 'approved' and is_active = '1' and company_id = '$company_id' and 
                     grn_id = '$grn_id' and invoice_no = '".str_replace('\\','\\\\',$invoice_no)."'";
@@ -2310,15 +2331,35 @@ class PendingGrn extends Model
                 $ref_id = Yii::$app->db->getLastInsertID();
             } else {
                 $ref_id = $debit_note[0]['id'];
+                $debit_note_ref = $debit_note[0]['debit_note_ref'];
                 $count = Yii::$app->db->createCommand()
                             ->update($tableName, $array, "id = '".$ref_id."'")
                             ->execute();
             }
 
-            $mycomponent = Yii::$app->mycomponent;
-            $financial_year = $mycomponent->get_financial_year($invoice_date);
-            $debit_note_ref = $financial_year . "/" . $ref_id;
+            // $mycomponent = Yii::$app->mycomponent;
+            // $financial_year = $mycomponent->get_financial_year($invoice_date);
+            // $debit_note_ref = $financial_year . "/" . $ref_id;
 
+            $sql = "select A.*, B.warehouse_name, B.gst_id, B.address_line_1, B.address_line_2, B.address_line_3, 
+                        B.city_id, B.state_id, B.pincode, C.city_name, D.state_name from grn A 
+                    left join internal_warehouse_master B on (A.warehouse_id = B.warehouse_code and A.company_id = B.company_id) 
+                    left join city_master C on (B.city_id = C.id) 
+                    left join state_master D on (B.state_id = D.id) 
+                    where A.grn_id = '$grn_id' and A.company_id = '$company_id'";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $grn_details = $reader->readAll();
+            
+            if(count($grn_details)>0){
+                $warehouse_state = $grn_details[0]['state_name'];
+            } else {
+                $warehouse_state = '';
+            }
+            if($debit_note_ref==''){
+                $debit_note_ref = $this->getDebitNoteRef($invoice_date, $warehouse_state);
+            }
+            
             $sql = "update acc_grn_debit_notes set debit_note_ref = '$debit_note_ref' where id = '$ref_id'";
             $command = Yii::$app->db->createCommand($sql);
             $count = $command->execute();
@@ -2328,13 +2369,6 @@ class PendingGrn extends Model
             $reader = $command->query();
             $debit_note = $reader->readAll();
 
-            $sql = "select A.*, B.warehouse_name, B.gst_id from grn A left join internal_warehouse_master B 
-                    on (A.warehouse_id = B.warehouse_code and A.company_id = B.company_id) 
-                    where A.grn_id = '$grn_id' and A.company_id = '$company_id'";
-            $command = Yii::$app->db->createCommand($sql);
-            $reader = $command->query();
-            $grn_details = $reader->readAll();
-            
             $mpdf=new mPDF();
             $mpdf->WriteHTML(Yii::$app->controller->renderPartial('debit_note', [
                 'invoice_details' => $invoice_details, 'debit_note' => $debit_note, 
@@ -2372,7 +2406,6 @@ class PendingGrn extends Model
             $reader = $command->query();
             $debit_note = $reader->readAll();
 
-            
         } else {
             $debit_note = array();
             $deduction_details = array();
@@ -2389,6 +2422,61 @@ class PendingGrn extends Model
         return $data;
     }
     
+    public function getDebitNoteRef($date_of_transaction, $warehouse_state){
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        // $date_of_transaction = "2018-05-25";
+        // $warehouse_state = 'Maharashtra';
+        $code = '';
+
+        $dateTime = \DateTime::createFromFormat('Y-m-d', $date_of_transaction);
+        $from = $dateTime->format('Y');
+        $to = $dateTime->format('Y');
+        if (date('m') > 3) {
+            $to = (int)($dateTime->format('Y')) +1;
+        } else {
+            $from = (int)($dateTime->format('Y')) -1;
+        }
+        $year = substr($from, 2) . substr($to, 2);
+
+        $month = $dateTime->format('M');
+
+        $state_code = '';
+        $sql = "select * from state_master where state_name = '$warehouse_state'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if (count($data)>0){
+            $state_code = $data[0]['state_code'];
+        }
+
+        $code = $year . "/" . $month . "/" . $state_code;
+
+        $sql = "select * from acc_series_master where type = 'debit_note' and company_id = '$company_id'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if (count($data)>0){
+            $series = intval($data[0]['series']) + 1;
+
+            $sql = "update acc_series_master set series = '$series' where type = 'debit_note' and company_id = '$company_id'";
+            $command = Yii::$app->db->createCommand($sql);
+            $count = $command->execute();
+        } else {
+            $series = 1;
+
+            $sql = "insert into acc_series_master (type, series, company_id) values ('debit_note', '".$series."', '".$company_id."')";
+            $command = Yii::$app->db->createCommand($sql);
+            $count = $command->execute();
+        }
+
+        $code = $code . "/" . str_pad($series, 3, "0", STR_PAD_LEFT);
+
+        // echo $code;
+        return $code;
+    }
+
     public function setLog($module_name, $sub_module, $action, $vendor_id, $description, $table_name, $table_id) {
         $session = Yii::$app->session;
         $curusr = $session['session_id'];

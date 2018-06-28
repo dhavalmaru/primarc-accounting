@@ -123,18 +123,13 @@
                     Being debit note raised for Qty - <?php if(isset($go_details[0]['total_quantity'])) echo $go_details[0]['total_quantity']; ?> Nos
                 </p>
             </td>
-            <td colspan="3" rowspan="3" align="right" valign="top" style="border:none; border-left:1px solid #999; border-bottom:1px solid #999;">
-                <p>
-                    
-                        Value <?php if(isset($amt_without_tax)) echo $mycomponent->format_money($amt_without_tax,2); ?><br/>
-                        <?php if($igst_amt>0) { ?>
-                            IGST <?php if(isset($igst_amt)) echo $mycomponent->format_money($igst_amt,2); ?><br/>
-                        <?php } else { ?>
-                            CGST <?php if(isset($cgst_amt)) echo $mycomponent->format_money($cgst_amt,2); ?><br/>
-                            SGST <?php if(isset($sgst_amt)) echo $mycomponent->format_money($sgst_amt,2); ?><br/>
-                        <?php } ?>
-                        Total <?php if(isset($total_amt)) echo $mycomponent->format_money($total_amt,2); ?><br/>
-                    
+            <td colspan="3" rowspan="3" valign="top" style="border:none; border-left:1px solid #999; border-bottom:1px solid #999;">
+                <p align="right" style="width: 60%;">
+                        <?php if(isset($amt_without_tax)) echo $mycomponent->format_money($amt_without_tax,2); ?><br/>
+                        <?php if(isset($cgst_amt)) echo $mycomponent->format_money($cgst_amt,2); ?><br/>
+                        <?php if(isset($sgst_amt)) echo $mycomponent->format_money($sgst_amt,2); ?><br/>
+                        <?php if(isset($igst_amt)) echo $mycomponent->format_money($igst_amt,2); ?><br/>
+                        <?php if(isset($total_amt)) echo $mycomponent->format_money($total_amt,2); ?><br/>
                 </p>
             </td>
         </tr>

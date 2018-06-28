@@ -1289,6 +1289,8 @@ class PendinggrnController extends Controller
 
     public function actionRedirect($action, $id){
         $model = new PendingGrn();
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
 
         $grn_entries = $model->getGrnAccEntries($id);
         $grn_details = $model->getGrnDetails($id);
@@ -1596,20 +1598,20 @@ class PendinggrnController extends Controller
 
             for($i=0; $i<count($invoice_details); $i++) {
                 $series = 2;
-                $sql = "select * from acc_series_master where type = 'Voucher'";
+                $sql = "select * from acc_series_master where type = 'Voucher' and company_id = '$company_id'";
                 $command = Yii::$app->db->createCommand($sql);
                 $reader = $command->query();
                 $data = $reader->readAll();
                 if (count($data)>0){
                     $series = intval($data[0]['series']) + 2;
 
-                    $sql = "update acc_series_master set series = '$series' where type = 'Voucher'";
+                    $sql = "update acc_series_master set series = '$series' where type = 'Voucher' and company_id = '$company_id'";
                     $command = Yii::$app->db->createCommand($sql);
                     $count = $command->execute();
                 } else {
                     $series = 2;
 
-                    $sql = "insert into acc_series_master (type, series) values ('Voucher', '".$series."')";
+                    $sql = "insert into acc_series_master (type, series, company_id) values ('Voucher', '".$series."', '".$company_id."')";
                     $command = Yii::$app->db->createCommand($sql);
                     $count = $command->execute();
                 }

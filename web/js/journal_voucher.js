@@ -168,4 +168,6 @@ function set_transaction(elem){
         $('#debit_amt_'+index).val('0.00');
         $('#debit_amt_'+index).attr('readonly', true);
     }
+
+    get_total();
 }

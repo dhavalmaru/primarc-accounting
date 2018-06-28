@@ -1426,3 +1426,89 @@ function check_acc_other_debit_credit_details() {
 
     return valid;
 }
+
+
+
+
+
+// ----------------- PROMOTION FORM VALIDATION -------------------------------------
+$("#promotion").validate({
+    rules: {
+        vendor_id: {
+            required: true
+        },
+        promotion_type: {
+            required: true
+        },
+        trans_type: {
+            required: true
+        },
+        date_of_transaction: {
+            required: true
+        },
+        transaction: {
+            required: true
+        },
+        diff_amt: {
+            required: true
+        }
+    },
+
+    ignore: false,
+    onkeyup: false,
+
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
+
+$('#promotion').submit(function() {
+    removeMultiInputNamingRules('#promotion', 'select[alt="acc_id[]"]');
+    removeMultiInputNamingRules('#promotion', 'input[alt="acc_code[]"]');
+    removeMultiInputNamingRules('#promotion', 'select[alt="transaction[]"]');
+    removeMultiInputNamingRules('#promotion', 'input[alt="debit_amt[]"]');
+    removeMultiInputNamingRules('#promotion', 'input[alt="credit_amt[]"]');
+
+    addMultiInputNamingRules('#promotion', 'select[name="acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#promotion', 'input[name="acc_code[]"]', { required: true });
+    addMultiInputNamingRules('#promotion', 'select[name="transaction[]"]', { required: true });
+    addMultiInputNamingRules('#promotion', 'input[name="debit_amt[]"]', { required: true });
+    addMultiInputNamingRules('#promotion', 'input[name="credit_amt[]"]', { required: true });
+
+    if (!$("#promotion").valid()) {
+
+        return false;
+    } else {
+        if (check_acc_promotion_details()==false) {
+            return false;
+        } else {
+            removeMultiInputNamingRules('#promotion', 'select[alt="acc_id[]"]');
+            removeMultiInputNamingRules('#promotion', 'input[alt="acc_code[]"]');
+            removeMultiInputNamingRules('#promotion', 'select[alt="transaction[]"]');
+            removeMultiInputNamingRules('#promotion', 'input[alt="debit_amt[]"]');
+            removeMultiInputNamingRules('#promotion', 'input[alt="credit_amt[]"]');
+
+            return true;
+        }
+    }
+});
+
+function check_acc_promotion_details() {
+    var validator = $("#promotion").validate();
+    var valid = true;
+
+    if (parseFloat(get_number($('#diff_amt').val(),2))!=0) {
+        var errors = {};
+        var name = "diff_amt";
+        errors[name] = "Difference should be zero.";
+        validator.showErrors(errors);
+        valid = false;
+    }
+
+    return valid;
+}

@@ -162,7 +162,7 @@ $session = Yii::$app->session;
                 </a>
                 <ul class="treeview-menu">
                     <li class="active"><a href="<?php echo Url::base(); ?>index.php?r=goodsoutward%2Findex"><i class="fa fa-circle-o"></i> Goods Outward</a></li>
-                    <li><a href="<?php echo Url::base(); ?>index.php?r=debitcredit%2Findex"><i class="fa fa-circle-o"></i> Promotion </a></li>
+                    <li><a href="<?php echo Url::base(); ?>index.php?r=promotion%2Findex"><i class="fa fa-circle-o"></i> Promotion </a></li>
                     <li><a href="<?php echo Url::base(); ?>index.php?r=otherdebitcredit%2Findex"><i class="fa fa-circle-o"></i> Other </a></li>
                 </ul>
             </li>

@@ -39,7 +39,7 @@
 
     <table width="100%" border="0" cellspacing="0" class="table" style="border-collapse:collapse;  ">
         <tr style="border:none;">
-            <td style="border:none;" colspan="6" align="center"><h2><b>Debit Note</b></h2></td>
+            <td style="border:none;" colspan="6" align="center"><h2><b><?php if(isset($debit_note[0]['trans_type'])) echo $debit_note[0]['trans_type']; ?> Note</b></h2></td>
         </tr>
         <tr style="border:none;">
             <td width="17%" style="border:none;"><p> Ref.</p></td>
@@ -99,7 +99,7 @@
         </tr>
         <tr>
             <td colspan="3"  style="border-left:none;"><p>Particulars</p></td>
-            <td colspan="3" align="center"  style="border-right:none;"><p>Amount</p></td>
+            <td colspan="3" align="center"  style="border-right:none;"><p>Amount In Rs</p></td>
         </tr>
         <tr valign="top"  style="border:none; ">
             <td colspan="3"   style="border-left:none; border-bottom:none; ">
@@ -107,7 +107,7 @@
                     Being <?php if(isset($debit_note[0]['trans_type'])) echo $debit_note[0]['trans_type']; ?> note raised
                 </p>
             </td>
-            <td colspan="3" align="center" valign="top" style="border-right:none;"><p><b>Rs.<?php if(isset($debit_note[0]['debit_amt'])) echo $mycomponent->format_money($debit_note[0]['debit_amt'],2); ?></b></p></td>
+            <td colspan="3" align="center" valign="top" style="border-right:none;"><p><b><?php if(isset($debit_note[0]['debit_amt'])) echo $mycomponent->format_money($debit_note[0]['debit_amt'],2); ?></b></p></td>
         </tr>
         <tr>
             <td  style="border:none; border-right:1px solid #999;" colspan="3"><p><b> Amount (in words) </b></p></td>

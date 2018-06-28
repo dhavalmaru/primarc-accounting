@@ -170,20 +170,20 @@ class JournalVoucher extends Model
 
         if(!isset($voucher_id) || $voucher_id==''){
             $series = 1;
-            $sql = "select * from acc_series_master where type = 'Voucher'";
+            $sql = "select * from acc_series_master where type = 'Voucher' and company_id = '$company_id'";
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $data = $reader->readAll();
             if (count($data)>0){
                 $series = intval($data[0]['series']) + 1;
 
-                $sql = "update acc_series_master set series = '$series' where type = 'Voucher'";
+                $sql = "update acc_series_master set series = '$series' where type = 'Voucher' and company_id = '$company_id'";
                 $command = Yii::$app->db->createCommand($sql);
                 $count = $command->execute();
             } else {
                 $series = 1;
 
-                $sql = "insert into acc_series_master (type, series) values ('Voucher', '".$series."')";
+                $sql = "insert into acc_series_master (type, series, company_id) values ('Voucher', '".$series."', '".$company_id."')";
                 $command = Yii::$app->db->createCommand($sql);
                 $count = $command->execute();
             }

@@ -57,7 +57,9 @@ class AccReport extends Model
                     date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and 
                     ref_type = 'purchase' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
                 on (A.voucher_id = B.cp_voucher_id) 
+
                 union all 
+
                 select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
                     A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
                     A.created_by, A.updated_by, A.created_date, A.updated_date, 
@@ -72,7 +74,9 @@ class AccReport extends Model
                     date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and 
                     ref_type = 'journal_voucher' and acc_id='$acc_id' and company_id = '$company_id') B 
                 on(A.ref_id=B.ref_id) 
+
                 union all 
+
                 select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
                     A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
                     A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
@@ -86,7 +90,40 @@ class AccReport extends Model
                     ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
                     date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and 
                     ref_type = 'payment_receipt' and ledger_type = 'Sub Entry' and company_id = '$company_id') B 
-                on (A.voucher_id = B.cp_voucher_id)) AA 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.date_of_transaction as gi_date, null as invoice_date, null as due_date from acc_ledger_entries A 
+                    left join acc_go_debit_details B on(A.ref_id = B.gi_go_id and A.ref_type = 'go_debit_details') 
+                    where A.status = '$status' and A.is_active = '1' and B.status = 'Approved' and B.is_active = '1' and 
+                        A.ref_type = 'go_debit_details' and A.ledger_type != 'Main Entry' and A.company_id = '$company_id' and B.company_id = '$company_id') A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'go_debit_details' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
+                    A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    B.acc_id as cp_acc_id, B.ledger_name as cp_ledger_name, B.ledger_code as cp_ledger_code from 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'other_debit_credit' and acc_id!='$acc_id' and company_id = '$company_id') A 
+                left join 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'other_debit_credit' and acc_id='$acc_id' and company_id = '$company_id') B 
+                on (A.ref_id=B.ref_id) 
+
+                ) AA 
                 where AA.acc_id = '$acc_id' or AA.cp_acc_id = '$acc_id' 
                 order by AA.ref_date, AA.id";
         $command = Yii::$app->db->createCommand($sql);
@@ -117,7 +154,9 @@ class AccReport extends Model
                     date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and 
                     ref_type = 'purchase' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
                 on (A.voucher_id = B.cp_voucher_id) 
+
                 union all 
+
                 select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
                     A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount as amount1, A.status, 
                     A.created_by, A.updated_by, A.created_date, A.updated_date, 
@@ -132,7 +171,9 @@ class AccReport extends Model
                     date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and 
                     ref_type = 'journal_voucher' and acc_id='$acc_id' and company_id = '$company_id') B 
                 on(A.ref_id=B.ref_id) 
+
                 union all 
+
                 select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
                     A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
                     A.amount as amount1, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
@@ -146,7 +187,40 @@ class AccReport extends Model
                     ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
                     date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and 
                     ref_type = 'payment_receipt' and ledger_type = 'Sub Entry' and company_id = '$company_id') B 
-                on (A.voucher_id = B.cp_voucher_id)) AA 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
+                    A.amount as amount1, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.date_of_transaction as gi_date, null as invoice_date, null as due_date from acc_ledger_entries A 
+                    left join acc_go_debit_details B on(A.ref_id = B.gi_go_id and A.ref_type = 'go_debit_details') 
+                    where A.status = '$status' and A.is_active = '1' and B.status = 'Approved' and B.is_active = '1' and 
+                        A.ref_type = 'go_debit_details' and A.ledger_type != 'Main Entry' and A.company_id = '$company_id' and B.company_id = '$company_id') A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'go_debit_details' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount as amount1, A.status, 
+                    A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    B.acc_id as cp_acc_id, B.ledger_name as cp_ledger_name, B.ledger_code as cp_ledger_code from 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'other_debit_credit' and acc_id!='$acc_id' and company_id = '$company_id') A 
+                left join 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'other_debit_credit' and acc_id='$acc_id' and company_id = '$company_id') B 
+                on (A.ref_id=B.ref_id) 
+
+                ) AA 
                 where AA.acc_id = '$acc_id' or AA.cp_acc_id = '$acc_id' 
                 order by AA.ref_date, AA.id ) A 
                 GROUP BY A.type, A.voucher_id, A.ref_type, A.ref_date, A.ref_id, A.invoice_no";
@@ -168,14 +242,15 @@ class AccReport extends Model
                 (select * from acc_master where is_active = '1' and status = '$status' and company_id = '$company_id') A 
                 left join 
                 (select acc_id, GROUP_CONCAT(category_name) as bus_category from acc_categories 
-                    where is_active = '1'and status = '$status' group by acc_id and company_id = '$company_id') B 
+                    where is_active = '1'and status = '$status' and company_id = '$company_id' group by acc_id) B 
                 on (A.id = B.acc_id)) C 
                 left join 
                 (select acc_id, sum(case when type='Debit' then amount*-1 else amount end) as opening_bal from acc_ledger_entries 
-                where status = '$status' and is_active = '1' and date(ref_date) < date('$from_date') and company_id = '$company_id' group by acc_id) D 
+                where status = '$status' and is_active = '1' and date(ref_date) < date('$from_date') and company_id = '$company_id' 
+                group by acc_id) D 
                 on (C.id = D.acc_id)) E 
                 left join 
-                (select acc_id, sum(case when type='Debit' then amount else 0 end) as debit_amt, 
+                (select acc_id, sum(case when type='Debit' then amount*-1 else 0 end) as debit_amt, 
                         sum(case when type='Credit' then amount else 0 end) as credit_amt 
                 from acc_ledger_entries where status = '$status' and is_active = '1' and 
                     date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and company_id = '$company_id' 

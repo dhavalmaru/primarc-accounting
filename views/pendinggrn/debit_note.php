@@ -46,10 +46,28 @@
 <body class="hold-transition">
 <div class="debit_note">
     <div class="header-section">
-        <h1><b> Primarc Pecan Retail (P) Ltd - Mum<?php echo $financial_year; ?></b></h1>
+        <!-- <h1><b> Primarc Pecan Retail (P) Ltd - Mum<?php //echo $financial_year; ?></b></h1>
         <p>210A, 214, Building No 2-B, <br>  Mittal Industrial Estate Premises <br> 
         Co-Operative Society Limited, Marol Naka <br>
-        Andheri (East), Mumbai - 400059 <br> Maharashtra  </p>
+        Andheri (East), Mumbai - 400059 <br> Maharashtra  </p> -->
+
+        <h1><b> Primarc Pecan Retail (P) Ltd </b></h1>
+        <p>
+            <?php if(isset($grn_details[0]['address_line_1'])) {
+                if($grn_details[0]['address_line_1']!='') echo $grn_details[0]['address_line_1'].'<br>';} ?>
+            <?php if(isset($grn_details[0]['address_line_2'])) {
+                if($grn_details[0]['address_line_2']!='') echo $grn_details[0]['address_line_2'].'<br>';} ?>
+            <?php if(isset($grn_details[0]['address_line_3'])) {
+                if($grn_details[0]['address_line_3']!='') echo $grn_details[0]['address_line_3'].'<br>';} ?>
+            <?php if(isset($grn_details[0]['city_name'])) {
+                if($grn_details[0]['city_name']!='') echo $grn_details[0]['city_name'];} ?>
+            <?php if(isset($grn_details[0]['city_name']) && isset($grn_details[0]['pincode'])) {
+                if($grn_details[0]['city_name']!='' && $grn_details[0]['pincode']!='') echo '-';} ?>
+            <?php if(isset($grn_details[0]['pincode'])) {
+                if($grn_details[0]['pincode']!='') echo $grn_details[0]['pincode'];} ?>
+            <?php if(isset($grn_details[0]['state_name'])) {
+                if($grn_details[0]['state_name']!='') echo ' ' . $grn_details[0]['state_name'];} ?>
+        </p>
     </div>
 
     <table width="100%" border="0" cellspacing="0" class="table" style="border-collapse:collapse;  ">
@@ -130,7 +148,7 @@
         </tr>
         <tr>
             <td colspan="3"  style="border-left:none;"><p>Particulars</p></td>
-            <td colspan="3" align="center"  style="border-right:none;"><p>Amount</p></td>
+            <td colspan="3" align="center"  style="border-right:none;"><p>Amount In Rs.</p></td>
         </tr>
         <tr valign="top"  style="border:none; ">
             <td colspan="3"   style="border-left:none; border-bottom:none; ">
@@ -141,17 +159,26 @@
                     Qty - <?php if(isset($debit_note[0]['total_qty'])) echo $debit_note[0]['total_qty']; ?> Nos
                 </p>
             </td>
-            <td colspan="3" align="center" valign="top" style="border-right:none;"><p><b>Rs.<?php if(isset($debit_note[0]['total_deduction'])) echo $mycomponent->format_money($debit_note[0]['total_deduction'],2); ?></b></p></td>
+            <!-- <td colspan="3" align="center" valign="top" style="border-right:none;"><p><b>Rs.<?php //if(isset($debit_note[0]['total_deduction'])) echo $mycomponent->format_money($debit_note[0]['total_deduction'],2); ?></b></p></td> -->
+            <td rowspan="3" colspan="3" valign="top" style="border-right:none;">
+                <p align="right" style="width: 60%;">
+                    <?php if(isset($debit_note[0]['total_without_tax'])) echo $mycomponent->format_money($debit_note[0]['total_without_tax'],2); ?><br/>
+                    <?php if(isset($debit_note[0]['total_cgst'])) echo $mycomponent->format_money($debit_note[0]['total_cgst'],2); ?><br/>
+                    <?php if(isset($debit_note[0]['total_sgst'])) echo $mycomponent->format_money($debit_note[0]['total_sgst'],2); ?><br/>
+                    <?php if(isset($debit_note[0]['total_igst'])) echo $mycomponent->format_money($debit_note[0]['total_igst'],2); ?><br/>
+                    <?php if(isset($debit_note[0]['total_deduction'])) echo $mycomponent->format_money($debit_note[0]['total_deduction'],2); ?><br/>
+                </p>
+            </td>
         </tr>
         <tr>
             <td  style="border:none; border-right:1px solid #999;" colspan="3"><p><b> Amount (in words) </b></p></td>
-            <td colspan="3" style="border:none; border-left:1px solid #999;"></td>
+            <!-- <td colspan="3" style="border:none; border-left:1px solid #999;"></td> -->
         </tr>
         <tr>
             <td height="40" colspan="3" valign="top" style="border:none; border-bottom:1px solid #999; border-right:1px solid #999;"> 
                 <p><?php if(isset($debit_note[0]['total_deduction'])) echo $mycomponent->convert_number_to_words(round($debit_note[0]['total_deduction'],2)); ?></p>
             </td>
-            <td colspan="3" style="border:none; border-left:1px solid #999; border-bottom:1px solid #999;"></td>
+            <!-- <td colspan="3" style="border:none; border-left:1px solid #999; border-bottom:1px solid #999;"></td> -->
         </tr>
         <!-- <tr valign="bottom" >
             <td colspan="6" style="border:none;">&nbsp;   </td>
