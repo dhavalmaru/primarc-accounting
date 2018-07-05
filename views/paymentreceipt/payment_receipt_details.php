@@ -55,11 +55,12 @@ $mycomponent = Yii::$app->mycomponent;
 							<option value="">Select</option>
 							<option value="Receipt" <?php if(isset($data[0])) { if($data[0]['trans_type']=="Receipt") echo "selected"; } ?>>Receipt</option>
 							<option value="Payment" <?php if(isset($data[0])) { if($data[0]['trans_type']=="Payment") echo "selected"; } ?>>Payment</option>
+							<option value="Contra Entry" <?php if(isset($data[0])) { if($data[0]['trans_type']=="Contra Entry") echo "selected"; } ?>>Contra Entry</option>
 						</select>
 					</div>
 				</div>
 				<div class="col-md-3 col-sm-12 col-xs-12">
-					<label class="control-label">Account Name</label>
+					<label class="control-label" id="acc_label" >Account Name</label>
 					<div class="">
 						<div class="">
 							<select class="form-control" name="acc_id" id="acc_id">
@@ -83,7 +84,7 @@ $mycomponent = Yii::$app->mycomponent;
 			</div>
 			<div class="form-group">
 				<div class="col-md-3 col-sm-12 col-xs-12">
-					<label class="control-label">Bank Name</label>
+					<label class="control-label" id="bank_label">Bank Name</label>
 					<div class="">
 						<div class="">
 							<select id="bank_id" class="form-control" name="bank_id">
@@ -96,7 +97,17 @@ $mycomponent = Yii::$app->mycomponent;
 						</div>
 					</div>
 				</div>
-				<div class="col-md-3 col-sm-12 col-xs-12">
+				
+				<div class="col-md-3 col-sm-12 col-xs-12 bank_acc_code" style="display:none;">
+					<label class="control-label">Account Code</label>
+					<div class="">
+						<div class="">  
+							<input id="acc_code1" name="acc_code1" class="form-control" type="text" value="<?php if(isset($data[0])) echo $data[0]['account_code1']; ?>" readonly />
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-md-3 col-sm-12 col-xs-12 payment_type1">
 					<label class="control-label">Payment Type</label>
 					<div class="">
 						<div class=""> 

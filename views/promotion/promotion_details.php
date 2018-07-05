@@ -44,9 +44,9 @@ table tr td { border: 1px solid #eee!important; }
 								<input type="hidden" id="action" name="action" value="<?php if(isset($action)) echo $action; ?>">
 								<input type="hidden" id="id" name="id" value="<?php if(isset($data)) echo $data[0]['id']; ?>" />
 								<input type="hidden" id="status" name="status" value="<?php if(isset($data)) echo $data[0]['status']; ?>" />
-								<input type="hidden" name="voucher_id" value="<?php if(isset($data)) echo $data[0]['voucher_id']; ?>" />
-								<input type="hidden" name="ledger_type" value="<?php if(isset($data)) echo $data[0]['ledger_type']; ?>" />
-								<input type="hidden" name="debit_note_ref" value="<?php if(isset($data)) echo $data[0]['debit_note_ref']; ?>" />
+								<input type="hidden" id="voucher_id" name="voucher_id" value="<?php if(isset($data)) echo $data[0]['voucher_id']; ?>" />
+								<input type="hidden" id="ledger_type" name="ledger_type" value="<?php if(isset($data)) echo $data[0]['ledger_type']; ?>" />
+								<input type="hidden" id="debit_note_ref" name="debit_note_ref" value="<?php if(isset($data)) echo $data[0]['debit_note_ref']; ?>" />
 								<select id="vendor_id" name="vendor_id" class="form-control" onChange="get_promo_types();">
 									<option value="">Select</option>
 									<?php if(isset($vendor)) { for($i=0; $i<count($vendor); $i++) { ?>
@@ -73,7 +73,7 @@ table tr td { border: 1px solid #eee!important; }
 						<label class="control-label">Promotion Code</label>
 						<div class=" ">
 							<div class=" ">
-								<select id="promotion_code" class="form-control" name="promotion_code" multiple>
+								<select id="promotion_code" class="form-control" name="promotion_code[]" multiple>
 									<option value="">Select</option>
 									<?php if(isset($promotion_code)) { for($i=0; $i<count($promotion_code); $i++) { ?>
 										<option value="<?php echo $promotion_code[$i]['promotion_code']; ?>" <?php if(isset($data[0])) { if($data[0]['promotion_code']==$promotion_code[$i]['promotion_code']) echo "selected"; } ?>><?php echo $promotion_code[$i]['promotion_code']; ?></option>

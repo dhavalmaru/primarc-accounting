@@ -215,11 +215,15 @@ class Promotion extends Model
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-        $sql = "select sum(C.debit_amount) as total_amount from 
-                (select A.promotion_code, B.promotion_id, debit_amount from vendor_promotions A 
+        $sql = "select sum(case when D.email_type = 'manual' then C.debit_amount else C.system_amount end) as total_amount from 
+                (select A.promotion_code, B.id as debit_note_id, B.promotion_id, B.debit_amount, B.system_amount from vendor_promotions A 
                     left join debit_notes B on (A.id = B.promotion_id) 
                 where A.company_id = '$company_id' and A.approve_status = 'Approved' and A.is_active = '1' and 
                     A.promo_status = 'Closed' and B.company_id = '$company_id' and B.promo_status = 'Closed'".$cond.$cond2.$cond3.") C 
+                left join 
+                (select A.debit_note_id, A.email_type from vp_email_log A where A.email_sent_status = '1' and 
+                    A.id = (select max(id) from vp_email_log where debit_note_id = A.debit_note_id)) D 
+                on (C.debit_note_id = D.debit_note_id)
                 where C.promotion_id is not null";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
@@ -354,11 +358,28 @@ class Promotion extends Model
         $vendor_id = $request->post('vendor_id');
         $promotion_type = $request->post('promotion_type');
         $promotion_code = $request->post('promotion_code');
+
+        // echo json_encode($promotion_code);
+        // echo '<br/>';
+
+        $promotion_codes = '';
         if(count($promotion_code)>0){
             $promotion_codes = implode(", ", $promotion_code);
-        } else {
-            $promotion_codes = '';
         }
+
+        // $promotion_codes = "";
+        // if(count($promotion_code)>0){
+        //     for($i=0; $i<count($promotion_code); $i++){
+        //         $promotion_codes = $promotion_codes . $promotion_code[$i] . ", ";
+        //     }
+        //     if($promotion_codes!=''){
+        //         $promotion_codes = substr($promotion_codes, 0, strrpos($promotion_codes, ", "));
+        //     }
+        // }
+
+        // echo $promotion_codes;
+        // echo '<br/>';
+
         $voucher_id = $request->post('voucher_id');
         $ledger_type = $request->post('ledger_type');
         $debit_note_ref = $request->post('debit_note_ref');
@@ -424,7 +445,7 @@ class Promotion extends Model
         }
 
         if(!isset($debit_note_ref) || $debit_note_ref==''){
-            $debit_note_ref = $this->getDebitNoteRef($date_of_transaction, 'Maharashtra');
+            $debit_note_ref = $this->getDebitNoteRef($date_of_transaction, 'Maharashtra', $trans_type);
         }
 
         $array = array('vendor_id' => $vendor_id, 
@@ -451,27 +472,27 @@ class Promotion extends Model
                         'debit_note_ref'=>$debit_note_ref
                     );
 
-        echo json_encode($array);
-        echo '<br/>';
+        // echo json_encode($array);
+        // echo '<br/>';
 
-        // if(count($array)>0){
-        //     if (isset($id) && $id!=""){
-        //         $count = Yii::$app->db->createCommand()
-        //                     ->update("acc_promotion_details", $array, "id = '".$id."'")
-        //                     ->execute();
+        if(count($array)>0){
+            if (isset($id) && $id!=""){
+                $count = Yii::$app->db->createCommand()
+                            ->update("acc_promotion_details", $array, "id = '".$id."'")
+                            ->execute();
 
-        //         $this->setLog('Promotion', '', 'Save', '', 'Update Promotion Details', 'acc_promotion_details', $id);
-        //     } else {
-        //         $array['created_by'] = $curusr;
-        //         $array['created_date'] = $now;
-        //         $count = Yii::$app->db->createCommand()
-        //                     ->insert("acc_promotion_details", $array)
-        //                     ->execute();
-        //         $id = Yii::$app->db->getLastInsertID();
+                $this->setLog('Promotion', '', 'Save', '', 'Update Promotion Details', 'acc_promotion_details', $id);
+            } else {
+                $array['created_by'] = $curusr;
+                $array['created_date'] = $now;
+                $count = Yii::$app->db->createCommand()
+                            ->insert("acc_promotion_details", $array)
+                            ->execute();
+                $id = Yii::$app->db->getLastInsertID();
 
-        //         $this->setLog('Promotion', '', 'Save', '', 'Insert Promotion Details', 'acc_promotion_details', $id);
-        //     }
-        // }
+                $this->setLog('Promotion', '', 'Save', '', 'Insert Promotion Details', 'acc_promotion_details', $id);
+            }
+        }
 
 
 
@@ -500,15 +521,15 @@ class Promotion extends Model
                                     'company_id'=>$company_id
                                 );
 
-            echo json_encode($acc_promotion_entries);
-            echo '<br/>';
+            // echo json_encode($acc_promotion_entries);
+            // echo '<br/>';
 
-            // $acc_promotion_entries['created_by'] = $curusr;
-            // $acc_promotion_entries['created_date'] = $now;
-            // $count = Yii::$app->db->createCommand()
-            //             ->insert("acc_promotion_entries", $acc_promotion_entries)
-            //             ->execute();
-            // $entry_id[$i] = Yii::$app->db->getLastInsertID();
+            $acc_promotion_entries['created_by'] = $curusr;
+            $acc_promotion_entries['created_date'] = $now;
+            $count = Yii::$app->db->createCommand()
+                        ->insert("acc_promotion_entries", $acc_promotion_entries)
+                        ->execute();
+            $entry_id[$i] = Yii::$app->db->getLastInsertID();
 
             // if (isset($entry_id[$i]) && $entry_id[$i]!=""){
             //     $count = Yii::$app->db->createCommand()
@@ -535,7 +556,7 @@ class Promotion extends Model
                             'sub_ref_id'=>$entry_id[$i],
                             'ref_type'=>'promotion',
                             'entry_type'=>'Promotion',
-                            'invoice_no'=>$reference,
+                            // 'invoice_no'=>$reference,
                             // 'vendor_id'=>$vendor_id,
                             'voucher_id' => $voucher_id, 
                             'ledger_type' => $ledger_type, 
@@ -554,14 +575,14 @@ class Promotion extends Model
                             'company_id'=>$company_id
                         ];
 
-            echo json_encode($ledgerArray);
-            echo '<br/>';
+            // echo json_encode($ledgerArray);
+            // echo '<br/>';
 
-            // $ledgerArray['created_by'] = $curusr;
-            // $ledgerArray['created_date'] = $now;
-            // $count = Yii::$app->db->createCommand()
-            //             ->insert("acc_ledger_entries", $ledgerArray)
-            //             ->execute();
+            $ledgerArray['created_by'] = $curusr;
+            $ledgerArray['created_date'] = $now;
+            $count = Yii::$app->db->createCommand()
+                        ->insert("acc_ledger_entries", $ledgerArray)
+                        ->execute();
 
             // $count = Yii::$app->db->createCommand()
             //             ->update("acc_ledger_entries", $ledgerArray, "ref_id = '".$id."' and sub_ref_id = '".$entry_id[$i]."' and ref_type = 'promotion'")
@@ -577,10 +598,49 @@ class Promotion extends Model
             // }
         }
 
+
+        $cond = "";
+        if($vendor_id!=""){
+            $cond = " and A.parent_vendor_id = '$vendor_id' and B.parent_vendor_id = '$vendor_id' ";
+        }
+        if($promotion_type!=""){
+            $cond = $cond . " and A.promotion_type = '$promotion_type' ";
+        }
+        $cond2 = "";
+        if($debit_note_ref!=""){
+            $cond2 = " and (B.dn_ref_no is null or B.dn_ref_no = '$debit_note_ref') ";
+        } else {
+            $cond2 = " and B.dn_ref_no is null ";
+        }
+        $cond3 = "";
+        $promotion_codes = "";
+        if(count($promotion_code)>0){
+            for($i=0; $i<count($promotion_code); $i++){
+                $promotion_codes = $promotion_codes . "'" . $promotion_code[$i] . "', ";
+            }
+            if($promotion_codes!=''){
+                $promotion_codes = substr($promotion_codes, 0, strrpos($promotion_codes, ", "));
+
+                $cond3 = $cond3 . " and A.promotion_code in (".$promotion_codes.")";
+            }
+        }
+
+        $sql = "update debit_notes set dn_ref_no = '$debit_note_ref' where id in 
+                (select distinct debit_note_id from 
+                (select A.promotion_code, B.id as debit_note_id, B.promotion_id, B.debit_amount, B.system_amount from vendor_promotions A 
+                    left join debit_notes B on (A.id = B.promotion_id) 
+                where A.company_id = '$company_id' and A.approve_status = 'Approved' and A.is_active = '1' and 
+                    A.promo_status = 'Closed' and B.company_id = '$company_id' and B.promo_status = 'Closed'".$cond.$cond2.$cond3.") C 
+                where C.promotion_id is not null)";
+        Yii::$app->db->createCommand($sql)->execute();
+
+        // echo $sql;
+        // echo '<br/>';
+
         return true;
     }
 
-    public function getDebitNoteRef($date_of_transaction, $warehouse_state){
+    public function getDebitNoteRef($date_of_transaction, $warehouse_state, $trans_type){
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
@@ -609,29 +669,239 @@ class Promotion extends Model
             $state_code = $data[0]['state_code'];
         }
 
-        $sql = "select * from acc_series_master where type = 'debit_note' and company_id = '$company_id'";
+        if($trans_type=='Invoice'){
+            $type = 'tax_invoice';
+            $code = $year . "/Invoice/" . $month . "/" . $state_code;
+        } else {
+            $type = 'debit_note';
+            $code = $year . "/" . $month . "/" . $state_code;
+        }
+
+        $sql = "select * from acc_series_master where type = '$type' and company_id = '$company_id'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $data = $reader->readAll();
         if (count($data)>0){
             $series = intval($data[0]['series']) + 1;
 
-            $sql = "update acc_series_master set series = '$series' where type = 'debit_note' and company_id = '$company_id'";
+            $sql = "update acc_series_master set series = '$series' where type = '$type' and company_id = '$company_id'";
             $command = Yii::$app->db->createCommand($sql);
             $count = $command->execute();
         } else {
             $series = 1;
 
-            $sql = "insert into acc_series_master (type, series, company_id) values ('debit_note', '".$series."', '".$company_id."')";
+            $sql = "insert into acc_series_master (type, series, company_id) values ('$type', '".$series."', '".$company_id."')";
             $command = Yii::$app->db->createCommand($sql);
             $count = $command->execute();
         }
 
-        $code = $year . "/" . $month . "/" . $state_code;
         $code = $code . "/" . str_pad($series, 3, "0", STR_PAD_LEFT);
 
         // echo $code;
         return $code;
+    }
+
+    public function getInvoiceDetails($id){
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $invoice_details = array();
+        $i = 0;
+        $inv_tax_details = array();
+        $k = 0;
+        $purchase_amt = 0;
+        $total_amt = 0;
+        $total_cgst = 0;
+        $total_sgst = 0;
+        $total_igst = 0;
+
+        $sql = "select sum(debit_amt) as total_debit_amt, sum(credit_amt) as total_credit_amt from acc_promotion_entries 
+                where promotion_id = '$id' and is_active = '1' and 
+                company_id = '$company_id' and account_name like '%purchase%'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if(count($data)>0){
+            if($data[0]['total_credit_amt']>0){
+                $purchase_amt = $data[0]['total_credit_amt'];
+            } else {
+                $purchase_amt = $data[0]['total_debit_amt'];
+            }
+            $invoice_details[$i]['sr_no'] = $i + 1;
+            $invoice_details[$i]['particulars'] = 'Service Income';
+            $invoice_details[$i]['code'] = '998311';
+            $invoice_details[$i]['qty'] = '';
+            $invoice_details[$i]['rate'] = '';
+            $invoice_details[$i]['per'] = '';
+            $invoice_details[$i]['amount'] = $purchase_amt;
+            $i = $i + 1;
+
+            $total_amt = $total_amt + $purchase_amt;
+        }
+
+        $sql = "select account_name, sum(debit_amt) as total_debit_amt, sum(credit_amt) as total_credit_amt from acc_promotion_entries 
+                where promotion_id = '$id' and is_active = '1' and company_id = '$company_id' and account_name like '%cgst%' 
+                group by account_name";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if(count($data)>0){
+            $k = 0;
+
+            for($j=0; $j<count($data); $j++){
+                if($data[$j]['total_credit_amt']>0){
+                    $amount = $data[$j]['total_credit_amt'];
+                } else {
+                    $amount = $data[$j]['total_debit_amt'];
+                }
+                $account_name = $data[$j]['account_name'];
+                $tax_per = 0;
+                if(strrpos($account_name, '-')!==false){
+                    $tax_per = substr($account_name, strrpos($account_name, '-')+1);
+                }
+                if(strrpos($tax_per, '%')!==false){
+                    $tax_per = substr($tax_per, 0, strrpos($tax_per, '%'));
+                }
+                
+                $invoice_details[$i]['sr_no'] = $i + 1;
+                $invoice_details[$i]['particulars'] = $account_name;
+                $invoice_details[$i]['code'] = '';
+                $invoice_details[$i]['qty'] = '';
+                $invoice_details[$i]['rate'] = $tax_per;
+                $invoice_details[$i]['per'] = '%';
+                $invoice_details[$i]['amount'] = $amount;
+                $i = $i + 1;
+
+                $inv_tax_details[$k]['hsn'] = '998311';
+                $inv_tax_details[$k]['value'] = $purchase_amt;
+                $inv_tax_details[$k]['cgst_rate'] = $tax_per.'%';
+                $inv_tax_details[$k]['cgst_amt'] = $amount;
+                $k = $k + 1;
+
+                $total_amt = $total_amt + $amount;
+                $total_cgst = $total_cgst + $amount;
+            }
+        }
+
+        $sql = "select account_name, sum(debit_amt) as total_debit_amt, sum(credit_amt) as total_credit_amt from acc_promotion_entries 
+                where promotion_id = '$id' and is_active = '1' and company_id = '$company_id' and account_name like '%sgst%' 
+                group by account_name";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if(count($data)>0){
+            $k = 0;
+
+            for($j=0; $j<count($data); $j++){
+                if($data[$j]['total_credit_amt']>0){
+                    $amount = $data[$j]['total_credit_amt'];
+                } else {
+                    $amount = $data[$j]['total_debit_amt'];
+                }
+                $account_name = $data[$j]['account_name'];
+                $tax_per = 0;
+                if(strrpos($account_name, '-')!==false){
+                    $tax_per = substr($account_name, strrpos($account_name, '-')+1);
+                }
+                if(strrpos($tax_per, '%')!==false){
+                    $tax_per = substr($tax_per, 0, strrpos($tax_per, '%'));
+                }
+                
+                $invoice_details[$i]['sr_no'] = $i + 1;
+                $invoice_details[$i]['particulars'] = $account_name;
+                $invoice_details[$i]['code'] = '';
+                $invoice_details[$i]['qty'] = '';
+                $invoice_details[$i]['rate'] = $tax_per;
+                $invoice_details[$i]['per'] = '%';
+                $invoice_details[$i]['amount'] = $amount;
+                $i = $i + 1;
+
+                $inv_tax_details[$k]['hsn'] = '998311';
+                $inv_tax_details[$k]['value'] = $purchase_amt;
+                $inv_tax_details[$k]['sgst_rate'] = $tax_per.'%';
+                $inv_tax_details[$k]['sgst_amt'] = $amount;
+                $k = $k + 1;
+
+                $total_amt = $total_amt + $amount;
+                $total_sgst = $total_sgst + $amount;
+            }
+        }
+
+        $sql = "select account_name, sum(debit_amt) as total_debit_amt, sum(credit_amt) as total_credit_amt from acc_promotion_entries 
+                where promotion_id = '$id' and is_active = '1' and company_id = '$company_id' and account_name like '%igst%' 
+                group by account_name";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if(count($data)>0){
+            for($j=0; $j<count($data); $j++){
+                if($data[$j]['total_credit_amt']>0){
+                    $amount = $data[$j]['total_credit_amt'];
+                } else {
+                    $amount = $data[$j]['total_debit_amt'];
+                }
+                $account_name = $data[$j]['account_name'];
+                $tax_per = 0;
+                if(strrpos($account_name, '-')!==false){
+                    $tax_per = substr($account_name, strrpos($account_name, '-')+1);
+                }
+                if(strrpos($tax_per, '%')!==false){
+                    $tax_per = substr($tax_per, 0, strrpos($tax_per, '%'));
+                }
+                
+                $invoice_details[$i]['sr_no'] = $i + 1;
+                $invoice_details[$i]['particulars'] = $account_name;
+                $invoice_details[$i]['code'] = '';
+                $invoice_details[$i]['qty'] = '';
+                $invoice_details[$i]['rate'] = $tax_per;
+                $invoice_details[$i]['per'] = '%';
+                $invoice_details[$i]['amount'] = $amount;
+                $i = $i + 1;
+
+                $inv_tax_details[$k]['hsn'] = '998311';
+                $inv_tax_details[$k]['value'] = $purchase_amt;
+                $inv_tax_details[$k]['igst_rate'] = $tax_per.'%';
+                $inv_tax_details[$k]['igst_amt'] = $amount;
+                $k = $k + 1;
+
+                $total_amt = $total_amt + $amount;
+                $total_igst = $total_igst + $amount;
+            }
+        }
+
+        $invoice_details[$i]['sr_no'] = $i + 1;
+        $invoice_details[$i]['particulars'] = 'Less - Rounded Off';
+        $invoice_details[$i]['code'] = '';
+        $invoice_details[$i]['qty'] = '';
+        $invoice_details[$i]['rate'] = '';
+        $invoice_details[$i]['per'] = '';
+        $invoice_details[$i]['amount'] = '0';
+        $i = $i + 1;
+
+        $invoice_details[$i]['sr_no'] = '';
+        $invoice_details[$i]['particulars'] = 'Total';
+        $invoice_details[$i]['code'] = '';
+        $invoice_details[$i]['qty'] = '';
+        $invoice_details[$i]['rate'] = '';
+        $invoice_details[$i]['per'] = '';
+        $invoice_details[$i]['amount'] = $total_amt;
+        $i = $i + 1;
+
+        $k = count($inv_tax_details);
+        $inv_tax_details[$k]['hsn'] = '998311';
+        $inv_tax_details[$k]['value'] = 'Total';
+        $inv_tax_details[$k]['cgst_rate'] = '';
+        $inv_tax_details[$k]['cgst_amt'] = $total_cgst;
+        $inv_tax_details[$k]['sgst_rate'] = '';
+        $inv_tax_details[$k]['sgst_amt'] = $total_sgst;
+        $inv_tax_details[$k]['igst_rate'] = '';
+        $inv_tax_details[$k]['igst_amt'] = $total_igst;
+        $inv_tax_details[$k]['total_amt'] = $total_amt;
+
+        $result['invoice_details'] = $invoice_details;
+        $result['inv_tax_details'] = $inv_tax_details;
+
+        return $result;
     }
 
     public function getDebitNoteDetails($id){
@@ -645,25 +915,15 @@ class Promotion extends Model
 
         if(count($debit_note)>0) {
             $trans_type = $debit_note[0]['trans_type'];
-            $vendor_code = '';
+            $vendor_id = $debit_note[0]['vendor_id'];
 
-            $sql = "select * from acc_promotion_entries where promotion_id = '$id' and 
-                    transaction = '$trans_type' and is_active = '1' and company_id = '$company_id'";
-            $command = Yii::$app->db->createCommand($sql);
-            $reader = $command->query();
-            $result = $reader->readAll();
-            if(count($result)>0){
-                $vendor_code = $result[0]['account_code'];
-            }
-
-            $vendor_id = '';
-            $sql = "select * from vendor_master where vendor_code like '%".$vendor_code."%' and 
-                    is_active = '1' and company_id = '$company_id'";
-            $command = Yii::$app->db->createCommand($sql);
-            $reader = $command->query();
-            $result = $reader->readAll();
-            if(count($result)>0){
-                $vendor_id = $result[0]['id'];
+            if($trans_type == 'Invoice'){
+                $result = $this->getInvoiceDetails($id);
+                $invoice_details = $result['invoice_details'];
+                $inv_tax_details = $result['inv_tax_details'];
+            } else {
+                $invoice_details = array();
+                $inv_tax_details = array();
             }
 
             $sql = "select C.*, D.contact_name, D.contact_email, D.contact_phone, D.contact_mobile, D.contact_fax from 
@@ -688,29 +948,40 @@ class Promotion extends Model
             $vendor_details = $reader->readAll();
 
             $mpdf=new mPDF();
-            $mpdf->WriteHTML(Yii::$app->controller->renderPartial('debit_note', ['debit_note' => $debit_note, 'vendor_details' => $vendor_details]));
+            if($trans_type == 'Invoice'){
+                $mpdf->WriteHTML(Yii::$app->controller->renderPartial('tax_invoice', ['debit_note' => $debit_note, 'vendor_details' => $vendor_details, 
+                                            'invoice_details' => $invoice_details, 'inv_tax_details' => $inv_tax_details]));
+            } else {
+                $mpdf->WriteHTML(Yii::$app->controller->renderPartial('debit_note', ['debit_note' => $debit_note, 'vendor_details' => $vendor_details]));
+            }
+            
+            if($trans_type=='Invoice'){
+                $type = 'invoice';
+            } else {
+                $type = 'debit_notes';
+            }
 
             $upload_path = './uploads';
             if(!is_dir($upload_path)) {
                 mkdir($upload_path, 0777, TRUE);
             }
-            $upload_path = './uploads/promotion_debit_notes';
+            $upload_path = './uploads/promotion_'.$type;
             if(!is_dir($upload_path)) {
                 mkdir($upload_path, 0777, TRUE);
             }
-            $upload_path = './uploads/promotion_debit_notes/'.$id;
+            $upload_path = './uploads/promotion_'.$type.'/'.$id;
             if(!is_dir($upload_path)) {
                 mkdir($upload_path, 0777, TRUE);
             }
 
-            $file_name = $upload_path . '/promotion_debit_note_' . $id . '.pdf';
-            $file_path = 'uploads/promotion_debit_notes/' . $id . '/promotion_debit_note_' . $id . '.pdf';
+            $file_name = $upload_path . '/promotion_' . $type . '_' . $id . '.pdf';
+            $file_path = 'uploads/promotion_'.$type.'/' . $id . '/promotion_' . $type . '_' . $id . '.pdf';
 
             // $mpdf->Output('MyPDF.pdf', 'D');
             $mpdf->Output($file_name, 'F');
             // exit;
 
-            $sql = "update acc_promotion_details set debit_credit_note_path = '$file_path' where id = '$id' and is_active = '1' and company_id = '$company_id'";
+            $sql = "update acc_promotion_details set debit_note_path = '$file_path' where id = '$id' and is_active = '1' and company_id = '$company_id'";
             $command = Yii::$app->db->createCommand($sql);
             $count = $command->execute();
 
@@ -722,10 +993,14 @@ class Promotion extends Model
         } else {
             $debit_note = array();
             $vendor_details = array();
+            $invoice_details = array();
+            $inv_tax_details = array();
         }
 
         $data['debit_note'] = $debit_note;
         $data['vendor_details'] = $vendor_details;
+        $data['invoice_details'] = $invoice_details;
+        $data['inv_tax_details'] = $inv_tax_details;
         
         return $data;
     }

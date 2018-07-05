@@ -50,7 +50,7 @@ class GoodsOutward extends Model
                 (select A.*, B.gi_go_id as b_gi_go_id from 
                 (select A.* from goods_inward_outward A where A.is_active = '1' and A.company_id='$company_id' and 
                     A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01') and 
-                    A.type_outward in ('VENDOR', 'INTER-DEPOT')) A 
+                    A.type_outward in ('VENDOR', 'INTER-DEPOT') and (A.pre_go_ref is null or A.pre_go_ref='')) A 
                 left join 
                 (select distinct gi_go_id from acc_go_debit_details) B 
                 on (A.gi_go_id = B.gi_go_id)) C 
@@ -82,7 +82,7 @@ class GoodsOutward extends Model
                 (select A.*, B.gi_go_id as b_gi_go_id from 
                 (select A.* from goods_inward_outward A where is_active = '1' and A.company_id='$company_id' and 
                     A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01') and 
-                    A.type_outward in ('VENDOR', 'INTER-DEPOT')) A 
+                    A.type_outward in ('VENDOR', 'INTER-DEPOT') and (A.pre_go_ref is null or A.pre_go_ref='')) A 
                 left join 
                 (select distinct gi_go_id from acc_go_debit_details) B 
                 on (A.gi_go_id = B.gi_go_id)) C 
@@ -214,7 +214,7 @@ class GoodsOutward extends Model
                 (select A.*, B.gi_go_id as b_gi_go_id, B.status as go_debit_status from 
                 (select A.* from goods_inward_outward A where is_active = '1' and A.company_id='$company_id' and 
                     A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01') and 
-                    A.type_outward in ('VENDOR', 'INTER-DEPOT')) A 
+                    A.type_outward in ('VENDOR', 'INTER-DEPOT') and (A.pre_go_ref is null or A.pre_go_ref='')) A 
                 left join 
                 (select distinct gi_go_id, status from acc_go_debit_details) B 
                 on (A.gi_go_id = B.gi_go_id)) C 
@@ -251,7 +251,7 @@ class GoodsOutward extends Model
                 (select A.*, B.gi_go_id as b_gi_go_id, B.status as go_debit_status from 
                 (select A.* from goods_inward_outward A where is_active = '1' and A.company_id='$company_id' and 
                     A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01') and 
-                    A.type_outward in ('VENDOR', 'INTER-DEPOT')) A 
+                    A.type_outward in ('VENDOR', 'INTER-DEPOT') and (A.pre_go_ref is null or A.pre_go_ref='')) A 
                 left join 
                 (select distinct gi_go_id, status from acc_go_debit_details) B 
                 on (A.gi_go_id = B.gi_go_id)) C 

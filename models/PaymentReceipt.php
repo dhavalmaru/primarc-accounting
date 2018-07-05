@@ -65,7 +65,23 @@ class PaymentReceipt extends Model
         return $reader->readAll();
     }
 
-    public function getAccountDetails($id=""){
+    // public function getAccountDetails($id=""){
+        // $cond = "";
+        // if($id!=""){
+            // $cond = " and id = '$id'";
+        // }
+
+        // $session = Yii::$app->session;
+        // $company_id = $session['company_id'];
+
+        // $sql = "select * from acc_master where is_active = '1' and status = 'approved' and 
+                // type = 'Bank Account' and company_id = '$company_id' ".$cond." order by legal_name";
+        // $command = Yii::$app->db->createCommand($sql);
+        // $reader = $command->query();
+        // return $reader->readAll();
+    // }
+
+	  public function getAccountDetails($id=""){
         $cond = "";
         if($id!=""){
             $cond = " and id = '$id'";
@@ -74,13 +90,42 @@ class PaymentReceipt extends Model
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-        $sql = "select * from acc_master where is_active = '1' and status = 'approved' and 
-                type = 'Vendor Goods' and company_id = '$company_id' ".$cond." order by legal_name";
+        $sql = "select * from acc_master where is_active = '1' and status = 'approved' and company_id = '$company_id' ".$cond." order by legal_name";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+	
+	  public function getacc1($trans_type="")
+	{
+       
+
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+		$sql = "select * from acc_master where is_active = '1' and status = 'approved' and 
+                type = 'Vendor Goods' and company_id = '$company_id' order by legal_name";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
     }
 
+    public function getaccbank1($trans_type="")
+	{
+        if($trans_type=="Contra Entry"){
+            $type = 'Bank Account';
+        } else {
+            $type = 'Vendor Goods';
+        }
+
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+		$sql = "select * from acc_master where is_active = '1' and status = 'approved' and company_id = '$company_id' and type = '$type' order by legal_name ";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+	
     public function getVendors(){
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
@@ -101,7 +146,7 @@ class PaymentReceipt extends Model
         $company_id = $session['company_id'];
 
         $sql = "select * from acc_master where is_active = '1' and status = 'approved' and company_id = '$company_id' and 
-                type = 'Bank Account'".$cond." order by legal_name";
+                type = 'Bank Account'".$cond." order by bank_name";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -255,6 +300,7 @@ class PaymentReceipt extends Model
         $acc_id = $request->post('acc_id');
         $legal_name = $request->post('legal_name');
         $acc_code = $request->post('acc_code');
+        $acc_code1 = $request->post('acc_code1');
         $bank_id = $request->post('bank_id');
         $bank_name = $request->post('bank_name');
         $payment_type = $request->post('payment_type');
@@ -316,6 +362,7 @@ class PaymentReceipt extends Model
                 'account_id'=>$acc_id,
                 'account_name'=>$legal_name,
                 'account_code'=>$acc_code,
+                'account_code1'=>$acc_code1,
                 'bank_id'=>$bank_id,
                 'bank_name'=>$bank_name,
                 'payment_type'=>$payment_type,

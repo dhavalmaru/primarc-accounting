@@ -1321,7 +1321,7 @@ $('#go_debit_details').submit(function() {
 
         return false;
     } else {
-        if (check_acc_jv_details()==false) {
+        if (check_acc_debit_details()==false) {
             return false;
         } else {
             removeMultiInputNamingRules('#go_debit_details', 'select[alt="acc_id[]"]');
@@ -1335,7 +1335,7 @@ $('#go_debit_details').submit(function() {
     }
 });
 
-function check_acc_jv_details() {
+function check_acc_debit_details() {
     var validator = $("#go_debit_details").validate();
     var valid = true;
 

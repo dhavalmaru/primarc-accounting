@@ -250,7 +250,7 @@ class AccReport extends Model
                 group by acc_id) D 
                 on (C.id = D.acc_id)) E 
                 left join 
-                (select acc_id, sum(case when type='Debit' then amount*-1 else 0 end) as debit_amt, 
+                (select acc_id, sum(case when type='Debit' then amount else 0 end) as debit_amt, 
                         sum(case when type='Credit' then amount else 0 end) as credit_amt 
                 from acc_ledger_entries where status = '$status' and is_active = '1' and 
                     date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and company_id = '$company_id' 
