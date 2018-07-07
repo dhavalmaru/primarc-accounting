@@ -55,9 +55,10 @@ class AccountMaster extends Model
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-        $sql = "select A.*, concat_ws(',', A.category_1, A.category_2, A.category_3) as acc_category, B.bus_category from 
-                (select A.*, B.username as updater, C.username as approver from 
+        $sql = "select A.*, B.bus_category from 
+                (select A.*, B.username as updater, C.username as approver, D.account_type as acc_category from 
                     acc_master A left join user B on (A.updated_by = B.id) left join user C on (A.approved_by = C.id) 
+                    left join acc_group_master D on (A.sub_account_type = D.id) 
                     where A.is_active = '1'" . $cond . " and A.company_id = '$company_id') A 
                 left join 
                 (select acc_id, GROUP_CONCAT(category_name) as bus_category from acc_categories where is_active = '1'" . $cond2 . " 
@@ -122,6 +123,106 @@ class AccountMaster extends Model
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
+    }
+
+    public function getGroupChild($id=""){
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $final_data = '';
+
+        $sql = "select A.* from acc_group_master A where A.is_active = '1' and A.status = 'approved' and 
+                A.company_id = '$company_id' and A.parent_id = '$id' order by A.id";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if(count($data)>0){
+            for($i=0; $i<count($data); $i++){
+                if($data[$i]['parent_id']!='0'){
+                    $final_data = $final_data . $data[$i]['id'] . ', ';
+                }
+                
+                $final_data = $final_data . $this->getGroupChild($data[$i]['id']);
+            }
+        } else {
+            $final_data = $final_data . $id . ', ';
+        }
+        
+        return $final_data;
+    }
+
+    public function getSubAccountTypes() {
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+        $request = Yii::$app->request;
+        $account_type = $request->post('account_type');
+        $sub_account_type = $request->post('sub_account_type');
+
+        $parent_id = 0;
+        $sql = "select * from acc_group_master where is_active = '1' and status = 'approved' and company_id = '$company_id' and 
+                parent_id = '0' and account_type = '$account_type'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if(count($data)>0){
+            $parent_id = $data[0]['id'];
+        }
+
+        $group_id = $this->getGroupChild($parent_id);
+        if($group_id!=''){
+            if(strrpos($group_id, ',')>0){
+                $group_id = substr($group_id, 0, strrpos($group_id, ','));
+            }
+        }
+
+        $data2 = array();
+        if($group_id!=''){
+            $sql = "select * from acc_group_master where status = 'approved' and company_id = '$company_id' and id in (".$group_id.")";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $data2 = $reader->readAll();
+        }
+
+        $result = '<option value="">Select</option>';
+        for($i=0; $i<count($data2); $i++){
+            $result = $result . '<option value="'.$data2[$i]['id'].'" '.(($sub_account_type==$data2[$i]['id'])?'selected':'').' >'.$data2[$i]['account_type'].'</option>';
+        }
+
+        return $result;
+    }
+
+    public function getSubAccountPath() {
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+        $request = Yii::$app->request;
+        $sub_account_type = $request->post('sub_account_type');
+
+        $data2 = array();
+        $j = 0;
+        $parent_id = $sub_account_type;
+        while ($parent_id != 0){
+            $sql = "select * from acc_group_master where is_active = '1' and status = 'approved' and 
+                    company_id = '$company_id' and id = '$parent_id'";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $data = $reader->readAll();
+            if(count($data)>0){
+                $parent_id = $data[0]['parent_id'];
+                $data2[$j] = $data[0]['account_type'];
+                $j = $j + 1;
+            }
+        }
+
+        $result = '';
+        for($i=count($data2)-1; $i>=0; $i--){
+            $result = $result . $data2[$i] . ' > ';
+        }
+
+        if($result!=''){
+            $result = substr($result, 0, strrpos($result, '>'));
+        }
+
+        return $result;
     }
 
     public function getAccCategories($id){
@@ -274,10 +375,11 @@ class AccountMaster extends Model
         $legal_name = $request->post('legal_name');
         $code = $request->post('code');
         $account_type = $request->post('account_type');
+        $sub_account_type = $request->post('sub_account_type');
         $details = $request->post('details');
-        $category_1 = $request->post('ac_category_1');
-        $category_2 = $request->post('ac_category_2');
-        $category_3 = $request->post('ac_category_3');
+        // $category_1 = $request->post('ac_category_1');
+        // $category_2 = $request->post('ac_category_2');
+        // $category_3 = $request->post('ac_category_3');
         $department = $request->post('department');
         $remarks = $request->post('remarks');
         $approver_id = $request->post('approver_id');
@@ -357,9 +459,9 @@ class AccountMaster extends Model
                         'description' => $description, 
                         'account_type' => $account_type, 
                         'details' => $details,
-                        'category_1' => $category_1,
-                        'category_2' => $category_2,
-                        'category_3' => $category_3,
+                        // 'category_1' => $category_1,
+                        // 'category_2' => $category_2,
+                        // 'category_3' => $category_3,
                         'pan_no' => $pan_no,
                         'address' => $address,
                         'legal_entity_name' => $legal_entity_name,
@@ -383,7 +485,8 @@ class AccountMaster extends Model
                         'approver_comments'=>$remarks,
                         'approver_id'=>$approver_id,
                         'gst_id'=>$gst_id,
-                        'company_id'=>$company_id
+                        'company_id'=>$company_id,
+                        'sub_account_type'=>$sub_account_type
                         );
 
         if(count($array)>0){
@@ -407,43 +510,43 @@ class AccountMaster extends Model
             }
         }
 
-        $sql = "delete from acc_categories where acc_id = '$id'";
-        Yii::$app->db->createCommand($sql)->execute();
+        // $sql = "delete from acc_categories where acc_id = '$id'";
+        // Yii::$app->db->createCommand($sql)->execute();
 
-        if ($type=="Vendor Goods"){
-            $acc_categories = array();
-            if(count($bus_category)>0){
-                for($i=0; $i<count($bus_category); $i++){
-                    if($bus_category[$i]!=""){
-                        $acc_categories[$i] = array('acc_id' => $id, 
-                                                    'category_id' => $bus_category[$i], 
-                                                    'category_name' => $bus_category_name[$i], 
-                                                    'status' => 'pending',
-                                                    'is_active' => '1',
-                                                    'created_by'=>$curusr,
-                                                    'created_date'=>$now,
-                                                    'updated_by'=>$curusr,
-                                                    'updated_date'=>$now,
-                                                    'approver_comments'=>$remarks,
-                                                    'company_id'=>$company_id
-                                                );
-                    }
-                }
-            }
+        // if ($type=="Vendor Goods"){
+        //     $acc_categories = array();
+        //     if(count($bus_category)>0){
+        //         for($i=0; $i<count($bus_category); $i++){
+        //             if($bus_category[$i]!=""){
+        //                 $acc_categories[$i] = array('acc_id' => $id, 
+        //                                             'category_id' => $bus_category[$i], 
+        //                                             'category_name' => $bus_category_name[$i], 
+        //                                             'status' => 'pending',
+        //                                             'is_active' => '1',
+        //                                             'created_by'=>$curusr,
+        //                                             'created_date'=>$now,
+        //                                             'updated_by'=>$curusr,
+        //                                             'updated_date'=>$now,
+        //                                             'approver_comments'=>$remarks,
+        //                                             'company_id'=>$company_id
+        //                                         );
+        //             }
+        //         }
+        //     }
 
-            if(count($acc_categories)>0){
-                // $acc_categories[$i]['created_by'] = $curusr;
-                // $acc_categories[$i]['created_date'] = $now;
+        //     if(count($acc_categories)>0){
+        //         // $acc_categories[$i]['created_by'] = $curusr;
+        //         // $acc_categories[$i]['created_date'] = $now;
 
-                $columnNameArray=['acc_id', 'category_id', 'category_name', 'status', 'is_active', 
-                                    'created_by', 'created_date', 'updated_by', 'updated_date', 
-                                    'approver_comments', 'company_id'];
-                $tableName = "acc_categories";
-                $insertCount = Yii::$app->db->createCommand()
-                                ->batchInsert($tableName, $columnNameArray, $acc_categories)
-                                ->execute();
-            }
-        }
+        //         $columnNameArray=['acc_id', 'category_id', 'category_name', 'status', 'is_active', 
+        //                             'created_by', 'created_date', 'updated_by', 'updated_date', 
+        //                             'approver_comments', 'company_id'];
+        //         $tableName = "acc_categories";
+        //         $insertCount = Yii::$app->db->createCommand()
+        //                         ->batchInsert($tableName, $columnNameArray, $acc_categories)
+        //                         ->execute();
+        //     }
+        // }
 
 
         $address_doc_path = $request->post('address_doc_path');
@@ -579,8 +682,8 @@ class AccountMaster extends Model
     }
 
     public function getAccountCategories(){
-        $request = Yii::$app->request;
-        $company_id = $request->post('company_id');
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
 
         $sql = "select * from acc_category_master where status = 'approved' and company_id = '$company_id'";
         $command = Yii::$app->db->createCommand($sql);

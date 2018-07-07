@@ -96,6 +96,9 @@ $("#account_master").validate({
         account_type: {
             required: true
         },
+        sub_account_type: {
+            required: true
+        },
         account_holder_name: {
             required: function(element) {
                         if($("#type").val()=="Vendor Goods" || $("#type").val()=="Bank Account" || $("#type").val()=="Vendor Expenses" || $("#type").val()=="Employee"){
@@ -186,9 +189,9 @@ $("#account_master").validate({
                         }
                     }
         },
-        ac_category_1: {
-            required: true
-        },
+        // ac_category_1: {
+        //     required: true
+        // },
         approver_id: {
             required: true
         },

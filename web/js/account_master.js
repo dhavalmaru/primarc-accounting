@@ -9,6 +9,9 @@ $(document).ready(function(){
 
     get_categories();
     set_view();
+
+    get_sub_account_type();
+    get_account_path();
 })
 
 function set_view(){
@@ -511,4 +514,66 @@ function set_bus_category(elem){
     var id = elem.id;
     var index = id.substr(id.lastIndexOf('_')+1);
     $('#cat_name_'+index).val($('#cat_id_'+index+' option:selected').text());
+}
+
+function get_sub_account_type(){
+    var account_type = $('#account_type').val();
+    var csrfToken = $('meta[name="csrf-token"]').attr("content");
+    var result = false;
+    var sub_account_type = $('#sub_account_type_id').val();
+
+    if(account_type==''){
+        account_type = '0';
+    }
+
+    $.ajax({
+        url: BASE_URL+'index.php?r=accountmaster%2Fgetsubaccounttypes',
+        type: 'post',
+        data: {
+                account_type : account_type,
+                sub_account_type : sub_account_type,
+                _csrf : csrfToken
+            },
+        dataType: 'html',
+        async: false,
+        success: function (data) {
+            if(data != null){
+                $('#sub_account_type').html(data);
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status);
+            alert(thrownError);
+        }
+    });
+}
+
+function get_account_path(){
+    var csrfToken = $('meta[name="csrf-token"]').attr("content");
+    var result = false;
+    var sub_account_type = $('#sub_account_type').val();
+
+    if(sub_account_type==''){
+        sub_account_type = '0';
+    }
+
+    $.ajax({
+        url: BASE_URL+'index.php?r=accountmaster%2Fgetsubaccountpath',
+        type: 'post',
+        data: {
+                sub_account_type : sub_account_type,
+                _csrf : csrfToken
+            },
+        dataType: 'html',
+        async: false,
+        success: function (data) {
+            if(data != null){
+                $('#sub_account_path').val(data);
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status);
+            alert(thrownError);
+        }
+    });
 }

@@ -301,4 +301,142 @@ class AccReport extends Model
 
         return true;
     }
+
+    public function getVendorname(){
+       $sql = "select id,legal_name from acc_master where is_active = '1' and status = 'approved' and type='Vendor Goods' order by legal_name ";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
+    public function getstatemaster(){
+       $sql = "select state_name,id,state_code from state_master WHERE is_active = '1'";
+       $command = Yii::$app->db->createCommand($sql);
+       $reader = $command->query();
+       return $reader->readAll();
+    }
+
+    public function getDetailledger($account, $vouchertype,$from_date, $to_date,$date_type){
+        if($date_type=='invoice_date')
+            $where_condition = "date(invoice_date)>='$from_date' and date(invoice_date)<='$to_date'";
+        else if($date_type=='grn_approved_date_time')
+            $where_condition = "date(grn_approved_date_time)>='$from_date' and date(grn_approved_date_time)<='$to_date'";
+        else if($date_type=='gi_date')
+            $where_condition = "date(gi_date)>='$from_date' and date(gi_date)<='$to_date'";
+        else if($date_type=='updated_date')
+            $where_condition = "date(updated_date)>='$from_date' and date(updated_date)<='$to_date'";
+        else
+             $where_condition=' ';
+
+        //$account;
+        if($account!='')
+        {
+           $sql = "Select * from 
+                    (Select * from 
+                    (
+                    Select * FROM(
+                    Select A.*,F.updated_date from 
+                    (
+                    Select C.*,G.gi_date,G.grn_approved_date_time,E.invoice_date,'' as debit_notes_ref,E.gi_go_ref_no,G.warehouse_id from (
+                    Select A.ref_id,A.ref_type,A.cp_acc_id, A.invoice_no,A.voucher_id ,A.cp_ledger_name,TRUNCATE((A.total_tax_amount+D.total_purchase_amount),2) as total_deduction,total_tax_amount as tax_amount, total_purchase_amount as total_without_tax from (
+                    select  A.ref_id,A.ref_type, sum(A.amount) as total_tax_amount, B.cp_acc_id, A.invoice_no,A.voucher_id , cp_ledger_name from 
+                    (select * from acc_ledger_entries where status = 'Approved' and is_active = '1' and 
+                                    ref_type = 'purchase' and ledger_type != 'Main Entry' and company_id = '1') A 
+                    left join 
+                    (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                                    ledger_code as cp_ledger_code from acc_ledger_entries where status = 'Approved' and is_active = '1'  and 
+                                    ref_type = 'purchase' and ledger_type = 'Main Entry' and company_id = '1') B 
+                    on (A.voucher_id = B.cp_voucher_id) 
+                    Where B.cp_acc_id IN ($account) AND entry_type IN('CGST','IGST','SGST')  GROUP BY A.ref_id,A.ref_type, B.cp_acc_id, A.invoice_no,A.voucher_id , cp_ledger_name
+                    ) A
+                    left JOIN
+                    (select  A.ref_id,A.ref_type, sum(A.amount) as total_purchase_amount, B.cp_acc_id, A.invoice_no ,A.voucher_id , cp_ledger_name from 
+                    (select * from acc_ledger_entries where status = 'Approved' and is_active = '1' and 
+                                    ref_type = 'purchase' and ledger_type != 'Main Entry' and company_id = '1') A 
+                    left join 
+                    (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                                    ledger_code as cp_ledger_code from acc_ledger_entries where status = 'Approved' and is_active = '1'  and 
+                                    ref_type = 'purchase' and ledger_type = 'Main Entry' and company_id = '1') B 
+                    on (A.voucher_id = B.cp_voucher_id) 
+                    Where B.cp_acc_id In($account) AND entry_type IN('Taxable Amount') GROUP BY A.ref_id,A.ref_type, B.cp_acc_id, A.invoice_no,A.voucher_id , cp_ledger_name 
+                    ) D on A.ref_id=D.ref_id and A.invoice_no=D.invoice_no ) C
+                    left JOIN
+                    (Select grn_approved_date_time,gi_date,grn_id,warehouse_id from grn ) G on C.ref_id=G.grn_id 
+                    left join
+                    (Select invoice_date,invoice_no,gi_go_ref_no from goods_inward_outward_invoices ) E on C.invoice_no=E.invoice_no
+                    ) A
+                    left join 
+                    (Select updated_date,grn_id from acc_grn_entries GROUP BY grn_id) F on A.ref_id=F.grn_id
+                    left join
+                    (Select warehouse_code from internal_warehouse_master Where state_id IN(5) ) G
+                     on A.warehouse_id=G.warehouse_code
+                    ) D
+                    UNION
+                    Select * from (
+                    Select B.ref_id, B.ref_type,B.cp_acc_id,B.invoice_no,B.voucher_id,B.cp_ledger_name ,B.total_deduction,
+                    B.tax_amount ,B.total_without_tax ,B.gi_date,B.grn_approved_date_time,B.invoice_date,B.debit_note_ref,B. gi_go_ref_no,B.updated_date,B.warehouse_id from (
+                    Select C.*,G.gi_date,G.grn_approved_date_time,E.invoice_date,E.gi_go_ref_no,F.updated_date,H.voucher_id,G.warehouse_id  from(
+                    Select  B.ref_id, 'Debit Note' as ref_type,A.cp_acc_id,B.invoice_no,A.legal_name as cp_ledger_name ,B.total_deduction,
+                    B.total_tax as tax_amount ,B.total_without_tax ,B.debit_note_ref from  
+                    (Select id as cp_acc_id ,vendor_id,legal_name from acc_master Where id IN ($account) ) A
+                    left join
+                    (Select grn_id as ref_id,vendor_id ,invoice_no,total_deduction ,total_tax ,total_without_tax ,debit_note_ref from acc_grn_debit_notes) B
+                     on A.vendor_id=B.vendor_id Where B.vendor_id IS NOT NULL) C
+                    left JOIN
+                    (Select grn_approved_date_time,gi_date,grn_id,warehouse_id  from grn ) G on C.ref_id=G.grn_id 
+                    left join
+                    (Select invoice_date,invoice_no,gi_go_ref_no from goods_inward_outward_invoices ) E on C.invoice_no=E.invoice_no
+                    left join 
+                    (Select updated_date,grn_id from acc_grn_entries GROUP BY grn_id) F on C.ref_id=F.grn_id 
+                    left join 
+                    (Select voucher_id,ref_id from acc_ledger_entries Where entry_type = 'Total Deduction') H on C.ref_id=H.ref_id) B
+                    left join 
+                    (Select warehouse_code from internal_warehouse_master Where state_id IN(5) ) G
+                    on B.warehouse_id=G.warehouse_code) E
+                    ) A $where_condition ORDER BY ref_id ASC,invoice_no ASC,ref_type DESC ) A
+                    ";
+                    
+            /*$sql.=" UNION  
+                    Select * from 
+                    (select A.ref_id, A.ref_type,A.acc_id as cp_acc_id, A.invoice_no,A.voucher_id ,A.ledger_name as cp_ledger_name,sum(A.amount) as total_deduction,0 as tax_amount ,
+                    sum(A.amount) as total_without_tax,'' as gi_date,'' as grn_approved_date_time,'' as invoice_date ,'' as debit_notes_ref,'' as gi_go_ref_no , '' as updated_date from 
+                    (select * from acc_ledger_entries where status = 'approved' and is_active = '1' and 
+                    ref_type = 'journal_voucher' and acc_id='693' and company_id = '2' ) A 
+                    Group  by A.id, A.ref_id,A.ref_type, A.entry_type, A.invoice_no,A.acc_id, A.ledger_name, A.ledger_code, A.voucher_id) B";*/
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            return $reader->readAll();
+        }
+        else
+        {
+            return [];
+        }
+    }
+
+    public function get_jventries(){
+        $sql ="SELECT * FROM  (
+                Select A.*,B.total_amount from (select A.id, A.ref_id,  A.entry_type, A.invoice_no, A.vendor_id, A.ledger_name, case when A.type='Debit' then                   'Credit' else 'Debit' end as type, A.amount as amount1,A.voucher_id,B.ledger_name as cp_ledger_name ,0 as tax_amount ,
+                '' as total_without_tax,'' as gi_date,'' as grn_approved_date_time,'' as invoice_date ,'' as debit_notes_ref,'' as gi_go_ref_no , '' as updated_date            from 
+                (select * from acc_ledger_entries where status = 'Approved' and is_active = '1' and 
+                ref_type = 'journal_voucher' and acc_id NOT IN('80',1) and company_id = '1') A 
+                left join 
+                (select * from acc_ledger_entries where status = 'Approved' and is_active = '1' and 
+                ref_type = 'journal_voucher' and acc_id IN('80',1) and company_id = '1') B 
+                on(A.ref_id=B.ref_id)
+                Where B.ledger_name IS NOT NULL
+                GROUP by A.id, A.ref_id,  A.entry_type, A.invoice_no, A.vendor_id, A.ledger_name,A.voucher_id,B.ledger_name ) A
+                left JOIN
+                (select ref_id,voucher_id,amount as total_amount from acc_ledger_entries where status = 'Approved' and is_active = '1' and ref_type = 'journal_voucher'         and acc_id IN('80',1) and company_id = '1' ) B
+                on A.ref_id=B.ref_id and  A.voucher_id=B.voucher_id ) A ORDER By voucher_id,ledger_name";
+            $command = Yii::$app->db->createCommand($sql);
+           $reader = $command->query();
+           return $reader->readAll();
+    }
+
+    public function column_names(){
+        $sql = "select Distinct(A.ledger_name) from (select * from acc_ledger_entries where status = 'Approved' and is_active = '1' and ref_type = 'journal_voucher' and acc_id NOt IN('80',1) and company_id = '1') A left join (select * from acc_ledger_entries where status = 'Approved' and is_active = '1' and ref_type = 'journal_voucher' and acc_id IN('80',1) and company_id = '1') B on(A.ref_id=B.ref_id) Where B.ledger_name IS NOT NULL";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
 }
