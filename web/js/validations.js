@@ -1515,3 +1515,46 @@ function check_acc_promotion_details() {
 
     return valid;
 }
+
+
+
+
+
+// ----------------- PURCHASE LEDGER REPORT VALIDATION -------------------------------------
+$("#detailledger_report").validate({
+    rules: {
+        
+    },
+
+    ignore: false,
+
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
+
+$('#detailledger_report').submit(function() {
+    removeMultiInputNamingRules('#detailledger_report', 'select[alt="account[]"]');
+    // removeMultiInputNamingRules('#detailledger_report', 'select[alt="vouchertype[]"]');
+    // removeMultiInputNamingRules('#detailledger_report', 'select[alt="state[]"]');
+
+    addMultiInputNamingRules('#detailledger_report', 'select[name="account[]"]', { required: true }, "");
+    // addMultiInputNamingRules('#detailledger_report', 'select[name="vouchertype[]"]', { required: true }, "");
+    // addMultiInputNamingRules('#detailledger_report', 'select[name="state[]"]', { required: true }, "");
+
+    if (!$("#detailledger_report").valid()) {
+        return false;
+    } else {
+
+        removeMultiInputNamingRules('#detailledger_report', 'select[alt="account[]"]');
+        // removeMultiInputNamingRules('#detailledger_report', 'select[alt="vouchertype[]"]');
+        // removeMultiInputNamingRules('#detailledger_report', 'select[alt="state[]"]');
+
+        return true;
+    }
+});

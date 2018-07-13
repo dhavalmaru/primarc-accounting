@@ -13,6 +13,7 @@
             addable: false,
             i18n: {
                 deleteNull: 'Select a type to delete',
+                deleteRoot: 'Cannot delete root parent type',
                 deleteParent: 'Cannot delete parent type',
                 deleteConfirmation: 'Delete this type?',
                 confirmButtonLabel: 'Okay',
@@ -228,31 +229,36 @@
                         if(item_id.indexOf('_') != -1){
                             parent_id = item_id.substring(item_id.lastIndexOf('_')+1);
                         }
-                        var result = get_child_account_type(parent_id);
-                        if(result==1){
+                        if(parent_id=='1' || parent_id=='2' || parent_id=='3' || parent_id=='4'){
                             $(easyTree).prepend(warningAlert);
-                            $(easyTree).find('.alert .alert-content').html(options.i18n.deleteParent);
+                            $(easyTree).find('.alert .alert-content').html(options.i18n.deleteRoot);
                         } else {
-                            $(easyTree).prepend(dangerAlert);
-                            $(easyTree).find('.alert .alert-content').html(options.i18n.deleteConfirmation)
-                                .append('<a style="margin-left: 10px;" class="btn btn-default btn-danger confirm"></a>')
-                                .find('.confirm').html(options.i18n.confirmButtonLabel);
-                            $(easyTree).find('.alert .alert-content .confirm').on('click', function () {
-                                var account_type = $(selected).find(' > span > a').text();
-                                var action = 'delete';
-                                var result = set_account_type(action, parent_id, account_type);
-                                if(result==false){
-                                    return false;
-                                }
+                            var result = get_child_account_type(parent_id);
+                            if(result==1){
+                                $(easyTree).prepend(warningAlert);
+                                $(easyTree).find('.alert .alert-content').html(options.i18n.deleteParent);
+                            } else {
+                                $(easyTree).prepend(dangerAlert);
+                                $(easyTree).find('.alert .alert-content').html(options.i18n.deleteConfirmation)
+                                    .append('<a style="margin-left: 10px;" class="btn btn-default btn-danger confirm"></a>')
+                                    .find('.confirm').html(options.i18n.confirmButtonLabel);
+                                $(easyTree).find('.alert .alert-content .confirm').on('click', function () {
+                                    var account_type = $(selected).find(' > span > a').text();
+                                    var action = 'delete';
+                                    var result = set_account_type(action, parent_id, account_type);
+                                    if(result==false){
+                                        return false;
+                                    }
 
-                                $(selected).find(' ul ').remove();
-                                if($(selected).parent('ul').find(' > li').length <= 1) {
-                                    $(selected).parents('li').removeClass('parent_li').find(' > span > span').removeClass('glyphicon-folder-open').addClass('glyphicon-file');
-                                    $(selected).parent('ul').remove();
-                                }
-                                $(selected).remove();
-                                $(dangerAlert).remove();
-                            });
+                                    $(selected).find(' ul ').remove();
+                                    if($(selected).parent('ul').find(' > li').length <= 1) {
+                                        $(selected).parents('li').removeClass('parent_li').find(' > span > span').removeClass('glyphicon-folder-open').addClass('glyphicon-file');
+                                        $(selected).parent('ul').remove();
+                                    }
+                                    $(selected).remove();
+                                    $(dangerAlert).remove();
+                                });
+                            }
                         }
                     }
                 });

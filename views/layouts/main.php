@@ -196,6 +196,7 @@ $session = Yii::$app->session;
                     <li class="active"><a href="<?php echo Url::base(); ?>index.php?r=accreport%2Fgetsummeryreport"><i class="fa fa-circle-o"></i> Ledger Summary</a></li>
                     <li class="active"><a href="<?php echo Url::base(); ?>index.php?r=accreport%2Fgetledgertotalreport"><i class="fa fa-circle-o"></i>Vendor Credit/Debit</a></li>
                     <li><a href="<?php echo Url::base(); ?>index.php?r=accreport%2Ftrialbalancereport"><i class="fa fa-circle-o"></i> Trial Balance </a></li>
+                    <li><a href="<?php echo Url::base(); ?>index.php?r=accreport%2Fdetailledgerreport"><i class="fa fa-circle-o"></i> Purchase Register Report </a></li>
                 </ul>
             </li>
         </ul>
