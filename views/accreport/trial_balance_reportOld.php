@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = ['label' => 'Report', 'url' => ['index']];
 									<label class="control-label">Type</label>
 									<div class="inputGroupContainer">
 										<div class="input-group"> 
-											<select class="form-control" id="type" name="type">
+											<select class="form-control select2" id="type" name="type">
 												<option value="Date Range">Date Range</option>
 												<option value="As Of Date">As Of Date</option>
 											</select>

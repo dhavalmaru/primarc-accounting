@@ -51,18 +51,19 @@ $mycomponent = Yii::$app->mycomponent;
 						<input type="hidden" id="status" name="status" value="<?php if(isset($data)) echo $data[0]['status']; ?>" />
 						<input type="hidden" id="voucher_id" name="voucher_id" value="<?php if(isset($data[0])) echo $data[0]['voucher_id']; ?>" />
 						<input type="hidden" id="ledger_type" name="ledger_type" value="<?php if(isset($data[0])) echo $data[0]['ledger_type']; ?>" />
-						<select id="trans_type" class="form-control" name="trans_type">
+						<select id="trans_type" class="form-control select2" name="trans_type">
 							<option value="">Select</option>
 							<option value="Receipt" <?php if(isset($data[0])) { if($data[0]['trans_type']=="Receipt") echo "selected"; } ?>>Receipt</option>
 							<option value="Payment" <?php if(isset($data[0])) { if($data[0]['trans_type']=="Payment") echo "selected"; } ?>>Payment</option>
+							<option value="Contra Entry" <?php if(isset($data[0])) { if($data[0]['trans_type']=="Contra Entry") echo "selected"; } ?>>Contra Entry</option>
 						</select>
 					</div>
 				</div>
 				<div class="col-md-3 col-sm-12 col-xs-12">
-					<label class="control-label">Account Name</label>
+					<label class="control-label" id="acc_label" >Account Name</label>
 					<div class="">
 						<div class="">
-							<select class="form-control" name="acc_id" id="acc_id">
+							<select class="form-control select2" name="acc_id" id="acc_id">
 								<option value="">Select</option>
 								<?php for($j=0; $j<count($acc_details); $j++) { ?>
 								<option value="<?php echo $acc_details[$j]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['account_id']==$acc_details[$j]['id']) echo 'selected'; } ?>><?php echo $acc_details[$j]['legal_name']; ?></option>
@@ -82,11 +83,21 @@ $mycomponent = Yii::$app->mycomponent;
 				</div>
 			</div>
 			<div class="form-group">
+			
 				<div class="col-md-3 col-sm-12 col-xs-12">
-					<label class="control-label">Bank Name</label>
+					<label class="control-label">Payment Date</label>
+					<div class="">
+						<div class=""> 
+							<input class="form-control datepicker" type="text" id="payment_date" name="payment_date" value="<?php if(isset($data)) echo (($data[0]['payment_date']!=null && $data[0]['payment_date']!='')?date('d/m/Y',strtotime($data[0]['payment_date'])):date('d/m/Y')); else echo date('d/m/Y'); ?>" readonly />
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-md-3 col-sm-12 col-xs-12">
+					<label class="control-label" id="bank_label">Bank Name</label>
 					<div class="">
 						<div class="">
-							<select id="bank_id" class="form-control" name="bank_id">
+							<select id="bank_id" class="form-control select2" name="bank_id">
 								<option value="">Select</option>
 								<?php for($i=0; $i<count($bank); $i++) { ?>
 									<option value="<?php echo $bank[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['bank_id']==$bank[$i]['id']) echo "selected"; } ?>><?php echo $bank[$i]['legal_name']; ?></option>
@@ -96,11 +107,21 @@ $mycomponent = Yii::$app->mycomponent;
 						</div>
 					</div>
 				</div>
-				<div class="col-md-3 col-sm-12 col-xs-12">
+				
+				<div class="col-md-3 col-sm-12 col-xs-12 bank_acc_code" style="display:none;">
+					<label class="control-label">Account Code</label>
+					<div class="">
+						<div class="">  
+							<input id="acc_code1" name="acc_code1" class="form-control" type="text" value="<?php if(isset($data[0])) echo $data[0]['account_code1']; ?>" readonly />
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-md-3 col-sm-12 col-xs-12 payment_type1">
 					<label class="control-label">Payment Type</label>
 					<div class="">
 						<div class=""> 
-							<select id="payment_type" class="form-control" name="payment_type">
+							<select id="payment_type" class="form-control select2" name="payment_type">
 								<option value="">Select</option>
 								<option value="Adhoc" <?php if(isset($data[0])) { if($data[0]['payment_type']=="Adhoc") echo "selected"; } ?>>Adhoc</option>
 								<option value="Knock off" <?php if(isset($data[0])) { if($data[0]['payment_type']=="Knock off") echo "selected"; } ?>>Knock off</option>
@@ -108,14 +129,7 @@ $mycomponent = Yii::$app->mycomponent;
 						</div>
 					</div>
 				</div>
-				<div class="col-md-3 col-sm-12 col-xs-12">
-					<label class="control-label">Payment Date</label>
-					<div class="">
-						<div class=""> 
-							<input class="form-control datepicker" type="text" id="payment_date" name="payment_date" value="<?php if(isset($data)) echo (($data[0]['payment_date']!=null && $data[0]['payment_date']!='')?date('d/m/Y',strtotime($data[0]['payment_date'])):date('d/m/Y')); else echo date('d/m/Y'); ?>" readonly />
-						</div>
-					</div>
-				</div>
+			
 			</div>
 			<div class="form-group">
 				<div class="col-md-3 col-sm-12 col-xs-12 ad_hock">
@@ -179,7 +193,7 @@ $mycomponent = Yii::$app->mycomponent;
 				</div>
 				<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Approver</label>
-					<select id="approver_id" name="approver_id" class="form-control">
+					<select id="approver_id" name="approver_id" class="form-control select2">
 						<option value="">Select</option>
 						<?php for($i=0; $i<count($approver_list); $i++) { ?>
 							<option value="<?php echo $approver_list[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['approver_id']==$approver_list[$i]['id']) echo "selected"; } ?>><?php echo $approver_list[$i]['username']; ?></option>
@@ -234,7 +248,9 @@ $mycomponent = Yii::$app->mycomponent;
 
 <script type="text/javascript">
     var BASE_URL="<?php echo Url::base(); ?>";
+		
 </script>
+
 
 <?php 
     $this->registerJsFile(
@@ -245,10 +261,10 @@ $mycomponent = Yii::$app->mycomponent;
         '@web/js/payment_receipt.js',
         ['depends' => [\yii\web\JqueryAsset::className()]]
     );
-	// $this->registerJsFile(
-	//     '@web/plugins/jQuery/jquery-2.2.3.min.js',
-	//     ['depends' => [\yii\web\JqueryAsset::className()]]
-	// );
+	$this->registerJsFile(
+	    '@web/plugins/select2/js/select2.full.min.js',
+	    ['depends' => [\yii\web\JqueryAsset::className()]]
+	);
 	// $this->registerJsFile(
 	//     'https://code.jquery.com/ui/1.11.4/jquery-ui.min.js',
 	//     ['depends' => [\yii\web\JqueryAsset::className()]]

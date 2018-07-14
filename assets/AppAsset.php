@@ -23,10 +23,12 @@ class AppAsset extends AssetBundle
         // 'css/custom.css',
         // 'css/dashboard.css',
         'js/jquery-ui-1.11.2/jquery-ui.min.css',
+     
 
         'bootstrap/css/bootstrap.min.css',
         'css/updated_css.css',
         'css/export.css',
+        'css/easyTree.css',
 
         'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css',
         'https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css',
@@ -40,7 +42,7 @@ class AppAsset extends AssetBundle
         'plugins/datepicker/datepicker3.css',
         'plugins/daterangepicker/daterangepicker.css',
         'plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css',
-
+  'plugins/select2/css/select2.min.css',
         // 'dist/css/jquery.dataTables.css',
 
         // 'dist/css/dataTables.fixedColumns.css',
@@ -49,8 +51,7 @@ class AppAsset extends AssetBundle
 
         // 'https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css',
         // 'https://cdn.datatables.net/fixedcolumns/3.2.2/css/fixedColumns.dataTables.min.css'
-
-
+	
         // 'StreamTable/examples/assets/css/style.css',
     ];
     public $js = [
@@ -65,14 +66,18 @@ class AppAsset extends AssetBundle
         
         'plugins/jQuery/jquery-2.2.3.min.js',
 
-
+		// 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.3/css/bootstrap-select.min.css',
+		// 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.3/js/bootstrap-select.min.js',
 
         // 'https://code.jquery.com/ui/1.11.4/jquery-ui.min.js',
         'js/jquery-ui.min.js',
         'bootstrap/js/bootstrap.min.js',
-
+		   'js/jquery.browser.min.js',
+	    'bootstrap-gtreetable/dist/bootstrap-gtreetable.min.js',
+	    'bootstrap-gtreetable/dist/bootstrap-gtreetable.js',
         // 'js/datatables.min.js',
         'js/custom.js',
+        'js/easyTree.js',
 
         'js/plugins/jquery-validation/jquery.validate.js',
         
@@ -83,7 +88,12 @@ class AppAsset extends AssetBundle
         'plugins/jvectormap/jquery-jvectormap-world-mill-en.js',
         'plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js',
         'plugins/slimScroll/jquery.slimscroll.min.js',
-        'plugins/fastclick/fastclick.js',
+		'plugins/fastclick/fastclick.js',
+
+		//'plugins/select2/js/select2.full.min.js',
+        
+
+
 
         'dist/js/app.min.js',
 
@@ -131,7 +141,7 @@ class AppAsset extends AssetBundle
         'js/export/buttons.print.min.js',
         'js/export/buttons.colVis.min.js',
 
-
+'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js',
 
         // 'StreamTable/vendors/mustache.js',
         // 'StreamTable/stream_table.js',
@@ -141,5 +151,7 @@ class AppAsset extends AssetBundle
     public $depends = [
         'yii\web\YiiAsset',
         'yii\bootstrap\BootstrapAsset',
+		
+       
     ];
 }

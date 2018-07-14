@@ -96,6 +96,9 @@ $("#account_master").validate({
         account_type: {
             required: true
         },
+        sub_account_type: {
+            required: true
+        },
         account_holder_name: {
             required: function(element) {
                         if($("#type").val()=="Vendor Goods" || $("#type").val()=="Bank Account" || $("#type").val()=="Vendor Expenses" || $("#type").val()=="Employee"){
@@ -186,9 +189,9 @@ $("#account_master").validate({
                         }
                     }
         },
-        ac_category_1: {
-            required: true
-        },
+        // ac_category_1: {
+        //     required: true
+        // },
         approver_id: {
             required: true
         },
@@ -1015,7 +1018,8 @@ $("#payment_receipt").validate({
             required: true
         },
         amount: {
-            required: true
+            required: true,
+			numbersandcommaonly: true
         },
         // ref_no: {
         //     required: true
@@ -1321,7 +1325,7 @@ $('#go_debit_details').submit(function() {
 
         return false;
     } else {
-        if (check_acc_jv_details()==false) {
+        if (check_acc_debit_details()==false) {
             return false;
         } else {
             removeMultiInputNamingRules('#go_debit_details', 'select[alt="acc_id[]"]');
@@ -1335,7 +1339,7 @@ $('#go_debit_details').submit(function() {
     }
 });
 
-function check_acc_jv_details() {
+function check_acc_debit_details() {
     var validator = $("#go_debit_details").validate();
     var valid = true;
 
@@ -1512,3 +1516,46 @@ function check_acc_promotion_details() {
 
     return valid;
 }
+
+
+
+
+
+// ----------------- PURCHASE LEDGER REPORT VALIDATION -------------------------------------
+$("#detailledger_report").validate({
+    rules: {
+        
+    },
+
+    ignore: false,
+
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
+
+$('#detailledger_report').submit(function() {
+    removeMultiInputNamingRules('#detailledger_report', 'select[alt="account[]"]');
+    removeMultiInputNamingRules('#detailledger_report', 'select[alt="vouchertype[]"]');
+    removeMultiInputNamingRules('#detailledger_report', 'select[alt="state[]"]');
+
+    addMultiInputNamingRules('#detailledger_report', 'select[name="account[]"]', { required: true }, "");
+    addMultiInputNamingRules('#detailledger_report', 'select[name="vouchertype[]"]', { required: true }, "");
+    addMultiInputNamingRules('#detailledger_report', 'select[name="state[]"]', { required: true }, "");
+
+    if (!$("#detailledger_report").valid()) {
+        return false;
+    } else {
+
+        removeMultiInputNamingRules('#detailledger_report', 'select[alt="account[]"]');
+        removeMultiInputNamingRules('#detailledger_report', 'select[alt="vouchertype[]"]');
+        removeMultiInputNamingRules('#detailledger_report', 'select[alt="state[]"]');
+
+        return true;
+    }
+});

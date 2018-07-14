@@ -25,6 +25,8 @@ input:-webkit-autofill {
 .form-devident { margin-top: 10px; }
 .form-devident h4 { border-bottom: 1px dashed #ddd; padding-bottom: 10px; }
 .download_file {display: block;}
+
+
 </style>
 <div class="grn-index">
 	<div class=" col-md-12">  
@@ -38,7 +40,7 @@ input:-webkit-autofill {
 					<input type="hidden" id="company_id" name="company_id" value="<?php if(isset($data)) echo $data[0]['company_id']; else if(isset($session['company_id'])) echo $session['company_id']; ?>" />
 					<input type="hidden" id="status" name="status" value="<?php if(isset($data)) echo $data[0]['status']; ?>" />
 					<input type="hidden" id="type_val" name="type_val" value="<?php if(isset($data)) echo $data[0]['type']; ?>" />
-					<select class="form-control" id="type" name="type" <?php if(isset($data)) echo 'disabled'; ?>>
+					<select class="form-control select2 " id="type" name="type" <?php if(isset($data)) echo 'disabled'; ?>>
 						<option value="">Select</option>
 						<option value="Vendor Goods" <?php if(isset($data)) { if($data[0]['type']=="Vendor Goods") echo "selected"; } ?>>Vendor Goods</option>
 						<option value="Vendor Expenses" <?php if(isset($data)) { if($data[0]['type']=="Vendor Expenses") echo "selected"; } ?>>Vendor Expenses</option>
@@ -55,12 +57,14 @@ input:-webkit-autofill {
 				</div>
 				<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Legal Name</label>
-					<select id="vendor_id" name="vendor_id" class="form-control" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Goods') echo 'display: none;'; } else { echo 'display: none;'; } ?>">
+					<span id="type_vendor_id">
+					<select id="vendor_id" name="vendor_id" class="form-control select2" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Goods') echo 'display: none;'; } else { echo 'display: none;'; } ?>">
 						<option value="">Select</option>
 						<?php for($i=0; $i<count($vendor); $i++) { ?>
 							<option value="<?php echo $vendor[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['vendor_id']==$vendor[$i]['id']) echo "selected"; } ?>><?php echo $vendor[$i]['vendor_name']; ?></option>
 						<?php } ?>
 					</select>
+					</span>
 					<input id="legal_name" name="legal_name" class="form-control" type="text" value="<?php if(isset($data[0])) echo $data[0]['legal_name']; ?>" style="<?php if(isset($data[0])) { if($data[0]['type'] == 'Vendor Goods') echo 'display: none;'; } ?>" />
 				</div>
 				<div class="col-md-3 col-sm-3 col-xs-6">
@@ -81,7 +85,7 @@ input:-webkit-autofill {
 		 	<div class="form-group">
 			  	<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Account Type</label>
-					<select class="form-control" id="account_type" name="account_type">
+					<select class="form-control select2" id="account_type" name="account_type" onchange="get_sub_account_type();">
 						<option value="">Select</option>
 						<option value="Income" <?php if(isset($data)) { if($data[0]['account_type']=="Income") echo "selected"; } ?>>Income</option>
 						<option value="Expense" <?php if(isset($data)) { if($data[0]['account_type']=="Expense") echo "selected"; } ?>>Expense</option>
@@ -89,6 +93,23 @@ input:-webkit-autofill {
 						<option value="Liability" <?php if(isset($data)) { if($data[0]['account_type']=="Liability") echo "selected"; } ?>>Liability</option>
 					</select>
 				</div>
+			  	<div class="col-md-3 col-sm-3 col-xs-6">
+					<label class="control-label">Sub Account Type</label>
+					<input type="hidden" id="sub_account_type_id" name="sub_account_type_id" value="<?php if(isset($data)) echo $data[0]['sub_account_type']; ?>" />
+					<select class="form-control" id="sub_account_type" name="sub_account_type" onchange="get_account_path();">
+						<option value="">Select</option>
+						<?php //for($i=0; $i<count($category); $i++) { ?>
+							<!-- <option value="<?php //echo $category[$i]['id']; ?>" <?php //if(isset($data)) { if($data[0]['sub_account_type']==$category[$i]['id']) echo "selected"; } ?>><?php //echo $category[$i]['account_type']; ?></option> -->
+						<?php //} ?>
+					</select>
+				</div>
+			  	<div class="col-md-6 col-sm-6 col-xs-12">
+			  		<label class="control-label">Path</label>
+			  		<input id="sub_account_path" name="sub_account_path" class="form-control" type="text" value="" readonly />
+				</div>
+			</div>
+			
+		 	<div class="form-group">
 	         	<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Details</label>
 					<input id="details" name="details" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['details']; ?>" />
@@ -299,7 +320,7 @@ input:-webkit-autofill {
 				</div>
 			</div>
 
-			<div class="form-devident">
+			<!-- <div class="form-devident">
 				<div class=" col-md-12 col-sm-12 col-xs-12">
 					<h4>Accounting Category</h4>
 				</div>
@@ -331,7 +352,7 @@ input:-webkit-autofill {
 						</div>
 					</div>
 				</div>
-			</div>
+			</div> -->
 
 			<div class="form-devident vendor_goods" id="business_category_label" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Goods') echo 'display: none;'; } else { echo 'display: none;'; } ?>">
 				<div class="  col-md-12 col-sm-12 col-xs-12">
@@ -397,7 +418,7 @@ input:-webkit-autofill {
 				</div>
 				<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Approver</label>
-					<select id="approver_id" name="approver_id" class="form-control">
+					<select id="approver_id" name="approver_id" class="form-control select2">
 						<option value="">Select</option>
 						<?php for($i=0; $i<count($approver_list); $i++) { ?>
 							<option value="<?php echo $approver_list[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['approver_id']==$approver_list[$i]['id']) echo "selected"; } ?>><?php echo $approver_list[$i]['username']; ?></option>

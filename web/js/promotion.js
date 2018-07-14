@@ -1,12 +1,14 @@
 $('.datepicker').datepicker({changeMonth: true,changeYear: true});
 
 $(document).ready(function(){
+	$('.select2').select2();
     addMultiInputNamingRules('#promotion', 'select[name="acc_id[]"]', { required: true });
     addMultiInputNamingRules('#promotion', 'input[name="acc_code[]"]', { required: true });
     addMultiInputNamingRules('#promotion', 'select[name="transaction[]"]', { required: true });
     addMultiInputNamingRules('#promotion', 'input[name="debit_amt[]"]', { required: true });
     addMultiInputNamingRules('#promotion', 'input[name="credit_amt[]"]', { required: true });
 
+    get_promo_codes();
     set_view();
 })
 
@@ -186,6 +188,7 @@ function get_promo_types(){
 }
 
 function get_promo_codes(){
+    var id = $('#id').val();
     var vendor_id = $('#vendor_id').val();
     var promotion_type = $('#promotion_type').val();
     var debit_note_ref = $('#debit_note_ref').val();
@@ -195,6 +198,7 @@ function get_promo_codes(){
         url: BASE_URL+'index.php?r=promotion%2Fgetpromocodes',
         type: 'post',
         data: {
+                id : id,
                 vendor_id : vendor_id,
                 promotion_type : promotion_type,
                 debit_note_ref : debit_note_ref,

@@ -1,6 +1,7 @@
 $('.datepicker').datepicker({changeMonth: true,changeYear: true});
 
 $(document).ready(function(){
+		$('.select2').select2();
     addMultiInputNamingRules('#journal_voucher', 'select[name="acc_id[]"]', { required: true });
     addMultiInputNamingRules('#journal_voucher', 'input[name="acc_code[]"]', { required: true });
     addMultiInputNamingRules('#journal_voucher', 'select[name="transaction[]"]', { required: true });
@@ -8,6 +9,7 @@ $(document).ready(function(){
     addMultiInputNamingRules('#journal_voucher', 'input[name="credit_amt[]"]', { required: true });
 
     set_view();
+	
 })
 
 function set_view(){

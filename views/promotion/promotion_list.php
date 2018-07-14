@@ -36,10 +36,10 @@ $this->params['breadcrumbs'][] = $this->title;
 											<th>Credit Account</th> 
 											<th>Debit Amount</th>  
 											<th>Credit Amount</th> 
-											<th>Debit Credit Note Ref</th> 
+											<th>Debit Note Ref</th> 
 											<th>Status</th> 
 											<th>Updated By</th> 
-											<th>Debit Credit Note</th> 
+											<th>Debit Note</th> 
 											<th style="display: none;">Approved By</th> 
 										</tr>  
 									</thead>
@@ -58,13 +58,19 @@ $this->params['breadcrumbs'][] = $this->title;
 											<td><?php echo $approved[$i]['credit_acc']; ?></td> 
 											<td><?php echo $approved[$i]['debit_amt']; ?></td> 
 											<td><?php echo $approved[$i]['credit_amt']; ?></td> 
-											<td><?php echo $approved[$i]['debit_credit_note_ref']; ?></td> 
+											<td><?php echo $approved[$i]['debit_note_ref']; ?></td> 
 											<td><?php echo $approved[$i]['status']; ?></td> 
 											<td><?php echo $approved[$i]['updater']; ?></td> 
 											<td>
-												<a href="<?php echo Url::base() .'index.php?r=promotion%2Fviewdebitcreditnote&id='.$approved[$i]['id']; ?>" target="_blank">View </a> <br/>
-												<a href="<?php echo Url::base() .'index.php?r=promotion%2Fdownloaddebitcreditnote&id='.$approved[$i]['id']; ?>" target="_blank">Download </a> <br/>
-												<a href="<?php echo Url::base() .'index.php?r=promotion%2Femaildebitcreditnote&id='.$approved[$i]['id']; ?>" >Email </a> <br/>
+												<?php if($approved[$i]['trans_type']=='Invoice') { ?>
+												<a href="<?php echo Url::base() .'index.php?r=promotion%2Fviewtaxinvoice&id='.$approved[$i]['id']; ?>" target="_blank">View </a> <br/>
+												<a href="<?php echo Url::base() .'index.php?r=promotion%2Fdownloadtaxinvoice&id='.$approved[$i]['id']; ?>" target="_blank">Download </a> <br/>
+												<a href="<?php echo Url::base() .'index.php?r=promotion%2Femailtaxinvoice&id='.$approved[$i]['id']; ?>" >Email </a> <br/>
+												<?php } else { ?>
+												<a href="<?php echo Url::base() .'index.php?r=promotion%2Fviewdebitnote&id='.$approved[$i]['id']; ?>" target="_blank">View </a> <br/>
+												<a href="<?php echo Url::base() .'index.php?r=promotion%2Fdownloaddebitnote&id='.$approved[$i]['id']; ?>" target="_blank">Download </a> <br/>
+												<a href="<?php echo Url::base() .'index.php?r=promotion%2Femaildebitnote&id='.$approved[$i]['id']; ?>" >Email </a> <br/>
+												<?php } ?>
 											</td> 
 											<td style="display: none;"><?php echo $approved[$i]['approver']; ?></td> 
 										</tr> 

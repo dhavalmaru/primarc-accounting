@@ -44,10 +44,10 @@ table tr td { border: 1px solid #eee!important; }
 								<input type="hidden" id="action" name="action" value="<?php if(isset($action)) echo $action; ?>">
 								<input type="hidden" id="id" name="id" value="<?php if(isset($data)) echo $data[0]['id']; ?>" />
 								<input type="hidden" id="status" name="status" value="<?php if(isset($data)) echo $data[0]['status']; ?>" />
-								<input type="hidden" name="voucher_id" value="<?php if(isset($data)) echo $data[0]['voucher_id']; ?>" />
-								<input type="hidden" name="ledger_type" value="<?php if(isset($data)) echo $data[0]['ledger_type']; ?>" />
-								<input type="hidden" name="debit_note_ref" value="<?php if(isset($data)) echo $data[0]['debit_note_ref']; ?>" />
-								<select id="vendor_id" name="vendor_id" class="form-control" onChange="get_promo_types();">
+								<input type="hidden" id="voucher_id" name="voucher_id" value="<?php if(isset($data)) echo $data[0]['voucher_id']; ?>" />
+								<input type="hidden" id="ledger_type" name="ledger_type" value="<?php if(isset($data)) echo $data[0]['ledger_type']; ?>" />
+								<input type="hidden" id="debit_note_ref" name="debit_note_ref" value="<?php if(isset($data)) echo $data[0]['debit_note_ref']; ?>" />
+								<select id="vendor_id" name="vendor_id" class="form-control select2" onChange="get_promo_types();">
 									<option value="">Select</option>
 									<?php if(isset($vendor)) { for($i=0; $i<count($vendor); $i++) { ?>
 										<option value="<?php echo $vendor[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['vendor_id']==$vendor[$i]['id']) echo "selected"; } ?>><?php echo $vendor[$i]['vendor_name']; ?></option>
@@ -60,7 +60,7 @@ table tr td { border: 1px solid #eee!important; }
 						<label class="control-label">Promotion Type</label>
 						<div class=" ">
 							<div class=" ">
-								<select id="promotion_type" class="form-control" name="promotion_type" onChange="get_promo_codes();">
+								<select id="promotion_type" class="form-control select2" name="promotion_type" onChange="get_promo_codes();">
 									<option value="">Select</option>
 									<?php if(isset($promotion_type)) { for($i=0; $i<count($promotion_type); $i++) { ?>
 										<option value="<?php echo $promotion_type[$i]['promotion_type']; ?>" <?php if(isset($data[0])) { if($data[0]['promotion_type']==$promotion_type[$i]['promotion_type']) echo "selected"; } ?>><?php echo $promotion_type[$i]['promotion_type']; ?></option>
@@ -73,7 +73,7 @@ table tr td { border: 1px solid #eee!important; }
 						<label class="control-label">Promotion Code</label>
 						<div class=" ">
 							<div class=" ">
-								<select id="promotion_code" class="form-control" name="promotion_code" multiple>
+								<select id="promotion_code" class="form-control" name="promotion_code[]" multiple>
 									<option value="">Select</option>
 									<?php if(isset($promotion_code)) { for($i=0; $i<count($promotion_code); $i++) { ?>
 										<option value="<?php echo $promotion_code[$i]['promotion_code']; ?>" <?php if(isset($data[0])) { if($data[0]['promotion_code']==$promotion_code[$i]['promotion_code']) echo "selected"; } ?>><?php echo $promotion_code[$i]['promotion_code']; ?></option>
@@ -90,7 +90,7 @@ table tr td { border: 1px solid #eee!important; }
 						<label class="control-label">Transaction</label>
 						<div class=" ">
 							<div class=" ">
-								<select id="trans_type" class="form-control" name="trans_type" onChange="set_trans_type();">
+								<select id="trans_type" class="form-control select2" name="trans_type" onChange="set_trans_type();">
 									<option value="">Select</option>
 									<option value="Debit Note" <?php if(isset($data[0])) { if($data[0]['trans_type']=="Debit Note") echo "selected"; } ?>>Debit Note</option>
 									<option value="Invoice" <?php if(isset($data[0])) { if($data[0]['trans_type']=="Invoice") echo "selected"; } ?>>Invoice</option>
@@ -155,7 +155,7 @@ table tr td { border: 1px solid #eee!important; }
 											<td  style="text-align: center; display: none;" id="sr_no_<?php echo $i; ?>"><?php echo $i+1; ?></td>
 											<td>
 												<input class="form-control" type="hidden" name="entry_id[]" id="entry_id_<?php echo $i; ?>" value="<?php if(isset($promotion_entries)) echo $promotion_entries[$i]['id']; ?>" />
-												<select class="form-control" name="acc_id[]" id="acc_id_<?php echo $i; ?>" onchange="get_acc_details(this);">
+												<select class="form-control select2" name="acc_id[]" id="acc_id_<?php echo $i; ?>" onchange="get_acc_details(this);">
 													<option value="">Select</option>
 													<?php for($j=0; $j<count($acc_details); $j++) { ?>
 													<option value="<?php echo $acc_details[$j]['id']; ?>" <?php if($promotion_entries[$i]['account_id']==$acc_details[$j]['id']) echo 'selected'; ?>><?php echo $acc_details[$j]['legal_name']; ?></option>
@@ -165,7 +165,7 @@ table tr td { border: 1px solid #eee!important; }
 											</td>
 											<td><input class="form-control" type="text" name="acc_code[]" id="acc_code_<?php echo $i; ?>" value="<?php echo $promotion_entries[$i]['account_code']; ?>" readonly /></td>
 											<td>
-												<select class="form-control" name="transaction[]" id="trans_<?php echo $i; ?>" onchange="set_transaction(this);">
+												<select class="form-control select2" name="transaction[]" id="trans_<?php echo $i; ?>" onchange="set_transaction(this);">
 													<option value="">Select</option>
 													<option value="Debit" <?php if($promotion_entries[$i]['transaction']=="Debit") echo 'selected'; ?>>Debit</option>
 													<option value="Credit" <?php if($promotion_entries[$i]['transaction']=="Credit") echo 'selected'; ?>>Credit</option>
@@ -180,7 +180,7 @@ table tr td { border: 1px solid #eee!important; }
 											<td   style="text-align: center; display: none;" id="sr_no_0">1</td>
 											<td>
 												<input class="form-control" type="hidden" name="entry_id[]" id="entry_id_0" value="" />
-												<select class="form-control" name="acc_id[]" id="acc_id_0" onchange="get_acc_details(this);">
+												<select class="form-control select2" name="acc_id[]" id="acc_id_0" onchange="get_acc_details(this);">
 													<option value="">Select</option>
 													<?php for($j=0; $j<count($acc_details); $j++) { ?>
 													<option value="<?php echo $acc_details[$j]['id']; ?>"><?php echo $acc_details[$j]['legal_name']; ?></option>
@@ -190,7 +190,7 @@ table tr td { border: 1px solid #eee!important; }
 											</td>
 											<td><input class="form-control" type="text" name="acc_code[]" id="acc_code_0" value="" readonly /></td>
 											<td>
-												<select class="form-control" name="transaction[]" id="trans_0" onchange="set_transaction(this);">
+												<select class="form-control select2" name="transaction[]" id="trans_0" onchange="set_transaction(this);">
 													<option value="">Select</option>
 													<option value="Debit">Debit</option>
 													<option value="Credit">Credit</option>
@@ -204,7 +204,7 @@ table tr td { border: 1px solid #eee!important; }
 											<td   style="text-align: center; display: none;" id="sr_no_1">1</td>
 											<td>
 												<input class="form-control" type="hidden" name="entry_id[]" id="entry_id_1" value="" />
-												<select class="form-control" name="acc_id[]" id="acc_id_1" onchange="get_acc_details(this);">
+												<select class="form-control select2" name="acc_id[]" id="acc_id_1" onchange="get_acc_details(this);">
 													<option value="">Select</option>
 													<?php for($j=0; $j<count($acc_details); $j++) { ?>
 													<option value="<?php echo $acc_details[$j]['id']; ?>"><?php echo $acc_details[$j]['legal_name']; ?></option>
@@ -214,7 +214,7 @@ table tr td { border: 1px solid #eee!important; }
 											</td>
 											<td><input class="form-control" type="text" name="acc_code[]" id="acc_code_1" value="" readonly /></td>
 											<td>
-												<select class="form-control" name="transaction[]" id="trans_1" onchange="set_transaction(this);">
+												<select class="form-control select2" name="transaction[]" id="trans_1" onchange="set_transaction(this);">
 													<option value="">Select</option>
 													<option value="Debit">Debit</option>
 													<option value="Credit">Credit</option>

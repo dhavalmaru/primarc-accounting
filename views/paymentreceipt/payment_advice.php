@@ -74,7 +74,7 @@
             <tr>
                 <td colspan="4" height="10" style="border:none;"> 
                     <p style="margin-bottom:5px;">Dear Sir/Madam,</p>
-                    <p>Please find beleow the payment details.</p>
+                    <p>Please find below the payment details.</p>
                 </td>
             </tr>
             <tr>

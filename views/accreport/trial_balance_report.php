@@ -54,7 +54,7 @@ table tr td { border: 1px solid #eee!important; }
 					<label class="control-label">Type</label>
 					<div class="">
 						<div class=""> 
-							<select class="form-control" id="date_type">
+							<select class="form-control select2" id="date_type">
 								<option value="As Of Date">As Of Date</option>
 								<option value="Date Range">Date Range</option>
 							</select>

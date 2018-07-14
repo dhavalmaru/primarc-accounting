@@ -1,6 +1,7 @@
 $('.datepicker').datepicker({changeMonth: true,changeYear: true});
 
 $(document).ready(function(){
+	$('.select2').select2();
     getTotal();
     // $("#form_purchase_details").validate();
 

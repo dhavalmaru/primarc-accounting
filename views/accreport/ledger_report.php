@@ -70,7 +70,7 @@ tbody {
 					<label class="control-label">Transaction Type</label>
 					<div class=" ">
 						<div class=" "> 
-							<select class="form-control" id="date_criteria" name="date_criteria">
+							<select class="form-control select2" id="date_criteria" name="date_criteria">
 								<option value="Financial Year">Financial Year</option>
 								<option value="By Date">By Date</option>
 							</select>
@@ -98,7 +98,7 @@ tbody {
 					<label class="control-label">Account Name</label>
 					<div class=" ">
 						<div class=" ">
-							<select class="form-control" id="account" name="account">
+							<select class="form-control select2" id="account" name="account">
 								<option value="">Select</option>
 								<?php for($i=0; $i<count($acc_details); $i++) { ?>
 									<option value="<?php echo $acc_details[$i]['id']; ?>" <?php if(isset($account)) {if($acc_details[$i]['id']==$account) echo 'selected';} ?>><?php echo $acc_details[$i]['legal_name']; ?></option>

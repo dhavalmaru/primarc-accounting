@@ -23,15 +23,20 @@ $(document).ready(function(){
 
     // $("#company_name").html("Primarc Pecan Retail Pvt Ltd");
     $("#account_name").html($("#account option:selected").text());
+$('.select2').select2();
 
+$('#narration').change(function(){
+    show_narration();
+});
     set_table();
-})
+	$("#date_criteria").change(function(){
+    change_date_criteria();
+});
+});
 
 $('.datepicker').datepicker({changeMonth: true,changeYear: true});
 
-$("#date_criteria").change(function(){
-    change_date_criteria();
-})
+
 
 function change_date_criteria(){
     if($("#date_criteria").val()=="By Date"){

@@ -139,6 +139,9 @@ $session = Yii::$app->session;
 
         <ul class="sidebar-menu"> 
             <li style="<?php if(isset($session['S_Account_Master'])) {if($session['S_Account_Master']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="<?php echo Url::base(); ?>index.php?r=groupmaster%2Findex"><i class="fa fa-users"></i> <span>Group Master</span></a>
+            </li> 
+            <li style="<?php if(isset($session['S_Account_Master'])) {if($session['S_Account_Master']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
                 <a href="<?php echo Url::base(); ?>index.php?r=accountmaster%2Findex"><i class="fa fa-book"></i> <span>Account Master</span></a>
             </li> 
             <li style="<?php if(isset($session['S_Purchase'])) {if($session['S_Purchase']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">

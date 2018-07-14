@@ -1,5 +1,8 @@
-$('.datepicker').datepicker({changeMonth: true,changeYear: true});
 
+
+$('.datepicker').datepicker({changeMonth: true,changeYear: true});
+$(document).ready(function(){
+	$('.select2').select2();
 $("#date_type").change(function(){
     if($("#date_type").val()=="Date Range"){
         // $("#date_range_div").show();
@@ -187,3 +190,4 @@ function set_table(){
     change_bus_cat();
     change_acc_cat();
 }
+});

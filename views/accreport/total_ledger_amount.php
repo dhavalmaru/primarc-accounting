@@ -70,7 +70,7 @@ tbody {
 					<label class="control-label">Transaction Type</label>
 					<div class=" ">
 						<div class=" "> 
-							<select class="form-control" id="date_criteria" name="date_criteria">
+							<select class="form-control select2" id="date_criteria" name="date_criteria">
 								<option value="Financial Year">Financial Year</option>
 								<option value="By Date">By Date</option>
 							</select>
