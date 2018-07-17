@@ -25,6 +25,7 @@ input:-webkit-autofill {
 .form-devident { margin-top: 10px; }
 .form-devident h4 { border-bottom: 1px dashed #ddd; padding-bottom: 10px; }
 .download_file {display: block;}
+.glyphicon-file {display:none!important;}
 /*body {
     background: #eee;
 }*/

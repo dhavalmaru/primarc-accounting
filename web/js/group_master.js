@@ -16,10 +16,11 @@
                 deleteRoot: 'Cannot delete root parent type',
                 deleteParent: 'Cannot delete parent type',
                 deleteConfirmation: 'Delete this type?',
-                confirmButtonLabel: 'Okay',
+                confirmButtonLabel: 'Yes',
                 editNull: 'Select a type to edit',
                 editMultiple: 'Only one type can be edited at one time',
                 addMultiple: 'Select a type to add a new type',
+                addDifferent: 'Entered type already exist please add different type',
                 collapseTip: 'collapse',
                 expandTip: 'expand',
                 selectTip: 'select',
@@ -27,14 +28,14 @@
                 editTip: 'edit',
                 addTip: 'add',
                 deleteTip: 'delete',
-                cancelButtonLabel: 'cancle'
+                cancelButtonLabel: 'Cancel'
             }
         };
 
-        var warningAlert = $('<div class="alert alert-warning alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><strong></strong><span class="alert-content"></span> </div> ');
-        var dangerAlert = $('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><strong></strong><span class="alert-content"></span> </div> ');
+        var warningAlert = $('<div class="alert alert-warning "><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><strong></strong><span class="alert-content"></span> </div> ');
+        var dangerAlert = $('<div class="alert alert-danger "><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><strong></strong><span class="alert-content"></span> </div> ');
 
-        var createInput = $('<div class="input-group"><input type="text" class="form-control"><span class="input-group-btn"><button type="button" class="btn btn-default btn-success confirm"></button> </span><span class="input-group-btn"><button type="button" class="btn btn-default cancel"></button> </span> </div> ');
+        var createInput = $('<form><div class="input-group"><input type="text" class="form-control">  </div> <br><div class="input-group"><span class="input-group-btn"><button type="button" class="btn btn-success btn-sm confirm"></button> </span><span class="input-group-btn"><button type="button" class="btn btn-danger btn-sm cancel"></button> </span></div>');
 
         options = $.extend(defaults, options);
 
@@ -98,7 +99,17 @@
                             var account_type = $(createInput).find('input').val();
                             var new_type_id = 0;
                             var action = 'insert';
-                            var result = set_account_type(action, parent_id, account_type);
+
+                            var result = get_account_type(action, parent_id, account_type);
+                            if(result==false){
+                                $(easyTree).prepend(warningAlert);
+                                $(easyTree).find('.alert .alert-content').html(options.i18n.addDifferent);
+                                return false;
+                            } else {
+                                $(warningAlert).remove();
+                            }
+
+                            result = set_account_type(action, parent_id, account_type);
                             if(result==false){
                                 return false;
                             } else {
@@ -200,7 +211,17 @@
 			                        }
 			                        var account_type = $(editor).val();
 			                        var action = 'update';
-			                        var result = set_account_type(action, parent_id, account_type);
+
+                                    var result = get_account_type(action, parent_id, account_type);
+                                    if(result==false){
+                                        $(easyTree).prepend(warningAlert);
+                                        $(easyTree).find('.alert .alert-content').html(options.i18n.addDifferent);
+                                        return false;
+                                    } else {
+                                        $(warningAlert).remove();
+                                    }
+
+			                        result = set_account_type(action, parent_id, account_type);
 			                        if(result==false){
 			                        	return false;
 			                        }
@@ -341,9 +362,45 @@ function init() {
 window.onload = init();
 })(jQuery)
 
+var get_account_type = function(action, parent_id, account_type){
+    var csrfToken = $('meta[name="csrf-token"]').attr("content");
+    var result = false;
+
+    if(action=='insert' || action=='update'){
+        $.ajax({
+            url: BASE_URL+'index.php?r=groupmaster%2Fgetaccounttype',
+            type: 'post',
+            data: {
+                    action : action,
+                    parent_id : parent_id,
+                    account_type : account_type,
+                    _csrf : csrfToken
+                },
+            dataType: 'json',
+            async: false,
+            success: function (data) {
+                if(data==1){
+                    result = false;
+                } else {
+                    result = true;
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        });
+    } else {
+        result = true;
+    }
+
+    return result;
+}
+
 var set_account_type = function(action, parent_id, account_type){
 	var csrfToken = $('meta[name="csrf-token"]').attr("content");
 	var result = false;
+
 	$.ajax({
         url: BASE_URL+'index.php?r=groupmaster%2Fsetaccounttype',
         type: 'post',

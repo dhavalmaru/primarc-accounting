@@ -1,6 +1,7 @@
 $('.datepicker').datepicker({changeMonth: true,changeYear: true});
 
 $(document).ready(function(){
+	$('.select2').select2();
     addMultiInputNamingRules('#promotion', 'select[name="acc_id[]"]', { required: true });
     addMultiInputNamingRules('#promotion', 'input[name="acc_code[]"]', { required: true });
     addMultiInputNamingRules('#promotion', 'select[name="transaction[]"]', { required: true });

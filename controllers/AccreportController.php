@@ -10,6 +10,7 @@ use yii\filters\VerbFilter;
 use yii\helpers\Url;
 // use moonlandsoft\phpexcel\Excel;
 use phpoffice\phpexcel\Excel;
+use app\models\PaymentReceipt;
 
 class AccreportController extends Controller
 {   
@@ -134,26 +135,22 @@ class AccreportController extends Controller
         $view = $request->post('view');
         $state = $request->post('state');
 
-
         $data['account']=$account;
-        
         $data['date_criteria']=$date_type;
         $data['from_date']=$from_date;
         $data['to_date']=$to_date;
         $data['view']=$view;
         
-
         $account = implode(",",$account);
        
         if(count($vouchertype)==0)
         {
             $data['vouchertype']=[];
             $vouchertype = array('purchase','journal_voucher','payment_receipt','go_debit_details','other_debit_credit');
-
         }
         else
         {
-             $data['vouchertype']=$vouchertype;
+            $data['vouchertype']=$vouchertype;
         }
         if(count($state)>0){
             $data['state']=$state;
@@ -365,19 +362,27 @@ class AccreportController extends Controller
             $innertab = '';
             $voucher = 0;
             $temp = 0;
+            $sum_total = 0;
 
             $column_names= $report->tax_wise_column($account, $vouchertype,$from_date, $to_date,$date_type,$state);
             $colname = '';
+            $tabrow = '';
+
+            // echo json_encode($column_names);
+            // echo '<br/>';
 
             foreach ($column_names as $res)
             {
                $colname.='<th class="text-center">'.'Purchase Value Exc Tax - '.$res['percentage'].'%'.'</th>';
-               $colname.='<th class="text-center">'.'Tax -'.$res['percentage'].'% Total Amount - '.'</th>';
+               $colname.='<th class="text-center">'.'Tax -'.$res['percentage'].'% Total Amount'.'</th>';
                $colname.='<th class="text-center">'.'Total Purchase inc Tax - '.$res['percentage'].'</th>';
             }
+
+            // echo json_encode($acc_details);
             for ($i=0; $i <count($acc_details) ; $i++) { 
-                
+
                 $voucher_id = $acc_details[$i]['voucher_id'];
+
                     if($voucher_id!=$voucher)
                     {   
                         if($voucher!=0)
@@ -388,55 +393,71 @@ class AccreportController extends Controller
                                 $innertab.='<td> </td>';
                                 $innertab.='<td> </td>';
                             }
-                            $innertab.="</tr>";
+
+                            $tabrow.='<tr>
+                                        <td>'.($acc_details[$i-1]['invoice_date']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['invoice_date'])):'').'</td>
+                                        <td>'.($acc_details[$i-1]['grn_approved_date_time']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['grn_approved_date_time'])):'').'</td>
+                                        <td>'.($acc_details[$i-1]['gi_date']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['gi_date'])):'').'</td>
+                                        <td>'.($acc_details[$i-1]['updated_date']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['updated_date'])):'').'</td>
+                                        <td>'.$acc_details[$i-1]['cp_ledger_name'].'</td>
+                                        <td>'.$acc_details[$i-1]['ref_type'].'</td>
+                                        <td>'.$acc_details[$i-1]['voucher_id'].'</td>
+                                        <td>'.($acc_details[$i-1]['ref_type']=='journal_voucher'?'':$acc_details[$i-1]['ref_id']).'</td>
+                                        <td>'.$acc_details[$i-1]['gi_go_ref_no'].'</td>
+                                        <td>'.($acc_details[$i-1]['ref_type']=='Debit Note'?$acc_details[$i-1]['debit_note_ref']:$acc_details[$i-1]['invoice_no']).'</td>
+                                        <td>'.$sum_total.'</td>'.$innertab.'
+                                    </tr>';
                         }
 
                         $temp=0;
-                        $innertab.='<tr>
-                        <td>'.($acc_details[$i]['invoice_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['invoice_date'])):'').'</td>
-                        <td>'.($acc_details[$i]['grn_approved_date_time']!=""?date('Y-m-d',strtotime($acc_details[$i]['grn_approved_date_time'])):'').'</td>
-                        <td>'.($acc_details[$i]['gi_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['gi_date'])):'').'</td>
-                        <td>'.($acc_details[$i]['updated_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['updated_date'])):'').'</td>
-                        <td>'.$acc_details[$i]['cp_ledger_name'].'</td>
-                        <td>'.$acc_details[$i]['ref_type'].'</td>
-                        <td>'.$acc_details[$i]['voucher_id'].'</td>
-                        <td>'.($acc_details[$i]['ref_type']=='journal_voucher'?'':$acc_details[$i]['ref_id']).'</td>
-                        <td>'.$acc_details[$i]['gi_go_ref_no'].'</td>
-                        <td>'.($acc_details[$i]['ref_type']=='Debit Note'?$acc_details[$i]['debit_note_ref']:$acc_details[$i]['invoice_no']).'</td>
-                        <td>'.$acc_details[$i]['total_deduction'].'</td>';
+                        $sum_total=0;
+                        // $innertab.='<tr>
+                        // <td>'.($acc_details[$i]['invoice_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['invoice_date'])):'').'</td>
+                        // <td>'.($acc_details[$i]['grn_approved_date_time']!=""?date('Y-m-d',strtotime($acc_details[$i]['grn_approved_date_time'])):'').'</td>
+                        // <td>'.($acc_details[$i]['gi_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['gi_date'])):'').'</td>
+                        // <td>'.($acc_details[$i]['updated_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['updated_date'])):'').'</td>
+                        // <td>'.$acc_details[$i]['cp_ledger_name'].'</td>
+                        // <td>'.$acc_details[$i]['ref_type'].'</td>
+                        // <td>'.$acc_details[$i]['voucher_id'].'</td>
+                        // <td>'.($acc_details[$i]['ref_type']=='journal_voucher'?'':$acc_details[$i]['ref_id']).'</td>
+                        // <td>'.$acc_details[$i]['gi_go_ref_no'].'</td>
+                        // <td>'.($acc_details[$i]['ref_type']=='Debit Note'?$acc_details[$i]['debit_note_ref']:$acc_details[$i]['invoice_no']).'</td>
+                        // <td>'.$acc_details[$i]['total_deduction'].'</td>';
+
+                        $innertab = '';
 
                         for($j=0;$j<count($column_names);$j++)
                         {
-                          if($acc_details[$i]['percentage']==$column_names[$j]['percentage'])
+                            if($acc_details[$i]['percentage']==$column_names[$j]['percentage'])
                             {
-                               
-                               $innertab.='<td>'.$acc_details[$i]['purchase'].'</td>';
-                               $innertab.='<td>'.$acc_details[$i]['total_tax_amount'].'</td>';
-                               $innertab.='<td>'.$acc_details[$i]['cost_inc_tax'].'</td>';
-                               $temp = $j;
-                               break;   
-                            }
-                            else{
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
+                                $sum_total = $sum_total + $acc_details[$i]['cost_inc_tax'];
 
+                                $innertab.='<td>'.$acc_details[$i]['purchase'].'</td>';
+                                $innertab.='<td>'.$acc_details[$i]['total_tax_amount'].'</td>';
+                                $innertab.='<td>'.$acc_details[$i]['cost_inc_tax'].'</td>';
+                                $temp = $j;
+                                break;   
+                            }
+                            else {
+                                $innertab.='<td> </td>';
+                                $innertab.='<td> </td>';
+                                $innertab.='<td> </td>';
                             }
                         }
                     }
                     else
                     {   
-
                         for($j=$temp+1;$j<count($column_names);$j++)
                         {
-                         
-                          if($acc_details[$i]['percentage']==$column_names[$j]['percentage'])
+                            if($acc_details[$i]['percentage']==$column_names[$j]['percentage'])
                             {
-                               $innertab.='<td>'.$acc_details[$i]['purchase'].'</td>';
-                               $innertab.='<td>'.$acc_details[$i]['total_tax_amount'].'</td>';
-                               $innertab.='<td>'.$acc_details[$i]['cost_inc_tax'].'</td>';
-                               $temp = $j;
-                               break;
+                                $sum_total = $sum_total + $acc_details[$i]['cost_inc_tax'];
+
+                                $innertab.='<td>'.$acc_details[$i]['purchase'].'</td>';
+                                $innertab.='<td>'.$acc_details[$i]['total_tax_amount'].'</td>';
+                                $innertab.='<td>'.$acc_details[$i]['cost_inc_tax'].'</td>';
+                                $temp = $j;
+                                break;
                             }
                             else{
                                 $innertab.='<td> </td>';
@@ -445,7 +466,8 @@ class AccreportController extends Controller
                             }
                         }
                     }
-                  $voucher  = $acc_details[$i]['voucher_id'];
+                    
+                    $voucher  = $acc_details[$i]['voucher_id'];
             }
 
             if($temp<count($column_names)-1){
@@ -455,10 +477,23 @@ class AccreportController extends Controller
                     $innertab.='<td> </td>';
                     $innertab.='<td> </td>';
                 }
-                $innertab.="</tr>";
             }
+
+            $tabrow.='<tr>
+                        <td>'.($acc_details[$i-1]['invoice_date']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['invoice_date'])):'').'</td>
+                        <td>'.($acc_details[$i-1]['grn_approved_date_time']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['grn_approved_date_time'])):'').'</td>
+                        <td>'.($acc_details[$i-1]['gi_date']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['gi_date'])):'').'</td>
+                        <td>'.($acc_details[$i-1]['updated_date']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['updated_date'])):'').'</td>
+                        <td>'.$acc_details[$i-1]['cp_ledger_name'].'</td>
+                        <td>'.$acc_details[$i-1]['ref_type'].'</td>
+                        <td>'.$acc_details[$i-1]['voucher_id'].'</td>
+                        <td>'.($acc_details[$i-1]['ref_type']=='journal_voucher'?'':$acc_details[$i-1]['ref_id']).'</td>
+                        <td>'.$acc_details[$i-1]['gi_go_ref_no'].'</td>
+                        <td>'.($acc_details[$i-1]['ref_type']=='Debit Note'?$acc_details[$i-1]['debit_note_ref']:$acc_details[$i-1]['invoice_no']).'</td>
+                        <td>'.$sum_total.'</td>'.$innertab.'
+                    </tr>';
             
-            $table ='<thead>
+            $table = '<thead>
                             <tr><th class="text-center">Invoice Date</th>
                                 <th class="text-center">Grn Approved Date</th>
                                 <th class="text-center"> GI Date</th>
@@ -470,7 +505,9 @@ class AccreportController extends Controller
                                 <th class="text-center"> Go No </th>
                                 <th class="text-center"> Invoice No/ Debit Note No </th>
                                 <th class="text-center"> Sum Total</th>'.$colname.'</tr>
-                    </thead>'.$innertab;
+                    </thead><tbody>'.$tabrow.'</tbody>';
+
+            // echo '<html><body><table>'.$table.'</table></body></table>';
         }
         
         if($view=='default')
@@ -538,7 +575,7 @@ class AccreportController extends Controller
                         <td>'.($acc_details[$i]['gi_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['gi_date'])):'').'</td>
                         <td>'.($acc_details[$i]['updated_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['updated_date'])):'').'</td>
                         <td>'.$acc_details[$i]['cp_ledger_name'].'</td>
-                        <td>'.$acc_details[$i]['ref_type'].'</td>
+                        <td>Journal Voucher</td>
                         <td>'.$acc_details[$i]['voucher_id'].'</td>
                         <td>'.($acc_details[$i]['ref_type']=='purchase'?$acc_details[$i]['ref_id']:'').'</td>
                         <td>'.$acc_details[$i]['gi_go_ref_no'].'</td>
@@ -588,7 +625,7 @@ class AccreportController extends Controller
                         <td>'.$acc_details[$i]['cp_ledger_name'].'</td>
                         <td>'.$acc_details[$i]['ref_type'].'</td>
                         <td>'.$acc_details[$i]['voucher_id'].'</td>
-                        <td>'.($acc_details[$i]['ref_type']=='purchase'?$acc_details[$i]['ref_id']:'').'</td>
+                        <td>'.($acc_details[$i]['ref_type']=='purchase' || $acc_details[$i]['ref_type']=='Debit Note'?$acc_details[$i]['ref_id']:'').'</td>
                         <td>'.$acc_details[$i]['gi_go_ref_no'].'</td>
                         <td>'.($acc_details[$i]['ref_type']=='Debit Note'?$acc_details[$i]['debit_note_ref']:$acc_details[$i]['invoice_no']).'</td>
                         <td>'.$acc_details[$i]['total_deduction'].'</td>
@@ -1347,5 +1384,17 @@ class AccreportController extends Controller
 
         $report->setLog('TrialBalanceReport', '', 'Generate', '', 'Generate Trial Balance Report', 'acc_ledger_entries', '');
         echo json_encode($data);
+    }
+
+    public function actionReconsile()
+    {
+       $report = new AccReport();
+       $payment_receipt = new PaymentReceipt();
+       $acc_details = $report->getVendorname();
+       $bank = $payment_receipt->getBanks();
+       $data['view']='';
+       $data['acc_details']=$acc_details;
+       $data['bank']=$bank  ;
+       return $this->render('reconsile_report',$data);
     }
 }

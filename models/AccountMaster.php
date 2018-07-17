@@ -510,43 +510,43 @@ class AccountMaster extends Model
             }
         }
 
-        // $sql = "delete from acc_categories where acc_id = '$id'";
-        // Yii::$app->db->createCommand($sql)->execute();
+        $sql = "delete from acc_categories where acc_id = '$id'";
+        Yii::$app->db->createCommand($sql)->execute();
 
-        // if ($type=="Vendor Goods"){
-        //     $acc_categories = array();
-        //     if(count($bus_category)>0){
-        //         for($i=0; $i<count($bus_category); $i++){
-        //             if($bus_category[$i]!=""){
-        //                 $acc_categories[$i] = array('acc_id' => $id, 
-        //                                             'category_id' => $bus_category[$i], 
-        //                                             'category_name' => $bus_category_name[$i], 
-        //                                             'status' => 'pending',
-        //                                             'is_active' => '1',
-        //                                             'created_by'=>$curusr,
-        //                                             'created_date'=>$now,
-        //                                             'updated_by'=>$curusr,
-        //                                             'updated_date'=>$now,
-        //                                             'approver_comments'=>$remarks,
-        //                                             'company_id'=>$company_id
-        //                                         );
-        //             }
-        //         }
-        //     }
+        if ($type=="Vendor Goods"){
+            $acc_categories = array();
+            if(count($bus_category)>0){
+                for($i=0; $i<count($bus_category); $i++){
+                    if($bus_category[$i]!=""){
+                        $acc_categories[$i] = array('acc_id' => $id, 
+                                                    'category_id' => $bus_category[$i], 
+                                                    'category_name' => $bus_category_name[$i], 
+                                                    'status' => 'pending',
+                                                    'is_active' => '1',
+                                                    'created_by'=>$curusr,
+                                                    'created_date'=>$now,
+                                                    'updated_by'=>$curusr,
+                                                    'updated_date'=>$now,
+                                                    'approver_comments'=>$remarks,
+                                                    'company_id'=>$company_id
+                                                );
+                    }
+                }
+            }
 
-        //     if(count($acc_categories)>0){
-        //         // $acc_categories[$i]['created_by'] = $curusr;
-        //         // $acc_categories[$i]['created_date'] = $now;
+            if(count($acc_categories)>0){
+                // $acc_categories[$i]['created_by'] = $curusr;
+                // $acc_categories[$i]['created_date'] = $now;
 
-        //         $columnNameArray=['acc_id', 'category_id', 'category_name', 'status', 'is_active', 
-        //                             'created_by', 'created_date', 'updated_by', 'updated_date', 
-        //                             'approver_comments', 'company_id'];
-        //         $tableName = "acc_categories";
-        //         $insertCount = Yii::$app->db->createCommand()
-        //                         ->batchInsert($tableName, $columnNameArray, $acc_categories)
-        //                         ->execute();
-        //     }
-        // }
+                $columnNameArray=['acc_id', 'category_id', 'category_name', 'status', 'is_active', 
+                                    'created_by', 'created_date', 'updated_by', 'updated_date', 
+                                    'approver_comments', 'company_id'];
+                $tableName = "acc_categories";
+                $insertCount = Yii::$app->db->createCommand()
+                                ->batchInsert($tableName, $columnNameArray, $acc_categories)
+                                ->execute();
+            }
+        }
 
 
         $address_doc_path = $request->post('address_doc_path');

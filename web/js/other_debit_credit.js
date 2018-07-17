@@ -1,6 +1,7 @@
 $('.datepicker').datepicker({changeMonth: true,changeYear: true});
 
 $(document).ready(function(){
+	$('.select2').select2();
     addMultiInputNamingRules('#other_debit_credit', 'select[name="acc_id[]"]', { required: true });
     addMultiInputNamingRules('#other_debit_credit', 'input[name="acc_code[]"]', { required: true });
     addMultiInputNamingRules('#other_debit_credit', 'select[name="transaction[]"]', { required: true });

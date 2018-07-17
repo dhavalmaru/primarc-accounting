@@ -12,7 +12,38 @@ $(document).ready(function(){
 
     get_sub_account_type();
     get_account_path();
-})
+	$('.select2').select2();
+	$("#type").change(function(){
+    set_acc_type();
+
+    $("#details").val("");
+    $("#vendor_id").val("");
+    $("#legal_name").val("");
+    $("#code").val("");
+    $("#vendor_code").val("");
+    $("#pan_no").val("");
+    $("#address").val("");
+    $("#legal_entity_name").val("");
+    $("#vat_no").val("");
+    $("#account_type").val("");
+    $("#account_holder_name").val("");
+    $("#bank_name").val("");
+    $("#branch").val("");
+    $("#acc_no").val("");
+    $("#ifsc_code").val("");
+    $("#category_1").val("");
+    $("#category_2").val("");
+    $("#category_3").val("");
+
+    $("#type_val").val($("#type").val());
+    get_code();
+});
+	$("#vendor_id").change(function(){
+    $("#legal_name").val($("#vendor_id option:selected").text());
+    get_code();
+
+});
+});
 
 function set_view(){
     if($('#action').val()=='view' || $('#status').val()=='approved'){
@@ -58,40 +89,15 @@ function delete_row(elem){
     }
 }
 
-$("#type").change(function(){
-    set_acc_type();
 
-    $("#details").val("");
-    $("#vendor_id").val("");
-    $("#legal_name").val("");
-    $("#code").val("");
-    $("#vendor_code").val("");
-    $("#pan_no").val("");
-    $("#address").val("");
-    $("#legal_entity_name").val("");
-    $("#vat_no").val("");
-    $("#account_type").val("");
-    $("#account_holder_name").val("");
-    $("#bank_name").val("");
-    $("#branch").val("");
-    $("#acc_no").val("");
-    $("#ifsc_code").val("");
-    $("#category_1").val("");
-    $("#category_2").val("");
-    $("#category_3").val("");
 
-    $("#type_val").val($("#type").val());
-    get_code();
-})
 
-$("#vendor_id").change(function(){
-    $("#legal_name").val($("#vendor_id option:selected").text());
-    get_code();
-});
 
 function set_acc_type(){
+	
     if($("#type").val()=="Vendor Goods"){
         $("#vendor_id").show();
+		$("#type_vendor_id").show();
         $("#legal_name").hide();
         $("#vendor_code").show();
         $("#code").hide();
@@ -109,7 +115,9 @@ function set_acc_type(){
         // $("#acc_no").attr('readonly',true);
         // $("#ifsc_code").attr('readonly',true);
     } else if($("#type").val()=="Vendor Expenses"){
-        $("#vendor_id").hide();
+       // $("#vendor_id").hide();
+		$("#vendor_id").css("display", "none");
+		$("#type_vendor_id").hide();
         $("#legal_name").show();
         $("#vendor_code").hide();
         $("#code").show();
@@ -128,6 +136,7 @@ function set_acc_type(){
         // $("#ifsc_code").attr('readonly',false);
     } else if($("#type").val()=="Bank Account"){
         $("#vendor_id").hide();
+        $("#type_vendor_id").hide();
         $("#legal_name").show();
         $("#vendor_code").hide();
         $("#code").show();
@@ -147,6 +156,7 @@ function set_acc_type(){
         // $("#ifsc_code").attr('readonly',false);
     } else if($("#type").val()=="Employee"){
         $("#vendor_id").hide();
+        $("#type_vendor_id").hide();
         $("#legal_name").show();
         $("#vendor_code").hide();
         $("#code").show();
@@ -166,6 +176,7 @@ function set_acc_type(){
         // $("#ifsc_code").attr('readonly',false);
     } else {
         $("#vendor_id").hide();
+        $("#type_vendor_id").hide();
         $("#legal_name").show();
         $("#vendor_code").hide();
         $("#code").show();

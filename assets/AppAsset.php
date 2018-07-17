@@ -47,6 +47,8 @@ class AppAsset extends AssetBundle
 
         'js/plugins/stickytable/jquery.stickytable.min.css',
 
+        'plugins/select2/css/select2.min.css',
+
         // 'https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css',
         // 'https://cdn.datatables.net/fixedcolumns/3.2.2/css/fixedColumns.dataTables.min.css'
 
@@ -131,7 +133,7 @@ class AppAsset extends AssetBundle
         'js/export/buttons.print.min.js',
         'js/export/buttons.colVis.min.js',
 
-
+        'plugins/select2/js/select2.full.min.js',
 
         // 'StreamTable/vendors/mustache.js',
         // 'StreamTable/stream_table.js',

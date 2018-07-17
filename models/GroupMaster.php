@@ -62,6 +62,30 @@ class GroupMaster extends Model
         return $final_tree;
     }
 
+    public function getAccountType(){
+        $request = Yii::$app->request;
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+        $curusr = $session['session_id'];
+        $now = date('Y-m-d H:i:s');
+
+        $parent_id = $request->post('parent_id');
+        $account_type = $request->post('account_type');
+
+        $result = 0;
+        $sql = "select A.* from acc_group_master A where A.is_active = '1' and A.status = 'approved' and 
+                A.company_id = '$company_id' and A.id != '$parent_id' and account_type = '$account_type' 
+                order by A.id";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if(count($data)>0){
+            $result = 1;
+        }
+        
+        return $result;
+    }
+
     public function getChildAccountType(){
         $request = Yii::$app->request;
         $session = Yii::$app->session;

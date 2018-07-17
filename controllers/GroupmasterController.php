@@ -48,4 +48,11 @@ class GroupmasterController extends Controller
         $result = $model->getChildAccountType();
         echo $result;
     }
+
+    public function actionGetaccounttype(){
+        $model = new GroupMaster();
+        $result = $model->getAccountType();
+        echo $result;
+    }
+
 }
