@@ -6,7 +6,7 @@ $(document).ready(function(){
     addMultiInputNamingRules('#go_debit_details', 'select[name="transaction[]"]', { required: true });
     addMultiInputNamingRules('#go_debit_details', 'input[name="debit_amt[]"]', { required: true });
     addMultiInputNamingRules('#go_debit_details', 'input[name="credit_amt[]"]', { required: true });
-
+	$('.select2').select2();
     set_view();
 })
 

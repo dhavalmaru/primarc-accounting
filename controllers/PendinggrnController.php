@@ -2246,14 +2246,14 @@ class PendinggrnController extends Controller
                             <td style="text-align: center;"><button type="button" class="btn btn-sm btn-success" id="'.$ded_type.'_delete_row_'.$i.'" onClick="delete_row(this);">-</button></td>
                             <td style="display: none;">' . $sr_no . '</td>
                             <td>
-                                <select class="'.$ded_type.'_psku_'.$sr_no.'" id="'.$ded_type.'_psku_'.$i.'" name="'.$ded_type.'_psku[]" onChange="get_sku_details(this)" data-error="#'.$ded_type.'_psku_'.$i.'_error">' . $sku_list . '</select>
+                                <select class="'.$ded_type.'_psku_'.$sr_no.' select2" id="'.$ded_type.'_psku_'.$i.'" name="'.$ded_type.'_psku[]" onChange="get_sku_details(this)" data-error="#'.$ded_type.'_psku_'.$i.'_error">' . $sku_list . '</select>
                                 <div id="'.$ded_type.'_psku_'.$i.'_error"></div>
                             </td>
                             <td><input type="text" class="'.$ded_type.'_product_title_'.$sr_no.'" id="'.$ded_type.'_product_title_'.$i.'" name="'.$ded_type.'_product_title[]" value="'.$rows[$i]["product_title"].'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_ean_'.$sr_no.'" id="'.$ded_type.'_ean_'.$i.'" name="'.$ded_type.'_ean[]" value="'.$rows[$i]["ean"].'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_hsn_code_'.$sr_no.'" id="'.$ded_type.'_hsn_code_'.$i.'" name="'.$ded_type.'_hsn_code[]" value="'.$rows[$i]["hsn_code"].'" readonly /></td>
                             <td>
-                                <select id="'.$ded_type.'cost_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_cost_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cost_acc_id_'.$sr_no.'_error">'.$cost_acc_list.'</select>
+                                <select id="'.$ded_type.'cost_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_cost_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cost_acc_id_'.$sr_no.'_error">'.$cost_acc_list.'</select>
                                 <input type="hidden" id="'.$ded_type.'cost_ledger_name_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_name[]" value="'.$rows[$i]["cost_ledger_name"].'" />
                                 <input type="hidden" id="'.$ded_type.'cost_voucher_id_'.$sr_no.'" name="'.$ded_type.'_cost_voucher_id[]" value="'.$voucher_id.'" />
                                 <input type="hidden" id="'.$ded_type.'cost_ledger_type_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_type[]" value="'.$ledger_type.'" />
@@ -2261,7 +2261,7 @@ class PendinggrnController extends Controller
                             </td>
                             <td><input type="text" id="'.$ded_type.'cost_ledger_code_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_code[]" value="'.$rows[$i]["cost_ledger_code"].'" readonly /></td>
                             <td style="'.$intra_state_style.'">
-                                <select id="'.$ded_type.'cgst_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_cgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cgst_acc_id_'.$sr_no.'_error">'.$cgst_acc_list.'</select>
+                                <select id="'.$ded_type.'cgst_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_cgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cgst_acc_id_'.$sr_no.'_error">'.$cgst_acc_list.'</select>
                                 <input type="hidden" id="'.$ded_type.'cgst_ledger_name_'.$sr_no.'" name="'.$ded_type.'_cgst_ledger_name[]" value="'.$rows[$i]["cgst_ledger_name"].'" />
                                 <input type="hidden" id="'.$ded_type.'cgst_voucher_id_'.$sr_no.'" name="'.$ded_type.'_cgst_voucher_id[]" value="'.$voucher_id.'" />
                                 <input type="hidden" id="'.$ded_type.'cgst_ledger_type_'.$sr_no.'" name="'.$ded_type.'_cgst_ledger_type[]" value="'.$ledger_type.'" />
@@ -2269,7 +2269,7 @@ class PendinggrnController extends Controller
                             </td>
                             <td style="'.$intra_state_style.'"><input type="text" id="'.$ded_type.'cgst_ledger_code_'.$sr_no.'" name="'.$ded_type.'_cgst_ledger_code[]" value="'.$rows[$i]["cgst_ledger_code"].'" readonly /></td>
                             <td style="'.$intra_state_style.'">
-                                <select id="'.$ded_type.'sgst_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_sgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'sgst_acc_id_'.$sr_no.'_error">'.$sgst_acc_list.'</select>
+                                <select id="'.$ded_type.'sgst_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_sgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'sgst_acc_id_'.$sr_no.'_error">'.$sgst_acc_list.'</select>
                                 <input type="hidden" id="'.$ded_type.'sgst_ledger_name_'.$sr_no.'" name="'.$ded_type.'_sgst_ledger_name[]" value="'.$rows[$i]["sgst_ledger_name"].'" />
                                 <input type="hidden" id="'.$ded_type.'sgst_voucher_id_'.$sr_no.'" name="'.$ded_type.'_sgst_voucher_id[]" value="'.$voucher_id.'" />
                                 <input type="hidden" id="'.$ded_type.'sgst_ledger_type_'.$sr_no.'" name="'.$ded_type.'_sgst_ledger_type[]" value="'.$ledger_type.'" />
@@ -2277,7 +2277,7 @@ class PendinggrnController extends Controller
                             </td>
                             <td style="'.$intra_state_style.'"><input type="text" id="'.$ded_type.'sgst_ledger_code_'.$sr_no.'" name="'.$ded_type.'_sgst_ledger_code[]" value="'.$rows[$i]["sgst_ledger_code"].'" readonly /></td>
                             <td style="'.$inter_state_style.'">
-                                <select id="'.$ded_type.'igst_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_igst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'igst_acc_id_'.$sr_no.'_error">'.$igst_acc_list.'</select>
+                                <select id="'.$ded_type.'igst_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_igst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'igst_acc_id_'.$sr_no.'_error">'.$igst_acc_list.'</select>
                                 <input type="hidden" id="'.$ded_type.'igst_ledger_name_'.$sr_no.'" name="'.$ded_type.'_igst_ledger_name[]" value="'.$rows[$i]["igst_ledger_name"].'" />
                                 <input type="hidden" id="'.$ded_type.'igst_voucher_id_'.$sr_no.'" name="'.$ded_type.'_igst_voucher_id[]" value="'.$voucher_id.'" />
                                 <input type="hidden" id="'.$ded_type.'igst_ledger_type_'.$sr_no.'" name="'.$ded_type.'_igst_ledger_type[]" value="'.$ledger_type.'" />
@@ -2285,7 +2285,7 @@ class PendinggrnController extends Controller
                             </td>
                             <td style="'.$inter_state_style.'"><input type="text" id="'.$ded_type.'igst_ledger_code_'.$sr_no.'" name="'.$ded_type.'_igst_ledger_code[]" value="'.$rows[$i]["igst_ledger_code"].'" readonly /></td>
                             <td style="'.$all_style.'">
-                                <select id="'.$ded_type.'tax_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_tax_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'tax_acc_id_'.$sr_no.'_error">'.$tax_acc_list.'</select>
+                                <select id="'.$ded_type.'tax_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_tax_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'tax_acc_id_'.$sr_no.'_error">'.$tax_acc_list.'</select>
                                 <input type="hidden" id="'.$ded_type.'tax_ledger_name_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_name[]" value="'.$rows[$i]["tax_ledger_name"].'" />
                                 <input type="hidden" id="'.$ded_type.'tax_voucher_id_'.$sr_no.'" name="'.$ded_type.'_tax_voucher_id[]" value="'.$voucher_id.'" />
                                 <input type="hidden" id="'.$ded_type.'tax_ledger_type_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_type[]" value="'.$ledger_type.'" />
@@ -2293,7 +2293,7 @@ class PendinggrnController extends Controller
                             </td>
                             <td style="'.$all_style.'"><input type="text" id="'.$ded_type.'tax_ledger_code_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_code[]" value="'.$rows[$i]["tax_ledger_code"].'" readonly /></td>
                             <td>
-                                <select class="'.$ded_type.'_invoice_no_'.$sr_no.'" id="'.$ded_type.'_invoice_no_'.$i.'" name="'.$ded_type.'_invoice_no[]" onChange="set_sku_details(this)" data-error="'.$ded_type.'_invoice_no_'.$sr_no.'_error">' . $invoice_list . '</select>
+                                <select class="'.$ded_type.'_invoice_no_'.$sr_no.' select2" id="'.$ded_type.'_invoice_no_'.$i.'" name="'.$ded_type.'_invoice_no[]" onChange="set_sku_details(this)" data-error="'.$ded_type.'_invoice_no_'.$sr_no.'_error">' . $invoice_list . '</select>
                                 <div id="'.$ded_type.'_invoice_no_'.$sr_no.'_error"></div>
                             </td>
                             <td id="'.$ded_type.'_invoice_date_'.$i.'">'.$rows[$i]["invoice_date"].'</td>
@@ -2690,14 +2690,14 @@ class PendinggrnController extends Controller
                     <td style="text-align: center;"><button type="button" class="btn btn-sm btn-success" id="'.$ded_type.'_delete_row_'.$i.'" onClick="delete_row(this);">-</button></td>
                     <td style="display: none;">' . $sr_no . '</td>
                     <td>
-                        <select class="'.$ded_type.'_psku_'.$sr_no.'" id="'.$ded_type.'_psku_'.$i.'" name="'.$ded_type.'_psku[]" onChange="get_sku_details(this)" data-error="#'.$ded_type.'_psku_'.$i.'_error">' . $sku_list . '</select>
+                        <select class="'.$ded_type.'_psku_'.$sr_no.' select2" id="'.$ded_type.'_psku_'.$i.'" name="'.$ded_type.'_psku[]" onChange="get_sku_details(this)" data-error="#'.$ded_type.'_psku_'.$i.'_error">' . $sku_list . '</select>
                         <div id="'.$ded_type.'_psku_'.$i.'_error"></div>
                     </td>
                     <td><input type="text" class="'.$ded_type.'_product_title_'.$sr_no.'" id="'.$ded_type.'_product_title_'.$i.'" name="'.$ded_type.'_product_title[]" value="" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_ean_'.$sr_no.'" id="'.$ded_type.'_ean_'.$i.'" name="'.$ded_type.'_ean[]" value="" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_hsn_code_'.$sr_no.'" id="'.$ded_type.'_hsn_code_'.$i.'" name="'.$ded_type.'_hsn_code[]" value="" readonly /></td>
                     <td>
-                        <select id="'.$ded_type.'cost_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_cost_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cost_acc_id_'.$sr_no.'_error">'.$cost_acc_list.'</select>
+                        <select id="'.$ded_type.'cost_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_cost_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cost_acc_id_'.$sr_no.'_error">'.$cost_acc_list.'</select>
                         <input type="hidden" id="'.$ded_type.'cost_ledger_name_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_name[]" value="" />
                         <input type="hidden" id="'.$ded_type.'cost_voucher_id_'.$sr_no.'" name="'.$ded_type.'_cost_voucher_id[]" value="" />
                         <input type="hidden" id="'.$ded_type.'cost_ledger_type_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_type[]" value="" />
@@ -2705,7 +2705,7 @@ class PendinggrnController extends Controller
                     </td>
                     <td><input type="text" id="'.$ded_type.'cost_ledger_code_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_code[]" value="" readonly /></td>
                     <td style="'.$intra_state_style.'">
-                        <select id="'.$ded_type.'cgst_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_cgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cgst_acc_id_'.$sr_no.'_error">'.$cgst_acc_list.'</select>
+                        <select id="'.$ded_type.'cgst_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_cgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cgst_acc_id_'.$sr_no.'_error">'.$cgst_acc_list.'</select>
                         <input type="hidden" id="'.$ded_type.'cgst_ledger_name_'.$sr_no.'" name="'.$ded_type.'_cgst_ledger_name[]" value="" />
                         <input type="hidden" id="'.$ded_type.'cgst_voucher_id_'.$sr_no.'" name="'.$ded_type.'_cgst_voucher_id[]" value="" />
                         <input type="hidden" id="'.$ded_type.'cgst_ledger_type_'.$sr_no.'" name="'.$ded_type.'_cgst_ledger_type[]" value="" />
@@ -2713,7 +2713,7 @@ class PendinggrnController extends Controller
                     </td>
                     <td style="'.$intra_state_style.'"><input type="text" id="'.$ded_type.'cgst_ledger_code_'.$sr_no.'" name="'.$ded_type.'_cgst_ledger_code[]" value="" readonly /></td>
                     <td style="'.$intra_state_style.'">
-                        <select id="'.$ded_type.'sgst_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_sgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'sgst_acc_id_'.$sr_no.'_error">'.$sgst_acc_list.'</select>
+                        <select id="'.$ded_type.'sgst_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_sgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'sgst_acc_id_'.$sr_no.'_error">'.$sgst_acc_list.'</select>
                         <input type="hidden" id="'.$ded_type.'sgst_ledger_name_'.$sr_no.'" name="'.$ded_type.'_sgst_ledger_name[]" value="" />
                         <input type="hidden" id="'.$ded_type.'sgst_voucher_id_'.$sr_no.'" name="'.$ded_type.'_sgst_voucher_id[]" value="" />
                         <input type="hidden" id="'.$ded_type.'sgst_ledger_type_'.$sr_no.'" name="'.$ded_type.'_sgst_ledger_type[]" value="" />
@@ -2721,7 +2721,7 @@ class PendinggrnController extends Controller
                     </td>
                     <td style="'.$intra_state_style.'"><input type="text" id="'.$ded_type.'sgst_ledger_code_'.$sr_no.'" name="'.$ded_type.'_sgst_ledger_code[]" value="" readonly /></td>
                     <td style="'.$inter_state_style.'">
-                        <select id="'.$ded_type.'igst_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_igst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'igst_acc_id_'.$sr_no.'_error">'.$igst_acc_list.'</select>
+                        <select id="'.$ded_type.'igst_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_igst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'igst_acc_id_'.$sr_no.'_error">'.$igst_acc_list.'</select>
                         <input type="hidden" id="'.$ded_type.'igst_ledger_name_'.$sr_no.'" name="'.$ded_type.'_igst_ledger_name[]" value="" />
                         <input type="hidden" id="'.$ded_type.'igst_voucher_id_'.$sr_no.'" name="'.$ded_type.'_igst_voucher_id[]" value="" />
                         <input type="hidden" id="'.$ded_type.'igst_ledger_type_'.$sr_no.'" name="'.$ded_type.'_igst_ledger_type[]" value="" />
@@ -2729,7 +2729,7 @@ class PendinggrnController extends Controller
                     </td>
                     <td style="'.$inter_state_style.'"><input type="text" id="'.$ded_type.'igst_ledger_code_'.$sr_no.'" name="'.$ded_type.'_igst_ledger_code[]" value="" readonly /></td>
                     <td style="'.$all_style.'">
-                        <select id="'.$ded_type.'tax_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_tax_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'tax_acc_id_'.$sr_no.'_error">'.$tax_acc_list.'</select>
+                        <select id="'.$ded_type.'tax_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_tax_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'tax_acc_id_'.$sr_no.'_error">'.$tax_acc_list.'</select>
                         <input type="hidden" id="'.$ded_type.'tax_ledger_name_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_name[]" value="" />
                         <input type="hidden" id="'.$ded_type.'tax_voucher_id_'.$sr_no.'" name="'.$ded_type.'_tax_voucher_id[]" value="" />
                         <input type="hidden" id="'.$ded_type.'tax_ledger_type_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_type[]" value="" />
@@ -2737,7 +2737,7 @@ class PendinggrnController extends Controller
                     </td>
                     <td style="'.$all_style.'"><input type="text" id="'.$ded_type.'tax_ledger_code_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_code[]" value="" readonly /></td>
                     <td>
-                        <select class="'.$ded_type.'_invoice_no_'.$sr_no.'" id="'.$ded_type.'_invoice_no_'.$i.'" name="'.$ded_type.'_invoice_no[]" onChange="set_sku_details(this)" data-error="'.$ded_type.'_invoice_no_'.$sr_no.'_error">' . $invoice_list . '</select>
+                        <select class="'.$ded_type.'_invoice_no_'.$sr_no.' select2" id="'.$ded_type.'_invoice_no_'.$i.'" name="'.$ded_type.'_invoice_no[]" onChange="set_sku_details(this)" data-error="'.$ded_type.'_invoice_no_'.$sr_no.'_error">' . $invoice_list . '</select>
                         <div id="'.$ded_type.'_invoice_no_'.$sr_no.'_error"></div>
                     </td>
                     <td id="'.$ded_type.'_invoice_date_'.$i.'"></td>

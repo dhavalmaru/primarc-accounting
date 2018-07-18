@@ -419,7 +419,7 @@ table {width: 1200px;}
                     <td class="sticky-cell" style="border: none!important;"><?php echo '1.'.($j+1); ?></td>
                     <td class="sticky-cell" style="border: none!important;">Taxable Amount</td>
                     <td class="sticky-cell" style="border: none!important;">
-                        <select id="invoicecost_acc_id_<?php echo $j;?>" class="form-control acc_id" name="invoice_cost_acc_id[]" onChange="get_acc_details(this)">
+                        <select id="invoicecost_acc_id_<?php echo $j;?>" class="form-control acc_id select2" name="invoice_cost_acc_id[]" onChange="get_acc_details(this)">
                             <option value="">Select</option>
                             <?php for($i=0; $i<count($acc_master); $i++) { 
                                     if($acc_master[$i]['type']=="Goods Purchase") { 
@@ -452,7 +452,7 @@ table {width: 1200px;}
                     <td class="sticky-cell" style="border: none!important;"><?php echo '2.'.($j+1); ?></td>
                     <td class="sticky-cell" style="border: none!important;">Tax</td>
                     <td class="sticky-cell" style="border: none!important;">
-                        <select id="invoicetax_acc_id_<?php echo $j;?>" class="form-control acc_id" name="invoice_tax_acc_id[]" onChange="get_acc_details(this)">
+                        <select id="invoicetax_acc_id_<?php echo $j;?>" class="form-control acc_id select2" name="invoice_tax_acc_id[]" onChange="get_acc_details(this)">
                             <option value="">Select</option>
                             <?php for($i=0; $i<count($acc_master); $i++) { 
                                     if($acc_master[$i]['type']=="Tax") { 
@@ -482,7 +482,7 @@ table {width: 1200px;}
                     <td class="sticky-cell" style="border: none!important;"><?php echo '2.'.($j+1); ?></td>
                     <td class="sticky-cell" style="border: none!important;">CGST</td>
                     <td class="sticky-cell" style="border: none!important;">
-                        <select id="invoicecgst_acc_id_<?php echo $j;?>" class="form-control acc_id" name="invoice_cgst_acc_id[]" onChange="get_acc_details(this)">
+                        <select id="invoicecgst_acc_id_<?php echo $j;?>" class="form-control acc_id select2" name="invoice_cgst_acc_id[]" onChange="get_acc_details(this)">
                             <option value="">Select</option>
                             <?php for($i=0; $i<count($acc_master); $i++) { 
                                     if($acc_master[$i]['type']=="CGST") { 
@@ -512,7 +512,7 @@ table {width: 1200px;}
                     <td class="sticky-cell" style="border: none!important;"><?php echo '2.'.($j+1); ?></td>
                     <td class="sticky-cell" style="border: none!important;">SGST</td>
                     <td class="sticky-cell" style="border: none!important;">
-                        <select id="invoicesgst_acc_id_<?php echo $j;?>" class="form-control acc_id" name="invoice_sgst_acc_id[]" onChange="get_acc_details(this)">
+                        <select id="invoicesgst_acc_id_<?php echo $j;?>" class="form-control acc_id select2" name="invoice_sgst_acc_id[]" onChange="get_acc_details(this)">
                             <option value="">Select</option>
                             <?php for($i=0; $i<count($acc_master); $i++) { 
                                     if($acc_master[$i]['type']=="SGST") { 
@@ -542,7 +542,7 @@ table {width: 1200px;}
                     <td class="sticky-cell" style="border: none!important;"><?php echo '2.'.($j+1); ?></td>
                     <td class="sticky-cell" style="border: none!important;">IGST</td>
                     <td class="sticky-cell" style="border: none!important;">
-                        <select id="invoiceigst_acc_id_<?php echo $j;?>" class="form-control acc_id" name="invoice_igst_acc_id[]" onChange="get_acc_details(this)">
+                        <select id="invoiceigst_acc_id_<?php echo $j;?>" class="form-control acc_id select2" name="invoice_igst_acc_id[]" onChange="get_acc_details(this)">
                             <option value="">Select</option>
                             <?php for($i=0; $i<count($acc_master); $i++) { 
                                     if($acc_master[$i]['type']=="IGST") { 
@@ -574,7 +574,7 @@ table {width: 1200px;}
                     <td class="sticky-cell" style="border: none!important;">3</td>
                     <td class="sticky-cell" style="border: none!important;">Other Charges</td>
                     <td class="sticky-cell" style="border: none!important;">
-                        <select id="othercharges_acc_id_0" class="form-control acc_id" name="other_charges_acc_id" onChange="get_acc_details(this)">
+                        <select id="othercharges_acc_id_0" class="form-control acc_id select2" name="other_charges_acc_id" onChange="get_acc_details(this)">
                             <option value="">Select</option>
                             <?php for($i=0; $i<count($acc_master); $i++) { 
                                     if($acc_master[$i]['type']=="Others") { 
@@ -754,7 +754,7 @@ table {width: 1200px;}
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">Total Deduction</td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">
-                        <select id="totaldeduction_acc_id_0" class="form-control acc_id" name="total_deduction_acc_id" onChange="get_acc_details(this)" style="display: none;">
+                        <select id="totaldeduction_acc_id_0" class="form-control acc_id select2" name="total_deduction_acc_id" onChange="get_acc_details(this)" style="display: none;">
                             <option value="">Select</option>
                             <?php for($i=0; $i<count($acc_master); $i++) { 
                                     if($acc['total_deduction_acc_id']==""){

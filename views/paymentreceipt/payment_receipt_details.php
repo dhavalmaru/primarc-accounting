@@ -261,12 +261,4 @@ $mycomponent = Yii::$app->mycomponent;
         '@web/js/payment_receipt.js',
         ['depends' => [\yii\web\JqueryAsset::className()]]
     );
-	$this->registerJsFile(
-	    '@web/plugins/select2/js/select2.full.min.js',
-	    ['depends' => [\yii\web\JqueryAsset::className()]]
-	);
-	// $this->registerJsFile(
-	//     'https://code.jquery.com/ui/1.11.4/jquery-ui.min.js',
-	//     ['depends' => [\yii\web\JqueryAsset::className()]]
-	// );
 ?>
