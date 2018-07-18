@@ -1551,7 +1551,6 @@ $('#detailledger_report').submit(function() {
     if (!$("#detailledger_report").valid()) {
         return false;
     } else {
-
         removeMultiInputNamingRules('#detailledger_report', 'select[alt="account[]"]');
         // removeMultiInputNamingRules('#detailledger_report', 'select[alt="vouchertype[]"]');
         // removeMultiInputNamingRules('#detailledger_report', 'select[alt="state[]"]');
