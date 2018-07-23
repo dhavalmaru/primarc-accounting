@@ -1395,6 +1395,140 @@ class AccreportController extends Controller
        $data['view']='';
        $data['acc_details']=$acc_details;
        $data['bank']=$bank  ;
+
+       $data['view']='';;
+       $data['opening_bal']=0;
+       $data['from_date']='';
+       $data['to_date']='';
+       $data['data']=[];
        return $this->render('reconsile_report',$data);
     }
+
+    public function actionGetreconsile()
+    {
+       $request = Yii::$app->request;
+       $mycomponent = Yii::$app->mycomponent;
+       $report = new AccReport();
+       $payment_receipt = new PaymentReceipt();
+       $acc_details = $report->getVendorname();
+       $bank = $payment_receipt->getBanks();
+       $account = $request->post('account');
+       $from_date = $request->post('from_date');
+       $to_date = $request->post('to_date');
+       $view = $request->post('view');
+
+
+       if($from_date==''){
+            $from_date=NULL;
+        } else {
+            $from_date=$mycomponent->formatdate($from_date);
+        }
+
+        if($to_date==''){
+            $to_date=NULL;
+        } else {
+            $to_date=$mycomponent->formatdate($to_date);
+        }
+    
+        if($view=='show_reconsiled')
+        {
+            $result = $report->getreconsiledonly($account, $from_date, $to_date);
+        }
+        else
+        {
+            $result = $report->getdefault($account, $from_date, $to_date);
+        }
+       
+       $opening_bal = 0;
+       $data['view']=$view;
+       $data['acc_details']=$acc_details;
+       $data['bank']=$bank ;
+       $data['opening_bal']=$opening_bal;
+       $data['account']=$account;
+       $data['from_date']=$from_date;
+       $data['to_date']=$to_date;
+       $data['data']=$result;
+       return $this->render('reconsile_report',$data);
+    }
+
+    public function actionSave()
+    {
+        $request = Yii::$app->request;
+        $mycomponent = Yii::$app->mycomponent;
+
+        $reconsile = $request->post('reconsile');
+        $payment_date = $request->post('payment_date');
+
+        $report = new AccReport();
+        $payment_receipt = new PaymentReceipt();
+        $acc_details = $report->getVendorname();
+        $bank = $payment_receipt->getBanks();
+        $data['view']='';
+        $data['acc_details']=$acc_details;
+        $data['bank']=$bank  ;
+
+        $data['view']='';;
+        $data['opening_bal']=0;
+        $data['from_date']='';
+        $data['to_date']='';
+        $data['data']=[];    
+
+        for ($i=0; $i <count($reconsile) ; $i++) 
+        { 
+            $reconsiled = $reconsile[$i];
+            $paydate = $payment_date[$i];
+
+            if($paydate!="")
+            {
+               $paydate=$mycomponent->formatdate($paydate);
+            }
+            else
+            {
+               $paydate = NULL;
+            }
+
+            $result = $report->update_ledegre($paydate,$reconsiled);
+        }
+            
+        return $this->render('reconsile_report',$data);  
+    }
+      
+       
+   public function actionGetasperbank()
+   {
+           $request = Yii::$app->request;
+           $mycomponent = Yii::$app->mycomponent;
+           $report = new AccReport();
+           $payment_receipt = new PaymentReceipt();
+           $account = $request->post('account');
+           $from_date = $request->post('from_date');
+           $to_date = $request->post('to_date');
+           $view = $request->post('view');
+
+           // $account = '689';
+           // $from_date = '01/01/2018';
+           // $to_date = '31/03/2019';
+           // $view = 'default';
+
+           if($from_date==''){
+                $from_date=NULL;
+            } else {
+                $from_date=$mycomponent->formatdate($from_date);
+            }
+
+            if($to_date==''){
+                $to_date=NULL;
+            } else {
+                $to_date=$mycomponent->formatdate($to_date);
+            }
+
+            $asperbank =0;
+
+            $result = $report->getbalasperbank($account, $from_date, $to_date, $view);
+            if(count($result)>0){
+                $asperbank = floatval($result[0]['asperbank']);
+            }
+
+            echo $asperbank;
+   }
 }

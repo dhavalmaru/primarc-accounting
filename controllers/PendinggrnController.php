@@ -1630,7 +1630,7 @@ class PendinggrnController extends Controller
             // $acc['other_charges_voucher_id'] = "";
             // $acc['other_charges_ledger_type'] = "";
 
-            $tax_code = 'Profit And Loss A/c';
+            $tax_code = 'Round Off';
             $result2 = $model->getAccountDetails('','',$tax_code);
             if(count($result2)>0){
                 $acc['other_charges_acc_id'] = $result2[0]['id'];

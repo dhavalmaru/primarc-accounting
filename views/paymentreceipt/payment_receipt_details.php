@@ -136,7 +136,7 @@ $mycomponent = Yii::$app->mycomponent;
 					<label class="control-label">Amount</label>
 					<div class="">
 						<div class="">  
-							<input name="amount" class="form-control" type="text" value="<?php if(isset($data[0])) echo $data[0]['amount']; ?>" />
+							<input id="amount" name="amount" class="form-control" type="text" value="<?php if(isset($data[0])) echo $data[0]['amount']; ?>" />
 						</div>
 					</div>
 				</div>

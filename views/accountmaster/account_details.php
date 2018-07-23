@@ -47,15 +47,30 @@ input:-webkit-autofill {
 						<option value="Bank Account" <?php if(isset($data)) { if($data[0]['type']=="Bank Account") echo "selected"; } ?>>Bank Account</option>
 						<option value="Goods Purchase" <?php if(isset($data)) { if($data[0]['type']=="Goods Purchase") echo "selected"; } ?>>Goods Purchase</option>
 						<option value="Tax" <?php if(isset($data)) { if($data[0]['type']=="Tax") echo "selected"; } ?>>Tax</option>
-						<option value="CGST" <?php if(isset($data)) { if($data[0]['type']=="CGST") echo "selected"; } ?>>CGST</option>
-						<option value="SGST" <?php if(isset($data)) { if($data[0]['type']=="SGST") echo "selected"; } ?>>SGST</option>
-						<option value="IGST" <?php if(isset($data)) { if($data[0]['type']=="IGST") echo "selected"; } ?>>IGST</option>
+						<option value="GST Tax" <?php if(isset($data)) { if($data[0]['type']=="GST Tax") echo "selected"; } ?>>GST Tax</option>
+					
 						<option value="Goods Sales" <?php if(isset($data)) { if($data[0]['type']=="Goods Sales") echo "selected"; } ?>>Goods Sales</option>
 						<option value="Employee" <?php if(isset($data)) { if($data[0]['type']=="Employee") echo "selected"; } ?>>Employee</option>
+						<option value="Customer" <?php if(isset($data)) { if($data[0]['type']=="Customer") echo "selected"; } ?>>Customer</option>
+						<option value="Marketplace" <?php if(isset($data)) { if($data[0]['type']=="Marketplace") echo "selected"; } ?>>Marketplace</option>
 						<option value="Others" <?php if(isset($data)) { if($data[0]['type']=="Others") echo "selected"; } ?>>Others</option>
 					</select>
 					<span id="err_type"></span>
 				</div>
+				
+				<div class="col-md-3 col-sm-3 col-xs-6 tax_type">
+					<label class="control-label">Tax Type</label>
+					<select id="tax_id" name="tax_id" class="form-control select2" data-error="#err_tax_id">
+						<option value="">Select</option>
+						<?php for($i=0; $i<count($tax); $i++) { ?>
+							<option value="<?php echo $tax[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['tax_id']==$tax[$i]['id']) echo "selected"; } ?>><?php echo $tax[$i]['tax_name']; ?></option>
+						<?php } ?>
+					</select>
+					<span id="err_tax_id"></span>
+				</div>
+			  	
+						
+						
 				<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Legal Name</label>
 					<span id="type_vendor_id">
@@ -67,12 +82,28 @@ input:-webkit-autofill {
 					</select>
 					<span id="err_vendor_id"></span>
 					</span>
-					<input id="legal_name" name="legal_name" class="form-control" type="text" value="<?php if(isset($data[0])) echo $data[0]['legal_name']; ?>" style="<?php if(isset($data[0])) { if($data[0]['type'] == 'Vendor Goods') echo 'display: none;'; } ?>" />
+					
+					<span id="type_customer_id">
+					<select id="customer_id" name="customer_id" class="form-control select2" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Customer') echo 'display: none;'; } else { echo 'display: none;'; } ?>">
+						<option value="">Select</option>
+						<?php for($i=0; $i<count($Customers); $i++) { ?>
+							<option value="<?php echo $Customers[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['customer_id']==$Customers[$i]['id']) echo "selected"; } ?>><?php echo $Customers[$i]['customer_name']; ?></option>
+						<?php } ?>
+					</select>
+				
+					</span>
+					<input id="legal_name" name="legal_name" class="form-control" type="text" value="<?php if(isset($data[0])) echo $data[0]['legal_name']; ?>" style="<?php if(isset($data[0])) { if($data[0]['type'] == 'Vendor Goods'||$data[0]['type'] == 'GST Tax'||$data[0]['type'] == 'Goods Sales'||$data[0]['type'] == 'Goods Purchase') echo 'display: none;'; } ?>" />
+				
+			  		
 				</div>
+				
+				
 				<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Code</label>
 					<input id="code" name="code" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['code']; ?>" style="<?php if(isset($data[0])) { if($data[0]['type'] == 'Vendor Goods') echo 'display: none;'; } ?>" readonly />
 					<input id="vendor_code" name="vendor_code" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['code']; ?>" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Goods') echo 'display: none;'; } else { echo 'display: none;'; } ?>" readonly />
+					
+					<input id="customer_code" name="customer_code" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['code']; ?>" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Customer') echo 'display: none;'; } else { echo 'display: none;'; } ?>" readonly />
 				</div>
 				<div class=" col-md-3 col-sm-3 col-xs-6 vendor_goods" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Goods') echo 'display: none;'; } else echo 'display: none;'; ?>">
 					<label class="control-label">Type Of Company</label>
@@ -85,6 +116,60 @@ input:-webkit-autofill {
 			</div>
 
 		 	<div class="form-group">
+			  	<div class="col-md-3 col-sm-3 col-xs-6 gst_tax"  style="display:none">
+					<label class="control-label">Input/Output</label>
+					<select class="form-control select2" id="input_output" name="input_output" data-error="#err_input_output" >
+						<option value="">Select</option>
+						<option value="Input" <?php if(isset($data)) { if($data[0]['input_output']=="Input") echo "selected"; } ?>>Input</option>
+						<option value="Output" <?php if(isset($data)) { if($data[0]['input_output']=="Output") echo "selected"; } ?>>Output</option>
+					
+					</select>
+					<span id="err_input_output"></span>
+				</div>
+				<div class="col-md-3 col-sm-3 col-xs-6 state"  style="display:none" data-error="#err_state">
+					<label class="control-label">State</label>
+					<select id="state_id" name="state_id" class="form-control select2">
+						<option value="">Select</option>
+						<?php for($i=0; $i<count($state); $i++) { ?>
+							<option value="<?php echo $state[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['state_id']==$state[$i]['id']) echo "selected"; } ?>><?php echo $state[$i]['state_name']; ?></option>
+						<?php } ?>
+					</select>
+					<span id="err_state"></span>
+				</div>
+				<div class="col-md-3 col-sm-3 col-xs-6 state_type"  style="display:none" >
+					<label class="control-label">State Type</label>
+					<select class="form-control select2" id="state_type" name="state_type" data-error="#err_state_type" >
+						<option value="">Select</option>
+						<option value="Local" <?php if(isset($data)) { if($data[0]['state_type']=="Local") echo "selected"; } ?>>Local</option>
+						<option value="Inter" <?php if(isset($data)) { if($data[0]['state_type']=="Inter") echo "selected"; } ?>>Inter</option>
+					
+					</select>
+					<span id="err_state_type"></span>
+				</div>
+				
+				<div class="col-md-3 col-sm-3 col-xs-6 bus_type"  style="display:none">
+					<label class="control-label">Business Type</label>
+					<select class="form-control select2" id="bus_type" name="bus_type" data-error="#err_business" >
+						<option value="">Select</option>
+						<option value="B2B" <?php if(isset($data)) { if($data[0]['bus_type']=="B2B") echo "selected"; } ?>>B2B</option>
+						<option value="B2C" <?php if(isset($data)) { if($data[0]['bus_type']=="B2C") echo "selected"; } ?>>B2C </option>
+					
+					</select>
+					<span id="err_business"></span>
+				</div>
+				
+				<div class="col-md-3 col-sm-3 col-xs-6 gst_rate"  style="display:none">
+					<label class="control-label">Gst Rate</label>
+			
+					<input id="gst_rate" name="gst_rate" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['gst_rate']; ?>"  />
+				</div>
+				
+				
+			
+			</div>
+		
+			
+			<div class="form-group">
 			  	<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Account Type</label>
 					<select class="form-control select2" id="account_type" name="account_type" data-error="#err_account_type" onchange="get_sub_account_type();">
@@ -112,6 +197,7 @@ input:-webkit-autofill {
 			  		<input id="sub_account_path" name="sub_account_path" class="form-control" type="text" value="" readonly />
 				</div>
 			</div>
+			
 			
 		 	<div class="form-group">
 	         	<div class="col-md-3 col-sm-3 col-xs-6">
@@ -495,7 +581,10 @@ input:-webkit-autofill {
     var cat_1 = "<?php if(isset($data)) echo $data[0]['category_1']; ?>";
     var cat_2 = "<?php if(isset($data)) echo $data[0]['category_2']; ?>";
     var cat_3 = "<?php if(isset($data)) echo $data[0]['category_3']; ?>";
+	
+	
 </script>
+
 
 
 <?php 

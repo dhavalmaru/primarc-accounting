@@ -58,8 +58,14 @@ $this->params['breadcrumbs'][] = $this->title;
 											<td><?php echo $pending[$i]['type']; ?></td> 
 											<td><?php echo $pending[$i]['code']; ?></td> 
 											<td><?php echo $pending[$i]['account_type']; ?></td> 
+											<?php /*if( $pending[$i]['type']="Goods Purchase"||$pending[$i]['type']="Goods Purchase"||$pending[$i]['type']="Goods Purchase") 	{?>
+											<td><?php echo $pending[$i]['legal_name_tree']; ?></td>
+											<?php } else{?>
+											<td><?php echo $pending[$i]['legal_name']; ?></td> 
+											<?php }*/?>
 											<td><?php echo $pending[$i]['legal_name']; ?></td> 
 											<td><?php echo $pending[$i]['acc_category']; ?></td> 
+											
 											<!-- <td><?php //echo $pending[$i]['category_1']; ?></td> 
 											<td><?php //echo $pending[$i]['category_2']; ?></td> 
 											<td><?php //echo $pending[$i]['category_3']; ?></td>  -->

@@ -15,6 +15,14 @@ $.validator.addMethod("checkemail", function(value, element) {
     return this.optional(element) || (/^[a-z0-9]+([-._][a-z0-9]+)*@([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,4}$/i.test(value) && /^(?=.{1,64}@.{4,64}$)(?=.{6,100}$).*/i.test(value));
 }, "Please enter valid email address");
 
+$.validator.addMethod("numbersandcommaanddotonly", function(value, element) {
+    return this.optional(element) || /^(0*[1-9][0-9.,]*)$/i.test(value);
+}, "Not Valid Input");
+
+jQuery.validator.addMethod("validDate", function(value, element) {
+    return this.optional(element) || moment(value,"DD/MM/YYYY").isValid();
+}, "Please enter a valid date in the format DD/MM/YYYY");
+
 function addMultiInputNamingRules(form, field, rules, type){
     // alert(field);
     $(form).find(field).each(function(index){
@@ -195,15 +203,64 @@ $("#account_master").validate({
         approver_id: {
             required: true
         },
-        // address_doc_file: {
-        //     required: function(element) {
-        //                 if($("#type").val()=="Employee" && $("#address_doc_path").val()==""){
-        //                     return true;
-        //                 } else {
-        //                     return false;
-        //                 }
-        //             }
-        // },
+        state_id: {
+            required: function(element) {
+                        if($("#type").val()=="Goods Purchase" ||$("#type").val()=="Goods Sales"||$("#type").val()=="GST Tax"){
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+        },
+        
+        gst_rate: {
+            required: function(element) {
+                        if($("#type").val()=="Goods Purchase" ||$("#type").val()=="Goods Sales"||$("#type").val()=="GST Tax"){
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+        },
+        
+        tax_id: {
+            required: function(element) {
+                        if($("#type").val()=="GST Tax"){
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+        },
+        input_output: {
+            required: function(element) {
+                        if($("#type").val()=="GST Tax"){
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+        },
+        state_type: {
+            required: function(element) {
+                        if($("#type").val()=="Goods Purchase" ||$("#type").val()=="Goods Sales"){
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+        },
+        
+        bus_type: {
+            required: function(element) {
+                        if($("#type").val()=="Goods Sales"){
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+        },
+        
         // pan_no_doc_file: {
         //     required: function(element) {
         //                 if($("#pan_no_doc_path").val()==""){
@@ -1019,7 +1076,7 @@ $("#payment_receipt").validate({
         },
         amount: {
             required: true,
-			numbersandcommaonly: true
+			numbersandcommaanddotonly: true
         },
         // ref_no: {
         //     required: true
@@ -1085,6 +1142,14 @@ function check_acc_payment_receipt() {
             var errors = {};
             var name = "payable_debit_amt";
             errors[name] = "Payable amount should be debit.";
+            validator.showErrors(errors);
+            valid = false;
+        }
+    } else {
+        if(parseFloat(get_number($('#amount').val(),2))==0){
+            var errors = {};
+            var name = "amount";
+            errors[name] = "Amount should be greater than zero.";
             validator.showErrors(errors);
             valid = false;
         }
@@ -1558,3 +1623,202 @@ $('#detailledger_report').submit(function() {
         return true;
     }
 });
+
+
+
+
+
+
+// ----------------- RECONSILATION REPORT VALIDATION -------------------------------------
+$("#reconsilation_form").validate({
+    rules: {
+        
+    },
+
+    ignore: false,
+
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
+
+$("#reconsilation_form").submit(function() {
+    removeMultiInputNamingRules('#reconsilation_form', 'input[alt="payment_date[]"]');
+    addMultiInputNamingRules('#reconsilation_form', 'input[name="payment_date[]"]', { validDate: true }, "");
+    
+    if (!$("#reconsilation_form").valid()) {
+        return false;
+    } else {
+        if(reconsiled()==false) {
+            return false;
+        } else {
+            removeMultiInputNamingRules('#reconsilation_form', 'input[alt="payment_date[]"]');
+            return true;
+        }
+    }
+});
+
+function reconsiled()
+{
+    var validator = $("#reconsilation_form").validate();
+    var count = $(".payment_date").length;
+    var valid = true;
+    for(var i=0;i<count;i++)
+    {
+        paymentdate = $("#payment_date_"+i).val();
+        var ref_date = $("#payment_date_"+i).closest('tr').children('td.ref_date').text();   
+            ref_date = splidate(ref_date);
+            ref_date = Date.parse(ref_date); 
+
+
+        var todate = $("#to_date").val();
+        todate = splidate(todate);
+        todate = Date.parse(todate);
+
+        var from_date = $("#from_date").val();
+        from_date = splidate(from_date);
+        from_date = Date.parse(from_date);
+
+        var bool = true;
+
+        if(paymentdate!="")
+        {
+            if(paymentdate!="")
+            {
+                paymentdate = splidate(paymentdate);
+                paymentdate = Date.parse(paymentdate);
+            }
+
+
+            /*if (to_date > Date.now())
+             {
+                if(paymentdate >Date.now()){
+                    bool = false;
+                    var errors = {};
+                    var name = $("#payment_date_"+i).attr('name');
+                    errors[name] = "Date Should be smaller than Today's Date";
+                    validator.showErrors(errors);
+                    valid = false;
+                 }
+            }*/
+            /*else if(to_date < Date.now())
+            {
+                if(paymentdate > to_date){
+                     bool = false;
+                    var errors = {};
+                    var name = $("#payment_date_"+i).attr('name');
+                    errors[name] = "Date Should be smaller than To Date";
+                    validator.showErrors(errors);
+                    valid = false;
+                } 
+            }*/
+            if(paymentdate>Date.now())
+            {
+                var errors = {};
+                var name = $('#payment_date_'+i).attr('name');
+                errors[name] = "Date Should Be Less Then Todays Date";
+                validator.showErrors(errors);
+                valid = false;
+            }
+            if(paymentdate>todate)
+            {
+                var errors = {};
+                var name = $('#payment_date_'+i).attr('name');
+                errors[name] = "Date Should Be Less Then Selected Todate Date";
+                validator.showErrors(errors);
+                valid = false;
+            }
+
+            if(paymentdate<ref_date)
+                {
+                        var errors = {};
+                        var name = $('#payment_date_'+i).attr('name');
+                        errors[name] = "Date Should Be Greater Then Payment Date";
+                        validator.showErrors(errors);
+                        valid = false;
+                }       
+        }
+    }
+
+    return valid;
+}
+
+function splidate(dateStr) {
+  var parts = dateStr.split("/")
+  return new Date(parts[2], parts[1] - 1, parts[0])
+}
+
+
+
+
+
+// ----------------- TAX MASTER FORM VALIDATION -------------------------------------
+$("#tax_type").validate({
+    rules: {
+        tax_name: {
+            required: true,
+            check_tax_type_availablity: true
+        },
+        // tax_details: {
+        //     required: true
+        // },
+        approver_id: {
+            required: true
+        },
+        // remarks: {
+        //     required: true
+        // }
+      
+    },
+
+    ignore: false,
+
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
+
+$('#tax_type').submit(function() {
+    if (!$("#tax_type").valid()) {
+        return false;
+    } else {
+        return true;
+    }
+});
+
+$.validator.addMethod("check_tax_type_availablity", function (value, element) {
+    var validator = $("#tax_type").validate();
+    var result = 1;
+
+    $.ajax({
+        url: BASE_URL+'index.php?r=taxtype%2Fchecktaxtypeavailablity',
+        type: 'post',
+        data: $("#tax_type").serialize(),
+        dataType: 'html',
+        global: false,
+        async: false,
+        success: function (data) {
+            result = data;
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status);
+            alert(thrownError);
+        }
+    });
+
+    if (result==1) {
+        return false;
+    } else {
+        return true;
+    }
+}, 'Tax type already in use.');
