@@ -146,7 +146,7 @@ class AccreportController extends Controller
         if(count($vouchertype)==0)
         {
             $data['vouchertype']=[];
-            $vouchertype = array('purchase','journal_voucher','payment_receipt','go_debit_details','other_debit_credit');
+            $vouchertype = array('purchase','journal_voucher','payment_receipt','go_debit_details','other_debit_credit','promotion');
         }
         else
         {
@@ -1487,7 +1487,7 @@ class AccreportController extends Controller
                $paydate = NULL;
             }
 
-            $result = $report->update_ledegre($paydate,$reconsiled);
+            $result = $report->update_ledger($paydate,$reconsiled);
         }
             
         return $this->render('reconsile_report',$data);  

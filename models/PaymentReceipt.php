@@ -247,6 +247,21 @@ class PaymentReceipt extends Model
                     ref_type = 'other_debit_credit' and acc_id='$acc_id' and company_id = '$company_id') B 
                 on (A.ref_id=B.ref_id) 
 
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
+                    A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    null as gi_date, null as invoice_date, null as due_date, 
+                    B.acc_id as cp_acc_id, B.ledger_name as cp_ledger_name, B.ledger_code as cp_ledger_code from 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'promotion' and acc_id!='$acc_id' and company_id = '$company_id') A 
+                left join 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'promotion' and acc_id='$acc_id' and company_id = '$company_id') B 
+                on (A.ref_id=B.ref_id) 
+
                 ) AA 
                 where (AA.acc_id = '$acc_id' or AA.cp_acc_id = '$acc_id') and AA.amount!=0 and 
                         (AA.ref_type!='payment_receipt' or AA.entry_type='Bank Entry' or AA.entry_type='Payment' or AA.entry_type='Receipt') and 

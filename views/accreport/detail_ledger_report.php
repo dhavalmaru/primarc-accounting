@@ -126,13 +126,14 @@ $this->registerCssFile(
 			<div class="col-md-4 col-sm-2 col-xs-6">
 					<label class="control-label">Voucher Type</label>
 					<select  id="vouchertype" class="form-control select2-container" name="vouchertype[]" multiple="multiple" data-error="#vouchererror">
-							<option value="purchase" <?=(in_array('purchase',$vouchertype)?'selected':'')?> >Purchase</option>
-							<option value="journal_voucher" <?=(in_array('journal_voucher',$vouchertype)?'selected':'')?>> Journal Voucher</option>
-							<option value="payment_receipt" <?=(in_array('payment_receipt',$vouchertype)?'selected':'')?>> Payment/Receipt</option>
-							<option value="go_debit_details" <?=(in_array('go_debit_details',$vouchertype)?'selected':'')?>>Good Debit Details</option>
-							<option value="other_debit_credit">Other Debit Details</option>
-						</select>
-						<span id="vouchererror"></span>
+						<option value="purchase" <?=(in_array('purchase',$vouchertype)?'selected':'')?> >Purchase</option>
+						<option value="journal_voucher" <?=(in_array('journal_voucher',$vouchertype)?'selected':'')?>> Journal Voucher</option>
+						<option value="payment_receipt" <?=(in_array('payment_receipt',$vouchertype)?'selected':'')?>> Payment/Receipt</option>
+						<option value="go_debit_details" <?=(in_array('go_debit_details',$vouchertype)?'selected':'')?>>Good Debit Details</option>
+						<option value="other_debit_credit" <?=(in_array('other_debit_credit',$vouchertype)?'selected':'')?>>Other Debit Details</option>
+						<option value="promotion" <?=(in_array('promotion',$vouchertype)?'selected':'')?>>Promotion</option>
+					</select>
+					<span id="vouchererror"></span>
 			</div>
 			<div class="col-md-3 col-sm-2 col-xs-6">
 				<label class="control-label">Select State</label>

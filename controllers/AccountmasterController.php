@@ -50,6 +50,7 @@ class AccountmasterController extends Controller
                 $vendor = $acc_master->getVendors();
                 $Customers = $acc_master->getCustomers();
 				$tax = $acc_master->getTax();
+                $tax_per = $acc_master->getTaxPercent();
                	$state = $acc_master->getState();
                 $category_list = $acc_master->getBusinessCategories();
                 $approver_list = $acc_master->getApprover($action);
@@ -57,7 +58,9 @@ class AccountmasterController extends Controller
                 $acc_master->setLog('AccountMaster', '', 'Insert', '', 'Insert Account Master Details', 'acc_master', '');
                 // return $this->render('account_details', ['action' => $action, 'category' => $category, 'vendor' => $vendor, 
                 //                                          'category_list' => $category_list, 'approver_list' => $approver_list]);
-                return $this->render('account_details', ['action' => $action, 'vendor' => $vendor,'tax' => $tax, 'Customers' => $Customers,'state' => $state,'category_list' => $category_list, 'approver_list' => $approver_list]);
+                return $this->render('account_details', ['action' => $action, 'vendor' => $vendor, 'tax' => $tax, 
+                                                        'tax_per' => $tax_per, 'Customers' => $Customers,'state' => $state, 
+                                                        'category_list' => $category_list, 'approver_list' => $approver_list]);
             } else {
                 return $this->render('/message', [
                     'title'  => \Yii::t('user', 'Access Denied'),
@@ -82,6 +85,7 @@ class AccountmasterController extends Controller
         $vendor = $acc_master->getVendors();
 		$state = $acc_master->getState();
 		$tax = $acc_master->getTax();
+        $tax_per = $acc_master->getTaxPercent();
         $Customers = $acc_master->getCustomers();
         $acc_category = $acc_master->getAccCategories($id);
         $category_list = $acc_master->getBusinessCategories();
@@ -108,7 +112,7 @@ class AccountmasterController extends Controller
         //                                             'acc_category' => $acc_category, 'approver_list' => $approver_list]);
 
         return $this->render('account_details', ['action' => $action, 'vendor' => $vendor, 'Customers' => $Customers,'state' => $state,  
-                                                    'category_list' => $category_list, 'data' => $data, 'tax' => $tax, 
+                                                    'category_list' => $category_list, 'data' => $data, 'tax' => $tax, 'tax_per' => $tax_per, 
                                                     'acc_category' => $acc_category, 'approver_list' => $approver_list]);
     }
 

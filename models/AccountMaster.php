@@ -118,6 +118,15 @@ class AccountMaster extends Model
         return $reader->readAll();
     }
 
+    public function getTaxPercent(){
+        $session = Yii::$app->session;
+
+        $sql = "select distinct tax_rate from tax_rate_master where is_active = '1' and entity_type = 'child' order by tax_rate";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
     public function getVendorDetails(){
         $request = Yii::$app->request;
         $vendor_id = $request->post('vendor_id');

@@ -68,9 +68,7 @@ input:-webkit-autofill {
 					</select>
 					<span id="err_tax_id"></span>
 				</div>
-			  	
-						
-						
+
 				<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Legal Name</label>
 					<span id="type_vendor_id">
@@ -160,8 +158,15 @@ input:-webkit-autofill {
 				
 				<div class="col-md-3 col-sm-3 col-xs-6 gst_rate"  style="display:none">
 					<label class="control-label">Gst Rate</label>
+					<select class="form-control select2" id="gst_rate" name="gst_rate" data-error="#err_gst_rate">
+						<option value="">Select</option>
+						<?php for($i=0; $i<count($tax_per); $i++) { ?>
+							<option value="<?php echo round($tax_per[$i]['tax_rate'],2); ?>" <?php if(isset($data[0])) { if($data[0]['gst_rate']==round($tax_per[$i]['tax_rate'],2)) echo "selected"; } ?>><?php echo round($tax_per[$i]['tax_rate'],2); ?></option>
+						<?php } ?>
+					</select>
+					<span id="err_gst_rate"></span>
 			
-					<input id="gst_rate" name="gst_rate" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['gst_rate']; ?>"  />
+					<!-- <input id="gst_rate" name="gst_rate" class="form-control" type="text" value="<?php //if(isset($data)) echo $data[0]['gst_rate']; ?>"  /> -->
 				</div>
 				
 				

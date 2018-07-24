@@ -14,7 +14,7 @@ use yii\db\Query;
 /* @var $searchModel app\models\GrnSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Reconsilation Report';
+$this->title = 'Reconciliation Report';
 $this->params['breadcrumbs'][] = $this->title;
 $mycomponent = Yii::$app->mycomponent;
 ?>
