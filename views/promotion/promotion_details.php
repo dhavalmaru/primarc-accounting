@@ -102,7 +102,7 @@ table tr td { border: 1px solid #eee!important; }
 						<label class="control-label">GSTIN</label>
 						<div class=" ">
 							<div class=" ">  
-								<select id="warehouse_id" name="warehouse_id" class="form-control">
+								<select id="warehouse_id" name="warehouse_id" class="form-control select2">
 									<option value="">Select</option>
 									<?php if(isset($warehouse_gst)) { for($i=0; $i<count($warehouse_gst); $i++) { ?>
 										<option value="<?php echo $warehouse_gst[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['warehouse_id']==$warehouse_gst[$i]['id']) echo "selected"; } ?>><?php echo $warehouse_gst[$i]['warehouse_gst']; ?></option>

@@ -2451,7 +2451,7 @@ class PendingGrn extends Model
             $state_code = $data[0]['state_code'];
         }
 
-        $code = $year . "/" . $month . "/" . $state_code;
+        $code = $year . "/Debit Note/" . $month . "/" . $state_code;
 
         $sql = "select * from acc_series_master where type = 'debit_note' and company_id = '$company_id'";
         $command = Yii::$app->db->createCommand($sql);

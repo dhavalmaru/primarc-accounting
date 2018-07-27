@@ -272,7 +272,12 @@ class PromotionController extends Controller
             //                 <td><input class="form-control" type="text credit_amt" name="credit_amt[]" id="credit_amt_0" value="" onChange="get_total();" readonly /></td>
             //             </tr>';
 
-            $tax = 5;
+
+            if($trans_type == "Invoice"){
+                $tax = 18;
+            } else {
+               $tax = 0; 
+            }
             
             $warehouse_details = $model->getWarehouseDetails($warehouse_id);
 

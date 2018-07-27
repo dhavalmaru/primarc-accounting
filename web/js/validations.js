@@ -1426,6 +1426,21 @@ function check_acc_debit_details() {
 // ----------------- OTHER DEBIT CREDIT FORM VALIDATION -------------------------------------
 $("#other_debit_credit").validate({
     rules: {
+        vendor_id: {
+            required: true
+        },
+        trans_type: {
+            required: true
+        },
+        warehouse_id: {
+            required: function(element) {
+                        if($("#trans_type").val()=="Invoice"){
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+        },
         date_of_transaction: {
             required: true
         },

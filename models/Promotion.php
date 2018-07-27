@@ -557,7 +557,7 @@ class Promotion extends Model
                             'ref_type'=>'promotion',
                             'entry_type'=>'Promotion',
                             // 'invoice_no'=>$reference,
-                            // 'vendor_id'=>$vendor_id,
+                            'vendor_id'=>$vendor_id,
                             'voucher_id' => $voucher_id, 
                             'ledger_type' => $ledger_type, 
                             'acc_id'=>$acc_id[$i],
@@ -674,7 +674,7 @@ class Promotion extends Model
             $code = $year . "/Invoice/" . $month . "/" . $state_code;
         } else {
             $type = 'debit_note';
-            $code = $year . "/" . $month . "/" . $state_code;
+            $code = $year . "/Debit Note/" . $month . "/" . $state_code;
         }
 
         $sql = "select * from acc_series_master where type = '$type' and company_id = '$company_id'";

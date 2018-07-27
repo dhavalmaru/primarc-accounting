@@ -143,3 +143,13 @@ function set_transaction(elem){
 
     get_total();
 }
+
+function set_trans_type(){
+    var trans_type = $('#trans_type').val();
+    
+    if(trans_type=="Invoice") {
+        $('#warehouse_gst_div').show();
+    } else {
+        $('#warehouse_gst_div').hide();
+    }
+}

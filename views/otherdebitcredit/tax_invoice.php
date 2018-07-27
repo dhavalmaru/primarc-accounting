@@ -23,7 +23,7 @@
         .modal-body-inside { padding:10px; }
         @media print{@page {size: portrait}}
         /*.modal-body-inside table { font-size: 14px; }*/
-             
+		     
     </style>
 </head>
 
@@ -41,19 +41,19 @@
         <tr valign="top"  style=" ">
             <td colspan="3"   style="border-left:none; border-bottom:none; ">
                 <p>
-                Primarc Pecan Retail (P) Ltd - Mum(FY 17<?php if(isset($debit_note[0]['date_of_transaction'])) 
+				Primarc Pecan Retail (P) Ltd - Mum(FY 17<?php if(isset($debit_note[0]['date_of_transaction'])) 
                                             echo $mycomponent->get_financial_year($debit_note[0]['date_of_transaction']); ?>)
-                210A, 214, Building No 2-B,
-                Mittal Industrial Estate Premises
-                Co-Operative Society Limited, Marol Naka
-                Andheri (East), Mumbai - 400059
-                Maharashtra
-                </p>
+				210A, 214, Building No 2-B,
+				Mittal Industrial Estate Premises
+				Co-Operative Society Limited, Marol Naka
+				Andheri (East), Mumbai - 400059
+				Maharashtra
+				</p>
             </td>
             <td colspan="2" align="center" valign="top" style=""><p><b>Invoice No.</b>
-            <br>     <?php if(isset($debit_note[0]['debit_note_ref'])) echo $debit_note[0]['debit_note_ref']; ?></p></td>
-            <td colspan="1" align="center" valign="top" style="border-right:none;"><p><b>Dated</b>
-            <br>  <?php if(isset($debit_note[0]['date_of_transaction'])) 
+			<br>     <?php if(isset($debit_note[0]['debit_note_ref'])) echo $debit_note[0]['debit_note_ref']; ?></p></td>
+			<td colspan="1" align="center" valign="top" style="border-right:none;"><p><b>Dated</b>
+			<br>  <?php if(isset($debit_note[0]['date_of_transaction'])) 
                                             echo (($debit_note[0]['date_of_transaction']!=null && $debit_note[0]['date_of_transaction']!='')?
                                             date('d/m/Y',strtotime($debit_note[0]['date_of_transaction'])):''); ?></p></td>
         </tr>
@@ -68,12 +68,12 @@
                 </p>
             </td>
               <td colspan="2" align="center" valign="top" style="border-right:none;"><p><b>Delivery Note  </b>
-            <br> </p></td>
-            <td colspan="1" align="center" valign="top" style="border-right:none;"><p><b>Mode/ Terms Of Payment</b>
-            <br> </p></td>
+			<br> </p></td>
+			<td colspan="1" align="center" valign="top" style="border-right:none;"><p><b>Mode/ Terms Of Payment</b>
+			<br> </p></td>
         </tr>
         <tr>
-            <td width="22%" style="border:none;"><p>State</p></td>
+			<td width="22%" style="border:none;"><p>State</p></td>
             <td width="4%" style="border:none;">:</td>
             <td width="14%" style="border:none;">
                 <p>
@@ -83,12 +83,12 @@
                 </p>
             </td>
               <td colspan="2"  align="center" valign="top" style="border-right:none;"><p><b>Supplier's Reference </b>
-            <br> </p></td>
-            <td colspan="1"  align="center" valign="top" style="border-right:none;"><p><b>Other Reference(S)</b>
-            <br> </p></td>
+			<br> </p></td>
+			<td colspan="1"  align="center" valign="top" style="border-right:none;"><p><b>Other Reference(S)</b>
+			<br> </p></td>
         </tr>
-        <tr>
-            <td width="22%" style="border:none;"><p>State Code</p></td>
+		<tr>
+			<td width="22%" style="border:none;"><p>State Code</p></td>
             <td width="4%" style="border:none;">:</td>
             <td width="14%" style="border:none;">
                 <p>
@@ -100,7 +100,7 @@
             <td colspan="3" style="border:none; border-left:1px solid #999; "></td>
         </tr>
         <tr>
-            <td width="22%" style="border:none; border-bottom:1px solid #999;"><p>CIN</p></td>
+			<td width="22%" style="border:none; border-bottom:1px solid #999;"><p>CIN</p></td>
             <td width="4%" style="border:none;">:</td>
             <td width="14%" style="border:none;">
                 <p>
@@ -111,23 +111,23 @@
             </td>
             <td colspan="3" style="border:none; border-left:1px solid #999; border-bottom:1px solid #999;"></td>
         </tr>
-        <tr>
+		<tr>
             <td colspan="6"  style="border-left:none;border-right:none;"><p>Details of Buyer | Billed to:</p></td>
         </tr>
-        <tr valign="top"  style="border:none;">
+		<tr valign="top"  style="border:none;">
             <td colspan="3" style="border-left:none; border-bottom:none;">
                 <p>
-                <?php if(isset($vendor_details[0]['account_holder_name'])) echo $vendor_details[0]['account_holder_name']; ?>
-                <?php if(isset($vendor_details[0]['office_address_line_1'])) echo $vendor_details[0]['office_address_line_1']; ?> &nbsp;
+    			<?php if(isset($vendor_details[0]['account_holder_name'])) echo $vendor_details[0]['account_holder_name']; ?>
+    			<?php if(isset($vendor_details[0]['office_address_line_1'])) echo $vendor_details[0]['office_address_line_1']; ?> &nbsp;
                 <?php if(isset($vendor_details[0]['office_address_line_2'])) echo $vendor_details[0]['office_address_line_2']; ?> &nbsp;
                 <?php if(isset($vendor_details[0]['office_address_line_3'])) echo $vendor_details[0]['office_address_line_3']; ?> &nbsp;
                 <?php if(isset($vendor_details[0]['city_name'])) echo $vendor_details[0]['city_name']; ?> <?php if(isset($vendor_details[0]['pincode'])) echo $vendor_details[0]['pincode']; ?> &nbsp;
-                </p>
+				</p>
             </td>
             <td colspan="2" align="center" valign="top" style="border-right:none;"><p><b>Buyers Order No.</b>
-            <br> </p></td>
-            <td colspan="1" align="center" valign="top" style="border-right:none;"><p><b>Dated</b>
-            <br> </p></td>
+			<br> </p></td>
+			<td colspan="1" align="center" valign="top" style="border-right:none;"><p><b>Dated</b>
+			<br> </p></td>
         </tr>
         <tr>
             <td width="22%" style="border:none;"><p> GSTIN</p></td>
@@ -142,12 +142,12 @@
             <td colspan="2" align="center" valign="top" style="border-right:none;">
                 <p><b>Dispatch Document No. </b><br> </p>
             </td>
-            <td colspan="1" align="center" valign="top" style="border-right:none;">
+			<td colspan="1" align="center" valign="top" style="border-right:none;">
                 <p><b>Delivery Note Date</b><br> </p>
             </td>
         </tr>
         <tr>
-            <td width="22%" style="border:none;"><p>State</p></td>
+			<td width="22%" style="border:none;"><p>State</p></td>
             <td width="4%" style="border:none;">:</td>
             <td width="14%" style="border:none;">
                 <p>
@@ -157,12 +157,12 @@
                 </p>
             </td>
               <td colspan="2"  align="center" valign="top" style="border-right:none;"><p><b>Dispatch Through</b>
-            <br> </p></td>
-            <td colspan="1"  align="center" valign="top" style="border-right:none;"><p><b>Destination</b>
-            <br> </p></td>
+			<br> </p></td>
+			<td colspan="1"  align="center" valign="top" style="border-right:none;"><p><b>Destination</b>
+			<br> </p></td>
         </tr>
-        <tr>
-            <td width="22%" style="border:none;"><p>State Code</p></td>
+		<tr>
+			<td width="22%" style="border:none;"><p>State Code</p></td>
             <td width="4%" style="border:none;">:</td>
             <td width="14%" style="border:none;">
                 <p>
@@ -173,13 +173,13 @@
             </td>
             <td colspan="3" align="center" valign="top" style="border:none; border-left:1px solid #999; "><p><b>Terms Of Delivery<b></p></td>
         </tr>
-        
+		
         <!-- <tr valign="bottom" >
             <td colspan="6" style="border:none;">&nbsp;   </td>
             <td colspan="3" style="border:none;"></td>
         </tr> -->
-        
-        <tr>
+		
+		<tr>
             <td colspan="6"  style="border-left:none;border-right:none;border-bottom:none;"></td>
                 <table class="table table-bordered">
                     <thead>
@@ -189,7 +189,7 @@
                             <th>HSN/SAC</th>
                             <th>Qty</th>
                             <th>Rate</th>
-                            <th>Per </th>
+                            <th>Per	</th>
                             <th> Amount </th>
                         </tr>
                     </thead>
@@ -214,13 +214,13 @@
                         <td>  </td>
                         <td style=" border-right:1px solid #999;"><?php echo $invoice_details[$i]['amount']; ?>  </td>
                         </tr>
-                    </tbody>
+					</tbody>
                 </table>  
             </td>
-        </tr>   
-                        
+        </tr>	
+						
         <tr>
-            <td colspan="6" style=" border-top:1px solid #999;border-bottom:1px solid #999; "> 
+			<td colspan="6" style=" border-top:1px solid #999;border-bottom:1px solid #999; "> 
                 <span style="  font-size:16px; font-weight:500; display: block;" > 
                     Amount Chargeable (in words): <br/><br/> 
                 </span> 
@@ -247,84 +247,84 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php for($i=0; $i<count($inv_tax_details)-1; $i++){ ?>
+					<?php for($i=0; $i<count($inv_tax_details)-1; $i++){ ?>
                     <tr>
                         <td  style="text-align:center;" colspan="2">998311</td>
                         <td align="right"><?php echo $inv_tax_details[$i]['value']; ?></td>
                         <td align="center" valign="middle" style="border-right:1px solid #666;border-bottom:0px solid #666;padding:0;">
-                            <table style="width: 100%;border-spacing: 0; height: 17px;">
-                                <tbody>
-                                    <tr>
-                                        <td style="border-right:1px solid #666;border-left:0px solid #666;border-bottom:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"><?php echo $inv_tax_details[$i]['cgst_rate']; ?></td>
-                                        <td style="border-right:0px solid #666;border-bottom:0px solid #666;border-left:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"><?php echo $inv_tax_details[$i]['cgst_amt']; ?></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                        <td align="center" valign="middle" style="border-right:1px solid #666;border-bottom:0px solid #666;padding:0;">
-                            <table style="width: 100%;border-spacing: 0; height: 17px;">
-                                <tbody>
-                                    <tr>
-                                        <td style="border-right:1px solid #666;border-left:0px solid #666;border-bottom:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"><?php echo $inv_tax_details[$i]['sgst_rate']; ?></td>
-                                        <td style="border-right:0px solid #666;border-bottom:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"><?php echo $inv_tax_details[$i]['sgst_amt']; ?></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                        <td align="center" valign="middle" style="border-right:1px solid #666;border-bottom:0px solid #666;padding:0;">
-                            <table style="width: 100%;border-spacing: 0; height: 17px;">
-                                <tbody>
-                                    <tr>
-                                        <td style="border-right:1px solid #666;border-left:0px solid #666;border-bottom:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"><?php echo $inv_tax_details[$i]['igst_rate']; ?></td>
-                                        <td style="border-right:0px solid #666;border-bottom:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"><?php echo $inv_tax_details[$i]['igst_amt']; ?></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
+							<table style="width: 100%;border-spacing: 0; height: 17px;">
+								<tbody>
+									<tr>
+										<td style="border-right:1px solid #666;border-left:0px solid #666;border-bottom:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"><?php echo $inv_tax_details[$i]['cgst_rate']; ?></td>
+										<td style="border-right:0px solid #666;border-bottom:0px solid #666;border-left:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"><?php echo $inv_tax_details[$i]['cgst_amt']; ?></td>
+									</tr>
+								</tbody>
+							</table>
+						</td>
+						<td align="center" valign="middle" style="border-right:1px solid #666;border-bottom:0px solid #666;padding:0;">
+							<table style="width: 100%;border-spacing: 0; height: 17px;">
+								<tbody>
+									<tr>
+										<td style="border-right:1px solid #666;border-left:0px solid #666;border-bottom:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"><?php echo $inv_tax_details[$i]['sgst_rate']; ?></td>
+										<td style="border-right:0px solid #666;border-bottom:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"><?php echo $inv_tax_details[$i]['sgst_amt']; ?></td>
+									</tr>
+								</tbody>
+							</table>
+						</td>
+						<td align="center" valign="middle" style="border-right:1px solid #666;border-bottom:0px solid #666;padding:0;">
+							<table style="width: 100%;border-spacing: 0; height: 17px;">
+								<tbody>
+									<tr>
+										<td style="border-right:1px solid #666;border-left:0px solid #666;border-bottom:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"><?php echo $inv_tax_details[$i]['igst_rate']; ?></td>
+										<td style="border-right:0px solid #666;border-bottom:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"><?php echo $inv_tax_details[$i]['igst_amt']; ?></td>
+									</tr>
+								</tbody>
+							</table>
+						</td>
                         <td align="right">  
                             <?php echo $inv_tax_details[$i]['value'] + $inv_tax_details[$i]['cgst_amt'] + $inv_tax_details[$i]['sgst_amt'] + $inv_tax_details[$i]['igst_amt']; ?> 
                         </td>
                     </tr>  
                     <?php } ?>
                     <?php $i = count($inv_tax_details)-1; ?>
-                    <tr>
-                        <td colspan="3" align="right" valign="middle" style="border-right:none;border-bottom:1px solid #666;">Total</td>
-                        
-                        <td align="center" valign="middle" style="border-right:1px solid #666;border-bottom:1px solid #666;padding:0;">
-                            <table style="width: 100%;border-spacing: 0; height: 17px;">
-                                <tbody>
-                                    <tr>
-                                        <!-- <td style="border-right:1px solid #666;border-bottom:0px solid #666;border-left:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"></td> -->
-                                        <td colspan="2" style="border-right:0px solid #666;border-left:0px solid #666;border-bottom:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"><?php echo $inv_tax_details[$i]['cgst_amt']; ?></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                        <td align="center" valign="middle" style="border-right:1px solid #666;border-bottom:1px solid #666;padding:0;">
-                            <table style="width: 100%;border-spacing: 0; height: 17px;">
-                                <tbody>
-                                    <tr>
-                                        <!-- <td style="border-right:1px solid #666;border-bottom:0px solid #666;border-left:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"></td> -->
-                                        <td colspan="2" style="border-right:0px solid #666;border-left:0px solid #666;border-bottom:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"><?php echo $inv_tax_details[$i]['sgst_amt']; ?></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                        <td align="center" valign="middle" style="border-right:1px solid #666;border-bottom:1px solid #666;padding:0;">
-                            <table style="width: 100%;border-spacing: 0; height: 17px;">
-                                <tbody>
-                                    <tr>
-                                        <!-- <td style="border-right:1px solid #666;border-bottom:0px solid #666;border-left:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"></td> -->
-                                        <td colspan="2" style="border-right:0px solid #666;border-left:0px solid #666;border-bottom:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"><?php echo $inv_tax_details[$i]['igst_amt']; ?></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                        <td align="right" style="border-left:1px solid #666;border-right:1px solid #666;border-bottom:1px solid #666;">
-                            <p style="margin:0; "><?php echo $inv_tax_details[$i]['total_amt']; ?></p>
-                        </td>
-                    </tr>
-                </tbody>
+					<tr>
+						<td colspan="3" align="right" valign="middle" style="border-right:none;border-bottom:1px solid #666;">Total</td>
+						
+						<td align="center" valign="middle" style="border-right:1px solid #666;border-bottom:1px solid #666;padding:0;">
+							<table style="width: 100%;border-spacing: 0; height: 17px;">
+								<tbody>
+									<tr>
+										<!-- <td style="border-right:1px solid #666;border-bottom:0px solid #666;border-left:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"></td> -->
+										<td colspan="2" style="border-right:0px solid #666;border-left:0px solid #666;border-bottom:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"><?php echo $inv_tax_details[$i]['cgst_amt']; ?></td>
+									</tr>
+								</tbody>
+							</table>
+						</td>
+						<td align="center" valign="middle" style="border-right:1px solid #666;border-bottom:1px solid #666;padding:0;">
+							<table style="width: 100%;border-spacing: 0; height: 17px;">
+								<tbody>
+									<tr>
+										<!-- <td style="border-right:1px solid #666;border-bottom:0px solid #666;border-left:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"></td> -->
+										<td colspan="2" style="border-right:0px solid #666;border-left:0px solid #666;border-bottom:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"><?php echo $inv_tax_details[$i]['sgst_amt']; ?></td>
+									</tr>
+								</tbody>
+							</table>
+						</td>
+						<td align="center" valign="middle" style="border-right:1px solid #666;border-bottom:1px solid #666;padding:0;">
+							<table style="width: 100%;border-spacing: 0; height: 17px;">
+								<tbody>
+									<tr>
+										<!-- <td style="border-right:1px solid #666;border-bottom:0px solid #666;border-left:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"></td> -->
+										<td colspan="2" style="border-right:0px solid #666;border-left:0px solid #666;border-bottom:0px solid #666;border-top: 0px solid #666;text-align: right;" width="50%"><?php echo $inv_tax_details[$i]['igst_amt']; ?></td>
+									</tr>
+								</tbody>
+							</table>
+						</td>
+						<td align="right" style="border-left:1px solid #666;border-right:1px solid #666;border-bottom:1px solid #666;">
+							<p style="margin:0; "><?php echo $inv_tax_details[$i]['total_amt']; ?></p>
+						</td>
+					</tr>
+				</tbody>
             </table>
         </tr>
             
