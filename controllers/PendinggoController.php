@@ -3,7 +3,7 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\PendingGrn;
+use app\models\PendingGo;
 use app\models\AccountMaster;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -11,10 +11,10 @@ use yii\filters\VerbFilter;
 use yii\helpers\Url;
 use yii\web\Session;
 
-class PendinggrnController extends Controller
+class PendinggoController extends Controller
 {
     public function actionIndex(){
-        $grn_cnt = new PendingGrn();
+        $grn_cnt = new PendingGo();
         // $grn = $grn_cnt->getNewGrnDetails();
         $grn = [];
         // $pending = $grn_cnt->getPurchaseDetails('pending');
@@ -23,14 +23,14 @@ class PendinggrnController extends Controller
         $approved = [];
         // $all = $grn_cnt->getAllGrnDetails();
         $all = [];
-        return $this->render('pending_grn', [
+        return $this->render('pending_go', [
             'grn' => $grn, 'pending' => $pending, 'approved' => $approved, 'all' => $all
         ]);
     }
 
-    public function actionGetgrn(){
-        $grn_cnt = new PendingGrn();
-        $grn = $grn_cnt->getNewGrnDetails();
+    public function actionGetgo(){
+        $grn_cnt = new PendingGo();
+        $grn = $grn_cnt->getNewGoDetails();
         $grn_count  = $grn_cnt->getCountGrnDetails();
         $request = Yii::$app->request;
         $grn_data = array();
@@ -40,17 +40,22 @@ class PendinggrnController extends Controller
         for($i=0; $i<count($grn); $i++) { 
            $row = array(
                         $start+1,
-                        '<a href="'.Url::base() .'index.php?r=pendinggrn%2Fupdate&id='.$grn[$i]['grn_id'].'" >Post </a>',
-                        ''.$grn[$i]['grn_id'].'',
-                        ''.$grn[$i]['gi_id'].'',
-                        ''.$grn[$i]['location'].'',
-                        ''.$grn[$i]['vendor_name'].'',
-                        ''.$grn[$i]['scanned_qty'].'',
-                        ''.$mycomponent->format_money($grn[$i]['payable_val_after_tax'], 2).'',
-                        ''.$grn[$i]['gi_date'].'',
-                        ''.$grn[$i]['status'].'',
-                        ''.$grn[$i]['username'].'',
-                        ''.$grn[$i]['approver_name'].'',
+                        '<a href="'.Url::base() .'index.php?r=pendinggo%2Fupdate&id='.$grn[$i]['gi_go_id'].'" >Post </a>',
+                        /*''.$grn[$i]['gi_go_id'].'',*/
+                        ''.$grn[$i]['gi_go_ref_no'].'',
+                        ''.$grn[$i]['po_number'].'',
+                        ''.$grn[$i]['order_id'].'',
+                        ''.$grn[$i]['dcno'].'',
+                        ''.$grn[$i]['invoice_number'].'',
+                        ''.$grn[$i]['warehouse_name'].'',
+                        ''.$grn[$i]['customerState'].'',
+                        ''.$grn[$i]['customerName'].'',
+                        ''.$grn[$i]['no_good_units'].'',
+                        ''.$mycomponent->format_money($grn[$i]['value_at_cost'], 2).'',
+                        ''.$grn[$i]['gi_go_date_time'].'',
+                        ''.$grn[$i]['gi_go_status'].'',
+                        ''.$grn[$i]['updated_by'].'',
+                        '',
                         ) ;
            $grn_data[] = $row;
            $start = $start+1;
@@ -66,7 +71,7 @@ class PendinggrnController extends Controller
     }
 
     public function actionGetapprovedgrn(){
-        $grn_cnt = new PendingGrn();
+        $grn_cnt = new PendingGo();
         $grn = $grn_cnt->getPurchaseDetails('approved');
         $grn_count  = $grn_cnt->getCountPurchaseDetails('approved');
         $request = Yii::$app->request;
@@ -74,21 +79,27 @@ class PendinggrnController extends Controller
         $mycomponent = Yii::$app->mycomponent;
         $start = $request->post('start');    
         //$params['start'].", ".$params['length']
-        for($i=0; $i<count($grn); $i++) { 
+        /*
+            <a href="'.Url::base() .'index.php?r=pendinggo%2Fupdate&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>
+        */
+         for($i=0; $i<count($grn); $i++) { 
            $row = array(
                         $start+1,
-                        '<a href="'.Url::base() .'index.php?r=pendinggrn%2Fview&id='.$grn[$i]['grn_id'].'" >View </a>
-                        <a href="'.Url::base() .'index.php?r=pendinggrn%2Fupdate&id='.$grn[$i]['grn_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>',
-                        ''.$grn[$i]['grn_id'].'',
-                        ''.$grn[$i]['grn_no'].'',
-                        ''.$grn[$i]['vendor_name'].'',
-                        ''.$grn[$i]['category_name'].'',
-                        ''.$grn[$i]['po_no'].'',
-                        ''.$grn[$i]['inv_nos'].'',
-                        ''.$mycomponent->format_money($grn[$i]['net_amt'], 2).'',
-                        ''.$mycomponent->format_money($grn[$i]['ded_amt'], 2).'',
-                        ''.$grn[$i]['username'].'',
-                        '<a href="'.Url::base() .'index.php?r=pendinggrn%2Fledger&id='.$grn[$i]['grn_id'].'" target="_new"> <span class="fa fa-file-pdf-o"></span> </a>',
+                        '<a href="'.Url::base() .'index.php?r=pendinggo%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>
+                        <a href="'.Url::base() .'index.php?r=pendinggo%2Fupdate&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>',
+                        /*''.$grn[$i]['gi_go_id'].'',*/
+                        ''.$grn[$i]['gi_go_id'].'',
+                        ''.$grn[$i]['po_number'].'',
+                        ''.$grn[$i]['order_id'].'',
+                        ''.$grn[$i]['warehouse_state'].'',
+                        ''.$grn[$i]['customerState'].'',
+                        ''.$grn[$i]['customerName'].'',
+                        ''.$mycomponent->format_money($grn[$i]['value_at_cost'], 2).'',
+                        ''.$grn[$i]['gi_go_date_time'].'',
+                        ''.$grn[$i]['gi_go_status'].'',
+                        ''.$grn[$i]['updated_by'].'',
+                        '',
+                        '<a href="'.Url::base() .'index.php?r=pendinggo%2Fledger&id='.$grn[$i]['gi_go_id'].'" target="_new"> <span class="fa fa-file-pdf-o"></span> </a>',
                         ) ;
            $grn_data[] = $row;
            $start = $start+1;
@@ -103,8 +114,8 @@ class PendinggrnController extends Controller
         echo json_encode($json_data);
     }
 
-    public function actionGetallgrn(){
-        $grn_cnt = new PendingGrn();
+    public function actionGetallgrn(){  
+        $grn_cnt = new PendingGo();
         $grn = $grn_cnt->getAllGrnDetails();
         $grn_count  = $grn_cnt->getCountAllGrnDetails();
         $request = Yii::$app->request;
@@ -115,18 +126,19 @@ class PendinggrnController extends Controller
         for($i=0; $i<count($grn); $i++) { 
            $row = array(
                         $start+1,
-                        '<a href="'.Url::base() .'index.php?r=pendinggrn%2Fview&id='.$grn[$i]['grn_id'].'" >View </a>
-                        <a href="'.Url::base() .'index.php?r=pendinggrn%2Fupdate&id='.$grn[$i]['grn_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>',
-                        ''.$grn[$i]['grn_id'].'',
-                        ''.$grn[$i]['gi_id'].'',
-                        ''.$grn[$i]['location'].'',
-                        ''.$grn[$i]['vendor_name'].'',
-                        ''.$grn[$i]['scanned_qty'].'',
-                        ''.$mycomponent->format_money($grn[$i]['payable_val_after_tax'], 2).'',
-                        ''.$grn[$i]['gi_date'].'',
-                        ''.$grn[$i]['status'].'',
-                        ''.$grn[$i]['username'].'',
-                        ''.$grn[$i]['approver_name'].'',
+                        '<a href="'.Url::base() .'index.php?r=pendinggo%2Fupdate&id='.$grn[$i]['gi_go_id'].'" >Post </a>',
+                        /*''.$grn[$i]['gi_go_id'].'',*/
+                        ''.$grn[$i]['gi_go_id'].'',
+                        ''.$grn[$i]['po_number'].'',
+                        ''.$grn[$i]['order_id'].'',
+                        ''.$grn[$i]['warehouse_state'].'',
+                        ''.$grn[$i]['customerState'].'',
+                        ''.$grn[$i]['customerName'].'',
+                        ''.$mycomponent->format_money($grn[$i]['value_at_cost'], 2).'',
+                        ''.$grn[$i]['gi_go_date_time'].'',
+                        ''.$grn[$i]['gi_go_status'].'',
+                        ''.$grn[$i]['updated_by'].'',
+                        '',
                         ) ;
            $grn_data[] = $row;
            $start = $start+1;
@@ -145,7 +157,7 @@ class PendinggrnController extends Controller
     // public function actionGetdebitnote(){
     //     $invoice_id = '11266';
 
-    //     $model = new PendingGrn();
+    //     $model = new PendingGo();
     //     $data = $model->getDebitNoteDetails($invoice_id);
         
     //     $this->layout = false;
@@ -156,7 +168,7 @@ class PendinggrnController extends Controller
     // }
 
     public function actionViewdebitnote($invoice_id){
-        $model = new PendingGrn();
+        $model = new PendingGo();
         $data = $model->getDebitNoteDetails($invoice_id);
         
         $this->layout = false;
@@ -168,7 +180,7 @@ class PendinggrnController extends Controller
     }
 
     public function actionDownload($invoice_id){
-        $model = new PendingGrn();
+        $model = new PendingGo();
         $data = $model->getDebitNoteDetails($invoice_id);
         $file = "";
 
@@ -187,7 +199,7 @@ class PendinggrnController extends Controller
     }
 
     public function actionEmaildebitnote($invoice_id){
-        $model = new PendingGrn();
+        $model = new PendingGo();
         $data = $model->getDebitNoteDetails($invoice_id);
         $file = "";
 
@@ -247,7 +259,7 @@ class PendinggrnController extends Controller
         $attachment_type = 'PDF';
         $vendor_name = $request->post('vendor_name');
         $company_id = $request->post('company_id');
-        $model = new PendingGrn();
+        $model = new PendingGo();
         $model->setEmailLog($vendor_name, $from, $to, $id, $body, $attachment, 
                                 $attachment_type, $email_sent_status, $error_message, $company_id);
 
@@ -255,7 +267,7 @@ class PendinggrnController extends Controller
     }
 
     public function actionView($id) {
-        $model = new PendingGrn();
+        $model = new PendingGo();
         $access = $model->getAccess();
         if(count($access)>0) {
             if($access[0]['r_view']==1) {
@@ -279,7 +291,7 @@ class PendinggrnController extends Controller
     }
 
     public function actionUpdate($id) {
-        $model = new PendingGrn();
+        $model = new PendingGo();
         $access = $model->getAccess();
         if(count($access)>0) {
             if($access[0]['r_view']==1) {
@@ -302,36 +314,30 @@ class PendinggrnController extends Controller
         }
     }
 
+  
     public function actionGetgrnpostingdetails($id){
         $total_val = array();
         $total_tax = array();
         $invoice_details = array();
         $invoice_tax = array();
 
-        $model = new PendingGrn();
+        $model = new PendingGo();
         $result = $model->getGrnPostingDetails($id);
 
-        // echo json_encode($result);
-        // echo '<br/>';
-        // echo '<br/>';   
 
         if(count($result)>0){
-            $other_charge = floatval($result[0]['other_charge']);
+            $total_val[0]['total_amount'] = 0;
+            $total_val[0]['total_payable_amount'] = 0;
+            $other_charge = 0;
             $total_val[0]['other_charges'] = $other_charge;
             $total_val[0]['total_amount'] = $other_charge;
-            $total_val[0]['shortage_amount'] = 0;
-            $total_val[0]['expiry_amount'] = 0;
-            $total_val[0]['damaged_amount'] = 0;
-            $total_val[0]['margindiff_amount'] = 0;
-            $total_val[0]['total_deduction'] = 0;
-            $total_val[0]['total_payable_amount'] = 0;
 
             $j = 0;
-            $total_tax[$j]['grn_id'] = $result[0]['grn_id'];
+            $total_tax[$j]['gi_go_id'] = $result[0]['gi_go_id'];
             $total_tax[$j]['tax_zone_code'] = $result[0]['tax_zone_code'];
             $total_tax[$j]['tax_zone_name'] = $result[0]['tax_zone_name'];
             $total_tax[$j]['vat_cst'] = $result[0]['vat_cst'];
-            $total_tax[$j]['vat_percen'] = $result[0]['vat_percen'];
+            $total_tax[$j]['vat_percent'] = $result[0]['vat_percent'];
             $total_tax[$j]['cgst_rate'] = $result[0]['cgst_rate'];
             $total_tax[$j]['sgst_rate'] = $result[0]['sgst_rate'];
             $total_tax[$j]['igst_rate'] = $result[0]['igst_rate'];
@@ -340,31 +346,7 @@ class PendinggrnController extends Controller
             $total_tax[$j]['total_cgst'] = 0;
             $total_tax[$j]['total_sgst'] = 0;
             $total_tax[$j]['total_igst'] = 0;
-            $total_tax[$j]['excess_cost'] = 0;
-            $total_tax[$j]['excess_tax'] = 0;
-            $total_tax[$j]['excess_cgst'] = 0;
-            $total_tax[$j]['excess_sgst'] = 0;
-            $total_tax[$j]['excess_igst'] = 0;
-            $total_tax[$j]['shortage_cost'] = 0;
-            $total_tax[$j]['shortage_tax'] = 0;
-            $total_tax[$j]['shortage_cgst'] = 0;
-            $total_tax[$j]['shortage_sgst'] = 0;
-            $total_tax[$j]['shortage_igst'] = 0;
-            $total_tax[$j]['expiry_cost'] = 0;
-            $total_tax[$j]['expiry_tax'] = 0;
-            $total_tax[$j]['expiry_cgst'] = 0;
-            $total_tax[$j]['expiry_sgst'] = 0;
-            $total_tax[$j]['expiry_igst'] = 0;
-            $total_tax[$j]['damaged_cost'] = 0;
-            $total_tax[$j]['damaged_tax'] = 0;
-            $total_tax[$j]['damaged_cgst'] = 0;
-            $total_tax[$j]['damaged_sgst'] = 0;
-            $total_tax[$j]['damaged_igst'] = 0;
-            $total_tax[$j]['margindiff_cost'] = 0;
-            $total_tax[$j]['margindiff_tax'] = 0;
-            $total_tax[$j]['margindiff_cgst'] = 0;
-            $total_tax[$j]['margindiff_sgst'] = 0;
-            $total_tax[$j]['margindiff_igst'] = 0;
+            
             $total_tax[$j]['invoice_cost_acc_id'] = null;
             $total_tax[$j]['invoice_cost_ledger_name'] = null;
             $total_tax[$j]['invoice_cost_ledger_code'] = null;
@@ -382,52 +364,37 @@ class PendinggrnController extends Controller
             $total_tax[$j]['invoice_igst_ledger_code'] = null;
 
             $k = 0;
-            $invoice_details[$k]['invoice_no'] = $result[0]['invoice_no'];
+            $invoice_details[$k]['invoice_number'] = $result[0]['invoice_number'];
             $invoice_details[$k]['invoice_total_cost'] = 0;
             $invoice_details[$k]['invoice_total_tax'] = 0;
             $invoice_details[$k]['invoice_other_charges'] = $other_charge;
             $invoice_details[$k]['invoice_total_amount'] = $other_charge;
-            $invoice_details[$k]['invoice_excess_amount'] = 0;
-            $invoice_details[$k]['invoice_shortage_amount'] = 0;
-            $invoice_details[$k]['invoice_expiry_amount'] = 0;
-            $invoice_details[$k]['invoice_damaged_amount'] = 0;
-            $invoice_details[$k]['invoice_margindiff_amount'] = 0;
-            $invoice_details[$k]['invoice_total_deduction'] = 0;
+            
             $invoice_details[$k]['invoice_total_payable_amount'] = 0;
             $invoice_details[$k]['edited_total_cost'] = 0;
             $invoice_details[$k]['edited_total_tax'] = 0;
+            $invoice_details[$k]['edited_total_amount'] = 0;
             $invoice_details[$k]['edited_other_charges'] = $other_charge;
             $invoice_details[$k]['edited_total_amount'] = $other_charge;
-            $invoice_details[$k]['edited_excess_amount'] = 0;
-            $invoice_details[$k]['edited_shortage_amount'] = 0;
-            $invoice_details[$k]['edited_expiry_amount'] = 0;
-            $invoice_details[$k]['edited_damaged_amount'] = 0;
-            $invoice_details[$k]['edited_margindiff_amount'] = 0;
-            $invoice_details[$k]['edited_total_deduction'] = 0;
             $invoice_details[$k]['edited_total_payable_amount'] = 0;
             $invoice_details[$k]['diff_total_cost'] = 0;
             $invoice_details[$k]['diff_total_tax'] = 0;
             $invoice_details[$k]['diff_total_amount'] = 0;
-            $invoice_details[$k]['diff_excess_amount'] = 0;
-            $invoice_details[$k]['diff_shortage_amount'] = 0;
-            $invoice_details[$k]['diff_expiry_amount'] = 0;
-            $invoice_details[$k]['diff_damaged_amount'] = 0;
-            $invoice_details[$k]['diff_margindiff_amount'] = 0;
-            $invoice_details[$k]['diff_total_deduction'] = 0;
             $invoice_details[$k]['diff_total_payable_amount'] = 0;
             $invoice_details[$k]['diff_other_charges'] = 0;
             $invoice_details[$k]['total_amount_voucher_id'] = null;
             $invoice_details[$k]['total_amount_ledger_type'] = null;
             $invoice_details[$k]['total_deduction_voucher_id'] = null;
             $invoice_details[$k]['total_deduction_ledger_type'] = null;
+            $invoice_details[$k]['diff_other_charges'] = 0;
 
             $l = 0;
-            $invoice_tax[$l]['grn_id'] = $result[0]['grn_id'];
+            $invoice_tax[$l]['gi_go_id'] = $result[0]['gi_go_id'];
             $invoice_tax[$l]['tax_zone_code'] = $result[0]['tax_zone_code'];
             $invoice_tax[$l]['tax_zone_name'] = $result[0]['tax_zone_name'];
-            $invoice_tax[$l]['invoice_no'] = $result[0]['invoice_no'];
+            $invoice_tax[$l]['invoice_number'] = $result[0]['invoice_number'];
             $invoice_tax[$l]['vat_cst'] = $result[0]['vat_cst'];
-            $invoice_tax[$l]['vat_percen'] = $result[0]['vat_percen'];
+            $invoice_tax[$l]['vat_percent'] = $result[0]['vat_percent'];
             $invoice_tax[$j]['cgst_rate'] = $result[0]['cgst_rate'];
             $invoice_tax[$j]['sgst_rate'] = $result[0]['sgst_rate'];
             $invoice_tax[$j]['igst_rate'] = $result[0]['igst_rate'];
@@ -451,31 +418,7 @@ class PendinggrnController extends Controller
             $invoice_tax[$l]['diff_cgst'] = 0;
             $invoice_tax[$l]['diff_sgst'] = 0;
             $invoice_tax[$l]['diff_igst'] = 0;
-            $invoice_tax[$l]['excess_cost'] = 0;
-            $invoice_tax[$l]['excess_tax'] = 0;
-            $invoice_tax[$l]['excess_cgst'] = 0;
-            $invoice_tax[$l]['excess_sgst'] = 0;
-            $invoice_tax[$l]['excess_igst'] = 0;
-            $invoice_tax[$l]['shortage_cost'] = 0;
-            $invoice_tax[$l]['shortage_tax'] = 0;
-            $invoice_tax[$l]['shortage_cgst'] = 0;
-            $invoice_tax[$l]['shortage_sgst'] = 0;
-            $invoice_tax[$l]['shortage_igst'] = 0;
-            $invoice_tax[$l]['expiry_cost'] = 0;
-            $invoice_tax[$l]['expiry_tax'] = 0;
-            $invoice_tax[$l]['expiry_cgst'] = 0;
-            $invoice_tax[$l]['expiry_sgst'] = 0;
-            $invoice_tax[$l]['expiry_igst'] = 0;
-            $invoice_tax[$l]['damaged_cost'] = 0;
-            $invoice_tax[$l]['damaged_tax'] = 0;
-            $invoice_tax[$l]['damaged_cgst'] = 0;
-            $invoice_tax[$l]['damaged_sgst'] = 0;
-            $invoice_tax[$l]['damaged_igst'] = 0;
-            $invoice_tax[$l]['margindiff_cost'] = 0;
-            $invoice_tax[$l]['margindiff_tax'] = 0;
-            $invoice_tax[$l]['margindiff_cgst'] = 0;
-            $invoice_tax[$l]['margindiff_sgst'] = 0;
-            $invoice_tax[$l]['margindiff_igst'] = 0;
+            
             $invoice_tax[$l]['invoice_cost_acc_id'] = null;
             $invoice_tax[$l]['invoice_cost_ledger_name'] = null;
             $invoice_tax[$l]['invoice_cost_ledger_code'] = null;
@@ -495,168 +438,63 @@ class PendinggrnController extends Controller
             $blFlag = false;
 
             for($i=0; $i<count($result); $i++){
-                $box_price = floatval($result[$i]['box_price']);
+                
                 $cost_excl_vat = floatval($result[$i]['cost_excl_vat']);
-                $cost_incl_vat_cst = floatval($result[$i]['cost_incl_vat_cst']);
+                $cost_incl_vat_cst = floatval($result[$i]['value_at_mrp']);
                 $invoice_qty = floatval($result[$i]['invoice_qty']);
-                // $proper_qty = floatval($result[$i]['proper_qty']);
-                $excess_qty = floatval($result[$i]['excess_qty']);
-                $shortage_qty = floatval($result[$i]['shortage_qty']);
-                $expiry_qty = floatval($result[$i]['expiry_qty']);
-                $damaged_qty = floatval($result[$i]['damaged_qty']);
-                $vat_percen = floatval($result[$i]['vat_percen']);
+               
+                $vat_percent = floatval($result[$i]['vat_percent']);
                 $cgst_rate = floatval($result[$i]['cgst_rate']);
                 $sgst_rate = floatval($result[$i]['sgst_rate']);
                 $igst_rate = floatval($result[$i]['igst_rate']);
 
-                $tot_cost = $invoice_qty*$cost_excl_vat;
-                $tot_cgst = $invoice_qty*$cost_excl_vat*$cgst_rate/100;
-                $tot_sgst = $invoice_qty*$cost_excl_vat*$sgst_rate/100;
-                $tot_igst = $invoice_qty*$cost_excl_vat*$igst_rate/100;
+                $tot_cost = $cost_excl_vat;
+                $tot_cgst = $cost_excl_vat*$cgst_rate/100;
+                $tot_sgst = $cost_excl_vat*$sgst_rate/100;
+                $tot_igst = $cost_excl_vat*$igst_rate/100;
                 $tot_tax = $tot_cgst+$tot_sgst+$tot_igst;
 
-                $excess_cost = round($excess_qty*$cost_excl_vat,2);
-                $excess_cgst = round($excess_cost*$cgst_rate/100,2);
-                $excess_sgst = round($excess_cost*$sgst_rate/100,2);
-                $excess_igst = round($excess_cost*$igst_rate/100,2);
-                $excess_tax = $excess_cgst+$excess_sgst+$excess_igst;
-
-                $shortage_cost = round($shortage_qty*$cost_excl_vat,2);
-                $shortage_cgst = round($shortage_cost*$cgst_rate/100,2);
-                $shortage_sgst = round($shortage_cost*$sgst_rate/100,2);
-                $shortage_igst = round($shortage_cost*$igst_rate/100,2);
-                $shortage_tax = $shortage_cgst+$shortage_sgst+$shortage_igst;
-
-                $expiry_cost = round($expiry_qty*$cost_excl_vat,2);
-                $expiry_cgst = round($expiry_cost*$cgst_rate/100,2);
-                $expiry_sgst = round($expiry_cost*$sgst_rate/100,2);
-                $expiry_igst = round($expiry_cost*$igst_rate/100,2);
-                $expiry_tax = $expiry_cgst+$expiry_sgst+$expiry_igst;
-
-                $damaged_cost = round($damaged_qty*$cost_excl_vat,2);
-                $damaged_cgst = round($damaged_cost*$cgst_rate/100,2);
-                $damaged_sgst = round($damaged_cost*$sgst_rate/100,2);
-                $damaged_igst = round($damaged_cost*$igst_rate/100,2);
-                $damaged_tax = $damaged_cgst+$damaged_sgst+$damaged_igst;
-
-                if($box_price==0){
-                    $margin_from_scan = 0;
-                } else {
-                    $margin_from_scan = intval((($box_price-$cost_incl_vat_cst)/$box_price*100)*100)/100;
-                }
-                if($result[$i]['purchase_order_id']!=null && $result[$i]['purchase_order_id']!=''){
-                    $po_mrp = floatval($result[$i]['po_mrp']);
-                    $po_cost_price_inc_tax = floatval($result[$i]['po_cost_price_inc_tax']);
-                    if($po_cost_price_inc_tax==0){
-                        $margin_from_po = 0;
-                    } else {
-                        $margin_from_po = intval((($po_mrp-$po_cost_price_inc_tax)/$po_mrp*100)*100)/100;
-                    }
-                    if($box_price==0){
-                        $margindiff_cost = 0;
-                    } else if($invoice_qty==0){
-                        $margindiff_cost = 0;
-                    } else if(($invoice_qty-$shortage_qty-$expiry_qty-$damaged_qty)<=0){
-                        $margindiff_cost = 0;
-                    // } else if($margin_from_scan==0){
-                    //     $margindiff_cost = 0;
-                    // } else if($margin_from_po==0){
-                    //     $margindiff_cost = 0;
-                    } else {
-                        $margindiff_cost = round((($margin_from_po-$margin_from_scan)/100*$box_price*($invoice_qty-$shortage_qty-$expiry_qty-$damaged_qty)) / (1+($vat_percen/100)),2);
-                    }
-                } else {
-                    $margindiff_cost = 0;
-                }
-                
-                if(round($margindiff_cost,2)<=0){
-                    $margindiff_cost=0;
-                }
-                $margindiff_cgst=round(($margindiff_cost*$cgst_rate)/100,2);
-                $margindiff_sgst=round(($margindiff_cost*$sgst_rate)/100,2);
-                $margindiff_igst=round(($margindiff_cost*$igst_rate)/100,2);
-                $margindiff_tax=$margindiff_cgst+$margindiff_sgst+$margindiff_igst;
-
-                // if($margindiff_cost>0){
-                //     $result[$i]['margin_from_scan']=$margin_from_scan;
-                //     $result[$i]['margin_from_po']=$margin_from_po;
-                //     $result[$i]['margindiff_cost']=$margindiff_cost;
-                //     $result[$i]['margindiff_tax']=($margindiff_cost*$vat_percen)/100;
-                //     $result[$i]['margindiff_cgst']=($margindiff_cost*$cgst_rate)/100;
-                //     $result[$i]['margindiff_sgst']=($margindiff_cost*$sgst_rate)/100;
-                //     $result[$i]['margindiff_igst']=($margindiff_cost*$igst_rate)/100;
-                // }
-
-
                 $total_val[0]['total_amount'] = floatval($total_val[0]['total_amount']) + $tot_cost + $tot_tax;
-                $total_val[0]['shortage_amount'] = floatval($total_val[0]['shortage_amount']) + $shortage_cost + $shortage_tax;
-                $total_val[0]['expiry_amount'] = floatval($total_val[0]['expiry_amount']) + $expiry_cost + $expiry_tax;
-                $total_val[0]['damaged_amount'] = floatval($total_val[0]['damaged_amount']) + $damaged_cost + $damaged_tax;
-                $total_val[0]['margindiff_amount'] = floatval($total_val[0]['margindiff_amount']) + $margindiff_cost + $margindiff_tax;
 
                 $blFlag = false;
                 for($a=0;$a<count($total_tax);$a++){
-                    if($result[$i]['grn_id']==$total_tax[$a]['grn_id'] && $result[$i]['tax_zone_code']==$total_tax[$a]['tax_zone_code'] && 
+                    if($result[$i]['gi_go_id']==$total_tax[$a]['gi_go_id'] && $result[$i]['tax_zone_code']==$total_tax[$a]['tax_zone_code'] && 
                        $result[$i]['tax_zone_name']==$total_tax[$a]['tax_zone_name'] && $result[$i]['vat_cst']==$total_tax[$a]['vat_cst'] && 
-                       $result[$i]['vat_percen']==$total_tax[$a]['vat_percen'] && $result[$i]['cgst_rate']==$total_tax[$a]['cgst_rate'] && 
+                       $result[$i]['vat_percent']==$total_tax[$a]['vat_percent'] && $result[$i]['cgst_rate']==$total_tax[$a]['cgst_rate'] && 
                        $result[$i]['sgst_rate']==$total_tax[$a]['sgst_rate'] && $result[$i]['igst_rate']==$total_tax[$a]['igst_rate'] ){
 
                         $blFlag = true;
                         $j = $a;
                     }
                 }
+
+
                 if($blFlag==true){
-                    // echo 'true';
-                    // echo '<br/>';
+                   /* echo 'true';
+                    echo '<br/>';*/
 
                     $total_tax[$j]['total_cost'] = floatval($total_tax[$j]['total_cost']) + $tot_cost;
                     $total_tax[$j]['total_tax'] = floatval($total_tax[$j]['total_tax']) + $tot_tax;
                     $total_tax[$j]['total_cgst'] = floatval($total_tax[$j]['total_cgst']) + $tot_cgst;
                     $total_tax[$j]['total_sgst'] = floatval($total_tax[$j]['total_sgst']) + $tot_sgst;
                     $total_tax[$j]['total_igst'] = floatval($total_tax[$j]['total_igst']) + $tot_igst;
-                    $total_tax[$j]['excess_cost'] = floatval($total_tax[$j]['excess_cost']) + $excess_cost;
-                    $total_tax[$j]['excess_tax'] = floatval($total_tax[$j]['excess_tax']) + $excess_tax;
-                    $total_tax[$j]['excess_cgst'] = floatval($total_tax[$j]['excess_cgst']) + $excess_cgst;
-                    $total_tax[$j]['excess_sgst'] = floatval($total_tax[$j]['excess_sgst']) + $excess_sgst;
-                    $total_tax[$j]['excess_igst'] = floatval($total_tax[$j]['excess_igst']) + $excess_igst;
-                    $total_tax[$j]['shortage_cost'] = floatval($total_tax[$j]['shortage_cost']) + $shortage_cost;
-                    $total_tax[$j]['shortage_tax'] = floatval($total_tax[$j]['shortage_tax']) + $shortage_tax;
-                    $total_tax[$j]['shortage_cgst'] = floatval($total_tax[$j]['shortage_cgst']) + $shortage_cgst;
-                    $total_tax[$j]['shortage_sgst'] = floatval($total_tax[$j]['shortage_sgst']) + $shortage_sgst;
-                    $total_tax[$j]['shortage_igst'] = floatval($total_tax[$j]['shortage_igst']) + $shortage_igst;
-                    $total_tax[$j]['expiry_cost'] = floatval($total_tax[$j]['expiry_cost']) + $expiry_cost;
-                    $total_tax[$j]['expiry_tax'] = floatval($total_tax[$j]['expiry_tax']) + $expiry_tax;
-                    $total_tax[$j]['expiry_cgst'] = floatval($total_tax[$j]['expiry_cgst']) + $expiry_cgst;
-                    $total_tax[$j]['expiry_sgst'] = floatval($total_tax[$j]['expiry_sgst']) + $expiry_sgst;
-                    $total_tax[$j]['expiry_igst'] = floatval($total_tax[$j]['expiry_igst']) + $expiry_igst;
-                    $total_tax[$j]['damaged_cost'] = floatval($total_tax[$j]['damaged_cost']) + $damaged_cost;
-                    $total_tax[$j]['damaged_tax'] = floatval($total_tax[$j]['damaged_tax']) + $damaged_tax;
-                    $total_tax[$j]['damaged_cgst'] = floatval($total_tax[$j]['damaged_cgst']) + $damaged_cgst;
-                    $total_tax[$j]['damaged_sgst'] = floatval($total_tax[$j]['damaged_sgst']) + $damaged_sgst;
-                    $total_tax[$j]['damaged_igst'] = floatval($total_tax[$j]['damaged_igst']) + $damaged_igst;
-                    $total_tax[$j]['margindiff_cost'] = floatval($total_tax[$j]['margindiff_cost']) + $margindiff_cost;
-                    $total_tax[$j]['margindiff_tax'] = floatval($total_tax[$j]['margindiff_tax']) + $margindiff_tax;
-                    $total_tax[$j]['margindiff_cgst'] = floatval($total_tax[$j]['margindiff_cgst']) + $margindiff_cgst;
-                    $total_tax[$j]['margindiff_sgst'] = floatval($total_tax[$j]['margindiff_sgst']) + $margindiff_sgst;
-                    $total_tax[$j]['margindiff_igst'] = floatval($total_tax[$j]['margindiff_igst']) + $margindiff_igst;
 
-                    // echo 'total_tax';
-                    // echo '<br/>';
+                   /* echo 'total_tax';
+                    echo '<br/>';*/
 
-                    $warehouse_code = $result[$i]['warehouse_id'];
+                    $warehouse_code = $result[$i]['warehouse_code'];
                     $state_name = '';
                     $result2 = $model->getState($warehouse_code);
                     if(count($result2)>0){
                         $state_name = $result2[0]['state_name'];
                     }
 
-                    // if($result[$i]['igst_rate']==0){
-                    if($result[$i]['vat_cst']!='INTER'){
-                        $vat_percen = $result[$i]['vat_percen'];
-                        if(is_numeric($vat_percen)){
-                            $vat_percen = floatval($vat_percen);
+                    if($result[$i]['igst_rate']==0){
+                        $vat_percent = $result[$i]['vat_percent'];
+                        if(is_numeric($vat_percent)){
+                            $vat_percent = floatval($vat_percent);
                         }
-                        $tax_code = 'Purchase-'.$state_name.'-Local-'.$vat_percen;
+                        $tax_code = 'Sales-'.$state_name.'-Local-'.$vat_percent;
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -672,7 +510,7 @@ class PendinggrnController extends Controller
                         if(is_numeric($cgst_rate)){
                             $cgst_rate = floatval($cgst_rate);
                         }
-                        $tax_code = 'Input-'.$state_name.'-CGST-'.$cgst_rate;
+                        $tax_code = 'Output-'.$state_name.'-CGST-'.$cgst_rate;
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -686,7 +524,7 @@ class PendinggrnController extends Controller
                         if(is_numeric($sgst_rate)){
                             $sgst_rate = floatval($sgst_rate);
                         }
-                        $tax_code = 'Input-'.$state_name.'-SGST-'.$sgst_rate;
+                        $tax_code = 'Output-'.$state_name.'-SGST-'.$sgst_rate;
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -696,11 +534,11 @@ class PendinggrnController extends Controller
                             $total_tax[$j]['invoice_sgst_ledger_code'] = $result2[0]['code'];
                         }
                     } else {
-                        $vat_percen = $result[$i]['vat_percen'];
-                        if(is_numeric($vat_percen)){
-                            $vat_percen = floatval($vat_percen);
+                        $vat_percent = $result[$i]['vat_percent'];
+                        if(is_numeric($vat_percent)){
+                            $vat_percent = floatval($vat_percent);
                         }
-                        $tax_code = 'Purchase-'.$state_name.'-Inter State-'.$vat_percen;
+                        $tax_code = 'Sales-'.$state_name.'-Inter State-'.$vat_percent;
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -714,7 +552,7 @@ class PendinggrnController extends Controller
                         if(is_numeric($igst_rate)){
                             $igst_rate = floatval($igst_rate);
                         }
-                        $tax_code = 'Input-'.$state_name.'-IGST-'.$result[$i]['igst_rate'];
+                        $tax_code = 'Output-'.$state_name.'-IGST-'.$result[$i]['igst_rate'];
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -729,11 +567,11 @@ class PendinggrnController extends Controller
                     // echo '<br/>';
 
                     $j = count($total_tax);
-                    $total_tax[$j]['grn_id'] = $result[$i]['grn_id'];
+                    $total_tax[$j]['gi_go_id'] = $result[$i]['gi_go_id'];
                     $total_tax[$j]['tax_zone_code'] = $result[$i]['tax_zone_code'];
                     $total_tax[$j]['tax_zone_name'] = $result[$i]['tax_zone_name'];
                     $total_tax[$j]['vat_cst'] = $result[$i]['vat_cst'];
-                    $total_tax[$j]['vat_percen'] = $result[$i]['vat_percen'];
+                    $total_tax[$j]['vat_percent'] = $result[$i]['vat_percent'];
                     $total_tax[$j]['cgst_rate'] = $result[$i]['cgst_rate'];
                     $total_tax[$j]['sgst_rate'] = $result[$i]['sgst_rate'];
                     $total_tax[$j]['igst_rate'] = $result[$i]['igst_rate'];
@@ -742,32 +580,7 @@ class PendinggrnController extends Controller
                     $total_tax[$j]['total_cgst'] = $tot_cgst;
                     $total_tax[$j]['total_sgst'] = $tot_sgst;
                     $total_tax[$j]['total_igst'] = $tot_igst;
-                    $total_tax[$j]['excess_cost'] = $excess_cost;
-                    $total_tax[$j]['excess_tax'] = $excess_tax;
-                    $total_tax[$j]['excess_cgst'] = $excess_cgst;
-                    $total_tax[$j]['excess_sgst'] = $excess_sgst;
-                    $total_tax[$j]['excess_igst'] = $excess_igst;
-                    $total_tax[$j]['shortage_cost'] = $shortage_cost;
-                    $total_tax[$j]['shortage_tax'] = $shortage_tax;
-                    $total_tax[$j]['shortage_cgst'] = $shortage_cgst;
-                    $total_tax[$j]['shortage_sgst'] = $shortage_sgst;
-                    $total_tax[$j]['shortage_igst'] = $shortage_igst;
-                    $total_tax[$j]['expiry_cost'] = $expiry_cost;
-                    $total_tax[$j]['expiry_tax'] = $expiry_tax;
-                    $total_tax[$j]['expiry_cgst'] = $expiry_cgst;
-                    $total_tax[$j]['expiry_sgst'] = $expiry_sgst;
-                    $total_tax[$j]['expiry_igst'] = $expiry_igst;
-                    $total_tax[$j]['damaged_cost'] = $damaged_cost;
-                    $total_tax[$j]['damaged_tax'] = $damaged_tax;
-                    $total_tax[$j]['damaged_cgst'] = $damaged_cgst;
-                    $total_tax[$j]['damaged_sgst'] = $damaged_sgst;
-                    $total_tax[$j]['damaged_igst'] = $damaged_igst;
-                    $total_tax[$j]['margindiff_cost'] = $margindiff_cost;
-                    $total_tax[$j]['margindiff_tax'] = $margindiff_tax;
-                    $total_tax[$j]['margindiff_cgst'] = $margindiff_cgst;
-                    $total_tax[$j]['margindiff_sgst'] = $margindiff_sgst;
-                    $total_tax[$j]['margindiff_igst'] = $margindiff_igst;
-
+                    
                     $total_tax[$j]['invoice_cost_acc_id'] = null;
                     $total_tax[$j]['invoice_cost_ledger_name'] = null;
                     $total_tax[$j]['invoice_cost_ledger_code'] = null;
@@ -787,20 +600,19 @@ class PendinggrnController extends Controller
                     // echo 'total_tax';
                     // echo '<br/>';
 
-                    $warehouse_code = $result[$i]['warehouse_id'];
+                    $warehouse_code = $result[$i]['warehouse_code'];
                     $state_name = '';
                     $result2 = $model->getState($warehouse_code);
                     if(count($result2)>0){
                         $state_name = $result2[0]['state_name'];
                     }
 
-                    // if($result[$i]['igst_rate']==0){
-                    if($result[$i]['vat_cst']!='INTER'){
-                        $vat_percen = $result[$i]['vat_percen'];
-                        if(is_numeric($vat_percen)){
-                            $vat_percen = floatval($vat_percen);
+                    if($result[$i]['igst_rate']==0){
+                        $vat_percent = $result[$i]['vat_percent'];
+                        if(is_numeric($vat_percent)){
+                            $vat_percent = floatval($vat_percent);
                         }
-                        $tax_code = 'Purchase-'.$state_name.'-Local-'.$vat_percen;
+                        $tax_code = 'Sales-'.$state_name.'-Local-'.$vat_percent;
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -816,7 +628,7 @@ class PendinggrnController extends Controller
                         if(is_numeric($cgst_rate)){
                             $cgst_rate = floatval($cgst_rate);
                         }
-                        $tax_code = 'Input-'.$state_name.'-CGST-'.$cgst_rate;
+                        $tax_code = 'Output-'.$state_name.'-CGST-'.$cgst_rate;
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -830,7 +642,7 @@ class PendinggrnController extends Controller
                         if(is_numeric($sgst_rate)){
                             $sgst_rate = floatval($sgst_rate);
                         }
-                        $tax_code = 'Input-'.$state_name.'-SGST-'.$sgst_rate;
+                        $tax_code = 'Output-'.$state_name.'-SGST-'.$sgst_rate;
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -840,11 +652,11 @@ class PendinggrnController extends Controller
                             $total_tax[$j]['invoice_sgst_ledger_code'] = $result2[0]['code'];
                         }
                     } else {
-                        $vat_percen = $result[$i]['vat_percen'];
-                        if(is_numeric($vat_percen)){
-                            $vat_percen = floatval($vat_percen);
+                        $vat_percent = $result[$i]['vat_percent'];
+                        if(is_numeric($vat_percent)){
+                            $vat_percent = floatval($vat_percent);
                         }
-                        $tax_code = 'Purchase-'.$state_name.'-Inter State-'.$vat_percen;
+                        $tax_code = 'Sales-'.$state_name.'-Inter State-'.$vat_percent;
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -858,7 +670,7 @@ class PendinggrnController extends Controller
                         if(is_numeric($igst_rate)){
                             $igst_rate = floatval($igst_rate);
                         }
-                        $tax_code = 'Input-'.$state_name.'-IGST-'.$result[$i]['igst_rate'];
+                        $tax_code = 'Output-'.$state_name.'-IGST-'.$result[$i]['igst_rate'];
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -872,7 +684,7 @@ class PendinggrnController extends Controller
                 
                 $blFlag = false;
                 for($a=0;$a<count($invoice_details);$a++){
-                    if($result[$i]['invoice_no']==$invoice_details[$a]['invoice_no'] ){
+                    if($result[$i]['invoice_number']==$invoice_details[$a]['invoice_number'] ){
 
                         $blFlag = true;
                         $k = $a;
@@ -882,32 +694,16 @@ class PendinggrnController extends Controller
                     $invoice_details[$k]['invoice_total_cost'] = floatval($invoice_details[$k]['invoice_total_cost']) + $tot_cost;
                     $invoice_details[$k]['invoice_total_tax'] = floatval($invoice_details[$k]['invoice_total_tax']) + $tot_tax;
                     $invoice_details[$k]['invoice_total_amount'] = floatval($invoice_details[$k]['invoice_total_amount']) + $tot_cost + $tot_tax;
-                    $invoice_details[$k]['invoice_excess_amount'] = floatval($invoice_details[$k]['invoice_excess_amount']) + $excess_cost + $excess_tax;
-                    $invoice_details[$k]['invoice_shortage_amount'] = floatval($invoice_details[$k]['invoice_shortage_amount']) + $shortage_cost + $shortage_tax;
-                    $invoice_details[$k]['invoice_expiry_amount'] = floatval($invoice_details[$k]['invoice_expiry_amount']) + $expiry_cost + $expiry_tax;
-                    $invoice_details[$k]['invoice_damaged_amount'] = floatval($invoice_details[$k]['invoice_damaged_amount']) + $damaged_cost + $damaged_tax;
-                    $invoice_details[$k]['invoice_margindiff_amount'] = floatval($invoice_details[$k]['invoice_margindiff_amount']) + $margindiff_cost + $margindiff_tax;
-                    $invoice_details[$k]['invoice_total_deduction'] = floatval($invoice_details[$k]['invoice_shortage_amount']) + floatval($invoice_details[$k]['invoice_expiry_amount']) + floatval($invoice_details[$k]['invoice_damaged_amount']) + floatval($invoice_details[$k]['invoice_margindiff_amount']);
-                    $invoice_details[$k]['invoice_total_payable_amount'] = $invoice_details[$k]['invoice_total_amount'] - floatval($invoice_details[$k]['invoice_total_deduction']);
+
+                    $invoice_details[$k]['invoice_total_payable_amount'] = $invoice_details[$k]['invoice_total_amount'];
+
                     $invoice_details[$k]['edited_total_cost'] = floatval($invoice_details[$k]['edited_total_cost']) + $tot_cost;
                     $invoice_details[$k]['edited_total_tax'] = floatval($invoice_details[$k]['edited_total_tax']) + $tot_tax;
                     $invoice_details[$k]['edited_total_amount'] = floatval($invoice_details[$k]['edited_total_amount']) + $tot_cost + $tot_tax;
-                    $invoice_details[$k]['edited_excess_amount'] = floatval($invoice_details[$k]['edited_excess_amount']) + $excess_cost + $excess_tax;
-                    $invoice_details[$k]['edited_shortage_amount'] = floatval($invoice_details[$k]['edited_shortage_amount']) + $shortage_cost + $shortage_tax;
-                    $invoice_details[$k]['edited_expiry_amount'] = floatval($invoice_details[$k]['edited_expiry_amount']) + $expiry_cost + $expiry_tax;
-                    $invoice_details[$k]['edited_damaged_amount'] = floatval($invoice_details[$k]['edited_damaged_amount']) + $damaged_cost + $damaged_tax;
-                    $invoice_details[$k]['edited_margindiff_amount'] = floatval($invoice_details[$k]['edited_margindiff_amount']) + $margindiff_cost + $margindiff_tax;
-                    $invoice_details[$k]['edited_total_deduction'] = floatval($invoice_details[$k]['edited_shortage_amount']) + floatval($invoice_details[$k]['edited_expiry_amount']) + floatval($invoice_details[$k]['edited_damaged_amount']) + floatval($invoice_details[$k]['edited_margindiff_amount']);
-                    $invoice_details[$k]['edited_total_payable_amount'] = $invoice_details[$k]['edited_total_amount'] - floatval($invoice_details[$k]['edited_total_deduction']);
+                    $invoice_details[$k]['edited_total_payable_amount'] =$invoice_details[$k]['edited_total_amount'];
                     $invoice_details[$k]['diff_total_cost'] = 0;
                     $invoice_details[$k]['diff_total_tax'] = 0;
                     $invoice_details[$k]['diff_total_amount'] = 0;
-                    $invoice_details[$k]['diff_excess_amount'] = 0;
-                    $invoice_details[$k]['diff_shortage_amount'] = 0;
-                    $invoice_details[$k]['diff_expiry_amount'] = 0;
-                    $invoice_details[$k]['diff_damaged_amount'] = 0;
-                    $invoice_details[$k]['diff_margindiff_amount'] = 0;
-                    $invoice_details[$k]['diff_total_deduction'] = 0;
                     $invoice_details[$k]['diff_total_payable_amount'] = 0;
                     $invoice_details[$k]['total_amount_voucher_id'] = null;
                     $invoice_details[$k]['total_amount_ledger_type'] = null;
@@ -915,57 +711,37 @@ class PendinggrnController extends Controller
                     $invoice_details[$k]['total_deduction_ledger_type'] = null;
                 } else {
                     $k = count($invoice_details);
-                    $other_charge = floatval($result[$i]['other_charge']);
-                    $invoice_details[$k]['invoice_no'] = $result[$i]['invoice_no'];
+                    $invoice_details[$k]['invoice_number'] = $result[$i]['invoice_number'];
                     $invoice_details[$k]['invoice_total_cost'] = $tot_cost;
                     $invoice_details[$k]['invoice_total_tax'] = $tot_tax;
-                    $invoice_details[$k]['invoice_other_charges'] = $other_charge;
+                     $invoice_details[$k]['invoice_other_charges'] = $other_charge;
                     $invoice_details[$k]['invoice_total_amount'] = $tot_cost + $tot_tax + $other_charge;
-                    $invoice_details[$k]['invoice_excess_amount'] = $excess_cost + $excess_tax;
-                    $invoice_details[$k]['invoice_shortage_amount'] = $shortage_cost + $shortage_tax;
-                    $invoice_details[$k]['invoice_expiry_amount'] = $expiry_cost + $expiry_tax;
-                    $invoice_details[$k]['invoice_damaged_amount'] = $damaged_cost + $damaged_tax;
-                    $invoice_details[$k]['invoice_margindiff_amount'] = $margindiff_cost + $margindiff_tax;
-                    $invoice_details[$k]['invoice_total_deduction'] = floatval($invoice_details[$k]['invoice_shortage_amount']) + floatval($invoice_details[$k]['invoice_expiry_amount']) + floatval($invoice_details[$k]['invoice_damaged_amount']) + floatval($invoice_details[$k]['invoice_margindiff_amount']);
-                    $invoice_details[$k]['invoice_total_payable_amount'] = $invoice_details[$k]['invoice_total_amount'] - floatval($invoice_details[$k]['invoice_total_deduction']);
+                    $invoice_details[$k]['invoice_total_payable_amount'] = $invoice_details[$k]['invoice_total_amount'] ;
                     $invoice_details[$k]['edited_total_cost'] = $tot_cost;
                     $invoice_details[$k]['edited_total_tax'] = $tot_tax;
-                    $invoice_details[$k]['edited_other_charges'] = $other_charge;
                     $invoice_details[$k]['edited_total_amount'] = $tot_cost + $tot_tax + $other_charge;
-                    $invoice_details[$k]['edited_excess_amount'] = $excess_cost + $excess_tax;
-                    $invoice_details[$k]['edited_shortage_amount'] = $shortage_cost + $shortage_tax;
-                    $invoice_details[$k]['edited_expiry_amount'] = $expiry_cost + $expiry_tax;
-                    $invoice_details[$k]['edited_damaged_amount'] = $damaged_cost + $damaged_tax;
-                    $invoice_details[$k]['edited_margindiff_amount'] = $margindiff_cost + $margindiff_tax;
-                    $invoice_details[$k]['edited_total_deduction'] = floatval($invoice_details[$k]['edited_shortage_amount']) + floatval($invoice_details[$k]['edited_expiry_amount']) + floatval($invoice_details[$k]['edited_damaged_amount']) + floatval($invoice_details[$k]['edited_margindiff_amount']);
-                    $invoice_details[$k]['edited_total_payable_amount'] = $invoice_details[$k]['edited_total_amount'] - floatval($invoice_details[$k]['edited_total_deduction']);
+                    $invoice_details[$k]['edited_total_payable_amount'] = $invoice_details[$k]['edited_total_amount'];
                     $invoice_details[$k]['diff_total_cost'] = 0;
                     $invoice_details[$k]['diff_total_tax'] = 0;
                     $invoice_details[$k]['diff_total_amount'] = 0;
-                    $invoice_details[$k]['diff_excess_amount'] = 0;
-                    $invoice_details[$k]['diff_shortage_amount'] = 0;
-                    $invoice_details[$k]['diff_expiry_amount'] = 0;
-                    $invoice_details[$k]['diff_damaged_amount'] = 0;
-                    $invoice_details[$k]['diff_margindiff_amount'] = 0;
-                    $invoice_details[$k]['diff_total_deduction'] = 0;
                     $invoice_details[$k]['diff_total_payable_amount'] = 0;
-                    $invoice_details[$k]['diff_other_charges'] = 0;
+                    $invoice_details[$k]['diff_other_charges'] = $other_charge;
                     $invoice_details[$k]['total_amount_voucher_id'] = null;
                     $invoice_details[$k]['total_amount_ledger_type'] = null;
                     $invoice_details[$k]['total_deduction_voucher_id'] = null;
                     $invoice_details[$k]['total_deduction_ledger_type'] = null;
-
+                    
                     $total_val[0]['other_charges'] = $total_val[0]['other_charges'] + $other_charge;
-                    $total_val[0]['total_amount'] = $total_val[0]['total_amount'] + $other_charge;
+                    $total_val[0]['total_amount'] = $total_val[0]['total_amount'] + 0;
                 }
 
                 $blFlag = false;
                 for($a=0;$a<count($invoice_tax);$a++){
-                    if($result[$i]['grn_id']==$invoice_tax[$a]['grn_id'] && $result[$i]['tax_zone_code']==$invoice_tax[$a]['tax_zone_code'] && 
+                    if($result[$i]['gi_go_id']==$invoice_tax[$a]['gi_go_id'] && $result[$i]['tax_zone_code']==$invoice_tax[$a]['tax_zone_code'] && 
                        $result[$i]['tax_zone_name']==$invoice_tax[$a]['tax_zone_name'] && $result[$i]['vat_cst']==$invoice_tax[$a]['vat_cst'] && 
-                       $result[$i]['vat_percen']==$invoice_tax[$a]['vat_percen'] && $result[$i]['cgst_rate']==$invoice_tax[$a]['cgst_rate'] && 
+                       $result[$i]['vat_percent']==$invoice_tax[$a]['vat_percent'] && $result[$i]['cgst_rate']==$invoice_tax[$a]['cgst_rate'] && 
                        $result[$i]['sgst_rate']==$invoice_tax[$a]['sgst_rate'] && $result[$i]['igst_rate']==$invoice_tax[$a]['igst_rate']  && 
-                       $result[$i]['invoice_no']==$invoice_tax[$a]['invoice_no'] ){
+                       $result[$i]['invoice_number']==$invoice_tax[$a]['invoice_number'] ){
 
                         $blFlag = true;
                         $l = $a;
@@ -992,49 +768,23 @@ class PendinggrnController extends Controller
                     $invoice_tax[$l]['diff_cgst'] = 0;
                     $invoice_tax[$l]['diff_sgst'] = 0;
                     $invoice_tax[$l]['diff_igst'] = 0;
-                    $invoice_tax[$l]['excess_cost'] = floatval($invoice_tax[$l]['excess_cost']) + $excess_cost;
-                    $invoice_tax[$l]['excess_tax'] = floatval($invoice_tax[$l]['excess_tax']) + $excess_tax;
-                    $invoice_tax[$l]['excess_cgst'] = floatval($invoice_tax[$l]['excess_cgst']) + $excess_cgst;
-                    $invoice_tax[$l]['excess_sgst'] = floatval($invoice_tax[$l]['excess_sgst']) + $excess_sgst;
-                    $invoice_tax[$l]['excess_igst'] = floatval($invoice_tax[$l]['excess_igst']) + $excess_igst;
-                    $invoice_tax[$l]['shortage_cost'] = floatval($invoice_tax[$l]['shortage_cost']) + $shortage_cost;
-                    $invoice_tax[$l]['shortage_tax'] = floatval($invoice_tax[$l]['shortage_tax']) + $shortage_tax;
-                    $invoice_tax[$l]['shortage_cgst'] = floatval($invoice_tax[$l]['shortage_cgst']) + $shortage_cgst;
-                    $invoice_tax[$l]['shortage_sgst'] = floatval($invoice_tax[$l]['shortage_sgst']) + $shortage_sgst;
-                    $invoice_tax[$l]['shortage_igst'] = floatval($invoice_tax[$l]['shortage_igst']) + $shortage_igst;
-                    $invoice_tax[$l]['expiry_cost'] = floatval($invoice_tax[$l]['expiry_cost']) + $expiry_cost;
-                    $invoice_tax[$l]['expiry_tax'] = floatval($invoice_tax[$l]['expiry_tax']) + $expiry_tax;
-                    $invoice_tax[$l]['expiry_cgst'] = floatval($invoice_tax[$l]['expiry_cgst']) + $expiry_cgst;
-                    $invoice_tax[$l]['expiry_sgst'] = floatval($invoice_tax[$l]['expiry_sgst']) + $expiry_sgst;
-                    $invoice_tax[$l]['expiry_igst'] = floatval($invoice_tax[$l]['expiry_igst']) + $expiry_igst;
-                    $invoice_tax[$l]['damaged_cost'] = floatval($invoice_tax[$l]['damaged_cost']) + $damaged_cost;
-                    $invoice_tax[$l]['damaged_tax'] = floatval($invoice_tax[$l]['damaged_tax']) + $damaged_tax;
-                    $invoice_tax[$l]['damaged_cgst'] = floatval($invoice_tax[$l]['damaged_cgst']) + $damaged_cgst;
-                    $invoice_tax[$l]['damaged_sgst'] = floatval($invoice_tax[$l]['damaged_sgst']) + $damaged_sgst;
-                    $invoice_tax[$l]['damaged_igst'] = floatval($invoice_tax[$l]['damaged_igst']) + $damaged_igst;
-                    $invoice_tax[$l]['margindiff_cost'] = floatval($invoice_tax[$l]['margindiff_cost']) + $margindiff_cost;
-                    $invoice_tax[$l]['margindiff_tax'] = floatval($invoice_tax[$l]['margindiff_tax']) + $margindiff_tax;
-                    $invoice_tax[$l]['margindiff_cgst'] = floatval($invoice_tax[$l]['margindiff_cgst']) + $margindiff_cgst;
-                    $invoice_tax[$l]['margindiff_sgst'] = floatval($invoice_tax[$l]['margindiff_sgst']) + $margindiff_sgst;
-                    $invoice_tax[$l]['margindiff_igst'] = floatval($invoice_tax[$l]['margindiff_igst']) + $margindiff_igst;
                     
                     // echo 'invoice_tax';
                     // echo '<br/>';
 
-                    $warehouse_code = $result[$i]['warehouse_id'];
+                    $warehouse_code = $result[$i]['warehouse_code'];
                     $state_name = '';
                     $result2 = $model->getState($warehouse_code);
                     if(count($result2)>0){
                         $state_name = $result2[0]['state_name'];
                     }
 
-                    // if($result[$i]['igst_rate']==0){
-                    if($result[$i]['vat_cst']!='INTER'){
-                        $vat_percen = $result[$i]['vat_percen'];
-                        if(is_numeric($vat_percen)){
-                            $vat_percen = floatval($vat_percen);
+                    if($result[$i]['igst_rate']==0){
+                        $vat_percent = $result[$i]['vat_percent'];
+                        if(is_numeric($vat_percent)){
+                            $vat_percent = floatval($vat_percent);
                         }
-                        $tax_code = 'Purchase-'.$state_name.'-Local-'.$vat_percen;
+                        $tax_code = 'Sales-'.$state_name.'-Local-'.$vat_percent;
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -1050,7 +800,7 @@ class PendinggrnController extends Controller
                         if(is_numeric($cgst_rate)){
                             $cgst_rate = floatval($cgst_rate);
                         }
-                        $tax_code = 'Input-'.$state_name.'-CGST-'.$cgst_rate;
+                        $tax_code = 'Output-'.$state_name.'-CGST-'.$cgst_rate;
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -1066,7 +816,7 @@ class PendinggrnController extends Controller
                         if(is_numeric($sgst_rate)){
                             $sgst_rate = floatval($sgst_rate);
                         }
-                        $tax_code = 'Input-'.$state_name.'-SGST-'.$sgst_rate;
+                        $tax_code = 'Output-'.$state_name.'-SGST-'.$sgst_rate;
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -1078,11 +828,11 @@ class PendinggrnController extends Controller
                             $invoice_tax[$l]['invoice_sgst_ledger_code'] = $result2[0]['code'];
                         }
                     } else {
-                        $vat_percen = $result[$i]['vat_percen'];
-                        if(is_numeric($vat_percen)){
-                            $vat_percen = floatval($vat_percen);
+                        $vat_percent = $result[$i]['vat_percent'];
+                        if(is_numeric($vat_percent)){
+                            $vat_percent = floatval($vat_percent);
                         }
-                        $tax_code = 'Purchase-'.$state_name.'-Inter State-'.$vat_percen;
+                        $tax_code = 'Sales-'.$state_name.'-Inter State-'.$vat_percent;
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -1096,7 +846,7 @@ class PendinggrnController extends Controller
                         if(is_numeric($igst_rate)){
                             $igst_rate = floatval($igst_rate);
                         }
-                        $tax_code = 'Input-'.$state_name.'-IGST-'.$igst_rate;
+                        $tax_code = 'Output-'.$state_name.'-IGST-'.$igst_rate;
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -1108,12 +858,12 @@ class PendinggrnController extends Controller
                     }
                 } else {
                     $l = count($invoice_tax);
-                    $invoice_tax[$l]['grn_id'] = $result[$i]['grn_id'];
+                    $invoice_tax[$l]['gi_go_id'] = $result[$i]['gi_go_id'];
                     $invoice_tax[$l]['tax_zone_code'] = $result[$i]['tax_zone_code'];
                     $invoice_tax[$l]['tax_zone_name'] = $result[$i]['tax_zone_name'];
-                    $invoice_tax[$l]['invoice_no'] = $result[$i]['invoice_no'];
+                    $invoice_tax[$l]['invoice_number'] = $result[$i]['invoice_number'];
                     $invoice_tax[$l]['vat_cst'] = $result[$i]['vat_cst'];
-                    $invoice_tax[$l]['vat_percen'] = $result[$i]['vat_percen'];
+                    $invoice_tax[$l]['vat_percent'] = $result[$i]['vat_percent'];
                     $invoice_tax[$l]['cgst_rate'] = $result[$i]['cgst_rate'];
                     $invoice_tax[$l]['sgst_rate'] = $result[$i]['sgst_rate'];
                     $invoice_tax[$l]['igst_rate'] = $result[$i]['igst_rate'];
@@ -1137,31 +887,7 @@ class PendinggrnController extends Controller
                     $invoice_tax[$l]['diff_cgst'] = 0;
                     $invoice_tax[$l]['diff_sgst'] = 0;
                     $invoice_tax[$l]['diff_igst'] = 0;
-                    $invoice_tax[$l]['excess_cost'] = $excess_cost;
-                    $invoice_tax[$l]['excess_tax'] = $excess_tax;
-                    $invoice_tax[$l]['excess_cgst'] = $excess_cgst;
-                    $invoice_tax[$l]['excess_sgst'] = $excess_sgst;
-                    $invoice_tax[$l]['excess_igst'] = $excess_igst;
-                    $invoice_tax[$l]['shortage_cost'] = $shortage_cost;
-                    $invoice_tax[$l]['shortage_tax'] = $shortage_tax;
-                    $invoice_tax[$l]['shortage_cgst'] = $shortage_cgst;
-                    $invoice_tax[$l]['shortage_sgst'] = $shortage_sgst;
-                    $invoice_tax[$l]['shortage_igst'] = $shortage_igst;
-                    $invoice_tax[$l]['expiry_cost'] = $expiry_cost;
-                    $invoice_tax[$l]['expiry_tax'] = $expiry_tax;
-                    $invoice_tax[$l]['expiry_cgst'] = $expiry_cgst;
-                    $invoice_tax[$l]['expiry_sgst'] = $expiry_sgst;
-                    $invoice_tax[$l]['expiry_igst'] = $expiry_igst;
-                    $invoice_tax[$l]['damaged_cost'] = $damaged_cost;
-                    $invoice_tax[$l]['damaged_tax'] = $damaged_tax;
-                    $invoice_tax[$l]['damaged_cgst'] = $damaged_cgst;
-                    $invoice_tax[$l]['damaged_sgst'] = $damaged_sgst;
-                    $invoice_tax[$l]['damaged_igst'] = $damaged_igst;
-                    $invoice_tax[$l]['margindiff_cost'] = $margindiff_cost;
-                    $invoice_tax[$l]['margindiff_tax'] = $margindiff_tax;
-                    $invoice_tax[$l]['margindiff_cgst'] = $margindiff_cgst;
-                    $invoice_tax[$l]['margindiff_sgst'] = $margindiff_sgst;
-                    $invoice_tax[$l]['margindiff_igst'] = $margindiff_igst;
+                    
                     $invoice_tax[$l]['invoice_cost_acc_id'] = null;
                     $invoice_tax[$l]['invoice_cost_ledger_name'] = null;
                     $invoice_tax[$l]['invoice_cost_ledger_code'] = null;
@@ -1181,20 +907,19 @@ class PendinggrnController extends Controller
                     // echo 'invoice_tax';
                     // echo '<br/>';
 
-                    $warehouse_code = $result[$i]['warehouse_id'];
+                    $warehouse_code = $result[$i]['warehouse_code'];
                     $state_name = '';
                     $result2 = $model->getState($warehouse_code);
                     if(count($result2)>0){
                         $state_name = $result2[0]['state_name'];
                     }
 
-                    // if($result[$i]['igst_rate']==0){
-                    if($result[$i]['vat_cst']!='INTER'){
-                        $vat_percen = $result[$i]['vat_percen'];
-                        if(is_numeric($vat_percen)){
-                            $vat_percen = floatval($vat_percen);
+                    if($result[$i]['igst_rate']==0){
+                        $vat_percent = $result[$i]['vat_percent'];
+                        if(is_numeric($vat_percent)){
+                            $vat_percent = floatval($vat_percent);
                         }
-                        $tax_code = 'Purchase-'.$state_name.'-Local-'.$vat_percen;
+                        $tax_code = 'Sales-'.$state_name.'-Local-'.$vat_percent;
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -1210,7 +935,7 @@ class PendinggrnController extends Controller
                         if(is_numeric($cgst_rate)){
                             $cgst_rate = floatval($cgst_rate);
                         }
-                        $tax_code = 'Input-'.$state_name.'-CGST-'.$cgst_rate;
+                        $tax_code = 'Output-'.$state_name.'-CGST-'.$cgst_rate;
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -1226,7 +951,7 @@ class PendinggrnController extends Controller
                         if(is_numeric($sgst_rate)){
                             $sgst_rate = floatval($sgst_rate);
                         }
-                        $tax_code = 'Input-'.$state_name.'-SGST-'.$sgst_rate;
+                        $tax_code = 'Output-'.$state_name.'-SGST-'.$sgst_rate;
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -1238,11 +963,11 @@ class PendinggrnController extends Controller
                             $invoice_tax[$l]['invoice_sgst_ledger_code'] = $result2[0]['code'];
                         }
                     } else {
-                        $vat_percen = $result[$i]['vat_percen'];
-                        if(is_numeric($vat_percen)){
-                            $vat_percen = floatval($vat_percen);
+                        $vat_percent = $result[$i]['vat_percent'];
+                        if(is_numeric($vat_percent)){
+                            $vat_percent = floatval($vat_percent);
                         }
-                        $tax_code = 'Purchase-'.$state_name.'-Inter State-'.$vat_percen;
+                        $tax_code = 'Sales-'.$state_name.'-Inter State-'.$vat_percent;
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -1256,7 +981,7 @@ class PendinggrnController extends Controller
                         if(is_numeric($igst_rate)){
                             $igst_rate = floatval($igst_rate);
                         }
-                        $tax_code = 'Input-'.$state_name.'-IGST-'.$igst_rate;
+                        $tax_code = 'Output-'.$state_name.'-IGST-'.$igst_rate;
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -1269,8 +994,7 @@ class PendinggrnController extends Controller
                 }
             }
 
-            $total_val[0]['total_deduction'] = floatval($total_val[0]['shortage_amount']) + floatval($total_val[0]['expiry_amount']) + floatval($total_val[0]['damaged_amount']) + floatval($total_val[0]['margindiff_amount']);
-            $total_val[0]['total_payable_amount'] = floatval($total_val[0]['total_amount']) - floatval($total_val[0]['total_deduction']);
+            $total_val[0]['total_payable_amount'] = floatval($total_val[0]['total_amount']);
         }
 
         // echo json_encode($result);
@@ -1292,7 +1016,7 @@ class PendinggrnController extends Controller
     }
 
     public function actionRedirect($action, $id){
-        $model = new PendingGrn();
+        $model = new PendingGo();
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
@@ -1303,13 +1027,15 @@ class PendinggrnController extends Controller
         // $total_tax = $model->getTotalTax($id);
 
         $data = $this->actionGetgrnpostingdetails($id);
+
+
         $total_val = $data['total_val'];
         $total_tax = $data['total_tax'];
 
         // echo json_encode($data);
 
         $acc_master = $model->getAccountDetails('', 'approved');
-        $tax_zone_code = $grn_details[0]['vat_cst'];
+        $tax_zone_code = '';//$grn_details[0]['vat_cst'];
 
         if (count($grn_entries) > 0){
             // echo json_encode($grn_entries);
@@ -1333,7 +1059,7 @@ class PendinggrnController extends Controller
                     $invoice_details[$num] = array();
                     // array_push($invoice_details[$num], array('invoice_no'=>$invoice_no));
                     // $invoice_details[] = array('invoice_no'=>$invoice_no);
-                    $invoice_details[$num]['invoice_no'] = $invoice_no;
+                    $invoice_details[$num]['invoice_number'] = $invoice_no;
                     $prev_invoice_no = $invoice_no;
                     // $tax_num = 0;
                 }
@@ -1372,9 +1098,9 @@ class PendinggrnController extends Controller
                        $grn_entries[$i]['particular']=="CGST" || $grn_entries[$i]['particular']=="SGST" || 
                        $grn_entries[$i]['particular']=="IGST"){
                         for($k=0; $k<count($invoice_tax); $k++){
-                            if($invoice_tax[$k]['invoice_no']==$grn_entries[$i]['invoice_no'] && 
+                            if($invoice_tax[$k]['invoice_number']==$grn_entries[$i]['invoice_no'] && 
                                 $invoice_tax[$k]['vat_cst']==$grn_entries[$i]['vat_cst'] && 
-                                $invoice_tax[$k]['vat_percen']==$grn_entries[$i]['vat_percen']){
+                                $invoice_tax[$k]['vat_percent']==$grn_entries[$i]['vat_percen']){
                                 $blFlag = true;
                                 if($grn_entries[$i]['particular']=="Taxable Amount"){
                                     $invoice_tax[$k]['invoice_cost_acc_id'] = $grn_entries[$i]['acc_id'];
@@ -1437,10 +1163,10 @@ class PendinggrnController extends Controller
                     if($blFlag==false){
                         $invoice_tax[$tax_num]['particular'] = $grn_entries[$i]['particular'];
                         $invoice_tax[$tax_num]['tax_zone_code'] = $grn_entries[$i]['tax_zone_code'];
-                        $invoice_tax[$tax_num]['invoice_no'] = $grn_entries[$i]['invoice_no'];
+                        $invoice_tax[$tax_num]['invoice_number'] = $grn_entries[$i]['invoice_no'];
                         $invoice_tax[$tax_num]['sub_particular_cost'] = $grn_entries[$i]['sub_particular'];
                         $invoice_tax[$tax_num]['vat_cst'] = $grn_entries[$i]['vat_cst'];
-                        $invoice_tax[$tax_num]['vat_percen'] = $grn_entries[$i]['vat_percen'];
+                        $invoice_tax[$tax_num]['vat_percent'] = $grn_entries[$i]['vat_percen'];
 
                         if($grn_entries[$i]['particular']=="Taxable Amount"){
                             $invoice_tax[$tax_num]['invoice_cost_acc_id'] = $grn_entries[$i]['acc_id'];
@@ -1674,21 +1400,7 @@ class PendinggrnController extends Controller
             $grn_details['isNewRecord']=1;
             $debit_note = array();
         }
-
-        $deductions['shortage'] = $this->actionGetinvoicedeductiondetails($id, "shortage", $tax_zone_code);
-        $deductions['expiry'] = $this->actionGetinvoicedeductiondetails($id, "expiry", $tax_zone_code);
-        $deductions['damaged'] = $this->actionGetinvoicedeductiondetails($id, "damaged", $tax_zone_code);
-        $deductions['margindiff'] = $this->actionGetinvoicedeductiondetails($id, "margindiff", $tax_zone_code);
-
-        // echo 'total_tax';
-        // echo '<br/>';
-        // echo json_encode($total_tax);
-        // echo '<br/>';
-        // echo 'invoice_tax';
-        // echo '<br/>';
-        // echo json_encode($invoice_tax);
-        // echo '<br/>';
-
+        $deductions = [];
         if (count($grn_details)>0) {
             return $this->render('update', ['grn_details' => $grn_details, 'total_val' => $total_val, 'total_tax' => $total_tax, 
                                 'invoice_details' => $invoice_details, 'invoice_tax' => $invoice_tax, 'narration' => $narration, 
@@ -1704,7 +1416,7 @@ class PendinggrnController extends Controller
     }
 
     public function actionLedger($id){
-        $model = new PendingGrn();
+        $model = new PendingGo();
 
         $acc_ledger_entries = $model->getGrnAccLedgerEntries($id);
         $grn_details = $model->getGrnDetails($id);
@@ -1713,10 +1425,10 @@ class PendinggrnController extends Controller
     }
 
     public function actionGetledger(){
-        $model = new PendingGrn();
+        $model = new PendingGo();
         $mycomponent = Yii::$app->mycomponent;
 
-        $data = $model->getGrnParticulars();
+        $data = $model->getGoParticulars();
         $acc_ledger_entries = $data['ledgerArray'];
 
         $rows = ""; $new_invoice_no = ""; $invoice_no = ""; $debit_amt=0; $credit_amt=0; $sr_no=1;
@@ -1832,13 +1544,13 @@ class PendinggrnController extends Controller
 
     public function actionSave(){
         $request = Yii::$app->request;
-        $model = new PendingGrn();
+        $model = new PendingGo();
         $mycomponent = Yii::$app->mycomponent;
 
-        $gi_id = $request->post('gi_id');
+        $gi_id = $request->post('gi_go_id');
         $invoice_no = $request->post('invoice_no');
 
-        $data = $model->getGrnParticulars();
+        $data = $model->getGoParticulars();
 
         // echo json_encode($data['bulkInsertArray']);
 
@@ -1854,17 +1566,25 @@ class PendinggrnController extends Controller
 
         // echo count($bulkInsertArray);
         // echo '<br/>';
+        /*echo "<pre>";
+        print_r($grnAccEntries);
+        echo "</pre>";
+
+        echo "<pre>";
+        print_r($ledgerArray);
+        echo "</pre>";*/
+
 
         if(count($bulkInsertArray)>0){
-            $sql = "delete from acc_grn_entries where grn_id = '$gi_id'";
+            $sql = "delete from acc_go_entries where gi_go_id = '$gi_id'";
             Yii::$app->db->createCommand($sql)->execute();
 
-            $columnNameArray=['grn_id','vendor_id','particular','sub_particular','acc_id','ledger_name','ledger_code',
+            $columnNameArray=['gi_go_id','customer_id','particular','sub_particular','acc_id','ledger_name','ledger_code',
                                 'voucher_id','ledger_type','vat_cst','vat_percen','invoice_no','total_val',
                                 'invoice_val','edited_val','difference_val','narration','status','is_active',
                                 'updated_by','updated_date', 'gi_date', 'company_id'];
             // below line insert all your record and return number of rows inserted
-            $tableName = "acc_grn_entries";
+            $tableName = "acc_go_entries";
             $insertCount = Yii::$app->db->createCommand()
                            ->batchInsert(
                                  $tableName, $columnNameArray, $bulkInsertArray
@@ -1876,11 +1596,12 @@ class PendinggrnController extends Controller
             // echo 'hii';
         }
 
+
         if(count($ledgerArray)>0){
-            $sql = "delete from acc_ledger_entries where ref_id = '$gi_id' and ref_type='purchase'";
+            $sql = "delete from acc_ledger_entries where ref_id = '$gi_id' and ref_type='B2B Sales'";
             Yii::$app->db->createCommand($sql)->execute();
 
-            $columnNameArray=['ref_id','ref_type','entry_type','invoice_no','vendor_id','acc_id','ledger_name','ledger_code',
+            $columnNameArray=['ref_id','ref_type','entry_type','invoice_no','customer_id','acc_id','ledger_name','ledger_code',
                                 'voucher_id','ledger_type','type','amount','narration','status','is_active',
                                 'updated_by','updated_date', 'ref_date', 'company_id'];
             // below line insert all your record and return number of rows inserted
@@ -1901,7 +1622,7 @@ class PendinggrnController extends Controller
         // $this->actionSaveskudetails($gi_id, $request, "damaged");
         // $this->actionSaveskudetails($gi_id, $request, "margindiff");
 
-        if(count($grnAccEntries)>0){
+       /* if(count($grnAccEntries)>0){
             $sql = "delete from acc_grn_sku_entries where grn_id = '$gi_id'";
             Yii::$app->db->createCommand($sql)->execute();
 
@@ -1925,14 +1646,14 @@ class PendinggrnController extends Controller
             // echo $insertCount;
             // echo '<br/>';
             // echo 'hii';
-        }
+        }*/
 
-        $this->redirect(array('pendinggrn/ledger', 'id'=>$gi_id));
+        $this->redirect(array('pendinggo/ledger', 'id'=>$gi_id));
     }
 
-    public function actionPendinggrn(){
-        $model = new PendingGrn();
-        $rows = $model->getPendingGrn();
+    public function actionPendingGo(){
+        $model = new PendingGo();
+        $rows = $model->getPendingGo();
         
         if (count($rows)>0) {
             // echo $rows[0]->grn_id;
@@ -1948,7 +1669,7 @@ class PendinggrnController extends Controller
 
         // $this->actionGetinvoicedeductiondetails('5909', 'shortage', 'INTRA');
 
-        $model = new PendingGrn();
+        $model = new PendingGo();
         $result = $model->getInvoiceDeductionDetails('9182', 'margindiff_qty');
         echo json_encode($result);
     }
@@ -1992,7 +1713,7 @@ class PendinggrnController extends Controller
         //     $col_qty = "shortage_qty";
         // }
 
-        $model = new PendingGrn();
+        $model = new PendingGo();
         $rows = array();
         $acc_master = $model->getAccountDetails('', 'approved');
 
@@ -2250,14 +1971,14 @@ class PendinggrnController extends Controller
                             <td style="text-align: center;"><button type="button" class="btn btn-sm btn-success" id="'.$ded_type.'_delete_row_'.$i.'" onClick="delete_row(this);">-</button></td>
                             <td style="display: none;">' . $sr_no . '</td>
                             <td>
-                                <select class="'.$ded_type.'_psku_'.$sr_no.' select2" id="'.$ded_type.'_psku_'.$i.'" name="'.$ded_type.'_psku[]" onChange="get_sku_details(this)" data-error="#'.$ded_type.'_psku_'.$i.'_error">' . $sku_list . '</select>
+                                <select class="'.$ded_type.'_psku_'.$sr_no.'" id="'.$ded_type.'_psku_'.$i.'" name="'.$ded_type.'_psku[]" onChange="get_sku_details(this)" data-error="#'.$ded_type.'_psku_'.$i.'_error">' . $sku_list . '</select>
                                 <div id="'.$ded_type.'_psku_'.$i.'_error"></div>
                             </td>
                             <td><input type="text" class="'.$ded_type.'_product_title_'.$sr_no.'" id="'.$ded_type.'_product_title_'.$i.'" name="'.$ded_type.'_product_title[]" value="'.$rows[$i]["product_title"].'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_ean_'.$sr_no.'" id="'.$ded_type.'_ean_'.$i.'" name="'.$ded_type.'_ean[]" value="'.$rows[$i]["ean"].'" readonly /></td>
                             <td><input type="text" class="'.$ded_type.'_hsn_code_'.$sr_no.'" id="'.$ded_type.'_hsn_code_'.$i.'" name="'.$ded_type.'_hsn_code[]" value="'.$rows[$i]["hsn_code"].'" readonly /></td>
                             <td>
-                                <select id="'.$ded_type.'cost_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_cost_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cost_acc_id_'.$sr_no.'_error">'.$cost_acc_list.'</select>
+                                <select id="'.$ded_type.'cost_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_cost_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cost_acc_id_'.$sr_no.'_error">'.$cost_acc_list.'</select>
                                 <input type="hidden" id="'.$ded_type.'cost_ledger_name_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_name[]" value="'.$rows[$i]["cost_ledger_name"].'" />
                                 <input type="hidden" id="'.$ded_type.'cost_voucher_id_'.$sr_no.'" name="'.$ded_type.'_cost_voucher_id[]" value="'.$voucher_id.'" />
                                 <input type="hidden" id="'.$ded_type.'cost_ledger_type_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_type[]" value="'.$ledger_type.'" />
@@ -2265,7 +1986,7 @@ class PendinggrnController extends Controller
                             </td>
                             <td><input type="text" id="'.$ded_type.'cost_ledger_code_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_code[]" value="'.$rows[$i]["cost_ledger_code"].'" readonly /></td>
                             <td style="'.$intra_state_style.'">
-                                <select id="'.$ded_type.'cgst_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_cgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cgst_acc_id_'.$sr_no.'_error">'.$cgst_acc_list.'</select>
+                                <select id="'.$ded_type.'cgst_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_cgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cgst_acc_id_'.$sr_no.'_error">'.$cgst_acc_list.'</select>
                                 <input type="hidden" id="'.$ded_type.'cgst_ledger_name_'.$sr_no.'" name="'.$ded_type.'_cgst_ledger_name[]" value="'.$rows[$i]["cgst_ledger_name"].'" />
                                 <input type="hidden" id="'.$ded_type.'cgst_voucher_id_'.$sr_no.'" name="'.$ded_type.'_cgst_voucher_id[]" value="'.$voucher_id.'" />
                                 <input type="hidden" id="'.$ded_type.'cgst_ledger_type_'.$sr_no.'" name="'.$ded_type.'_cgst_ledger_type[]" value="'.$ledger_type.'" />
@@ -2273,7 +1994,7 @@ class PendinggrnController extends Controller
                             </td>
                             <td style="'.$intra_state_style.'"><input type="text" id="'.$ded_type.'cgst_ledger_code_'.$sr_no.'" name="'.$ded_type.'_cgst_ledger_code[]" value="'.$rows[$i]["cgst_ledger_code"].'" readonly /></td>
                             <td style="'.$intra_state_style.'">
-                                <select id="'.$ded_type.'sgst_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_sgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'sgst_acc_id_'.$sr_no.'_error">'.$sgst_acc_list.'</select>
+                                <select id="'.$ded_type.'sgst_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_sgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'sgst_acc_id_'.$sr_no.'_error">'.$sgst_acc_list.'</select>
                                 <input type="hidden" id="'.$ded_type.'sgst_ledger_name_'.$sr_no.'" name="'.$ded_type.'_sgst_ledger_name[]" value="'.$rows[$i]["sgst_ledger_name"].'" />
                                 <input type="hidden" id="'.$ded_type.'sgst_voucher_id_'.$sr_no.'" name="'.$ded_type.'_sgst_voucher_id[]" value="'.$voucher_id.'" />
                                 <input type="hidden" id="'.$ded_type.'sgst_ledger_type_'.$sr_no.'" name="'.$ded_type.'_sgst_ledger_type[]" value="'.$ledger_type.'" />
@@ -2281,7 +2002,7 @@ class PendinggrnController extends Controller
                             </td>
                             <td style="'.$intra_state_style.'"><input type="text" id="'.$ded_type.'sgst_ledger_code_'.$sr_no.'" name="'.$ded_type.'_sgst_ledger_code[]" value="'.$rows[$i]["sgst_ledger_code"].'" readonly /></td>
                             <td style="'.$inter_state_style.'">
-                                <select id="'.$ded_type.'igst_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_igst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'igst_acc_id_'.$sr_no.'_error">'.$igst_acc_list.'</select>
+                                <select id="'.$ded_type.'igst_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_igst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'igst_acc_id_'.$sr_no.'_error">'.$igst_acc_list.'</select>
                                 <input type="hidden" id="'.$ded_type.'igst_ledger_name_'.$sr_no.'" name="'.$ded_type.'_igst_ledger_name[]" value="'.$rows[$i]["igst_ledger_name"].'" />
                                 <input type="hidden" id="'.$ded_type.'igst_voucher_id_'.$sr_no.'" name="'.$ded_type.'_igst_voucher_id[]" value="'.$voucher_id.'" />
                                 <input type="hidden" id="'.$ded_type.'igst_ledger_type_'.$sr_no.'" name="'.$ded_type.'_igst_ledger_type[]" value="'.$ledger_type.'" />
@@ -2289,7 +2010,7 @@ class PendinggrnController extends Controller
                             </td>
                             <td style="'.$inter_state_style.'"><input type="text" id="'.$ded_type.'igst_ledger_code_'.$sr_no.'" name="'.$ded_type.'_igst_ledger_code[]" value="'.$rows[$i]["igst_ledger_code"].'" readonly /></td>
                             <td style="'.$all_style.'">
-                                <select id="'.$ded_type.'tax_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_tax_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'tax_acc_id_'.$sr_no.'_error">'.$tax_acc_list.'</select>
+                                <select id="'.$ded_type.'tax_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_tax_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'tax_acc_id_'.$sr_no.'_error">'.$tax_acc_list.'</select>
                                 <input type="hidden" id="'.$ded_type.'tax_ledger_name_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_name[]" value="'.$rows[$i]["tax_ledger_name"].'" />
                                 <input type="hidden" id="'.$ded_type.'tax_voucher_id_'.$sr_no.'" name="'.$ded_type.'_tax_voucher_id[]" value="'.$voucher_id.'" />
                                 <input type="hidden" id="'.$ded_type.'tax_ledger_type_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_type[]" value="'.$ledger_type.'" />
@@ -2297,7 +2018,7 @@ class PendinggrnController extends Controller
                             </td>
                             <td style="'.$all_style.'"><input type="text" id="'.$ded_type.'tax_ledger_code_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_code[]" value="'.$rows[$i]["tax_ledger_code"].'" readonly /></td>
                             <td>
-                                <select class="'.$ded_type.'_invoice_no_'.$sr_no.' select2" id="'.$ded_type.'_invoice_no_'.$i.'" name="'.$ded_type.'_invoice_no[]" onChange="set_sku_details(this)" data-error="'.$ded_type.'_invoice_no_'.$sr_no.'_error">' . $invoice_list . '</select>
+                                <select class="'.$ded_type.'_invoice_no_'.$sr_no.'" id="'.$ded_type.'_invoice_no_'.$i.'" name="'.$ded_type.'_invoice_no[]" onChange="set_sku_details(this)" data-error="'.$ded_type.'_invoice_no_'.$sr_no.'_error">' . $invoice_list . '</select>
                                 <div id="'.$ded_type.'_invoice_no_'.$sr_no.'_error"></div>
                             </td>
                             <td id="'.$ded_type.'_invoice_date_'.$i.'">'.$rows[$i]["invoice_date"].'</td>
@@ -2470,7 +2191,7 @@ class PendinggrnController extends Controller
                             <th>Action</th>
                             <th style="display: none;">Sr No</th>
                             <th>SKU Code</th>
-                            <th style="min-width: 225px;">SKU Name</th>
+                            <th>SKU Name</th>
                             <th>EAN Code</th>
                             <th>HSN Code</th>
                             <th>Cost Ledger Name</th>
@@ -2578,7 +2299,7 @@ class PendinggrnController extends Controller
         //     $col_qty = "shortage_qty";
         // }
 
-        $model = new PendingGrn();
+        $model = new PendingGo();
         // $rows = array();
         // $rows = $model->getInvoiceDeductionDetails($gi_id, $col_qty);
         $acc_master = $model->getAccountDetails('', 'approved');
@@ -2694,14 +2415,14 @@ class PendinggrnController extends Controller
                     <td style="text-align: center;"><button type="button" class="btn btn-sm btn-success" id="'.$ded_type.'_delete_row_'.$i.'" onClick="delete_row(this);">-</button></td>
                     <td style="display: none;">' . $sr_no . '</td>
                     <td>
-                        <select class="'.$ded_type.'_psku_'.$sr_no.' select2" id="'.$ded_type.'_psku_'.$i.'" name="'.$ded_type.'_psku[]" onChange="get_sku_details(this)" data-error="#'.$ded_type.'_psku_'.$i.'_error">' . $sku_list . '</select>
+                        <select class="'.$ded_type.'_psku_'.$sr_no.'" id="'.$ded_type.'_psku_'.$i.'" name="'.$ded_type.'_psku[]" onChange="get_sku_details(this)" data-error="#'.$ded_type.'_psku_'.$i.'_error">' . $sku_list . '</select>
                         <div id="'.$ded_type.'_psku_'.$i.'_error"></div>
                     </td>
                     <td><input type="text" class="'.$ded_type.'_product_title_'.$sr_no.'" id="'.$ded_type.'_product_title_'.$i.'" name="'.$ded_type.'_product_title[]" value="" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_ean_'.$sr_no.'" id="'.$ded_type.'_ean_'.$i.'" name="'.$ded_type.'_ean[]" value="" readonly /></td>
                     <td><input type="text" class="'.$ded_type.'_hsn_code_'.$sr_no.'" id="'.$ded_type.'_hsn_code_'.$i.'" name="'.$ded_type.'_hsn_code[]" value="" readonly /></td>
                     <td>
-                        <select id="'.$ded_type.'cost_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_cost_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cost_acc_id_'.$sr_no.'_error">'.$cost_acc_list.'</select>
+                        <select id="'.$ded_type.'cost_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_cost_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cost_acc_id_'.$sr_no.'_error">'.$cost_acc_list.'</select>
                         <input type="hidden" id="'.$ded_type.'cost_ledger_name_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_name[]" value="" />
                         <input type="hidden" id="'.$ded_type.'cost_voucher_id_'.$sr_no.'" name="'.$ded_type.'_cost_voucher_id[]" value="" />
                         <input type="hidden" id="'.$ded_type.'cost_ledger_type_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_type[]" value="" />
@@ -2709,7 +2430,7 @@ class PendinggrnController extends Controller
                     </td>
                     <td><input type="text" id="'.$ded_type.'cost_ledger_code_'.$sr_no.'" name="'.$ded_type.'_cost_ledger_code[]" value="" readonly /></td>
                     <td style="'.$intra_state_style.'">
-                        <select id="'.$ded_type.'cgst_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_cgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cgst_acc_id_'.$sr_no.'_error">'.$cgst_acc_list.'</select>
+                        <select id="'.$ded_type.'cgst_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_cgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'cgst_acc_id_'.$sr_no.'_error">'.$cgst_acc_list.'</select>
                         <input type="hidden" id="'.$ded_type.'cgst_ledger_name_'.$sr_no.'" name="'.$ded_type.'_cgst_ledger_name[]" value="" />
                         <input type="hidden" id="'.$ded_type.'cgst_voucher_id_'.$sr_no.'" name="'.$ded_type.'_cgst_voucher_id[]" value="" />
                         <input type="hidden" id="'.$ded_type.'cgst_ledger_type_'.$sr_no.'" name="'.$ded_type.'_cgst_ledger_type[]" value="" />
@@ -2717,7 +2438,7 @@ class PendinggrnController extends Controller
                     </td>
                     <td style="'.$intra_state_style.'"><input type="text" id="'.$ded_type.'cgst_ledger_code_'.$sr_no.'" name="'.$ded_type.'_cgst_ledger_code[]" value="" readonly /></td>
                     <td style="'.$intra_state_style.'">
-                        <select id="'.$ded_type.'sgst_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_sgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'sgst_acc_id_'.$sr_no.'_error">'.$sgst_acc_list.'</select>
+                        <select id="'.$ded_type.'sgst_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_sgst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'sgst_acc_id_'.$sr_no.'_error">'.$sgst_acc_list.'</select>
                         <input type="hidden" id="'.$ded_type.'sgst_ledger_name_'.$sr_no.'" name="'.$ded_type.'_sgst_ledger_name[]" value="" />
                         <input type="hidden" id="'.$ded_type.'sgst_voucher_id_'.$sr_no.'" name="'.$ded_type.'_sgst_voucher_id[]" value="" />
                         <input type="hidden" id="'.$ded_type.'sgst_ledger_type_'.$sr_no.'" name="'.$ded_type.'_sgst_ledger_type[]" value="" />
@@ -2725,7 +2446,7 @@ class PendinggrnController extends Controller
                     </td>
                     <td style="'.$intra_state_style.'"><input type="text" id="'.$ded_type.'sgst_ledger_code_'.$sr_no.'" name="'.$ded_type.'_sgst_ledger_code[]" value="" readonly /></td>
                     <td style="'.$inter_state_style.'">
-                        <select id="'.$ded_type.'igst_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_igst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'igst_acc_id_'.$sr_no.'_error">'.$igst_acc_list.'</select>
+                        <select id="'.$ded_type.'igst_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_igst_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'igst_acc_id_'.$sr_no.'_error">'.$igst_acc_list.'</select>
                         <input type="hidden" id="'.$ded_type.'igst_ledger_name_'.$sr_no.'" name="'.$ded_type.'_igst_ledger_name[]" value="" />
                         <input type="hidden" id="'.$ded_type.'igst_voucher_id_'.$sr_no.'" name="'.$ded_type.'_igst_voucher_id[]" value="" />
                         <input type="hidden" id="'.$ded_type.'igst_ledger_type_'.$sr_no.'" name="'.$ded_type.'_igst_ledger_type[]" value="" />
@@ -2733,7 +2454,7 @@ class PendinggrnController extends Controller
                     </td>
                     <td style="'.$inter_state_style.'"><input type="text" id="'.$ded_type.'igst_ledger_code_'.$sr_no.'" name="'.$ded_type.'_igst_ledger_code[]" value="" readonly /></td>
                     <td style="'.$all_style.'">
-                        <select id="'.$ded_type.'tax_acc_id_'.$sr_no.'" class="acc_id select2" name="'.$ded_type.'_tax_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'tax_acc_id_'.$sr_no.'_error">'.$tax_acc_list.'</select>
+                        <select id="'.$ded_type.'tax_acc_id_'.$sr_no.'" class="acc_id" name="'.$ded_type.'_tax_acc_id[]" onChange="get_acc_details(this)" data-error="#'.$ded_type.'tax_acc_id_'.$sr_no.'_error">'.$tax_acc_list.'</select>
                         <input type="hidden" id="'.$ded_type.'tax_ledger_name_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_name[]" value="" />
                         <input type="hidden" id="'.$ded_type.'tax_voucher_id_'.$sr_no.'" name="'.$ded_type.'_tax_voucher_id[]" value="" />
                         <input type="hidden" id="'.$ded_type.'tax_ledger_type_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_type[]" value="" />
@@ -2741,7 +2462,7 @@ class PendinggrnController extends Controller
                     </td>
                     <td style="'.$all_style.'"><input type="text" id="'.$ded_type.'tax_ledger_code_'.$sr_no.'" name="'.$ded_type.'_tax_ledger_code[]" value="" readonly /></td>
                     <td>
-                        <select class="'.$ded_type.'_invoice_no_'.$sr_no.' select2" id="'.$ded_type.'_invoice_no_'.$i.'" name="'.$ded_type.'_invoice_no[]" onChange="set_sku_details(this)" data-error="'.$ded_type.'_invoice_no_'.$sr_no.'_error">' . $invoice_list . '</select>
+                        <select class="'.$ded_type.'_invoice_no_'.$sr_no.'" id="'.$ded_type.'_invoice_no_'.$i.'" name="'.$ded_type.'_invoice_no[]" onChange="set_sku_details(this)" data-error="'.$ded_type.'_invoice_no_'.$sr_no.'_error">' . $invoice_list . '</select>
                         <div id="'.$ded_type.'_invoice_no_'.$sr_no.'_error"></div>
                     </td>
                     <td id="'.$ded_type.'_invoice_date_'.$i.'"></td>
@@ -2908,7 +2629,7 @@ class PendinggrnController extends Controller
     }
 
     public function actionGetskudetails(){
-        $grn = new PendingGrn();
+        $grn = new PendingGo();
         $data = $grn->getSkuDetails();
         echo json_encode($data);
     }
@@ -2922,7 +2643,7 @@ class PendinggrnController extends Controller
     }
 
     public function actionGetgrndetails(){
-        $grn = new PendingGrn();
+        $grn = new PendingGo();
         $grn = $grn->getNewGrnDetails();
         // $result = "<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
         $result = "";
@@ -2946,7 +2667,7 @@ class PendinggrnController extends Controller
     }
 
     public function actionGetpendinggrndetails(){
-        $grn = new PendingGrn();
+        $grn = new PendingGo();
         $grn = $grn->getPendingGrnDetails();
         $result = "";
 
@@ -2967,9 +2688,9 @@ class PendinggrnController extends Controller
         echo $result;
     }
 
-    public function actionGetgrnparticulars(){
-        $grn = new PendingGrn();
-        $data = $grn->getGrnParticulars();
+    public function actiongetGoParticulars(){
+        $grn = new PendingGo();
+        $data = $grn->getGoParticulars();
 
         echo json_encode($data);
     }

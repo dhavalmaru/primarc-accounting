@@ -154,8 +154,8 @@ table tr td { border: 1px solid #eee!important; }
 													<option value="Credit" <?php if($other_debit_credit_entries[$i]['transaction']=="Credit") echo 'selected'; ?>>Credit</option>
 												</select>
 											</td>
-											<td><input class="form-control" type="text debit_amt" name="debit_amt[]" id="debit_amt_<?php echo $i; ?>" value="<?php echo $mycomponent->format_money($other_debit_credit_entries[$i]['debit_amt'],2); ?>" onChange="get_total();" <?php if($other_debit_credit_entries[$i]['transaction']=="Credit") echo 'readonly'; ?> /></td>
-											<td><input class="form-control" type="text credit_amt" name="credit_amt[]" id="credit_amt_<?php echo $i; ?>" value="<?php echo $mycomponent->format_money($other_debit_credit_entries[$i]['credit_amt'],2); ?>" onChange="get_total();" <?php if($other_debit_credit_entries[$i]['transaction']=="Debit") echo 'readonly'; ?> /></td>
+											<td><input class="form-control debit_amt" type="text" name="debit_amt[]" id="debit_amt_<?php echo $i; ?>" value="<?php echo $mycomponent->format_money($other_debit_credit_entries[$i]['debit_amt'],2); ?>" onChange="get_total();" <?php if($other_debit_credit_entries[$i]['transaction']=="Credit") echo 'readonly'; ?> /></td>
+											<td><input class="form-control credit_amt" type="text" name="credit_amt[]" id="credit_amt_<?php echo $i; ?>" value="<?php echo $mycomponent->format_money($other_debit_credit_entries[$i]['credit_amt'],2); ?>" onChange="get_total();" <?php if($other_debit_credit_entries[$i]['transaction']=="Debit") echo 'readonly'; ?> /></td>
 										</tr>
 								<?php }}} if($blFlag == false) { ?>
 										<tr id="row_0">
