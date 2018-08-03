@@ -81,8 +81,8 @@ table tr td { border: 1px solid #eee!important; }
 													<option value="Credit" <?php if($jv_entries[$i]['transaction']=="Credit") echo 'selected'; ?>>Credit</option>
 												</select>
 											</td>
-											<td><input class="form-control" type="text debit_amt" name="debit_amt[]" id="debit_amt_<?php echo $i; ?>" value="<?php echo $mycomponent->format_money($jv_entries[$i]['debit_amt'],2); ?>" onChange="get_total();" <?php if($jv_entries[$i]['transaction']=="Credit") echo 'readonly'; ?> /></td>
-											<td><input class="form-control" type="text credit_amt" name="credit_amt[]" id="credit_amt_<?php echo $i; ?>" value="<?php echo $mycomponent->format_money($jv_entries[$i]['credit_amt'],2); ?>" onChange="get_total();" <?php if($jv_entries[$i]['transaction']=="Debit") echo 'readonly'; ?> /></td>
+											<td><input class="form-control debit_amt" type="text" name="debit_amt[]" id="debit_amt_<?php echo $i; ?>" value="<?php echo $mycomponent->format_money($jv_entries[$i]['debit_amt'],2); ?>" onChange="get_total();" <?php if($jv_entries[$i]['transaction']=="Credit") echo 'readonly'; ?> /></td>
+											<td><input class="form-control credit_amt" type="text" name="credit_amt[]" id="credit_amt_<?php echo $i; ?>" value="<?php echo $mycomponent->format_money($jv_entries[$i]['credit_amt'],2); ?>" onChange="get_total();" <?php if($jv_entries[$i]['transaction']=="Debit") echo 'readonly'; ?> /></td>
 										</tr>
 								<?php }}} if($blFlag == false) { ?>
 										<tr id="row_0">
@@ -100,7 +100,7 @@ table tr td { border: 1px solid #eee!important; }
 											</td>
 											<td><input class="form-control" type="text" name="acc_code[]" id="acc_code_0" value="" readonly /></td>
 											<td>
-												<select class="form-control" name="transaction[]" id="trans_0" onchange="set_transaction(this);">
+												<select class="form-control select2" name="transaction[]" id="trans_0" onchange="set_transaction(this);">
 													<option value="">Select</option>
 													<option value="Debit">Debit</option>
 													<option value="Credit">Credit</option>
@@ -111,7 +111,7 @@ table tr td { border: 1px solid #eee!important; }
 										</tr>
 										<tr id="row_1">
 											<td style="text-align: center;" class="action_delete"><button type="button" class="btn btn-sm btn-success" id="delete_row_1" onClick="delete_row(this);">-</button></td>
-											<td   style="text-align: center; display: none;" id="sr_no_1">1</td>
+											<td   style="text-align: center; display: none;" id="sr_no_1">2</td>
 											<td>
 												<input class="form-control" type="hidden" name="entry_id[]" id="entry_id_1" value="" />
 												<select class="form-control select2" name="acc_id[]" id="acc_id_1" onchange="get_acc_details(this);">
@@ -124,7 +124,7 @@ table tr td { border: 1px solid #eee!important; }
 											</td>
 											<td><input class="form-control" type="text" name="acc_code[]" id="acc_code_1" value="" readonly /></td>
 											<td>
-												<select class="form-control" name="transaction[]" id="trans_1" onchange="set_transaction(this);">
+												<select class="form-control select2" name="transaction[]" id="trans_1" onchange="set_transaction(this);">
 													<option value="">Select</option>
 													<option value="Debit">Debit</option>
 													<option value="Credit">Credit</option>
@@ -313,6 +313,15 @@ table tr td { border: 1px solid #eee!important; }
 
 <script type="text/javascript">
     var BASE_URL="<?php echo Url::base(); ?>";
+
+    var acc_details = '<option value="">Select</option>';
+    <?php 
+    	$acc_master = ''; 
+    	for($j=0; $j<count($acc_details); $j++) {
+    		$acc_master = $acc_master . '<option value="'.$acc_details[$j]["id"].'">'.str_replace("'","",$acc_details[$j]["legal_name"]).'</option>';
+		} 
+	?>
+	acc_details = acc_details + '<?php echo $acc_master; ?>';
 </script>
 
 <?php 

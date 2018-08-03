@@ -408,7 +408,7 @@ class PendingGo extends Model
             where child_tax_rate != 0
             group by id, tax_zone_code, tax_zone_name, parent_id, tax_rate
             ) BB
-            on (AA.vat_cst = BB.tax_zone_code and round(AA.vat_percent,4)=round(BB.tax_rate,4))
+            on (AA.vat_cst COLLATE utf8_unicode_ci = BB.tax_zone_code and round(AA.vat_percent,4)=round(BB.tax_rate,4))
             Where AA.gi_go_id=$id;";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();

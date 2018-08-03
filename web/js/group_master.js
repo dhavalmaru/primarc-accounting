@@ -21,6 +21,7 @@
                 editMultiple: 'Only one type can be edited at one time',
                 addMultiple: 'Select a type to add a new type',
                 addDifferent: 'Entered type already exist please add different type',
+                inAccMaster: 'Entered type already exist in account master please select different type',
                 collapseTip: 'collapse',
                 expandTip: 'expand',
                 selectTip: 'select',
@@ -101,7 +102,11 @@
                             var action = 'insert';
 
                             var result = get_account_type(action, parent_id, account_type);
-                            if(result==false){
+                            if(result=='In_Acc_Master'){
+                                $(easyTree).prepend(warningAlert);
+                                $(easyTree).find('.alert .alert-content').html(options.i18n.inAccMaster);
+                                return false;
+                            } else if(result==false){
                                 $(easyTree).prepend(warningAlert);
                                 $(easyTree).find('.alert .alert-content').html(options.i18n.addDifferent);
                                 return false;
@@ -213,7 +218,11 @@
 			                        var action = 'update';
 
                                     var result = get_account_type(action, parent_id, account_type);
-                                    if(result==false){
+                                    if(result=='In_Acc_Master'){
+                                        $(easyTree).prepend(warningAlert);
+                                        $(easyTree).find('.alert .alert-content').html(options.i18n.inAccMaster);
+                                        return false;
+                                    } else if(result==false){
                                         $(easyTree).prepend(warningAlert);
                                         $(easyTree).find('.alert .alert-content').html(options.i18n.addDifferent);
                                         return false;
@@ -259,26 +268,33 @@
                                 $(easyTree).prepend(warningAlert);
                                 $(easyTree).find('.alert .alert-content').html(options.i18n.deleteParent);
                             } else {
-                                $(easyTree).prepend(dangerAlert);
-                                $(easyTree).find('.alert .alert-content').html(options.i18n.deleteConfirmation)
-                                    .append('<a style="margin-left: 10px;" class="btn btn-default btn-danger confirm"></a>')
-                                    .find('.confirm').html(options.i18n.confirmButtonLabel);
-                                $(easyTree).find('.alert .alert-content .confirm').on('click', function () {
-                                    var account_type = $(selected).find(' > span > a').text();
-                                    var action = 'delete';
-                                    var result = set_account_type(action, parent_id, account_type);
-                                    if(result==false){
-                                        return false;
-                                    }
+                                var account_type = $(selected).find(' > span > a').text();
+                                var action = 'delete';
+                                var result = get_account_type(action, parent_id, account_type);
+                                if(result=='In_Acc_Master'){
+                                    $(easyTree).prepend(warningAlert);
+                                    $(easyTree).find('.alert .alert-content').html(options.i18n.inAccMaster);
+                                    return false;
+                                } else {
+                                    $(easyTree).prepend(dangerAlert);
+                                    $(easyTree).find('.alert .alert-content').html(options.i18n.deleteConfirmation)
+                                        .append('<a style="margin-left: 10px;" class="btn btn-default btn-danger confirm"></a>')
+                                        .find('.confirm').html(options.i18n.confirmButtonLabel);
+                                    $(easyTree).find('.alert .alert-content .confirm').on('click', function () {
+                                        var result = set_account_type(action, parent_id, account_type);
+                                        if(result==false){
+                                            return false;
+                                        }
 
-                                    $(selected).find(' ul ').remove();
-                                    if($(selected).parent('ul').find(' > li').length <= 1) {
-                                        $(selected).parents('li').removeClass('parent_li').find(' > span > span').removeClass('glyphicon-folder-open').addClass('glyphicon-file');
-                                        $(selected).parent('ul').remove();
-                                    }
-                                    $(selected).remove();
-                                    $(dangerAlert).remove();
-                                });
+                                        $(selected).find(' ul ').remove();
+                                        if($(selected).parent('ul').find(' > li').length <= 1) {
+                                            $(selected).parents('li').removeClass('parent_li').find(' > span > span').removeClass('glyphicon-folder-open').addClass('glyphicon-file');
+                                            $(selected).parent('ul').remove();
+                                        }
+                                        $(selected).remove();
+                                        $(dangerAlert).remove();
+                                    });
+                                }
                             }
                         }
                     }
@@ -366,9 +382,34 @@ var get_account_type = function(action, parent_id, account_type){
     var csrfToken = $('meta[name="csrf-token"]').attr("content");
     var result = false;
 
-    if(action=='insert' || action=='update'){
+    if(action=='insert' || action=='update' || action=='delete'){
+        if(action=='insert' || action=='update'){
+            $.ajax({
+                url: BASE_URL+'index.php?r=groupmaster%2Fgetaccounttype',
+                type: 'post',
+                data: {
+                        action : action,
+                        parent_id : parent_id,
+                        account_type : account_type,
+                        _csrf : csrfToken
+                    },
+                dataType: 'json',
+                async: false,
+                success: function (data) {
+                    if(data==1){
+                        result = false;
+                    } else {
+                        result = true;
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(thrownError);
+                }
+            });
+        }
         $.ajax({
-            url: BASE_URL+'index.php?r=groupmaster%2Fgetaccounttype',
+            url: BASE_URL+'index.php?r=groupmaster%2Fgetaccounttypefromaccmaster',
             type: 'post',
             data: {
                     action : action,
@@ -380,9 +421,7 @@ var get_account_type = function(action, parent_id, account_type){
             async: false,
             success: function (data) {
                 if(data==1){
-                    result = false;
-                } else {
-                    result = true;
+                    result = 'In_Acc_Master';
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {

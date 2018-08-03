@@ -278,4 +278,10 @@ class AccountmasterController extends Controller
         $result = $acc_master->checkLegalNameAvailablity();
         echo $result;
     }
+
+    public function actionChecklegalnameavailablityinaccmaster() {
+        $acc_master = new AccountMaster();
+        $result = $acc_master->checkLegalNameAvailablityInAccMaster();
+        echo $result;
+    }
 }

@@ -142,7 +142,7 @@ tbody {
 
 									                $credit_amt = floatval($data[$i]['debit_amount']);
 									                $debit_amt = floatval($data[$i]['credit_amount']);
-									                $balance_amt = $credit_amt-$debit_amt;
+									                $balance_amt = round($credit_amt-$debit_amt,2);
 
 									                if($balance_amt<0){
 									                    $balance_type = 'Dr';

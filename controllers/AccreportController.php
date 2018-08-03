@@ -126,6 +126,7 @@ class AccreportController extends Controller
     public function actionGetdetailledgerreport() {   
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
+        $report = new AccReport();
 
         $account = $request->post('account');
         $vouchertype = $request->post('vouchertype');
@@ -141,8 +142,23 @@ class AccreportController extends Controller
         $data['to_date']=$to_date;
         $data['view']=$view;
         
-        $account = implode(",",$account);
-       
+        $acc_details = $report->getVendorname();
+        $state_master = $report->getstatemaster();    
+        $data['acc_details'] = $acc_details;
+        $data['state_detail'] = $state_master;
+
+        $table = ''; 
+
+        if(count($account)==0){
+            $account_id = array();
+            for($i=0; $i<count($acc_details); $i++){
+                $account_id[$i] = $acc_details[$i]['id'];
+            }
+            $account = implode(",",$account_id);
+        } else {
+            $account = implode(",",$account);
+        }
+        
         if(count($vouchertype)==0)
         {
             $data['vouchertype']=[];
@@ -173,11 +189,9 @@ class AccreportController extends Controller
             $to_date=$mycomponent->formatdate($to_date);
         }
         
-        $report = new AccReport();
-
         if($view=='state')
         {
-            $acc_details= $report->getstatewisebifercation($account, $vouchertype,$from_date, $to_date,$date_type,$state);
+            $acc_details= $report->getstatewisebifercation($account, $vouchertype, $from_date, $to_date, $date_type, $state);
 
             $innertab = '';
             $voucher = 0;
@@ -201,6 +215,8 @@ class AccreportController extends Controller
                }
             }
 
+            $blFlag = false;
+
             for ($i=0; $i <count($acc_details) ; $i++) { 
                 
                 $voucher_id = $acc_details[$i]['voucher_id'];
@@ -209,7 +225,7 @@ class AccreportController extends Controller
                 if($voucher_id!=$voucher)
                     {   
                         
-                        if($voucher!=0)
+                        if($voucher!=0 && $blFlag == true)
                         {   
                             for($j=$temp+1;$j<count($column_names);$j++)
                             {
@@ -221,9 +237,11 @@ class AccreportController extends Controller
                                 $innertab.='<td> </td>';
                             }
                             $innertab.="</tr>";
+                            $blFlag = false;
                         }
 
                         $temp=0;
+                        $blFlag = true;
                         $innertab.='<tr>
                         <td>'.($acc_details[$i]['invoice_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['invoice_date'])):'').'</td>
                         <td>'.($acc_details[$i]['grn_approved_date_time']!=""?date('Y-m-d',strtotime($acc_details[$i]['grn_approved_date_time'])):'').'</td>
@@ -327,7 +345,7 @@ class AccreportController extends Controller
                   $voucher  = $acc_details[$i]['voucher_id'];
             }
 
-            if($temp<count($column_names)-1){
+            if($temp<count($column_names)-1 && $blFlag == true){
                 for($j=$temp+1;$j<count($column_names);$j++)
                 {
                     $innertab.='<td> </td>';
@@ -338,6 +356,7 @@ class AccreportController extends Controller
                     $innertab.='<td> </td>';
                 }
                 $innertab.="</tr>";
+                $blFlag = false;
             }
             
             $table ='<thead>
@@ -479,7 +498,8 @@ class AccreportController extends Controller
                 }
             }
 
-            $tabrow.='<tr>
+            if($i>0 && count($acc_details)>0){
+                $tabrow.='<tr>
                         <td>'.($acc_details[$i-1]['invoice_date']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['invoice_date'])):'').'</td>
                         <td>'.($acc_details[$i-1]['grn_approved_date_time']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['grn_approved_date_time'])):'').'</td>
                         <td>'.($acc_details[$i-1]['gi_date']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['gi_date'])):'').'</td>
@@ -492,6 +512,8 @@ class AccreportController extends Controller
                         <td>'.($acc_details[$i-1]['ref_type']=='Debit Note'?$acc_details[$i-1]['debit_note_ref']:$acc_details[$i-1]['invoice_no']).'</td>
                         <td>'.$sum_total.'</td>'.$innertab.'
                     </tr>';
+            }
+            
             
             $table = '<thead>
                             <tr><th class="text-center">Invoice Date</th>
@@ -511,7 +533,7 @@ class AccreportController extends Controller
         }
         
         if($view=='default')
-        {   
+        {
             $acc_details= $report->getDetailledger($account, $vouchertype,$from_date, $to_date,$date_type,$state);
             $innertab = '';
             $voucher = 0;
@@ -537,9 +559,9 @@ class AccreportController extends Controller
                 <td>'.$acc_details['total_deduction'].'</td>';
             }*/
             $colname = '';
-            if(in_array('journal_voucher',$vouchertype))
+            if(in_array('journal_voucher',$vouchertype) || in_array('other_debit_credit',$vouchertype))
             {
-               $column_names= $report->column_names($account, $vouchertype,$from_date, $to_date,$date_type,$state);
+                $column_names= $report->column_names($account, $vouchertype, $from_date, $to_date, $date_type, $state);
                 foreach ($column_names as $res)
                 {
                    $colname.='<th class="text-center">'.$res['ledger_name'].'</th>';
@@ -549,34 +571,45 @@ class AccreportController extends Controller
             {
                 $column_names= [];
             }
-            
+
+            // echo json_encode($acc_details);
+            // echo '<br/><br/>';
+            // echo json_encode($column_names);
+
+            $blFlag = false;
+
             for ($i=0; $i <count($acc_details) ; $i++) { 
                 
-                if($acc_details[$i]['ref_type']=='journal_voucher')
+                if($acc_details[$i]['ref_type']=='journal_voucher' || $acc_details[$i]['ref_type']=='Other Debit Note')
                 {
-                    
                     $voucher_id = $acc_details[$i]['voucher_id'];
                
                     if($voucher_id!=$voucher)
-                    {   
-                        if($voucher!=0)
+                    {
+                        if($voucher!=0 && $blFlag == true)
                         {   
                             for($j=$temp+1;$j<count($column_names);$j++)
                             {
                                 $innertab.='<td> </td>';
                             }
                             $innertab.="</tr>";
+                            $blFlag = false;
+
+                            // echo $innertab;
+                            // echo '<br/>';
+                            // echo '<br/>';
                         }
 
                         $temp=0;
+                        $blFlag = true;
                         $innertab.='<tr>
                         <td>'.($acc_details[$i]['invoice_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['invoice_date'])):'').'</td>
                         <td>'.($acc_details[$i]['grn_approved_date_time']!=""?date('Y-m-d',strtotime($acc_details[$i]['grn_approved_date_time'])):'').'</td>
                         <td>'.($acc_details[$i]['gi_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['gi_date'])):'').'</td>
                         <td>'.($acc_details[$i]['updated_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['updated_date'])):'').'</td>
-                        <td>'.$acc_details[$i]['cp_ledger_name'].'</td>
-                        <td>Journal Voucher</td>
-                        <td>'.$acc_details[$i]['voucher_id'].'</td>
+                        <td>'.$acc_details[$i]['cp_ledger_name'].'</td>' . 
+                        (($acc_details[$i]['ref_type']=='journal_voucher')?'<td>Journal Voucher</td>':'<td>Other Debit Note</td>').
+                        '<td>'.$acc_details[$i]['voucher_id'].'</td>
                         <td>'.($acc_details[$i]['ref_type']=='purchase'?$acc_details[$i]['ref_id']:'').'</td>
                         <td>'.$acc_details[$i]['gi_go_ref_no'].'</td>
                         <td>'.($acc_details[$i]['ref_type']=='Debit Note'?$acc_details[$i]['debit_note_ref']:$acc_details[$i]['invoice_no']).'</td>
@@ -587,7 +620,7 @@ class AccreportController extends Controller
 
                         for($j=0;$j<count($column_names);$j++)
                         {
-                          if($acc_details[$i]['ledger_name']==$column_names[$j]['ledger_name'])
+                            if($acc_details[$i]['ledger_name']==$column_names[$j]['ledger_name'])
                             {
                                $innertab.='<td>'.$acc_details[$i]['amount1'].'</td>';
                                $temp = $j;
@@ -599,24 +632,34 @@ class AccreportController extends Controller
                         }
                     }
                     else
-                    {   
-
+                    {
                         for($j=$temp+1;$j<count($column_names);$j++)
                         {
-                          if($acc_details[$i]['ledger_name']==$column_names[$j]['ledger_name'])
+                            if($acc_details[$i]['ledger_name']==$column_names[$j]['ledger_name'])
                             {
                                 $innertab.='<td>'.$acc_details[$i]['amount1'].'</td>';
                                 $temp = $j;
+                                break;
                             }
                             else{
                                 $innertab.='<td> </td>';
                             }
                         }
                     }
-                  $voucher  = $acc_details[$i]['voucher_id'];
+                    $voucher  = $acc_details[$i]['voucher_id'];
                 }
                 else
                 {
+                    if($blFlag == true){
+                        for($j=$temp+1;$j<count($column_names);$j++)
+                        {
+                            $innertab.='<td> </td>';
+                        }
+                        $innertab.="</tr>";
+                        $temp = 0;
+                        $blFlag = false;
+                    }
+
                     $innertab.='<tr>
                         <td>'.($acc_details[$i]['invoice_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['invoice_date'])):'').'</td>
                         <td>'.($acc_details[$i]['grn_approved_date_time']!=""?date('Y-m-d',strtotime($acc_details[$i]['grn_approved_date_time'])):'').'</td>
@@ -638,7 +681,18 @@ class AccreportController extends Controller
                         }
                         $innertab.='</tr>';
                 }
-            }       
+            }
+
+            if($blFlag == true){
+                for($j=$temp+1;$j<count($column_names);$j++)
+                {
+                    $innertab.='<td> </td>';
+                }
+                $innertab.="</tr>";
+                $temp = 0;
+                $blFlag = false;
+            }
+
             $table ='<thead>
                             <tr><th class="text-center">Invoice Date</th>
                                 <th class="text-center">Grn Approved Date</th>
@@ -656,17 +710,21 @@ class AccreportController extends Controller
                                 <th class="text-center"> Total Inc Tax </th>'.$colname.'</tr>
                     </thead>'.$innertab;  
         }
-
-        $acc_details = $report->getAccountDetails();
-        $state_master = $report->getstatemaster();    
-        $data['acc_details'] = $acc_details;
-        $data['state_detail'] = $state_master;     
+    
         $data['table'] = $table;  
 
         for($i=0;$i<count($account);$i++)
         {
           $report->setLog('LedgerReport', '', 'Generate', '', 'Generate Ledger Report', 'acc_ledger_entries', $account[$i]);
-        }   
+        }
+
+        // echo json_encode($column_names);
+        // echo '<br/>';
+        // echo '<br/>';
+        // echo json_encode($acc_details);
+        // echo '<br/>';
+
+        // echo '<html><head><style type="text/css">table tr td {border: 1px solid;}</style></head><body><table class="table table-border">'.$table.'</table></body></html>';
         
         return $this->render('detail_ledger_report',$data);
     }
@@ -1172,6 +1230,11 @@ class AccreportController extends Controller
         $from_date = $request->post('from_date');
         $to_date = $request->post('to_date');
 
+        // $date_type = 'As Of Date';
+        // $as_of_date = '02/08/2018';
+        // $from_date = '';
+        // $to_date = '';
+
         if($as_of_date==''){
             $as_of_date=NULL;
         } else {
@@ -1250,6 +1313,11 @@ class AccreportController extends Controller
                         $credit_amt_val = $mycomponent->format_money($credit_amt,2);
                     }
 
+                    // echo 'debit ' . $debit_amt . '<br/>';
+                    // echo 'debit value ' . $debit_amt_val . '<br/>';
+                    // echo 'credit ' . $credit_amt . '<br/>';
+                    // echo 'credit value ' . $credit_amt_val . '<br/>';
+
                     $tbody = $tbody . '<tr>
                                         <td>'.($sr_no+1).'</td>
                                         <td>'.$data[$i]['legal_name'].'</td>
@@ -1285,17 +1353,24 @@ class AccreportController extends Controller
                 }
 
                 if($opening_bal<0){
-                    $tot_deb_ope_bal = $tot_deb_ope_bal + $opening_bal;
+                    $tot_deb_ope_bal = $tot_deb_ope_bal + ($opening_bal*-1);
                 } else {
                     $tot_crd_ope_bal = $tot_crd_ope_bal + $opening_bal;
                 }
                 if($closing_bal<0){
-                    $tot_deb_clo_bal = $tot_deb_clo_bal + $closing_bal;
+                    $tot_deb_clo_bal = $tot_deb_clo_bal + ($closing_bal*-1);
                 } else {
                     $tot_crd_clo_bal = $tot_crd_clo_bal + $closing_bal;
                 }
                 $tot_deb_tran = $tot_deb_tran + $debit_amt;
                 $tot_crd_tran = $tot_crd_tran + $credit_amt;
+
+                // echo 'opening_bal ' . $opening_bal . '<br/>';
+                // echo 'tot_deb_ope_bal ' . $tot_deb_ope_bal . '<br/>';
+                // echo 'tot_crd_ope_bal ' . $tot_crd_ope_bal . '<br/>';
+                // echo 'closing_bal ' . $closing_bal . '<br/>';
+                // echo 'tot_deb_clo_bal ' . $tot_deb_clo_bal . '<br/>';
+                // echo 'tot_crd_clo_bal ' . $tot_crd_clo_bal . '<br/>';
 
                 // $opening_bal = $closing_bal;
             }
@@ -1305,11 +1380,11 @@ class AccreportController extends Controller
                                     <td></td>
                                     <td></td>
                                     <td>Grant Total</td>
-                                    <td style="text-align: right;">'.$mycomponent->format_money($tot_deb_ope_bal*-1,2).'</td>
+                                    <td style="text-align: right;">'.$mycomponent->format_money($tot_deb_ope_bal,2).'</td>
                                     <td style="text-align: right;">'.$mycomponent->format_money($tot_crd_ope_bal,2).'</td>
                                     <td style="text-align: right;">'.$mycomponent->format_money($tot_deb_tran,2).'</td>
                                     <td style="text-align: right;">'.$mycomponent->format_money($tot_crd_tran,2).'</td>
-                                    <td style="text-align: right;">'.$mycomponent->format_money($tot_deb_clo_bal*-1,2).'</td>
+                                    <td style="text-align: right;">'.$mycomponent->format_money($tot_deb_clo_bal,2).'</td>
                                     <td style="text-align: right;">'.$mycomponent->format_money($tot_crd_clo_bal,2).'</td>
                                     <td class="bus_cat"></td>
                                     <td class="acc_cat"></td>
@@ -1322,7 +1397,7 @@ class AccreportController extends Controller
                                     <td></td>
                                     <td></td>
                                     <td>Grant Total</td>
-                                    <td style="text-align: right;">'.$mycomponent->format_money($tot_deb_clo_bal*-1,2).'</td>
+                                    <td style="text-align: right;">'.$mycomponent->format_money($tot_deb_clo_bal,2).'</td>
                                     <td style="text-align: right;">'.$mycomponent->format_money($tot_crd_clo_bal,2).'</td>
                                     <td class="bus_cat"></td>
                                     <td class="acc_cat"></td>
@@ -1381,6 +1456,8 @@ class AccreportController extends Controller
 
         $data['tbody'] = $tbody;
         $data['tbody2'] = $tbody2;
+
+        // echo '<html><body><table>'.$tbody.'</table></body></html>';
 
         $report->setLog('TrialBalanceReport', '', 'Generate', '', 'Generate Trial Balance Report', 'acc_ledger_entries', '');
         echo json_encode($data);

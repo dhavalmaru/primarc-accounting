@@ -438,7 +438,7 @@ class OtherDebitCredit extends Model
         return $code;
     }
 
-    public function getInvoiceDetails($id){
+    public function getInvoiceDetails($id, $vendor_id){
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
@@ -455,9 +455,18 @@ class OtherDebitCredit extends Model
         $total_sgst = 0;
         $total_igst = 0;
 
+        $vendor_acc_id = '';
+        $sql = "select * from acc_master where vendor_id = '$vendor_id'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if(count($data)>0){
+            $vendor_acc_id = $data[0]['id'];
+        }
+
         $sql = "select account_name, sum(debit_amt) as total_debit_amt, sum(credit_amt) as total_credit_amt from acc_other_debit_credit_entries 
-                where other_debit_credit_id = '$id' and is_active = '1' and company_id = '$company_id' and account_name like '%purchase%' 
-                group by account_name";
+                where other_debit_credit_id = '$id' and is_active = '1' and company_id = '$company_id' and account_name not like '%gst%' and 
+                    account_id <> '$vendor_acc_id' group by account_name";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $data = $reader->readAll();
@@ -476,7 +485,8 @@ class OtherDebitCredit extends Model
                 $tax_per = substr($tax_per, 0, strrpos($tax_per, '%'));
             }
             $invoice_details[$i]['sr_no'] = $i + 1;
-            $invoice_details[$i]['particulars'] = 'Service Income';
+            // $invoice_details[$i]['particulars'] = 'Service Income';
+            $invoice_details[$i]['particulars'] = $account_name;
             $invoice_details[$i]['code'] = '998311';
             $invoice_details[$i]['qty'] = '';
             $invoice_details[$i]['rate'] = '';
@@ -672,7 +682,7 @@ class OtherDebitCredit extends Model
             $vendor_id = $debit_note[0]['vendor_id'];
 
             if($trans_type == 'Invoice'){
-                $result = $this->getInvoiceDetails($id);
+                $result = $this->getInvoiceDetails($id, $vendor_id);
                 $invoice_details = $result['invoice_details'];
                 $inv_tax_details = $result['inv_tax_details'];
             } else {

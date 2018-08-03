@@ -57,8 +57,8 @@ $("#acc_id").change(function(){
 
 $("#bank_id").change(function(){
     
-	 var bank_id = $("#bank_id").val();
-var csrfToken = $('meta[name="csrf-token"]').attr("content");
+    var bank_id = $("#bank_id").val();
+    var csrfToken = $('meta[name="csrf-token"]').attr("content");
 
     $.ajax({
         url: BASE_URL+'index.php?r=paymentreceipt%2Fgetaccbankdetails',

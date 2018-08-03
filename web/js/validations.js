@@ -93,7 +93,8 @@ $("#account_master").validate({
         },
         legal_name: {
             required: true,
-            check_legal_name_availablity: true
+            check_legal_name_availablity: true,
+            check_legal_name_availablity_in_acc_master: true
         },
         code: {
             required: true
@@ -387,6 +388,33 @@ $.validator.addMethod("check_legal_name_availablity", function (value, element) 
         return true;
     }
 }, 'Legal Name already in use.');
+
+$.validator.addMethod("check_legal_name_availablity_in_acc_master", function (value, element) {
+    var validator = $("#account_master").validate();
+    var result = 1;
+
+    $.ajax({
+        url: BASE_URL+'index.php?r=accountmaster%2Fchecklegalnameavailablityinaccmaster',
+        type: 'post',
+        data: $("#account_master").serialize(),
+        dataType: 'html',
+        global: false,
+        async: false,
+        success: function (data) {
+            result = data;
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status);
+            alert(thrownError);
+        }
+    });
+
+    if (result==1) {
+        return false;
+    } else {
+        return true;
+    }
+}, 'Legal Name already in use in group master.');
 
 
 
@@ -1620,18 +1648,18 @@ $("#detailledger_report").validate({
 });
 
 $('#detailledger_report').submit(function() {
-    removeMultiInputNamingRules('#detailledger_report', 'select[alt="account[]"]');
+    // removeMultiInputNamingRules('#detailledger_report', 'select[alt="account[]"]');
     // removeMultiInputNamingRules('#detailledger_report', 'select[alt="vouchertype[]"]');
     // removeMultiInputNamingRules('#detailledger_report', 'select[alt="state[]"]');
 
-    addMultiInputNamingRules('#detailledger_report', 'select[name="account[]"]', { required: true }, "");
+    // addMultiInputNamingRules('#detailledger_report', 'select[name="account[]"]', { required: true }, "");
     // addMultiInputNamingRules('#detailledger_report', 'select[name="vouchertype[]"]', { required: true }, "");
     // addMultiInputNamingRules('#detailledger_report', 'select[name="state[]"]', { required: true }, "");
 
     if (!$("#detailledger_report").valid()) {
         return false;
     } else {
-        removeMultiInputNamingRules('#detailledger_report', 'select[alt="account[]"]');
+        // removeMultiInputNamingRules('#detailledger_report', 'select[alt="account[]"]');
         // removeMultiInputNamingRules('#detailledger_report', 'select[alt="vouchertype[]"]');
         // removeMultiInputNamingRules('#detailledger_report', 'select[alt="state[]"]');
 

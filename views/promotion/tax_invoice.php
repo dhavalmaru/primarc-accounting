@@ -333,7 +333,7 @@
                 <td colspan="4"   valign="top" style="padding:5px;">
                     <p style="margin:0;text-align:left;line:height:22px;font-size:18px;"><span style="  font-size:16px; font-weight:500; display: block;" >Tax Amount (in words): <br/><br> </span> <?php if(isset($inv_tax_details[$i]['total_amt'])) echo $mycomponent->convert_number_to_words(round($inv_tax_details[$i]['total_amt'],2)); ?> </p> <br>
                     <p style="margin:0;text-align:left;line:height:22px;font-size:14px;"><span style="  font-size:16px; font-weight:500; display: block;" >Remarks: <br/><br> </span> </p> <br>
-                    <p style="margin:0;text-align:left;line:height:22px;font-size:11px;font-weight:bold;"><span style="  font-size:16px; font-weight:500; display: block;" >Company's PAN: <br/><br> </span> AACCT5910H </p> 
+                    <p style="margin:0;text-align:left;line:height:22px;font-size:14px;font-weight:bold;"><span style="  font-size:16px; font-weight:500; display: block;" >Company's PAN: <br/><br> </span> AACCT5910H </p> 
                 </td>
                 <td colspan="2" align="center" valign="top" style=" font-size:8px; font-weight:500;"> 
                     For Primarc Pecan Retail (P) Ltd Mum(FY <?php if(isset($debit_note[0]['date_of_transaction'])) 

@@ -201,7 +201,7 @@ table tr td { border: 1px solid #eee!important; }
 										</tr>
 										<tr id="row_1">
 											<td style="text-align: center;" class="action_delete"><button type="button" class="btn btn-sm btn-success" id="delete_row_1" onClick="delete_row(this);">-</button></td>
-											<td   style="text-align: center; display: none;" id="sr_no_1">1</td>
+											<td   style="text-align: center; display: none;" id="sr_no_1">2</td>
 											<td>
 												<input class="form-control" type="hidden" name="entry_id[]" id="entry_id_1" value="" />
 												<select class="form-control select2" name="acc_id[]" id="acc_id_1" onchange="get_acc_details(this);">
@@ -275,10 +275,13 @@ table tr td { border: 1px solid #eee!important; }
 <script type="text/javascript">
     var BASE_URL="<?php echo Url::base(); ?>";
 
-    var acc_details = '<option value="">Select</option>' + 
-						'<?php for($j=0; $j<count($acc_details); $j++) { ?>' + 
-						'<option value="<?php echo $acc_details[$j]['id']; ?>"><?php echo str_replace("'", "\'", $acc_details[$j]['legal_name']); ?></option>' + 
-					'<?php } ?>';
+    <?php 
+    	$acc_master = '<option value="">Select</option>'; 
+    	for($j=0; $j<count($acc_details); $j++) {
+    		$acc_master = $acc_master . '<option value="'.$acc_details[$j]["id"].'">'.str_replace("'","",$acc_details[$j]["legal_name"]).'</option>';
+		} 
+	?>
+	var acc_details = '<?php echo $acc_master; ?>';
 </script>
 
 <?php 

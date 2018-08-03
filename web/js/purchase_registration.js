@@ -14,15 +14,48 @@ $('.loading').hide();
 // });
 
 $(document).ready(function(){
-    $('.loading').fadeIn(1000); 
-    $('#loader').fadeOut(400);
+
+    var account_name = $("#account option:selected").text();
+    var voucher_type = $("#vouchertype option:selected").text();
+    var state = $("#state option:selected").text();
+    var date_criteria = $("#date_criteria option:selected").text();
+    var view = $("#view option:selected").text();
+
+    // $("#account_name").html("All");
+    // $("#voucher_type_name").html("All");
+    // $("#state_name").html("All");
+
+    // console.log('eee');
+
+    // if(account_name!=""){
+    //     $("#account_name").html(account_name);
+    // }
+        
+    // $("#company_name").html("Primarc Pecan Retail Pvt Ltd");
+
+    if($("#account option:selected").length==0){
+        $("#account_name").html("All");
+    } else {
+        $("#account_name").html(account_name);
+    }
+    if($("#vouchertype option:selected").text()==' '){
+        $("#voucher_type_name").html("All");
+    } else {
+        $("#voucher_type_name").html(voucher_type);
+    }
+    if(state==' '){
+        $("#state_name").html("All");
+    } else {
+        $("#state_name").html(state);
+    }
+    
+
+    // $('.loading').fadeIn(1000); 
+    // $('#loader').fadeOut(400);
 
     if($('#from_date').val()==""){
         change_date_criteria();
     }
-
-    // $("#company_name").html("Primarc Pecan Retail Pvt Ltd");
-    $("#account_name").html($("#account option:selected").text());
 
     set_table();
 })

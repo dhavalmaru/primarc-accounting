@@ -53,10 +53,10 @@ class GroupMaster extends Model
         if(count($data)>0){
             $final_tree = $final_tree . '<ul>';
             for($i=0; $i<count($data); $i++){
-                $final_tree = $final_tree . '<li id="type_'.$data[$i]['id'].'">'.$data[$i]['account_type'].'</li>';
+                $final_tree = $final_tree . '<li id="type_'.$data[$i]['id'].'">'.$data[$i]['account_type'];
                 $final_tree = $final_tree . $this->getGroupDetails($data[$i]['id']);
             }
-            $final_tree = $final_tree . '</ul>';
+            $final_tree = $final_tree . '</li></ul>';
         }
         
         return $final_tree;
@@ -74,8 +74,36 @@ class GroupMaster extends Model
 
         $result = 0;
         $sql = "select A.* from acc_group_master A where A.is_active = '1' and A.status = 'approved' and 
-                A.company_id = '$company_id' and A.id != '$parent_id' and account_type = '$account_type' 
+                A.company_id = '$company_id' and A.id != '$parent_id' and A.account_type = '$account_type' 
                 order by A.id";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if(count($data)>0){
+            $result = 1;
+        }
+        
+        return $result;
+    }
+
+    public function getAccTypeFromAccMaster(){
+        $request = Yii::$app->request;
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $action = $request->post('action');
+        $parent_id = $request->post('parent_id');
+        $account_type = $request->post('account_type');
+
+        if($action=='delete'){
+            $cond = " and (A.legal_name = '$account_type' or A.sub_account_type = '$parent_id')";
+        } else {
+            $cond = " and A.legal_name = '$account_type'";
+        }
+
+        $result = 0;
+        $sql = "select A.* from acc_master A where A.is_active = '1' and A.status = 'approved' and 
+                A.company_id = '$company_id' ".$cond." order by A.id";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $data = $reader->readAll();

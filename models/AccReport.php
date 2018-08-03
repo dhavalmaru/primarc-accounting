@@ -23,7 +23,7 @@ class AccReport extends Model
     }
 
     public function getVendorname() {
-       $sql = "select id,legal_name from acc_master where is_active = '1' and status = 'approved' and type='Vendor Goods' order by legal_name ";
+        $sql = "select id, legal_name from acc_master where is_active = '1' and status = 'approved' and type='Vendor Goods' order by legal_name ";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -168,20 +168,20 @@ class AccReport extends Model
 
     public function getDetailledger($account, $vouchertype,$from_date, $to_date,$date_type,$state) {
         if($date_type=='invoice_date')
-            $where_condition = "date(invoice_date)>='$from_date' and date(invoice_date)<='$to_date'";
+            $where_condition = " date(invoice_date)>='$from_date' and date(invoice_date)<='$to_date' ";
         else if($date_type=='grn_approved_date_time')
-            $where_condition = "date(grn_approved_date_time)>='$from_date' and date(grn_approved_date_time)<='$to_date'";
+            $where_condition = " date(grn_approved_date_time)>='$from_date' and date(grn_approved_date_time)<='$to_date' ";
         else if($date_type=='gi_date')
-            $where_condition = "date(gi_date)>='$from_date' and date(gi_date)<='$to_date'";
+            $where_condition = " date(gi_date)>='$from_date' and date(gi_date)<='$to_date' ";
         else if($date_type=='updated_date')
-            $where_condition = "date(updated_date)>='$from_date' and date(updated_date)<='$to_date'";
+            $where_condition = " date(updated_date)>='$from_date' and date(updated_date)<='$to_date' ";
         else
              $where_condition=' ';
 
         if($date_type=='updated_date')
         {
-           $where2 = "Where  date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date')";
-            $where3 = "And  date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date')"; 
+           $where2 = " Where date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') ";
+            $where3 = " And date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') "; 
         }
         else
         {
@@ -415,7 +415,7 @@ class AccReport extends Model
                             on (A.voucher_id = B.cp_voucher_id)
                         ) A
                         where A.acc_id IN($account) or A.cp_acc_id IN ($account) 
-                        ) A ".$where3;
+                        ) A ".$where2;
             }
             
             if(in_array('other_debit_credit',$vouchertype))
@@ -425,7 +425,8 @@ class AccReport extends Model
                     $sql.=' UNION ';
                 }
 
-                $sql .="Select  A.ref_id,'Other Debit Note' as ref_type,A.cp_acc_id,A.invoice_no,A.voucher_id,A.cp_ledger_name , Truncate(A.amount,2) as total_deduction,'' as tax_amount,amount as total_without_tax,
+                $sql .="Select * from (
+                        Select  A.ref_id,'Other Debit Note' as ref_type,A.cp_acc_id,A.invoice_no,A.voucher_id,A.cp_ledger_name , Truncate(A.amount,2) as total_deduction,'' as tax_amount,amount as total_without_tax,
                     '' as other_charges ,A.ledger_name ,'' as gi_date,'' as grn_approved_date_time,
                     '' as invoice_date ,'' as gi_go_ref_no ,
                     '' as warehouse_id , A.ref_date as updated_date,'' as debit_note_ref,Truncate(A.amount,2) as amount1 from 
@@ -442,7 +443,8 @@ class AccReport extends Model
                         ref_type = 'other_debit_credit' and acc_id IN($account) and company_id = $company_id) B 
                     on (A.ref_id=B.ref_id) 
                     ) A
-                    where A.acc_id IN($account) or A.cp_acc_id IN ($account) ".$where2;
+                    where A.acc_id IN($account) or A.cp_acc_id IN ($account)
+                    ) A ".$where2;
             }
 
             if(in_array('promotion',$vouchertype))
@@ -452,7 +454,8 @@ class AccReport extends Model
                     $sql.=' UNION ';
                 }
 
-                $sql .="Select  A.ref_id,'Promotion' as ref_type,A.cp_acc_id,A.invoice_no,A.voucher_id,A.cp_ledger_name , Truncate(A.amount,2) as total_deduction,'' as tax_amount,amount as total_without_tax,
+                $sql .="Select * from (
+                        Select  A.ref_id,'Promotion' as ref_type,A.cp_acc_id,A.invoice_no,A.voucher_id,A.cp_ledger_name , Truncate(A.amount,2) as total_deduction,'' as tax_amount,amount as total_without_tax,
                     '' as other_charges ,A.ledger_name ,'' as gi_date,'' as grn_approved_date_time,
                     '' as invoice_date ,'' as gi_go_ref_no ,
                     '' as warehouse_id , A.ref_date as updated_date,'' as debit_note_ref,Truncate(A.amount,2) as amount1 from 
@@ -469,7 +472,8 @@ class AccReport extends Model
                         ref_type = 'promotion' and acc_id IN($account) and company_id = $company_id) B 
                     on (A.ref_id=B.ref_id) 
                     ) A
-                    where A.acc_id IN($account) or A.cp_acc_id IN ($account) ".$where2;
+                    where A.acc_id IN($account) or A.cp_acc_id IN ($account)
+                    ) A ".$where2;
             }
 
             $sql;
@@ -485,20 +489,20 @@ class AccReport extends Model
 
     public function column_names($account, $vouchertype,$from_date, $to_date,$date_type,$state) {
         if($date_type=='invoice_date')
-            $where_condition = "date(invoice_date)>='$from_date' and date(invoice_date)<='$to_date'";
+            $where_condition = " date(invoice_date)>='$from_date' and date(invoice_date)<='$to_date' ";
         else if($date_type=='grn_approved_date_time')
-            $where_condition = "date(grn_approved_date_time)>='$from_date' and date(grn_approved_date_time)<='$to_date'";
+            $where_condition = " date(grn_approved_date_time)>='$from_date' and date(grn_approved_date_time)<='$to_date' ";
         else if($date_type=='gi_date')
-            $where_condition = "date(gi_date)>='$from_date' and date(gi_date)<='$to_date'";
+            $where_condition = " date(gi_date)>='$from_date' and date(gi_date)<='$to_date' ";
         else if($date_type=='updated_date')
-            $where_condition = "date(updated_date)>='$from_date' and date(updated_date)<='$to_date'";
+            $where_condition = " date(updated_date)>='$from_date' and date(updated_date)<='$to_date' ";
         else
              $where_condition=' ';
 
         if($date_type=='updated_date')
         {
-           $where2 = "Where  date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date')";
-            $where3 = "And  date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date')"; 
+           $where2 = " Where  date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') ";
+            $where3 = " And  date(updated_date) >= date('$from_date') and date(updated_date) <= date('$to_date') "; 
         }
         else
         {
@@ -512,7 +516,8 @@ class AccReport extends Model
         //$account;
         if($account!='')
         { 
-            $sql = "";
+            $sql = "select distinct ledger_name from (";
+
             if(in_array('purchase',$vouchertype))
             {
                 $sql.="Select Distinct ledger_name from ( Select * from (
@@ -600,7 +605,7 @@ class AccReport extends Model
                     $sql.=' UNION ALL';
                 }
 
-                $sql.=" SELECT Distinct ledger_name  from 
+                $sql.=" select Distinct ledger_name  from 
                         (Select A.ref_id,A.ref_type,A.cp_acc_id,A.invoice_no,A.voucher_id,A.cp_ledger_name ,
                         A.amount as total_deduction,'' as tax_amount,amount as total_without_tax,
                         '' as other_charges ,A.ledger_name ,'' as gi_date,'' as grn_approved_date_time,
@@ -621,16 +626,43 @@ class AccReport extends Model
                         where A.acc_id IN ($account)  or A.cp_acc_id IN ($account) ) A  ".$where2;
             }
 
+            if(in_array('other_debit_credit',$vouchertype))        
+            {
+                if($sql!='')
+                {
+                    $sql.=' UNION ALL';
+                }
+
+                $sql.=" select Distinct ledger_name  from 
+                        (Select A.ref_id,A.ref_type,A.cp_acc_id,A.invoice_no,A.voucher_id,A.cp_ledger_name ,
+                        A.amount as total_deduction,'' as tax_amount,amount as total_without_tax,
+                        '' as other_charges ,A.ledger_name ,'' as gi_date,'' as grn_approved_date_time,
+                        '' as invoice_date,'' as gi_go_ref_no ,
+                        '' as warehouse_id , A.ref_date as updated_date,'' as debit_note_ref ,A.amount as amount1 from (    
+                        select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                        A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type,case when A.type='Debit' then A.amount*-1 else A.amount end as amount, A.status, 
+                        A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                        A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, 
+                        A.narration, A.ref_date, B.acc_id as cp_acc_id, B.ledger_name as cp_ledger_name, 
+                        B.ledger_code as cp_ledger_code from 
+                         (select * from acc_ledger_entries where status = 'Approved' and is_active = '1'  and 
+                             ref_type = 'other_debit_credit' and acc_id NOT IN ($account) and company_id = $company_id) A 
+                         left join 
+                         (select * from acc_ledger_entries where status = 'Approved' and is_active = '1'  and 
+                             ref_type = 'other_debit_credit' and acc_id IN ($account) and company_id = $company_id) B 
+                         on(A.ref_id=B.ref_id)  ) A
+                        where A.acc_id IN ($account)  or A.cp_acc_id IN ($account) ) A  ".$where2;
+            }
+
+            $sql.=") AA";
+
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $result = $reader->readAll();
              
             if(count($result)>0)
             {
-                
                 return $result = array_map("unserialize", array_unique(array_map("serialize", $result)));
-
-
             }
             else
             {
@@ -973,7 +1005,7 @@ class AccReport extends Model
         else if($date_type=='updated_date')
             $where_condition = "date(updated_date)>='$from_date' and date(updated_date)<='$to_date'";
         else
-             $where_condition=' ';
+            $where_condition=' ';
         $session = Yii::$app->session;
         $company_id = $session['company_id']; 
 
@@ -1083,7 +1115,8 @@ class AccReport extends Model
         $company_id = $session['company_id']; 
         
 
-        $sql = "Select DISTINCT percentage ,ledger_name FROM
+        $sql = "select * from 
+                (Select DISTINCT cast(percentage as UNSIGNED) as percentage, ledger_name FROM
                 (Select * from 
                 (Select A.*,F.updated_date,B.total_amount as total_deduction from 
                 (SELECT C.*,G.gi_date,G.grn_approved_date_time,E.invoice_date,'' as debit_note_ref,E.gi_go_ref_no,G.warehouse_id from 
@@ -1096,11 +1129,13 @@ class AccReport extends Model
                     ELSE (2 * Replace(Substring_index(ledger_name, '-', -1), '%', '')) END as percentage 
                 from acc_ledger_entries where status = 'Approved' and is_active = '1' and ref_type = 'purchase' and ledger_type != 'Main Entry' and company_id = '$company_id') A 
                 left join 
-                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, ledger_code as cp_ledger_code from acc_ledger_entries where status = 'Approved' and is_active = '1' and ref_type = 'purchase' and ledger_type = 'Main Entry' and company_id = '$company_id') B on (A.voucher_id = B.cp_voucher_id) 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, ledger_code as cp_ledger_code from acc_ledger_entries 
+                    where status = 'Approved' and is_active = '1' and ref_type = 'purchase' and ledger_type = 'Main Entry' and company_id = '$company_id') B on (A.voucher_id = B.cp_voucher_id) 
                 Where B.cp_acc_id IN ($account) AND entry_type IN('CGST','IGST','SGST') 
                 GROUP By A.ref_id,A.ref_type, B.cp_acc_id, A.invoice_no,A.voucher_id , cp_ledger_name, percentage, entry_type ,ledger_name) A 
                 left join 
-                (select A.ref_id,A.ref_type, sum(A.amount) as total_purchase_amount, B.cp_acc_id, A.invoice_no ,A.voucher_id , cp_ledger_name,REPLACE(RIGHT(ledger_name,3),'-','') as ledger_name1, Replace(Substring_index(ledger_name, '-', -1),'%', '' ) as percentage from 
+                (select A.ref_id,A.ref_type, sum(A.amount) as total_purchase_amount, B.cp_acc_id, A.invoice_no ,A.voucher_id , 
+                    cp_ledger_name,REPLACE(RIGHT(ledger_name,3),'-','') as ledger_name1, Replace(Substring_index(ledger_name, '-', -1),'%', '' ) as percentage from 
                 (select * from acc_ledger_entries where status = 'Approved' and is_active = '1' and ref_type = 'purchase' and ledger_type != 'Main Entry' and company_id = '$company_id') A 
                 left join 
                 (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, ledger_code as cp_ledger_code from acc_ledger_entries 
@@ -1122,7 +1157,8 @@ class AccReport extends Model
                $sql.= " left join 
                 (Select min(updated_date) as updated_date,grn_id from acc_grn_entries GROUP BY grn_id) F on A.ref_id=F.grn_id 
                 left JOIN 
-                (select ref_id,voucher_id,amount as total_amount,entry_type from acc_ledger_entries where status = 'Approved' and is_active = '1' and ref_type = 'purchase' and ledger_type = 'Main Entry' and acc_id IN($account) and company_id = '$company_id' and entry_type='Total Amount') B 
+                (select ref_id,voucher_id,amount as total_amount,entry_type from acc_ledger_entries where status = 'Approved' and is_active = '1' and 
+                    ref_type = 'purchase' and ledger_type = 'Main Entry' and acc_id IN($account) and company_id = '$company_id' and entry_type='Total Amount') B 
                 on A.ref_id=B.ref_id and A.voucher_id=B.voucher_id) D 
                 Union 
 
@@ -1135,12 +1171,16 @@ class AccReport extends Model
                 (select ref_id, 'Debit Note' as ref_type, invoice_no, voucher_id, amount, Replace(entry_type,'sgst','cgst') as entry_type, 
                 Replace(ledger_name,'SGST','CGST') as ledger_name,
                 CASE WHEN entry_type = 'IGST' THEN Replace(Substring_index(ledger_name, '-', -1),'%', '') 
-                    ELSE (2 * Replace(Substring_index(ledger_name, '-', -1), '%', '')) END as percentage from acc_ledger_entries where status = 'Approved' and is_active = '1' and ref_type = 'purchase' and ledger_type != 'Main Entry' and company_id = '$company_id') A 
+                    ELSE (2 * Replace(Substring_index(ledger_name, '-', -1), '%', '')) END as percentage from acc_ledger_entries 
+                    where status = 'Approved' and is_active = '1' and ref_type = 'purchase' and ledger_type != 'Main Entry' and company_id = '$company_id') A 
                 left join 
-                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, ledger_code as cp_ledger_code from acc_ledger_entries where status = 'Approved' and is_active = '1' and ref_type = 'purchase' and ledger_type = 'Main Entry' and company_id = '$company_id') B on (A.voucher_id = B.cp_voucher_id) Where B.cp_acc_id IN ($account) 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, ledger_code as cp_ledger_code 
+                    from acc_ledger_entries where status = 'Approved' and is_active = '1' and ref_type = 'purchase' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
+                on (A.voucher_id = B.cp_voucher_id) Where B.cp_acc_id IN ($account) 
                     AND entry_type IN('margindiff_cgst','margindiff_sgst','margindiff_igst','shortage_cgst' ,'shortage_sgst' ,'shortage_igst' , 'expiry_cgst' ,'expiry_sgst' ,'expiry_igst' ,'damage_cgst', 'damage_sgst','damage_igst') 
                 GROUP By A.ref_id,A.ref_type, B.cp_acc_id, A.invoice_no,A.voucher_id , cp_ledger_name,entry_type ,ledger_name, percentage) A
-                     left join (select A.ref_id,A.ref_type, sum(A.amount) as total_purchase_amount, B.cp_acc_id, A.invoice_no ,A.voucher_id , cp_ledger_name,REPLACE(RIGHT(ledger_name,3),'-','') as ledger_name1,Replace(Substring_index(ledger_name, '-', -1), '%', '') as percentage from (select * from acc_ledger_entries where status = 'Approved' and is_active = '1' and ref_type = 'purchase' and ledger_type != 'Main Entry' and company_id = '$company_id') A 
+                     left join (select A.ref_id,A.ref_type, sum(A.amount) as total_purchase_amount, B.cp_acc_id, A.invoice_no ,A.voucher_id , cp_ledger_name,REPLACE(RIGHT(ledger_name,3),'-','') as ledger_name1,Replace(Substring_index(ledger_name, '-', -1), '%', '') as percentage 
+                        from (select * from acc_ledger_entries where status = 'Approved' and is_active = '1' and ref_type = 'purchase' and ledger_type != 'Main Entry' and company_id = '$company_id') A 
                      left join (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, ledger_code as cp_ledger_code from acc_ledger_entries where status = 'Approved' and is_active = '1' and ref_type = 'purchase' and ledger_type = 'Main Entry' and company_id = '$company_id') B on (A.voucher_id = B.cp_voucher_id) 
                      Where B.cp_acc_id In($account) AND entry_type IN('margindiff_cost','shortage_cost','expiry_cost','damage_cost') GROUP BY A.ref_id,A.ref_type, B.cp_acc_id, A.invoice_no,A.voucher_id , cp_ledger_name,entry_type ,ledger_name ) B on A.ref_id=B.ref_id and A.invoice_no=B.invoice_no and A.percentage=B.percentage ) C 
                      left join (Select debit_note_ref as debit_note_ref,grn_id,invoice_no from acc_grn_debit_notes ) D on C.ref_id=D.grn_id and C.invoice_no=D.invoice_no 
@@ -1153,7 +1193,17 @@ class AccReport extends Model
                         on A.warehouse_id=G.warehouse_code ";  
                     }
                     $sql.=" left join (Select min(updated_date) as updated_date,grn_id from acc_grn_entries GROUP BY grn_id) F on A.ref_id=F.grn_id 
-                     left JOIN (select ref_id,voucher_id,amount as total_amount,entry_type from acc_ledger_entries where status = 'Approved' and is_active = '1' and ref_type = 'purchase' and ledger_type = 'Main Entry' and acc_id IN($account) and company_id = '$company_id' and entry_type='Total Deduction') B on A.ref_id=B.ref_id and A.voucher_id=B.voucher_id ) E ORDER BY ref_id ASC,invoice_no ASC,ref_type DESC ,percentage ASC )A Where $where_condition";
+                     left JOIN (select ref_id,voucher_id,amount as total_amount,entry_type from acc_ledger_entries 
+                        where status = 'Approved' and is_active = '1' and ref_type = 'purchase' and ledger_type = 'Main Entry' and 
+                        acc_id IN($account) and company_id = '$company_id' and entry_type='Total Deduction') B 
+                    on A.ref_id=B.ref_id and A.voucher_id=B.voucher_id ) E 
+                    ORDER BY ref_id ASC,invoice_no ASC,ref_type DESC ,percentage ASC ) A Where $where_condition) AA  
+                    order by percentage asc, ledger_name asc";
+
+        // echo $sql;
+        // echo '<br/>';
+        // echo '<br/>';
+
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -1292,7 +1342,7 @@ class AccReport extends Model
                 group by acc_id) D 
                 on (C.id = D.acc_id)) E 
                 left join 
-                (select acc_id, sum(case when type='Debit' then amount*-1 else 0 end) as debit_amt, 
+                (select acc_id, sum(case when type='Debit' then amount else 0 end) as debit_amt, 
                         sum(case when type='Credit' then amount else 0 end) as credit_amt 
                 from acc_ledger_entries where status = '$status' and is_active = '1' and 
                     date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and company_id = '$company_id' 

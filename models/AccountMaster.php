@@ -936,6 +936,23 @@ class AccountMaster extends Model
         }
     }
 
+    public function checkLegalNameAvailablityInAccMaster(){
+        $request = Yii::$app->request;
+        $id = $request->post('id');
+        $legal_name = $request->post('legal_name');
+        $company_id = $request->post('company_id');
+
+        $sql = "SELECT * FROM acc_group_master WHERE status='approved' and account_type='".$legal_name."' and company_id='".$company_id."'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if (count($data)>0){
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
     public function setLog($module_name, $sub_module, $action, $vendor_id, $description, $table_name, $table_id) {
         $session = Yii::$app->session;
         $curusr = $session['session_id'];

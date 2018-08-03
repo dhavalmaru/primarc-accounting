@@ -46,7 +46,7 @@ input:-webkit-autofill {
         <!-- <form id="group_master" class="form-horizontal" action="<?php //echo Url::base(); ?>index.php?r=groupmaster%2Fsave" method="post" enctype="multipart/form-data" onkeypress="return event.keyCode != 13;">  -->
             <input type="hidden" name="_csrf" value="<?=Yii::$app->request->getCsrfToken()?>" />
             <div class="form-group">
-                <div class="col-md-3">
+                <div class="col-md-12">
                     <div class="easy-tree">
                         <?php echo $list; ?>
 

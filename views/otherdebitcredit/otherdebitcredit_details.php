@@ -55,7 +55,7 @@ table tr td { border: 1px solid #eee!important; }
 						<label class="control-label">Vendor</label>
 						<div class=" ">
 							<div class=" "> 
-								<select id="vendor_id" name="vendor_id" class="form-control">
+								<select id="vendor_id" name="vendor_id" class="form-control select2">
 									<option value="">Select</option>
 									<?php if(isset($vendor)) { for($i=0; $i<count($vendor); $i++) { ?>
 										<option value="<?php echo $vendor[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['vendor_id']==$vendor[$i]['id']) echo "selected"; } ?>><?php echo $vendor[$i]['vendor_name']; ?></option>
@@ -72,7 +72,7 @@ table tr td { border: 1px solid #eee!important; }
 						<label class="control-label">Transaction</label>
 						<div class=" ">
 							<div class=" ">
-								<select id="trans_type" class="form-control" name="trans_type" onChange="set_trans_type();">
+								<select id="trans_type" class="form-control select2" name="trans_type">
 									<option value="">Select</option>
 									<option value="Debit" <?php if(isset($data[0])) { if($data[0]['trans_type']=="Debit") echo "selected"; } ?>>Debit</option>
 									<option value="Credit" <?php if(isset($data[0])) { if($data[0]['trans_type']=="Credit") echo "selected"; } ?>>Credit</option>
@@ -81,11 +81,11 @@ table tr td { border: 1px solid #eee!important; }
 							</div>
 						</div>
 					</div>
-					<div id="warehouse_gst_div" class="col-md-3 col-sm-3 col-xs-6" style="<?php if(isset($data[0])) { if($data[0]['trans_type'] != 'Invoice') echo 'display: none;'; } else { echo 'display: none;'; } ?>">
+					<div id="warehouse_gst_div" class="col-md-3 col-sm-3 col-xs-6" style="<?php //if(isset($data[0])) { if($data[0]['trans_type'] != 'Invoice') echo 'display: none;'; } else { echo 'display: none;'; } ?>">
 						<label class="control-label">GSTIN</label>
 						<div class=" ">
 							<div class=" ">  
-								<select id="warehouse_id" name="warehouse_id" class="form-control">
+								<select id="warehouse_id" name="warehouse_id" class="form-control select2">
 									<option value="">Select</option>
 									<?php if(isset($warehouse_gst)) { for($i=0; $i<count($warehouse_gst); $i++) { ?>
 										<option value="<?php echo $warehouse_gst[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['warehouse_id']==$warehouse_gst[$i]['id']) echo "selected"; } ?>><?php echo $warehouse_gst[$i]['warehouse_gst']; ?></option>
@@ -138,7 +138,7 @@ table tr td { border: 1px solid #eee!important; }
 											<td  style="text-align: center; display: none;" id="sr_no_<?php echo $i; ?>"><?php echo $i+1; ?></td>
 											<td>
 												<input class="form-control" type="hidden" name="entry_id[]" id="entry_id_<?php echo $i; ?>" value="<?php if(isset($other_debit_credit_entries)) echo $other_debit_credit_entries[$i]['id']; ?>" />
-												<select class="form-control" name="acc_id[]" id="acc_id_<?php echo $i; ?>" onchange="get_acc_details(this);">
+												<select class="form-control select2" name="acc_id[]" id="acc_id_<?php echo $i; ?>" onchange="get_acc_details(this);">
 													<option value="">Select</option>
 													<?php for($j=0; $j<count($acc_details); $j++) { ?>
 													<option value="<?php echo $acc_details[$j]['id']; ?>" <?php if($other_debit_credit_entries[$i]['account_id']==$acc_details[$j]['id']) echo 'selected'; ?>><?php echo $acc_details[$j]['legal_name']; ?></option>
@@ -148,7 +148,7 @@ table tr td { border: 1px solid #eee!important; }
 											</td>
 											<td><input class="form-control" type="text" name="acc_code[]" id="acc_code_<?php echo $i; ?>" value="<?php echo $other_debit_credit_entries[$i]['account_code']; ?>" readonly /></td>
 											<td>
-												<select class="form-control" name="transaction[]" id="trans_<?php echo $i; ?>" onchange="set_transaction(this);">
+												<select class="form-control select2" name="transaction[]" id="trans_<?php echo $i; ?>" onchange="set_transaction(this);">
 													<option value="">Select</option>
 													<option value="Debit" <?php if($other_debit_credit_entries[$i]['transaction']=="Debit") echo 'selected'; ?>>Debit</option>
 													<option value="Credit" <?php if($other_debit_credit_entries[$i]['transaction']=="Credit") echo 'selected'; ?>>Credit</option>
@@ -163,7 +163,7 @@ table tr td { border: 1px solid #eee!important; }
 											<td   style="text-align: center; display: none;" id="sr_no_0">1</td>
 											<td>
 												<input class="form-control" type="hidden" name="entry_id[]" id="entry_id_0" value="" />
-												<select class="form-control" name="acc_id[]" id="acc_id_0" onchange="get_acc_details(this);">
+												<select class="form-control select2" name="acc_id[]" id="acc_id_0" onchange="get_acc_details(this);">
 													<option value="">Select</option>
 													<?php for($j=0; $j<count($acc_details); $j++) { ?>
 													<option value="<?php echo $acc_details[$j]['id']; ?>"><?php echo $acc_details[$j]['legal_name']; ?></option>
@@ -173,7 +173,7 @@ table tr td { border: 1px solid #eee!important; }
 											</td>
 											<td><input class="form-control" type="text" name="acc_code[]" id="acc_code_0" value="" readonly /></td>
 											<td>
-												<select class="form-control" name="transaction[]" id="trans_0" onchange="set_transaction(this);">
+												<select class="form-control select2" name="transaction[]" id="trans_0" onchange="set_transaction(this);">
 													<option value="">Select</option>
 													<option value="Debit">Debit</option>
 													<option value="Credit">Credit</option>
@@ -184,10 +184,10 @@ table tr td { border: 1px solid #eee!important; }
 										</tr>
 										<tr id="row_1">
 											<td style="text-align: center;" class="action_delete"><button type="button" class="btn btn-sm btn-success" id="delete_row_1" onClick="delete_row(this);">-</button></td>
-											<td   style="text-align: center; display: none;" id="sr_no_1">1</td>
+											<td   style="text-align: center; display: none;" id="sr_no_1">2</td>
 											<td>
 												<input class="form-control" type="hidden" name="entry_id[]" id="entry_id_1" value="" />
-												<select class="form-control" name="acc_id[]" id="acc_id_1" onchange="get_acc_details(this);">
+												<select class="form-control select2" name="acc_id[]" id="acc_id_1" onchange="get_acc_details(this);">
 													<option value="">Select</option>
 													<?php for($j=0; $j<count($acc_details); $j++) { ?>
 													<option value="<?php echo $acc_details[$j]['id']; ?>"><?php echo $acc_details[$j]['legal_name']; ?></option>
@@ -197,7 +197,7 @@ table tr td { border: 1px solid #eee!important; }
 											</td>
 											<td><input class="form-control" type="text" name="acc_code[]" id="acc_code_1" value="" readonly /></td>
 											<td>
-												<select class="form-control" name="transaction[]" id="trans_1" onchange="set_transaction(this);">
+												<select class="form-control select2" name="transaction[]" id="trans_1" onchange="set_transaction(this);">
 													<option value="">Select</option>
 													<option value="Debit">Debit</option>
 													<option value="Credit">Credit</option>
@@ -257,6 +257,14 @@ table tr td { border: 1px solid #eee!important; }
 
 <script type="text/javascript">
     var BASE_URL="<?php echo Url::base(); ?>";
+
+    <?php 
+    	$acc_master = '<option value="">Select</option>'; 
+    	for($j=0; $j<count($acc_details); $j++) {
+    		$acc_master = $acc_master . '<option value="'.$acc_details[$j]["id"].'">'.str_replace("'","",$acc_details[$j]["legal_name"]).'</option>';
+		} 
+	?>
+	var acc_details = '<?php echo $acc_master; ?>';
 </script>
 
 <?php 

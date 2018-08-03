@@ -351,6 +351,7 @@ function add_sku_details(elem){
         success: function (data) {
             $('#'+ded_type+'_sku_details tr:last').before(data);
 
+            $('.select2').select2();
             $('.format_number').keyup(function(){
                 format_number(this);
             });
