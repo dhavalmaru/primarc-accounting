@@ -49,9 +49,8 @@ $(document).ready(function(){
         $("#state_name").html(state);
     }
     
-
-    // $('.loading').fadeIn(1000); 
-    // $('#loader').fadeOut(400);
+    $('.loading').fadeIn(1000); 
+    $('#loader').fadeOut(400);
 
     if($('#from_date').val()==""){
         change_date_criteria();
