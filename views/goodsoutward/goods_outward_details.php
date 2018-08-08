@@ -90,7 +90,7 @@
                             <?php for($i=0; $i<count($data_entries); $i++) { ?>
                             <tr>
                                 <td>
-                                    <select class="form-control select2" id="acc_id_<?php echo $i; ?>" name="acc_id[]" onChange="get_acc_details(this)">
+                                    <select class="form-control" id="acc_id_<?php echo $i; ?>" name="acc_id[]" onChange="get_acc_details(this)">
                                         <option value="">Select</option>
                                         <?php for($j=0; $j<count($acc_master); $j++) { 
                                                 if($acc_master[$j]['type']==$data_entries[$i]['acc_type']) { 
@@ -103,7 +103,7 @@
                                     <input type="hidden" id="ledger_type_<?php echo $i; ?>" name="ledger_type[]" value="<?php echo $data_entries[$i]['ledger_type']; ?>" />
                                     <input type="hidden" id="transaction_<?php echo $i; ?>" name="transaction[]" value="<?php echo $data_entries[$i]['transaction']; ?>" />
                                 </td>
-                                <td><input class="form-control " type="text" id="ledger_code_<?php echo $i; ?>" name="ledger_code[]" value="<?php echo $data_entries[$i]['ledger_code']; ?>" readonly /></td>
+                                <td><input class="form-control" type="text" id="ledger_code_<?php echo $i; ?>" name="ledger_code[]" value="<?php echo $data_entries[$i]['ledger_code']; ?>" readonly /></td>
                                 <td><input class="form-control debit_amt" type="text" id="debit_amt_<?php echo $i; ?>" name="debit_amt[]" value="<?php echo $mycomponent->format_money($data_entries[$i]['debit_amt'],2); ?>" onChange="get_total();" <?php if($data_entries[$i]['transaction']=="Credit") echo 'readonly'; ?> /></td>
                                 <td><input class="form-control credit_amt" type="text" id="credit_amt_<?php echo $i; ?>" name="credit_amt[]" value="<?php echo $mycomponent->format_money($data_entries[$i]['credit_amt'],2); ?>" onChange="get_total();" <?php if($data_entries[$i]['transaction']=="Debit") echo 'readonly'; ?> /></td>
                             </tr>

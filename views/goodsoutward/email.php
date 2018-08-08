@@ -74,7 +74,7 @@ Team Primarc</textarea>
 			<div class="form-group btn-container"> 
 				<div class="col-md-12">
 					<button type="submit" class="btn btn-success btn-sm" id="btn_submit"> Send </button>
-					<a href="<?php echo Url::base(); ?>index.php?r=goodsoutward%2Findex" class="btn btn-danger btn-sm" >Cancel</a>
+					<a href="<?php echo Url::base(); ?>index.php?r=goodsoutward%2Fedit&id=<?php echo $debit_note[0]['gi_go_id']; ?>" class="btn btn-danger btn-sm" >Cancel</a>
 					<!-- <button type="submit" class="btn btn-danger btn-sm" >Cancel </button> -->
 				</div>
 			</div>

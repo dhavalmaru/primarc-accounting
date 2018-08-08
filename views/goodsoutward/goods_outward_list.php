@@ -39,13 +39,13 @@ $mycomponent = Yii::$app->mycomponent;
 										<tr> 
 											<th width="45" style="text-align: center;">Sr. No.</th> 
 											<th>Action</th> 
-											<th>Grn Id</th> 
-											<th>Gi Id</th>
+											<th>Go Id</th> 
+											<th>Go No</th>
 											<th>Warehouse</th> 
 											<th>Vendor Name</th> 
 											<th>Idt Warehouse</th> 
 											<th>Total Value</th> 
-											<th>Gi Date</th> 
+											<th>Go Date</th> 
 											<th>Updated By</th> 
 										</tr>  
 									</thead>
@@ -63,15 +63,15 @@ $mycomponent = Yii::$app->mycomponent;
 										<tr> 
 											<th style="text-align: center;">Sr. No.</th> 
 											<th>Action</th> 
-											<th>Grn Id</th> 
-											<th>Gi Id</th> 
+											<th>Go Id</th> 
+											<th>Go No</th> 
 											<th>Warehouse</th>  
 											<th>Vendor Name</th> 
 											<th>Idt Warehouse</th> 
 											<th>Total Value</th> 
-											<th>Gi Date</th> 
+											<th>Go Date</th> 
 											<th>Updated By</th> 
-											<th>Debit Note</th> 
+											<th>Ledger</th> 
 										</tr>  
 									</thead>
 									<tbody> 
@@ -88,13 +88,13 @@ $mycomponent = Yii::$app->mycomponent;
 										<tr> 
 											<th width="45" style="text-align: center;">Sr. No.</th> 
 											<th>Action</th> 
-											<th>Grn Id</th> 
-											<th>Gi Id</th>
+											<th>Go Id</th> 
+											<th>Go No</th>
 											<th>Warehouse</th> 
 											<th>Vendor Name</th> 
 											<th>Idt Warehouse</th> 
 											<th>Total Value</th> 
-											<th>Gi Date</th> 
+											<th>Go Date</th> 
 											<th>Updated By</th> 
 										</tr>  
 									</thead>
