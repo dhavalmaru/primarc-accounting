@@ -34,7 +34,6 @@ class GoodsoutwardController extends Controller
                         ''.$grn[$i]['gi_go_ref_no'].'',
                         ''.$grn[$i]['warehouse_name'].'',
                         ''.$grn[$i]['vendor_name'].'',
-                        ''.$grn[$i]['idt_warehouse_name'].'',
                         ''.$mycomponent->format_money($grn[$i]['total_amount'], 2).'',
                         ''.$grn[$i]['gi_go_date_time'].'',
                         ''.$grn[$i]['updated_by'].''
@@ -70,7 +69,6 @@ class GoodsoutwardController extends Controller
                         ''.$grn[$i]['gi_go_ref_no'].'',
                         ''.$grn[$i]['warehouse_name'].'',
                         ''.$grn[$i]['vendor_name'].'',
-                        ''.$grn[$i]['idt_warehouse_name'].'',
                         ''.$mycomponent->format_money($grn[$i]['total_amount'], 2).'',
                        ''.$grn[$i]['gi_go_date_time'].'',
                         ''.$grn[$i]['username'].'',
@@ -107,7 +105,6 @@ class GoodsoutwardController extends Controller
                         ''.$grn[$i]['gi_go_ref_no'].'',
                         ''.$grn[$i]['warehouse_name'].'',
                         ''.$grn[$i]['vendor_name'].'',
-                        ''.$grn[$i]['idt_warehouse_name'].'',
                         ''.$mycomponent->format_money($grn[$i]['total_amount'], 2).'',
                         ''.$grn[$i]['gi_go_date_time'].'',
                         ''.$grn[$i]['updated_by'].''
@@ -1688,7 +1685,7 @@ class GoodsoutwardController extends Controller
         $this->redirect(array('goodsoutward/ledger', 'id'=>$gi_id));
     }
 
-   public function actionLedger($id){
+    public function actionLedger($id){
         $model = new GoodsOutward();
 
         $acc_ledger_entries = $model->getGrnAccLedgerEntries($id);
@@ -1697,7 +1694,7 @@ class GoodsoutwardController extends Controller
         return $this->render('ledger', ['grn_details' => $grn_details, 'acc_ledger_entries' => $acc_ledger_entries]);
     }
 
-     public function actionGetledger(){
+    public function actionGetledger(){
         $model = new GoodsOutward();
         $mycomponent = Yii::$app->mycomponent;
 
@@ -2150,7 +2147,7 @@ class GoodsoutwardController extends Controller
                     <td class="sticky-cell" style="border: none!important;">1.'.($j+1).'</td>
                     <td class="sticky-cell" style="border: none!important;">Taxable Amount</td>
                     <td class="sticky-cell" style="border: none!important;">
-                        <select id="invoicecost_acc_id_'.$j.'" class="form-control acc_id" name="invoice_cost_acc_id[]" onChange="get_acc_details(this)">
+                        <select id="invoicecost_acc_id_'.$j.'" class="form-control acc_id select2" name="invoice_cost_acc_id[]" onChange="get_acc_details(this)">
                             <option value="">Select</option>';
                             for($i=0; $i<count($acc_master); $i++) { 
                             if($acc_master[$i]['type']=="Goods Purchase") { 
@@ -2187,7 +2184,7 @@ class GoodsoutwardController extends Controller
                     <td class="sticky-cell" style="border: none!important;">2.'.($j+1).'</td>
                     <td class="sticky-cell" style="border: none!important;">Tax</td>
                     <td class="sticky-cell" style="border: none!important;">
-                        <select id="invoicetax_acc_id_'.$j.'" class="form-control acc_id" name="invoice_tax_acc_id[]" onChange="get_acc_details(this)">
+                        <select id="invoicetax_acc_id_'.$j.'" class="form-control acc_id select2" name="invoice_tax_acc_id[]" onChange="get_acc_details(this)">
                             <option value="">Select</option>
                         </select>
                         <input type="hidden" id="invoicetax_ledger_name_'.$j.'" name="invoice_tax_ledger_name[]" value="'.$total_tax[$j]['invoice_tax_ledger_name'].'" />
@@ -2209,7 +2206,7 @@ class GoodsoutwardController extends Controller
                     <td class="sticky-cell" style="border: none!important;">2.'.($j+1).'</td>
                     <td class="sticky-cell" style="border: none!important;">CGST</td>
                     <td class="sticky-cell" style="border: none!important;">
-                        <select id="invoicecgst_acc_id_'.$j.'" class="form-control acc_id" name="invoice_cgst_acc_id[]" onChange="get_acc_details(this)">
+                        <select id="invoicecgst_acc_id_'.$j.'" class="form-control acc_id select2" name="invoice_cgst_acc_id[]" onChange="get_acc_details(this)">
                             <option value="">Select</option>';
                             for($i=0; $i<count($acc_master); $i++) { 
                             if($acc_master[$i]['type']=="CGST") { 
@@ -2240,7 +2237,7 @@ class GoodsoutwardController extends Controller
                     <td class="sticky-cell" style="border: none!important;">2.'.($j+1).'</td>
                     <td class="sticky-cell" style="border: none!important;">SGST</td>
                     <td class="sticky-cell" style="border: none!important;">
-                        <select id="invoicesgst_acc_id_'.$j.'" class="form-control acc_id" name="invoice_sgst_acc_id[]" onChange="get_acc_details(this)">
+                        <select id="invoicesgst_acc_id_'.$j.'" class="form-control acc_id select2" name="invoice_sgst_acc_id[]" onChange="get_acc_details(this)">
                             <option value="">Select</option>';
                            for($i=0; $i<count($acc_master); $i++) { 
                         if($acc_master[$i]['type']=="SGST") { 
@@ -2271,7 +2268,7 @@ class GoodsoutwardController extends Controller
                     <td class="sticky-cell" style="border: none!important;">2.'.($j+1).'</td>
                     <td class="sticky-cell" style="border: none!important;">IGST</td>
                     <td class="sticky-cell" style="border: none!important;">
-                        <select id="invoiceigst_acc_id_'.$j.'" class="form-control acc_id" name="invoice_igst_acc_id[]" onChange="get_acc_details(this)">
+                        <select id="invoiceigst_acc_id_'.$j.'" class="form-control acc_id select2" name="invoice_igst_acc_id[]" onChange="get_acc_details(this)">
                             <option value="">Select</option>';
                             for($i=0; $i<count($acc_master); $i++) { 
                             if($acc_master[$i]['type']=="IGST") { 
@@ -2304,7 +2301,7 @@ class GoodsoutwardController extends Controller
 
         echo $tableamount;
         
-     }          
+    }          
 
    
     }

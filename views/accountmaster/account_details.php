@@ -15,18 +15,16 @@ $this->params['breadcrumbs'][] = $this->title;
 $session = Yii::$app->session;
 ?>
 <style type="text/css">
-input:-webkit-autofill {
-    background-color: white !important;
-}
-/*select {
-	width: 100%;
-}*/
-.form-horizontal .control-label { font-size: 12px; letter-spacing: .5px; margin-top:5px; }
-.form-devident { margin-top: 10px; }
-.form-devident h4 { border-bottom: 1px dashed #ddd; padding-bottom: 10px; }
-.download_file {display: block;}
-
-
+	input:-webkit-autofill {
+	    background-color: white !important;
+	}
+	/*select {
+		width: 100%;
+	}*/
+	.form-horizontal .control-label { font-size: 12px; letter-spacing: .5px; margin-top:5px; }
+	.form-devident { margin-top: 10px; }
+	.form-devident h4 { border-bottom: 1px dashed #ddd; padding-bottom: 10px; }
+	.download_file {display: block;}
 </style>
 <div class="grn-index">
 	<div class=" col-md-12">  
@@ -47,12 +45,12 @@ input:-webkit-autofill {
 						<option value="Bank Account" <?php if(isset($data)) { if($data[0]['type']=="Bank Account") echo "selected"; } ?>>Bank Account</option>
 						<option value="Goods Purchase" <?php if(isset($data)) { if($data[0]['type']=="Goods Purchase") echo "selected"; } ?>>Goods Purchase</option>
 						<option value="Tax" <?php if(isset($data)) { if($data[0]['type']=="Tax") echo "selected"; } ?>>Tax</option>
-						<option value="GST Tax" <?php if(isset($data)) { if($data[0]['type']=="GST Tax") echo "selected"; } ?>>GST Tax</option>
-					
+						<option value="GST Tax" <?php if(isset($data)) { if($data[0]['type']=="GST Tax" || $data[0]['type']=="CGST" || $data[0]['type']=="SGST" || $data[0]['type']=="IGST") echo "selected"; } ?>>GST Tax</option>
 						<option value="Goods Sales" <?php if(isset($data)) { if($data[0]['type']=="Goods Sales") echo "selected"; } ?>>Goods Sales</option>
 						<option value="Employee" <?php if(isset($data)) { if($data[0]['type']=="Employee") echo "selected"; } ?>>Employee</option>
 						<option value="Customer" <?php if(isset($data)) { if($data[0]['type']=="Customer") echo "selected"; } ?>>Customer</option>
 						<option value="Marketplace" <?php if(isset($data)) { if($data[0]['type']=="Marketplace") echo "selected"; } ?>>Marketplace</option>
+						<option value="Branch Type" <?php if(isset($data)) { if($data[0]['type']=="Branch Type") echo "selected"; } ?>>Branch Type</option>
 						<option value="Others" <?php if(isset($data)) { if($data[0]['type']=="Others") echo "selected"; } ?>>Others</option>
 					</select>
 					<span id="err_type"></span>
@@ -67,6 +65,7 @@ input:-webkit-autofill {
 						<?php } ?>
 					</select>
 					<span id="err_tax_id"></span>
+					<input type="hidden" id="tax_id_val" name="tax_id_val" />
 				</div>
 
 				<div class="col-md-3 col-sm-3 col-xs-6">
@@ -90,7 +89,7 @@ input:-webkit-autofill {
 					</select>
 				
 					</span>
-					<input id="legal_name" name="legal_name" class="form-control" type="text" value="<?php if(isset($data[0])) echo $data[0]['legal_name']; ?>" style="<?php if(isset($data[0])) { if($data[0]['type'] == 'Vendor Goods'||$data[0]['type'] == 'GST Tax'||$data[0]['type'] == 'Goods Sales'||$data[0]['type'] == 'Goods Purchase') echo 'display: none;'; } ?>" />
+					<input id="legal_name" name="legal_name" class="form-control" type="text" value="<?php if(isset($data[0])) echo $data[0]['legal_name']; ?>" style="<?php if(isset($data[0])) {if($data[0]['type']=='Vendor Goods' || $data[0]['type']=='GST Tax' || $data[0]['type']=='CGST' || $data[0]['type']=='SGST' || $data[0]['type']=='IGST' || $data[0]['type']=='Goods Sales' || $data[0]['type']=='Goods Purchase') echo 'display: none;'; } ?>" />
 				
 			  		
 				</div>
@@ -139,7 +138,7 @@ input:-webkit-autofill {
 					<select class="form-control select2" id="state_type" name="state_type" data-error="#err_state_type" >
 						<option value="">Select</option>
 						<option value="Local" <?php if(isset($data)) { if($data[0]['state_type']=="Local") echo "selected"; } ?>>Local</option>
-						<option value="Inter" <?php if(isset($data)) { if($data[0]['state_type']=="Inter") echo "selected"; } ?>>Inter</option>
+						<option value="Inter State" <?php if(isset($data)) { if($data[0]['state_type']=="Inter State") echo "selected"; } ?>>Inter</option>
 					
 					</select>
 					<span id="err_state_type"></span>
@@ -208,6 +207,11 @@ input:-webkit-autofill {
 	         	<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Details</label>
 					<input id="details" name="details" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['details']; ?>" />
+				</div>
+	         	<div class="col-md-3 col-sm-3 col-xs-6">
+					<label class="control-label">Bill Wise</label><br/>
+					<input name="bill_wise" type="radio" value="Yes" <?php if(isset($data)) {if($data[0]['bill_wise']=='1') echo 'checked';} ?> /> Yes &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<input name="bill_wise" type="radio" value="No" <?php if(isset($data)) {if($data[0]['bill_wise']!='1') echo 'checked';} ?> /> No
 				</div>
 	         	<div class="col-md-3 col-sm-3 col-xs-6 vendor_goods">
 					<label class="control-label">GSTIN</label>

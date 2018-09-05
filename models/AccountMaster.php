@@ -344,9 +344,11 @@ class AccountMaster extends Model
             $code = "GS";
         } else if($type=="Employee"){
             $code = "EM";
-        }else if($type=="Marketplace"){
+        } else if($type=="Marketplace"){
             $code = "MP";
-		}else {
+        } else if($type=="Branch Type"){
+            $code = "BT";
+		} else {
             $code = "OT";
         }
 
@@ -387,7 +389,9 @@ class AccountMaster extends Model
             $code = "EM";
         } else if($type=="Marketplace"){
             $code = "MP";		
-		} else {
+		} else if($type=="Branch Type"){
+            $code = "BT";
+        } else {
             $code = "OT";
         }
 
@@ -534,12 +538,14 @@ class AccountMaster extends Model
         $approver_id = $request->post('approver_id');
         $company_id = $request->post('company_id');
         $tax_id = $request->post('tax_id');
+        $tax_id_val = $request->post('tax_id_val');
 		$state_id =$request->post('state_id');
 		$state_type =$request->post('state_type');
 		$bus_type =$request->post('bus_type');
 		$gst_rate =$request->post('gst_rate');
 		$input_output =$request->post('input_output');
-		$legal_name_tree =$request->post('legal_name_tree');			
+		$legal_name_tree =$request->post('legal_name_tree');
+        $bill_wise = $request->post('bill_wise');
         $vendor_id = "";
         $customer_id = "";
         $pan_no = "";
@@ -633,6 +639,14 @@ class AccountMaster extends Model
             }
         }
 
+        if($tax_id_val=="CGST"){
+            $type = "CGST";
+        } else if($tax_id_val=="SGST"){
+            $type = "SGST";
+        } else if($tax_id_val=="IGST"){
+            $type = "IGST";
+        }
+
         $array = array('type' => $type, 
                         'vendor_id' => $vendor_id, 
 						'customer_id' => $customer_id, 
@@ -644,7 +658,8 @@ class AccountMaster extends Model
 						'gst_rate' => $gst_rate, 
 						'legal_name_tree' => $legal_name_tree, 
 					
-                        'legal_name' => ucwords(strtolower($legal_name)), 
+                        // 'legal_name' => ucwords(strtolower($legal_name)), 
+                        'legal_name' => $legal_name, 
                         'department' => $department,
                         'code' => $code, 
 
@@ -678,7 +693,8 @@ class AccountMaster extends Model
                         'approver_id'=>$approver_id,
                         'gst_id'=>$gst_id,
                         'company_id'=>$company_id,
-                        'sub_account_type'=>$sub_account_type
+                        'sub_account_type'=>$sub_account_type,
+                        'bill_wise'=>(($bill_wise=='Yes')?'1':'0')
                         );
 
         if(count($array)>0){

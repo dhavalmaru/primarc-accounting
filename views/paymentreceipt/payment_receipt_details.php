@@ -18,24 +18,24 @@ $mycomponent = Yii::$app->mycomponent;
 ?>
 
 <style>
-#payment_receipt .error {color: #dd4b39!important;}
-.table-head { font-weight:100;  
-    background: #41ace9; 
-    color: #fff;
-    border-bottom: 1px solid #41ace9;
-    background-image: linear-gradient(#54b4eb, #2fa4e7 60%, #1d9ce5);
-}
-.form-horizontal .checkbox, .form-horizontal .radio { padding:0;  margin:0; min-height:auto; line-height:20px;}
-.checkbox input[type=checkbox], .checkbox-inline input[type=checkbox], .radio input[type=radio], .radio-inline input[type=radio] { position:relative; margin:0;}
-.table>thead>tr>th {   vertical-align: middle;  border-bottom: 2px solid #ddd;}
-.checkbox, .radio { margin:0; padding:0;}
-.bold-text {    background-color: #f1f1f1; text-align:right;}
-.bold-text th {text-align:right!important;}
-.ad_hock{display:none;}
-#knock_off{display:none;} 
-.form-horizontal .control-label {font-size: 12px; letter-spacing: .5px; margin-top:5px; }
-.form-devident { margin-top: 10px; }
-.form-devident h4 { border-bottom: 1px dashed #ddd; padding-bottom: 10px; }
+	#payment_receipt .error {color: #dd4b39!important;}
+	.table-head { font-weight:100;  
+	    background: #41ace9; 
+	    color: #fff;
+	    border-bottom: 1px solid #41ace9;
+	    background-image: linear-gradient(#54b4eb, #2fa4e7 60%, #1d9ce5);
+	}
+	.form-horizontal .checkbox, .form-horizontal .radio { padding:0;  margin:0; min-height:auto; line-height:20px;}
+	.checkbox input[type=checkbox], .checkbox-inline input[type=checkbox], .radio input[type=radio], .radio-inline input[type=radio] { position:relative; margin:0;}
+	.table>thead>tr>th {   vertical-align: middle;  border-bottom: 2px solid #ddd;}
+	.checkbox, .radio { margin:0; padding:0;}
+	.bold-text {    background-color: #f1f1f1; text-align:right;}
+	.bold-text th {text-align:right!important;}
+	.ad_hock{display:none;}
+	#knock_off{display:none;} 
+	.form-horizontal .control-label {font-size: 12px; letter-spacing: .5px; margin-top:5px; }
+	.form-devident { margin-top: 10px; }
+	.form-devident h4 { border-bottom: 1px dashed #ddd; padding-bottom: 10px; }
 </style>
 
 <div class="grn-index">

@@ -150,7 +150,8 @@ class OtherdebitcreditController extends Controller
         
         $this->layout = false;
         return $this->render('tax_invoice', ['debit_note' => $data['debit_note'], 'vendor_details' => $data['vendor_details'], 
-                                            'invoice_details' => $data['invoice_details'], 'inv_tax_details' => $data['inv_tax_details']]);
+                                            'invoice_details' => $data['invoice_details'], 'inv_tax_details' => $data['inv_tax_details'], 
+                                            'warehouse_details' => $data['warehouse_details']]);
     }
 
     public function actionDownloadtaxinvoice($id){
@@ -178,7 +179,8 @@ class OtherdebitcreditController extends Controller
         $file = "";
 
         return $this->render('email', ['debit_note' => $data['debit_note'], 'vendor_details' => $data['vendor_details'], 
-                                        'invoice_details' => $data['invoice_details'], 'inv_tax_details' => $data['inv_tax_details']]);
+                                        'invoice_details' => $data['invoice_details'], 'inv_tax_details' => $data['inv_tax_details'], 
+                                        'warehouse_details' => $data['warehouse_details']]);
     }
 
     public function actionViewdebitcreditnote($id){
@@ -186,7 +188,8 @@ class OtherdebitcreditController extends Controller
         $data = $model->getDebitNoteDetails($id);
         
         $this->layout = false;
-        return $this->render('debit_note', ['debit_note' => $data['debit_note'], 'vendor_details' => $data['vendor_details']]);
+        return $this->render('debit_note', ['debit_note' => $data['debit_note'], 'vendor_details' => $data['vendor_details'], 
+                                        'warehouse_details' => $data['warehouse_details']]);
     }
 
     public function actionDownloaddebitcreditnote($id){
@@ -216,7 +219,7 @@ class OtherdebitcreditController extends Controller
         return $this->render('email', [
             'invoice_details' => $data['invoice_details'], 'debit_note' => $data['debit_note'], 
             'deduction_details' => $data['deduction_details'], 'vendor_details' => $data['vendor_details'], 
-            'grn_details' => $data['grn_details']
+            'grn_details' => $data['grn_details'], 'warehouse_details' => $data['warehouse_details']
         ]);
     }
 

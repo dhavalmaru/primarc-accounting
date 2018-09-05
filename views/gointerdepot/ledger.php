@@ -17,10 +17,10 @@ $mycomponent = Yii::$app->mycomponent;
 
 <style>
     .table-head { font-weight:500;  
-    background: #41ace9;
-    color: #fff;
-    border-bottom: 1px solid #41ace9;
-    background-image: linear-gradient(#54b4eb, #2fa4e7 60%, #1d9ce5);
+        background: #41ace9;
+        color: #fff;
+        border-bottom: 1px solid #41ace9;
+        background-image: linear-gradient(#54b4eb, #2fa4e7 60%, #1d9ce5);
     }
 
     .bold-text { font-weight:600; letter-spacing:.5px; background:#f9f9f9;   }
@@ -53,25 +53,23 @@ $mycomponent = Yii::$app->mycomponent;
     .close { outline:none;}
     .diversion {   /*box-shadow: 0 0 5px rgba(0,0,0,.1);   padding:3px 10px 10px 10px; */  margin:20px 0;}
     @media only screen and (min-width:250px) and (max-width:420px) { 
-    .diversion  { width:100%; overflow-x:scroll;}
-    .grn-view .table { width:500px; padding:10px;}
+        .diversion  { width:100%; overflow-x:scroll;}
+        .grn-view .table { width:500px; padding:10px;}
     }
-
     @media only screen and (min-width:250px) and (max-width:767px) {
-    .col-xs-6 {   padding:5px 10px; } 
-    .row-container { padding:0;}
-    label { margin:0;}
-    .table-container { max-width:700px; overflow-x:scroll;}
-    .table-container table{ width:1200px;   } 
-    .navbar-collapse.in { overflow:hidden!important;}
+        .col-xs-6 {   padding:5px 10px; } 
+        .row-container { padding:0;}
+        label { margin:0;}
+        .table-container { max-width:700px; overflow-x:scroll;}
+        .table-container table{ width:1200px;   } 
+        .navbar-collapse.in { overflow:hidden!important;}
     }
-
     @media print{#btn_close, #btn_print{ display : none }}
 </style>
 
 <div class="grn-view">  
     <div class=" col-md-12"> 
-        <a class="btn btn-sm btn-danger pull-left" id="btn_close" href="<?php echo Url::base(); ?>index.php?r=goodsoutward%2Findex">Close</a>
+        <a class="btn btn-sm btn-danger pull-left" id="btn_close" href="<?php echo Url::base(); ?>index.php?r=gointerdepot%2Findex">Close</a>
         <button type="button" class="btn btn-sm btn-info pull-right" id="btn_print" onclick="javascript:window.print();">Print</button>
         <h3 class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Primarc Pecan Retail Pvt. Ltd.</h3>
         <h5 class="text-center">Mumbai</h5>
@@ -82,9 +80,19 @@ $mycomponent = Yii::$app->mycomponent;
             print_r($acc_ledger_entries);
             echo "</pre>";*/
         ?>
-        <div>Vendor: <?php echo ($grn_details[0]['vendor_name']!=""?$grn_details[0]['vendor_name']:$grn_details[0]['idt_warehouse']) ?></div>
-        <div class="pull-left">Grn Id: <?php echo $grn_details[0]['gi_go_id']; ?></div>
-        <div class="pull-right">Posting Date: <?php if(isset($acc_ledger_entries[0]["ref_date"])) echo (($acc_ledger_entries[0]["ref_date"]!=null && $acc_ledger_entries[0]["ref_date"]!='')?date('d/m/Y',strtotime($acc_ledger_entries[0]["ref_date"])):date('d/m/Y')); else echo date('d/m/Y'); ?></div>
+        <!-- <div>Vendor: <?php //cho ($grn_details[0]['vendor_name']!=""?$grn_details[0]['vendor_name']:$grn_details[0]['idt_warehouse']) ?></div> -->
+        <div class="pull-left">
+            <span>From: <?php echo $grn_details[0]['warehouse_state']; ?></span><br/>
+            <span>Grn Id: <?php echo $grn_details[0]['gi_go_id']; ?></span><br/>
+        </div>
+        <div class="pull-right">
+            <span>To: <?php echo $grn_details[0]['to_state']; ?></span><br/>
+            <span>Posting Date: <?php if(isset($acc_ledger_entries[0]["ref_date"])) echo (($acc_ledger_entries[0]["ref_date"]!=null && $acc_ledger_entries[0]["ref_date"]!='')?date('d/m/Y',strtotime($acc_ledger_entries[0]["ref_date"])):date('d/m/Y')); else echo date('d/m/Y'); ?></span><br/>
+        </div>
+
+        <br/>
+        <!-- <div class="pull-left">Grn Id: <?php //echo $grn_details[0]['gi_go_id']; ?></div>
+        <div class="pull-right">Posting Date: <?php //if(isset($acc_ledger_entries[0]["ref_date"])) echo (($acc_ledger_entries[0]["ref_date"]!=null && $acc_ledger_entries[0]["ref_date"]!='')?date('d/m/Y',strtotime($acc_ledger_entries[0]["ref_date"])):date('d/m/Y')); else echo date('d/m/Y'); ?></div> -->
         
 
     <?php 
@@ -92,6 +100,7 @@ $mycomponent = Yii::$app->mycomponent;
     <?php $rows = ""; $new_invoice_no = ""; $invoice_no = ""; $debit_amt=0; $credit_amt=0; $sr_no=1;
         $total_debit_amt=0; $total_credit_amt=0; 
         $table_arr = array(); $table_cnt = 0;
+        $tbody = "";
 
         for($i=0; $i<count($acc_ledger_entries); $i++) {
             $rows = $rows . '<tr>
@@ -118,31 +127,44 @@ $mycomponent = Yii::$app->mycomponent;
 
             $rows = $rows . '</tr>';
 
-            if($acc_ledger_entries[$i]["entry_type"]=="Total Amount" || $acc_ledger_entries[$i]["entry_type"]=="Total Deduction"){
+            if($acc_ledger_entries[$i]["entry_type"]=="Total Amount" || $acc_ledger_entries[$i]["entry_type"]=="Total Deduction" || ($i+1)==count($acc_ledger_entries)){
                 if($acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
-                    $particular = "Total Purchase Amount";
+                    $particular = "Total Amount";
                 } else {
-                    $particular = "Total Deduction Amount";
+                    $particular = "Total Amount";
                     
                     $debit_amt = $debit_amt - ($total_debit_amt*2);
                     $credit_amt = $credit_amt - ($total_credit_amt*2);
                 }
 
-                $rows = $rows . '<tr class="bold-text text-right">
-                                    <td colspan="4" style="text-align:right;">'.$particular.'</td>
-                                    <td class="bold-text text-right">'.$mycomponent->format_money($total_debit_amt,2).'</td>
-                                    <td class="bold-text text-right">'.$mycomponent->format_money($total_credit_amt,2).'</td>';
-                $rows = $rows . '<tr><td colspan="6"></td></tr>';
+                if(strpos($acc_ledger_entries[$i-1]["ledger_name"], 'Stock')!==false) {
+                    $entry_type = "Stock Transfer";
+                } else if(strpos($acc_ledger_entries[$i-1]["ledger_name"], 'Input')!==false) {
+                    $entry_type = "Purchase Entry";
+                } else {
+                    $entry_type = "Sales Entry";
+                }
 
+                $tbody = $tbody . '<tr class="bold-text text-right">
+                            <td colspan="6" style="text-align:left;">'.$entry_type.'</td>
+                        </tr>' . $rows . 
+                        '<tr class="bold-text text-right">
+                            <td colspan="4" style="text-align:right;">'.$particular.'</td>
+                            <td class="bold-text text-right">'.$mycomponent->format_money($total_debit_amt,2).'</td>
+                            <td class="bold-text text-right">'.$mycomponent->format_money($total_credit_amt,2).'</td>
+                        </tr>
+                        <tr><td colspan="6"></td></tr>';
+
+                $rows = "";
                 $total_debit_amt = 0;
                 $total_credit_amt = 0;
                 $sr_no=1;
 
-                if($acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
-                    /*$rows = $rows . '<tr class="bold-text text-right">
-                                        <td colspan="6" style="text-align:left;">Deduction Entry</td>
-                                    </tr>';*/
-                }
+                // if($acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
+                //     $rows = $rows . '<tr class="bold-text text-right">
+                //                         <td colspan="6" style="text-align:left;">Deduction Entry</td>
+                //                     </tr>';
+                // }
             }
 
             $blFlag = false;
@@ -153,9 +175,9 @@ $mycomponent = Yii::$app->mycomponent;
             }
 
             if($blFlag == true){
-                $rows = '<tr class="bold-text text-right">
-                            <td colspan="6" style="text-align:left;">Sales Entry</td>
-                        </tr>' . $rows;
+                // $rows = '<tr class="bold-text text-right">
+                //             <td colspan="6" style="text-align:left;">Sales Entry</td>
+                //         </tr>' . $rows;
 
                 $invoice_created_date = '';
                 if(isset($acc_ledger_entries[0]["invoice_created_date"])) {
@@ -179,12 +201,7 @@ $mycomponent = Yii::$app->mycomponent;
                                     <th>Debit</th>
                                     <th>Credit</th>
                                 </tr>
-                                ' . $rows . '
-                                <tr class="bold-text text-right">
-                                    <td colspan="4" style="text-align:right;">Total Amount</td>
-                                    <td>' . $mycomponent->format_money($debit_amt,2) . '</td>
-                                    <td>' . $mycomponent->format_money($credit_amt,2) . '</td>
-                                </tr>
+                                ' . $tbody . '
                             </table>
                         </div>';
 
@@ -192,9 +209,9 @@ $mycomponent = Yii::$app->mycomponent;
                 $table_arr[$table_cnt] = $table;
                 $table_cnt = $table_cnt + 1;
 
-                $rows=""; $debit_amt=0; $credit_amt=0; $sr_no=1;
+                $rows=""; $debit_amt=0; $credit_amt=0; $sr_no=1; $tbody="";
             }
         }
          ?>
- </div>
+    </div>
 </div>

@@ -13,6 +13,7 @@ $(document).ready(function(){
     get_sub_account_type();
     get_account_path();
     $('.select2').select2();
+    set_tax_type();
 
     $("#type").change(function(){
         set_acc_type();
@@ -44,6 +45,7 @@ $(document).ready(function(){
         $("#legal_name").val($("#vendor_id option:selected").text());
         get_code();
     });
+
     $("#customer_id").change(function(){
         $("#legal_name").val($("#customer_id option:selected").text());
         get_code();
@@ -51,12 +53,22 @@ $(document).ready(function(){
         
     $("#tax_id").change(function(){
         get_code1();
+        set_tax_type();
     });
 
     $("#gst_rate,#bus_type,#state_id,#state_type,#tax_id,#input_output").change(function(){
         get_tree();
+        set_tax_type();
     });
 });
+
+function set_tax_type(){
+    if($("#tax_id option:selected").text()=="CGST"||$("#tax_id option:selected").text()=="SGST"||$("#tax_id option:selected").text()=="IGST"){
+        $("#tax_id_val").val($("#tax_id option:selected").text());
+    } else {
+        $("#tax_id_val").val('');
+    }
+}
 
 function get_tree() {
     var input_output = $("#input_output").val();
@@ -65,6 +77,8 @@ function get_tree() {
     
     var state_id = $("#state_id option:selected").text();
     var tax_id = $("#tax_id option:selected").text();
+
+    var company_name = $("#session_company option:selected").text();
     
     var state_type = $("#state_type").val();
     if($("#type").val()=="Goods Purchase")
@@ -81,7 +95,12 @@ function get_tree() {
         
         $("#legal_name").val(''+input_output+'-'+state_id+'-'+tax_id+'-'+gst_rate+'%');
     }
-    else
+    else if($("#type").val()=="Branch Type")
+    {
+        $("#legal_name").val(company_name+'-'+state_id);
+    
+    }
+    else 
     {
         $("#legal_name").val("");
     }
@@ -190,12 +209,13 @@ function set_acc_type(){
         // $("#branch").attr('readonly',false);
         // $("#acc_no").attr('readonly',false);
         // $("#ifsc_code").attr('readonly',false);
-           $("#customer_code").hide();
+        $("#customer_code").hide();
     } else if($("#type").val()=="Bank Account"){
         $("#vendor_id").hide();
         $("#type_vendor_id").hide();
         $("#customer_id").hide();
         $("#type_customer_id").hide();
+        $('#legal_name').show();
         $('#legal_name').attr("readonly", false);
         $("#vendor_code").hide();
         $("#code").show();
@@ -372,11 +392,32 @@ function set_acc_type(){
         $(".gst_tax").show();
         $(".tax_type").show();
         $("#customer_code").hide();
+    } else if($("#type").val()=="Branch Type"){
+        $("#customer_id").hide();
+        $("#type_customer_id").hide();
+        $("#vendor_id").hide();
+        $("#type_vendor_id").hide();
+        $("#legal_name").show();
+        $('#legal_name').attr("readonly", true);
+        $("#vendor_code").hide();
+        $("#code").show();
+        $(".vendor_goods").hide();
+        $(".vendor_expenses").hide();
+        $(".bank_account").hide();
+        $(".employee").hide();
+        $("#customer_code").hide();
+        $(".state").show();
+        $(".state_type").hide();
+        $(".gst_rate").hide();
+        $(".bus_type").hide();
+        $(".gst_tax").hide();
+        $(".tax_type").hide();
     } else {
         $("#customer_id").hide();
         $("#type_customer_id").hide();
         $("#vendor_id").hide();
         $("#type_vendor_id").hide();
+        $('#legal_name').show();
         $('#legal_name').attr("readonly", false);
         $("#vendor_code").hide();
         $("#code").show();
@@ -420,7 +461,7 @@ function get_code1() {
                     },
             success: function (data) {
                 if(data != null){
-                  $("#code").val(data);
+                    $("#code").val(data);
                 } else {
                     $("#code").val("");
                 }

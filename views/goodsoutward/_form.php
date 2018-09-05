@@ -23,31 +23,17 @@ $mycomponent = Yii::$app->mycomponent;
 /*--------------------------*/
 #shortage_sku_details { width: 2500px; }
 #shortage_sku_details tr td input { border: none; outline: none; }
+    
 #shortage_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
 #shortage_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
 #shortage_sku_details tr td:nth-child(25) input, #shortage_sku_details tr td:nth-child(54) input { border: 1px solid #ddd!important; outline: none; }
 #shortage_sku_details tr td:nth-child(54) { width: 400px; }
-/*-----------------------*/
-#expiry_sku_details { width: 2500px; }
-#expiry_sku_details tr td input { border: none; outline: none; }
-#expiry_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
-#expiry_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-#expiry_sku_details tr td:nth-child(25) input, #expiry_sku_details tr td:nth-child(54) input { border: 1px solid #ddd!important; outline: none; }
-#expiry_sku_details tr td:nth-child(54) { width: 400px; }
+/*-----------------------
+
 /*----------------------*/
-#damaged_sku_details { width: 2500px; }
-#damaged_sku_details tr td input { border: none; outline: none; }
-#damaged_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
-#damaged_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-#damaged_sku_details tr td:nth-child(25) input, #damaged_sku_details tr td:nth-child(54) input { border: 1px solid #ddd!important; outline: none; }
-#damaged_sku_details tr td:nth-child(54) { width: 400px; }
+
 /*----------------------*/
-#margindiff_sku_details { width: 3000px; }
-#margindiff_sku_details tr td input { border: none; outline: none; }
-#margindiff_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
-#margindiff_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-#margindiff_sku_details tr td:nth-child(47) input, #margindiff_sku_details tr td:nth-child(54) input { border: 1px solid #ddd!important; outline: none; }
-#margindiff_sku_details tr td:nth-child(54) { width: 400px; }
+
 /*----------------------*/
 #ledger_details .modal-body .table   {  }
 
@@ -181,7 +167,7 @@ table {width: 1200px;}
                     <label class=" control-label">Vendor name</label> 
                     <div class=" "> 
     					<input type="hidden" class="form-control" name="vendor_id" id="vendor_id" value="<?= $grn_details[0]['vendor_id1']?>" /> 
-                        <input type="hidden" class="form-control" name="warehouse_id" id="vendor_id" value="<?= $grn_details[0]['warehouse_id']?>" /> 
+                        <input type="hidden" class="form-control" name="warehouse_id" id="warehouse_id" value="<?= $grn_details[0]['warehouse_id']?>" /> 
                         <input type="text" class="form-control" name="vendor_name" id="vendor_name" value="<?= ($grn_details[0]['vendor_name']!=""?$grn_details[0]['vendor_name']:$grn_details[0]['idt_warehouse'])  ?>" readonly />  
                     </div>
                 </div>
@@ -454,7 +440,7 @@ table {width: 1200px;}
                     <td class="sticky-cell" style="border: none!important;"><?php echo '1.'.($j+1); ?></td>
                     <td class="sticky-cell" style="border: none!important;">Taxable Amount</td>
                     <td class="sticky-cell" style="border: none!important;">
-                        <select id="invoicecost_acc_id_<?php echo $j;?>" class="form-control acc_id" name="invoice_cost_acc_id[]" onChange="get_acc_details(this)">
+                        <select id="invoicecost_acc_id_<?php echo $j;?>" class="form-control acc_id select2" name="invoice_cost_acc_id[]" onChange="get_acc_details(this)">
                             <option value="">Select</option>
                             <?php for($i=0; $i<count($acc_master); $i++) { 
                                     if($acc_master[$i]['type']=="Goods Purchase") { 
@@ -487,7 +473,7 @@ table {width: 1200px;}
                     <td class="sticky-cell" style="border: none!important;"><?php echo '2.'.($j+1); ?></td>
                     <td class="sticky-cell" style="border: none!important;">Tax</td>
                     <td class="sticky-cell" style="border: none!important;">
-                        <select id="invoicetax_acc_id_<?php echo $j;?>" class="form-control acc_id" name="invoice_tax_acc_id[]" onChange="get_acc_details(this)">
+                        <select id="invoicetax_acc_id_<?php echo $j;?>" class="form-control acc_id select2" name="invoice_tax_acc_id[]" onChange="get_acc_details(this)">
                             <option value="">Select</option>
                             <?php for($i=0; $i<count($acc_master); $i++) { 
                                     if($acc_master[$i]['type']=="Tax") { 
@@ -517,7 +503,7 @@ table {width: 1200px;}
                     <td class="sticky-cell" style="border: none!important;"><?php echo '2.'.($j+1); ?></td>
                     <td class="sticky-cell" style="border: none!important;">CGST</td>
                     <td class="sticky-cell" style="border: none!important;">
-                        <select id="invoicecgst_acc_id_<?php echo $j;?>" class="form-control acc_id" name="invoice_cgst_acc_id[]" onChange="get_acc_details(this)">
+                        <select id="invoicecgst_acc_id_<?php echo $j;?>" class="form-control acc_id select2" name="invoice_cgst_acc_id[]" onChange="get_acc_details(this)">
                             <option value="">Select</option>
                             <?php for($i=0; $i<count($acc_master); $i++) { 
                                     if($acc_master[$i]['type']=="CGST") { 
@@ -547,7 +533,7 @@ table {width: 1200px;}
                     <td class="sticky-cell" style="border: none!important;"><?php echo '2.'.($j+1); ?></td>
                     <td class="sticky-cell" style="border: none!important;">SGST</td>
                     <td class="sticky-cell" style="border: none!important;">
-                        <select id="invoicesgst_acc_id_<?php echo $j;?>" class="form-control acc_id" name="invoice_sgst_acc_id[]" onChange="get_acc_details(this)">
+                        <select id="invoicesgst_acc_id_<?php echo $j;?>" class="form-control acc_id select2" name="invoice_sgst_acc_id[]" onChange="get_acc_details(this)">
                             <option value="">Select</option>
                             <?php for($i=0; $i<count($acc_master); $i++) { 
                                     if($acc_master[$i]['type']=="SGST") { 
@@ -577,7 +563,7 @@ table {width: 1200px;}
                     <td class="sticky-cell" style="border: none!important;"><?php echo '2.'.($j+1); ?></td>
                     <td class="sticky-cell" style="border: none!important;">IGST</td>
                     <td class="sticky-cell" style="border: none!important;">
-                        <select id="invoiceigst_acc_id_<?php echo $j;?>" class="form-control acc_id" name="invoice_igst_acc_id[]" onChange="get_acc_details(this)">
+                        <select id="invoiceigst_acc_id_<?php echo $j;?>" class="form-control acc_id select2" name="invoice_igst_acc_id[]" onChange="get_acc_details(this)">
                             <option value="">Select</option>
                             <?php for($i=0; $i<count($acc_master); $i++) { 
                                     if($acc_master[$i]['type']=="IGST") { 
@@ -608,7 +594,7 @@ table {width: 1200px;}
                         <td class="sticky-cell" style="border: none!important;">3</td>
                         <td class="sticky-cell" style="border: none!important;">Other Charges</td>
                         <td class="sticky-cell" style="border: none!important;">
-                            <select id="othercharges_acc_id_0" class="form-control acc_id" name="other_charges_acc_id" onChange="get_acc_details(this)">
+                            <select id="othercharges_acc_id_0" class="form-control acc_id select2" name="other_charges_acc_id" onChange="get_acc_details(this)">
                                 <option value="">Select</option>
                                 <?php for($i=0; $i<count($acc_master); $i++) { 
                                         if($acc_master[$i]['type']=="Others") { 
@@ -649,7 +635,7 @@ table {width: 1200px;}
 
                         if($grn_details[0]['vendor_id1']!=""){
                         ?>
-                            <select id="totalamount_acc_id_0" class="form-control acc_id" name="total_amount_acc_id" onChange="get_acc_details(this)" style="display: none;">
+                            <select id="totalamount_acc_id_0" class="form-control acc_id " name="total_amount_acc_id" onChange="get_acc_details(this)" style="display: none;">
                                 <option value="">Select</option>
                                 <?php for($i=0; $i<count($acc_master); $i++) { 
                                         if($acc['total_amount_acc_id']==""){
@@ -673,7 +659,7 @@ table {width: 1200px;}
 
                         {?>
 
-                              <select id="totalamount_acc_id_0" class="form-control acc_id" name="total_amount_acc_id" onChange="get_acc_details(this)" >
+                              <select id="totalamount_acc_id_0" class="form-control acc_id " name="total_amount_acc_id" onChange="get_acc_details(this)" >
                                     <option value="">Select</option>
                                     <?php 
                                     for($i=0; $i<count($acc_master); $i++) { 
@@ -764,7 +750,7 @@ table {width: 1200px;}
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Shortage Deductions</h4>
+                        <h4 class="modal-title">SKU Details</h4>
                     </div>
                     <div class="modal-body" style=" ">
                         <div class="modal-body-inside"  >
@@ -772,9 +758,9 @@ table {width: 1200px;}
                             <thead>
                                 <tr>
                                     <th colspan="8">SKU Details</th>
-                                    <th colspan="2">Quantity Deducted</th>
+                                    <th colspan="2">Quantity</th>
 
-                                    <th colspan="10">Purchase Order Details (Per Unit)</th>
+                                    <th colspan="10">Purchase Order Details</th>
                                 </tr>
                                 <tr>
                                     <th>Sr no</th>
@@ -864,7 +850,7 @@ table {width: 1200px;}
                                                 </td>
                                                 <td><input type="text" class="'.$ded_type.'_asin_code_'.$sr_no.' valid" id="'.$ded_type.'_asin_code_'.$i.'" name="'.$ded_type.'_asin_code[]" value="'.$skuwise[$i]['asin'].'" readonly
                                                     aria-invalid="false"></td>
-                                                <td><input type="text" class="'.$ded_type.'_hsn_code_'.$sr_no.'" id="'.$ded_type.'_hsn_code_'.$i.'" name="'.$ded_type.'_hsn_code[]" value="'.$skuwise[$i]['hsn_code'].'"/></td>
+                                                <td><input type="text" style="border: 1px solid #ddd!important;" class="'.$ded_type.'_hsn_code_'.$sr_no.'" id="'.$ded_type.'_hsn_code_'.$i.'" name="'.$ded_type.'_hsn_code[]" value="'.$skuwise[$i]['hsn_code'].'"/></td>
                                                 <td><input type="text" class="'.$ded_type.'_batch_code_'.$sr_no.' valid" id="'.$ded_type.'_batch_code_'.$i.'" name="'.$ded_type.'_batch_code[]" value="'.$skuwise[$i]['batch_code'].'" readonly
                                                     aria-invalid="false"></td>
                                                 <td ><input type="text" class="'.$ded_type.'_expiry_date_'.$sr_no.'" id="'.$ded_type.'_expiry_date_'.$i.'" name="'.$ded_type.'_expiry_date[]" value="" readonly /></td>
@@ -876,7 +862,7 @@ table {width: 1200px;}
                                                 <td><input type="text" class="'.$ded_type.'_qty_'.$sr_no.' edit-sku" id="'.$ded_type.'_qty_'.$i.'" name="'.$ded_type.'_qty[]" value="' . $mycomponent->format_money($skuwise[$i]["invoice_qty"],2) . '" readonly/>
                                                 </td>
                                                 <td><input type="text" class="'.$ded_type.'_mrp_'.$sr_no.'" id="'.$ded_type.'_mrp_'.$i.'" name="'.$ded_type.'_mrp[]" value="'.$mycomponent->format_money($skuwise[$i]["mrp"],4).'" readonly /></td>
-                                                <td><input type="text" class="'.$ded_type.'_cost_excl_tax_per_unit_'.$sr_no.'" id="'.$ded_type.'_cost_excl_tax_per_unit_'.$i.'" name="'.$ded_type.'_cost_excl_tax_per_unit[]" value="'.$skuwise[$i]["per_unit_exc_tax"].'" onChange="set_sku_details2(this)"/></td>
+                                                <td><input type="text" style="border: 1px solid #ddd!important;" class="'.$ded_type.'_cost_excl_tax_per_unit_'.$sr_no.'" id="'.$ded_type.'_cost_excl_tax_per_unit_'.$i.'" name="'.$ded_type.'_cost_excl_tax_per_unit[]" value="'.$skuwise[$i]["per_unit_exc_tax"].'" onChange="set_sku_details2(this)"/></td>
                                                  <td><input type="text" class="'.$ded_type.'_cost_excl_tax_'.$sr_no.'" id="'.$ded_type.'_cost_excl_tax_'.$i.'" name="'.$ded_type.'_cost_excl_tax[]" value="'.$mycomponent->format_money($skuwise[$i]["cost_excl_vat"],2).'" readonly/>
                                                  <input type="hidden" class="'.$ded_type.'_cost_inc_tax_'.$sr_no.'" id="'.$ded_type.'_cost_inc_tax_'.$i.'" name="'.$ded_type.'_cost_inc_tax[]" value="'.$mycomponent->format_money($skuwise[$i]["per_unit"],2).'" readonly/>
                                                  </td>

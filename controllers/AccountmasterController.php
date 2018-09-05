@@ -190,7 +190,7 @@ class AccountmasterController extends Controller
         }
     }
 
-    public function actionSave() {   
+    public function actionSave() {
         $acc_master = new AccountMaster();
         $result = $acc_master->save();
 		
@@ -255,6 +255,7 @@ class AccountmasterController extends Controller
         $state = $acc_master->getState();
         echo json_encode($state);
     }
+    
 	public function actionGettax() {
         $acc_master = new AccountMaster();
         $tax = $acc_master->getTax();

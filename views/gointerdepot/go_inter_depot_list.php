@@ -8,7 +8,7 @@ use yii\helpers\Url;
 /* @var $searchModel app\models\GrnSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Goods Outward';
+$this->title = 'Goods Outward Inter Depot';
 $this->params['breadcrumbs'][] = $this->title;
 $mycomponent = Yii::$app->mycomponent;
 ?>
@@ -43,8 +43,8 @@ $mycomponent = Yii::$app->mycomponent;
 											<th>Go Id</th> 
 											<th>Go No</th>
 											<th>Warehouse</th> 
-											<th>Vendor Name</th> 
-											<!-- <th>Idt Warehouse</th>  -->
+											<!-- <th>Vendor Name</th>  -->
+											<th>Idt Warehouse</th> 
 											<th>Total Value</th> 
 											<th>Go Date</th> 
 											<th>Updated By</th> 
@@ -67,8 +67,8 @@ $mycomponent = Yii::$app->mycomponent;
 											<th>Go Id</th> 
 											<th>Go No</th> 
 											<th>Warehouse</th>  
-											<th>Vendor Name</th> 
-											<!-- <th>Idt Warehouse</th>  -->
+											<!-- <th>Vendor Name</th>  -->
+											<th>Idt Warehouse</th> 
 											<th>Total Value</th> 
 											<th>Go Date</th> 
 											<th>Updated By</th> 
@@ -92,8 +92,8 @@ $mycomponent = Yii::$app->mycomponent;
 											<th>Go Id</th> 
 											<th>Go No</th>
 											<th>Warehouse</th> 
-											<th>Vendor Name</th> 
-											<!-- <th>Idt Warehouse</th>  -->
+											<!-- <th>Vendor Name</th>  -->
+											<th>Idt Warehouse</th> 
 											<th>Total Value</th> 
 											<th>Go Date</th> 
 											<th>Updated By</th> 
@@ -119,7 +119,7 @@ $mycomponent = Yii::$app->mycomponent;
 
 <?php 
     $this->registerJsFile(
-        '@web/js/goods_outward.js',
+        '@web/js/go_inter_depot.js',
         ['depends' => [\yii\web\JqueryAsset::className()]]
     );
 ?>

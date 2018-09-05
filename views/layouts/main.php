@@ -188,7 +188,20 @@ $session = Yii::$app->session;
                     </span>
                 </a>
                 <ul class="treeview-menu">
-                    <li class="active"><a href="<?php echo Url::base(); ?>index.php?r=goodsoutward%2Findex"><i class="fa fa-circle-o"></i> Goods Outward</a></li>
+                    <li class="treeview" style="<?php if(isset($session['S_Purchase'])) {if($session['S_Purchase']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                        <a href="#">
+                            <i class="fa fa-book"></i> <span>Goods Outward</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li class="active"><a href="<?php echo Url::base(); ?>index.php?r=goodsoutward%2Findex"><i class="fa fa-circle-o"></i> RTV</a></li>
+                            <li><a href="<?php echo Url::base(); ?>index.php?r=gointerdepot%2Findex"><i class="fa fa-circle-o"></i> Inter Depot </a></li>
+                        </ul>
+                    </li>
+
+                    <!-- <li class="active"><a href="<?php //echo Url::base(); ?>index.php?r=goodsoutward%2Findex"><i class="fa fa-circle-o"></i> Goods Outward</a></li> -->
                     <li><a href="<?php echo Url::base(); ?>index.php?r=promotion%2Findex"><i class="fa fa-circle-o"></i> Promotion </a></li>
                     <li><a href="<?php echo Url::base(); ?>index.php?r=otherdebitcredit%2Findex"><i class="fa fa-circle-o"></i> Other </a></li>
                 </ul>

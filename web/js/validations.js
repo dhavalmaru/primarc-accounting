@@ -1042,25 +1042,46 @@ $('#journal_voucher').submit(function() {
     removeMultiInputNamingRules('#journal_voucher', 'select[alt="transaction[]"]');
     removeMultiInputNamingRules('#journal_voucher', 'input[alt="debit_amt[]"]');
     removeMultiInputNamingRules('#journal_voucher', 'input[alt="credit_amt[]"]');
+    removeMultiInputNamingRules('#journal_voucher', 'input[alt="invoice_no[]"]');
+    removeMultiInputNamingRules('#journal_voucher', 'input[alt="invoice_date[]"]');
+    removeMultiInputNamingRules('#journal_voucher', 'input[alt="invoice_amount[]"]');
 
     addMultiInputNamingRules('#journal_voucher', 'select[name="acc_id[]"]', { required: true });
     addMultiInputNamingRules('#journal_voucher', 'input[name="acc_code[]"]', { required: true });
     addMultiInputNamingRules('#journal_voucher', 'select[name="transaction[]"]', { required: true });
     addMultiInputNamingRules('#journal_voucher', 'input[name="debit_amt[]"]', { required: true });
     addMultiInputNamingRules('#journal_voucher', 'input[name="credit_amt[]"]', { required: true });
+    addMultiInputNamingRules('#journal_voucher', 'input[name="invoice_no[]"]', { required: true });
+    addMultiInputNamingRules('#journal_voucher', 'input[name="invoice_date[]"]', { required: true });
+    addMultiInputNamingRules('#journal_voucher', 'input[name="invoice_amount[]"]', { required: true });
+   
+    $('.invoice_no,.invoice_date,.invoice_amount').each(function(){
+        $(this).rules('add', { required: true });
+    });  
+
+      
 
     if (!$("#journal_voucher").valid()) {
-
+        jv_invalid_handler();
         return false;
     } else {
         if (check_acc_jv_details()==false) {
+            jv_invalid_handler();
             return false;
-        } else {
+        }else if(check_jv_invoice_details()==false)
+        {
+            jv_invalid_handler();
+            return false;
+        }else {
+
             removeMultiInputNamingRules('#journal_voucher', 'select[alt="acc_id[]"]');
             removeMultiInputNamingRules('#journal_voucher', 'input[alt="acc_code[]"]');
             removeMultiInputNamingRules('#journal_voucher', 'select[alt="transaction[]"]');
             removeMultiInputNamingRules('#journal_voucher', 'input[alt="debit_amt[]"]');
             removeMultiInputNamingRules('#journal_voucher', 'input[alt="credit_amt[]"]');
+            removeMultiInputNamingRules('#journal_voucher', 'input[alt="invoice_no[]"]');
+            removeMultiInputNamingRules('#journal_voucher', 'input[alt="invoice_date[]"]');
+            removeMultiInputNamingRules('#journal_voucher', 'input[alt="invoice_amount[]"]');
 
             return true;
         }
@@ -1080,6 +1101,71 @@ function check_acc_jv_details() {
     }
 
     return valid;
+}
+
+function check_jv_invoice_details(){
+    var validator = $("#journal_voucher").validate();
+    var valid = true;
+    $('.voucher .debit_amt , .credit_amt').each(function(){
+        var element_val = get_number($(this).val(),2);
+        if(parseInt(element_val)!=0 && element_val!="")
+        {
+            var id = $(this).attr('id');
+            console.log('id'+id);
+            var elem_id = id.substr(id.lastIndexOf('_')+1);
+            console.log('elem_id'+elem_id);
+            var total_val = $('#sum_total_'+elem_id).text();
+            console.log('sum_total'+total_val);
+            if(total_val!=undefined && total_val!="")
+            {
+                if(parseInt(element_val)!=parseInt(total_val))
+                {
+                    console.log('total_val'+total_val);
+                    var errors = {};
+                    var name = $(this).attr('name');
+                    console.log('name'+elem_id);
+                    errors[name] = "Invoice Amount and Actual Amount Should Be Same";
+                    validator.showErrors(errors);
+                    valid = false;
+                }   
+            }
+        }
+        
+    });
+
+    /*$('.voucher  .credit_amt').each(function(){
+        var element_val = $(this).val();
+        var id = $(this).attr('id');
+        var elem_id = id.substr(id.lastIndexOf('_')+1);
+        var total_val = $('#sum_total_'+elem_id).val();
+        if(total_val!=undefined)
+        {
+            if(parseInt(element_val)!=parseInt(total_val))
+            {
+                var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Invoice Amount and Debit Amount Should Be Same";
+                validator.showErrors(errors);
+                valid = false;
+            }   
+        }  
+    });*/
+
+     return valid;
+}
+
+function jv_invalid_handler() {
+    $('.errors').remove();
+    $('.jv_body_detail').each(function(){
+        var id = $(this).attr('id');
+       
+        var index = id.substr(id.lastIndexOf('_')+1);
+        if ($('#jv_'+index).find("input.error").length>0) {
+           var errors = "<span>Please Clear Errors</span> <br/>";
+           
+            $('#'+index).after('<div class="errors" style="color: #dd4b39!important;"><br>'+errors+'</div>');
+        }
+    });
 }
 
 
@@ -1694,17 +1780,27 @@ $("#reconsilation_form").submit(function() {
     removeMultiInputNamingRules('#reconsilation_form', 'input[alt="payment_date[]"]');
     addMultiInputNamingRules('#reconsilation_form', 'input[name="payment_date[]"]', { validDate: true }, "");
     
-    if (!$("#reconsilation_form").valid()) {
-        return false;
-    } else {
-        if(reconsiled()==false) {
+    if($('#form_val').val()=='true'){
+        if (!$("#reconsilation_form").valid()) {
             return false;
         } else {
-            removeMultiInputNamingRules('#reconsilation_form', 'input[alt="payment_date[]"]');
-            return true;
+            if(reconsiled()==false) {
+                return false;
+            } else {
+                removeMultiInputNamingRules('#reconsilation_form', 'input[alt="payment_date[]"]');
+                return true;
+            }
         }
     }
 });
+
+function set_form_val(elem){
+    if(elem.value=="submit"){
+        $('#form_val').val('true');
+    } else {
+        $('#form_val').val('false');
+    }
+}
 
 function reconsiled()
 {
@@ -2399,6 +2495,220 @@ function sale_invalid_handler(){
         $('#margindiff_validation_icon').show();
     } else {
         $('#margindiff_validation_icon').hide();
+    }
+
+    $('#form_errors').html(errors);
+
+    if(errors!=""){
+        $('#form_errors_group').show();
+        $('#form_errors').show();
+    } else {
+        $('#form_errors_group').hide();
+        $('#form_errors').hide();
+    }
+}
+
+
+
+
+// ----------------- GO INTER DEPOT DETAILS FORM VALIDATION -------------------------------------
+$(function() {
+    $("#form_go_inter_depot_details").validate({
+        rules: {
+            sales_other_charges_acc_id: {
+                required: function(){
+                    var blFlag = false;
+                    $('.sales_edited_other_charges').each(function() {
+                        if($(this).val()!=""){
+                            if(parseFloat($(this).val())>0){
+                                blFlag = true;
+                            }
+                        }
+                    });
+
+                    return blFlag;
+                }
+            },
+            other_charges_acc_id: {
+                required: function(){
+                    var blFlag = false;
+                    $('.edited_other_charges').each(function() {
+                        if($(this).val()!=""){
+                            if(parseFloat($(this).val())>0){
+                                blFlag = true;
+                            }
+                        }
+                    });
+
+                    return blFlag;
+                }
+            },
+            sales_stock_transfer_acc_id: {
+                required: function(){
+                    var blFlag = false;
+                    $('.edited_sales_stock_transfer').each(function() {
+                        if($(this).val()!=""){
+                            if(parseFloat($(this).val())>0){
+                                blFlag = true;
+                            }
+                        }
+                    });
+
+                    return blFlag;
+                }
+            },
+            purchase_stock_transfer_acc_id: {
+                required: function(){
+                    var blFlag = false;
+                    $('.edited_purchase_stock_transfer').each(function() {
+                        if($(this).val()!=""){
+                            if(parseFloat($(this).val())>0){
+                                blFlag = true;
+                            }
+                        }
+                    });
+
+                    return blFlag;
+                }
+            }
+        },
+
+        ignore: ":not(:visible)",
+
+        errorPlacement: function (error, element) {
+            var placement = $(element).data('error');
+            if (placement) {
+                $(placement).append(error);
+            } else {
+                error.insertAfter(element);
+            }
+        },
+
+        invalidHandler: function(e,validator) {
+            go_inter_depot_invalid_handler();
+        }
+    });
+
+    addMultiInputNamingRules_form_go_inter_depot_details();
+})
+
+function addMultiInputNamingRules_form_go_inter_depot_details(){
+    addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="invoice_cost_acc_id[]"]', { required: true });
+    // addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="invoice_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="invoice_cgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="invoice_sgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="invoice_igst_acc_id[]"]', { required: true });
+
+    addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="sales_invoice_cost_acc_id[]"]', { required: true });
+    // addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="sales_invoice_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="sales_invoice_cgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="sales_invoice_sgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="sales_invoice_igst_acc_id[]"]', { required: true });
+}
+function removeMultiInputNamingRules_form_go_inter_depot_details(){
+    removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="invoice_cost_acc_id[]"]');
+    // removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="invoice_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="invoice_cgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="invoice_sgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="invoice_igst_acc_id[]"]');
+
+    removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="sales_invoice_cost_acc_id[]"]');
+    // removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="sales_invoice_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="sales_invoice_cgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="sales_invoice_sgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="sales_invoice_igst_acc_id[]"]');
+}
+
+$('#form_go_inter_depot_details').submit(function() {
+    removeMultiInputNamingRules_form_go_inter_depot_details();
+    addMultiInputNamingRules_form_go_inter_depot_details();
+
+    if (!$("#form_go_inter_depot_details").valid()) {
+        go_inter_depot_invalid_handler();
+        return false;
+    } else {
+        if (check_go_inter_depot_details()==false) {
+            go_inter_depot_invalid_handler();
+            return false;
+        } else {
+            removeMultiInputNamingRules_form_go_inter_depot_details();
+            
+            return true;
+        }
+    }
+});
+function check_go_inter_depot_details() {
+    var validator = $("#form_go_inter_depot_details").validate();
+    var valid = true;
+    var purchase_acc_id = [];
+    var tax_acc_id = [];
+    var cgst_acc_id = [];
+    var sgst_acc_id = [];
+    var igst_acc_id = [];
+    var errors = {};
+
+    $("#form_go_inter_depot_details").find('select[alt="invoice_cost_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            purchase_acc_id.push($(this).val());
+        }
+    });
+    // $("#form_go_inter_depot_details").find('select[alt="invoice_tax_acc_id[]"]').each(function(index){
+    //     if($(this).val()!=null && $(this).val()!=''){
+    //         tax_acc_id.push($(this).val());
+    //     }
+    // });
+    $("#form_go_inter_depot_details").find('select[alt="invoice_cgst_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            cgst_acc_id.push($(this).val());
+        }
+    });
+    $("#form_go_inter_depot_details").find('select[alt="invoice_sgst_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            sgst_acc_id.push($(this).val());
+        }
+    });
+    $("#form_go_inter_depot_details").find('select[alt="invoice_igst_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            igst_acc_id.push($(this).val());
+        }
+    });
+
+    $("#form_go_inter_depot_details").find('select[alt="sales_invoice_cost_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            purchase_acc_id.push($(this).val());
+        }
+    });
+    // $("#form_go_inter_depot_details").find('select[alt="sales_invoice_tax_acc_id[]"]').each(function(index){
+    //     if($(this).val()!=null && $(this).val()!=''){
+    //         tax_acc_id.push($(this).val());
+    //     }
+    // });
+    $("#form_go_inter_depot_details").find('select[alt="sales_invoice_cgst_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            cgst_acc_id.push($(this).val());
+        }
+    });
+    $("#form_go_inter_depot_details").find('select[alt="sales_invoice_sgst_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            sgst_acc_id.push($(this).val());
+        }
+    });
+    $("#form_go_inter_depot_details").find('select[alt="sales_invoice_igst_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            igst_acc_id.push($(this).val());
+        }
+    });
+
+    validator.showErrors(errors);
+    return valid;
+}
+function go_inter_depot_invalid_handler(){
+    var errors="";
+    if ($('#gointerdepot_modal').find("input.error, select.error").length>0) {
+        errors=errors+"<span>Please Clear errors in Go Inter Depot details.</span> <br/>";
+        $('#gointerdepot_validation_icon').show();
+    } else {
+        $('#gointerdepot_validation_icon').hide();
     }
 
     $('#form_errors').html(errors);

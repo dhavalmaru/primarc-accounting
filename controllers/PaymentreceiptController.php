@@ -40,31 +40,27 @@ class PaymentreceiptController extends Controller
         }
     }
 
-	  public function actionGetotheraccdetails()
-		{
-			$payment_receipt = new PaymentReceipt();
-			$request = Yii::$app->request;
-			$trans_type = $request->post('trans_type');
-			$data = $payment_receipt->getaccbank1($trans_type);
+    public function actionGetotheraccdetails() {
+		$payment_receipt = new PaymentReceipt();
+		$request = Yii::$app->request;
+		$trans_type = $request->post('trans_type');
+		$data = $payment_receipt->getaccbank1($trans_type);
 
-            $result='<option value="">Select</option>';
-            for($i=0; $i<count($data); $i++){
-                $result = $result . '<option value="'.$data[$i]['id'].'">'.$data[$i]['legal_name'].'</option>';
-            }
+        $result='<option value="">Select</option>';
+        for($i=0; $i<count($data); $i++){
+            $result = $result . '<option value="'.$data[$i]['id'].'">'.$data[$i]['legal_name'].'</option>';
+        }
 
-			echo $result;
-		}
+		echo $result;
+	}
 	
-	
-	  public function actionGetotheraccdetails1(){
+    public function actionGetotheraccdetails1(){
         $payment_receipt = new PaymentReceipt();
         $request = Yii::$app->request;
         $trans_type = $request->post('trans_type');
         $data = $payment_receipt->getacc1($trans_type);
         echo json_encode($data);
     }
-	
-
 	
     public function actionCreate(){
         $payment_receipt = new PaymentReceipt();
@@ -195,9 +191,7 @@ class PaymentreceiptController extends Controller
         echo json_encode($data);
     }
 	
-	 
-	
-		public function actionGetaccbankdetails(){
+	public function actionGetaccbankdetails(){
         $payment_receipt = new PaymentReceipt();
         $request = Yii::$app->request;
         $bank_id = $request->post('bank_id');
@@ -205,7 +199,6 @@ class PaymentreceiptController extends Controller
         echo json_encode($data);
     }
 	
-
     public function actionGetledger(){   
         $request = Yii::$app->request;
 

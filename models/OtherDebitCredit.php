@@ -680,6 +680,17 @@ class OtherDebitCredit extends Model
         if(count($debit_note)>0) {
             $trans_type = $debit_note[0]['trans_type'];
             $vendor_id = $debit_note[0]['vendor_id'];
+            $warehouse_id = $debit_note[0]['warehouse_id'];
+
+            $sql = "select B.warehouse_name, B.gst_id, B.address_line_1, B.address_line_2, B.address_line_3, 
+                        B.city_id, B.state_id, B.pincode, C.city_name, D.state_name, D.state_code 
+                    from internal_warehouse_master B 
+                    left join city_master C on (B.city_id = C.id) 
+                    left join state_master D on (B.state_id = D.id) 
+                    where B.id = '$warehouse_id' and B.company_id = '$company_id'";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $warehouse_details = $reader->readAll();
 
             if($trans_type == 'Invoice'){
                 $result = $this->getInvoiceDetails($id, $vendor_id);
@@ -689,6 +700,7 @@ class OtherDebitCredit extends Model
                 $invoice_details = array();
                 $inv_tax_details = array();
             }
+
 
             // $vendor_code = '';
 
@@ -732,6 +744,7 @@ class OtherDebitCredit extends Model
             // $reader = $command->query();
             // $vendor_details = $reader->readAll();
 
+
             $sql = "select C.*, D.contact_name, D.contact_email, D.contact_phone, D.contact_mobile, D.contact_fax from 
                     (select A.*, B.* from 
                     (select AA.*, BB.legal_entity_name from vendor_master AA left join legal_entity_type_master BB 
@@ -760,7 +773,7 @@ class OtherDebitCredit extends Model
                 $mpdf->WriteHTML(Yii::$app->controller->renderPartial('tax_invoice', ['debit_note' => $debit_note, 'vendor_details' => $vendor_details, 
                                             'invoice_details' => $invoice_details, 'inv_tax_details' => $inv_tax_details]));
             } else {
-                $mpdf->WriteHTML(Yii::$app->controller->renderPartial('debit_note', ['debit_note' => $debit_note, 'vendor_details' => $vendor_details]));
+                $mpdf->WriteHTML(Yii::$app->controller->renderPartial('debit_note', ['debit_note' => $debit_note, 'vendor_details' => $vendor_details, 'warehouse_details' => $warehouse_details]));
             }
 
             if($trans_type=='Invoice') {
@@ -802,12 +815,14 @@ class OtherDebitCredit extends Model
 
         } else {
             $debit_note = array();
+            $warehouse_details = array();
             $vendor_details = array();
             $invoice_details = array();
             $inv_tax_details = array();
         }
 
         $data['debit_note'] = $debit_note;
+        $data['warehouse_details'] = $warehouse_details;
         $data['vendor_details'] = $vendor_details;
         $data['invoice_details'] = $invoice_details;
         $data['inv_tax_details'] = $inv_tax_details;

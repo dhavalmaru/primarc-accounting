@@ -1,6 +1,7 @@
 $('.datepicker').datepicker({changeMonth: true,changeYear: true});
 
 $(document).ready(function(){
+    $('.select2').select2();
     getTotal();
     // $("#form_purchase_details").validate();
 
@@ -15,7 +16,7 @@ $(document).ready(function(){
     // });
     $('.edit-sku').each(function(){
         var id = $(this).attr('id');
-        set_sku_details(document.getElementById(id));
+        //set_sku_details(document.getElementById(id));
     });
 
     set_view();
@@ -499,6 +500,7 @@ function set_sku_details2(elem){
             setTimeout(function(){
             taxes = $('.edited-cost').length;
             //alert(taxes);
+            $(".select2").select2();
             getDifference(document.getElementById('edited_0_cost_'+j_count));            
             },500);
 
