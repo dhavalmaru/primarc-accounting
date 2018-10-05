@@ -41,6 +41,35 @@ class OtherDebitCredit extends Model
         return $reader->readAll();
     }
 
+    public function getVendors(){
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $sql = "select distinct A.id, A.vendor_name from vendor_master A 
+                where A.company_id = '$company_id' and A.is_active = '1' order by A.vendor_name";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
+    public function getWarehouseDetails($warehouse_id=""){
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $cond = "";
+        if($warehouse_id!=""){
+            $cond = $cond . " and A.id = '$warehouse_id'";
+        }
+
+        $sql = "select distinct C.id, C.warehouse_gst, C.state_name from 
+                (select A.id, concat(A.warehouse_name, '-', A.gst_id) as warehouse_gst, B.state_name 
+                from internal_warehouse_master A left join state_master B on (A.state_id = B.id) 
+                where A.company_id = '$company_id' and A.is_active = '1'".$cond.") C order by C.warehouse_gst";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
     public function getOtherDebitCreditDetails($id="", $status=""){
         $cond = "";
         if($id!=""){
@@ -120,6 +149,7 @@ class OtherDebitCredit extends Model
         $now = date('Y-m-d H:i:s');
 
         $id = $request->post('id');
+        $vendor_id = $request->post('vendor_id');
         $voucher_id = $request->post('voucher_id');
         $ledger_type = $request->post('ledger_type');
         $debit_credit_note_ref = $request->post('debit_credit_note_ref');
@@ -134,6 +164,7 @@ class OtherDebitCredit extends Model
         $total_credit_amt = $request->post('total_credit_amt');
         $diff_amt = $request->post('diff_amt');
         $trans_type = $request->post('trans_type');
+        $warehouse_id = $request->post('warehouse_id');
         $reference = $request->post('reference');
         $narration = $request->post('narration');
         $date_of_transaction = $request->post('date_of_transaction');
@@ -185,13 +216,21 @@ class OtherDebitCredit extends Model
             $ledger_type = 'Main Entry';
         }
 
+        // echo $trans_type;
+        // echo '<br/>';
+
         if(!isset($debit_credit_note_ref) || $debit_credit_note_ref==''){
             $debit_credit_note_ref = $this->getDebitCreditNoteRef($date_of_transaction, 'Maharashtra', $trans_type);
         }
 
-        $array = array('voucher_id' => $voucher_id, 
+        // echo $debit_credit_note_ref;
+        // echo '<br/>';
+
+        $array = array('vendor_id' => $vendor_id, 
+                        'voucher_id' => $voucher_id, 
                         'ledger_type' => $ledger_type, 
                         'trans_type' => $trans_type,
+                        'warehouse_id' => $warehouse_id,
                         'reference' => $reference, 
                         'narration' => $narration, 
                         'debit_acc' => $debit_acc, 
@@ -247,7 +286,7 @@ class OtherDebitCredit extends Model
                                     'account_code' => $acc_code[$i], 
                                     'transaction' => $transaction[$i], 
                                     'debit_amt' => $mycomponent->format_number($debit_amt[$i],2), 
-                                    'credit_amt' => $mycomponent->format_number($credit_amt[$i],2),
+                                    'credit_amt' => $mycomponent->format_number($credit_amt[$i],2), 
                                     // 'status' => 'pending',
                                     'status' => 'approved',
                                     'is_active' => '1',
@@ -289,8 +328,8 @@ class OtherDebitCredit extends Model
                             'sub_ref_id'=>$entry_id[$i],
                             'ref_type'=>'other_debit_credit',
                             'entry_type'=>'Other Debit Credit',
-                            'invoice_no'=>$reference,
-                            // 'vendor_id'=>$vendor_id,
+                            'invoice_no'=>$debit_credit_note_ref,
+                            'vendor_id'=>$vendor_id,
                             'voucher_id' => $voucher_id, 
                             'ledger_type' => $ledger_type, 
                             'acc_id'=>$acc_id[$i],
@@ -305,7 +344,9 @@ class OtherDebitCredit extends Model
                             'updated_date'=>$now,
                             'ref_date'=>$date_of_transaction,
                             'approver_comments'=>$remarks,
-                            'company_id'=>$company_id
+                            'company_id'=>$company_id,
+                            'narration'=>$narration,
+                            'reference'=>$reference
                         ];
 
             $ledgerArray['created_by'] = $curusr;
@@ -360,11 +401,18 @@ class OtherDebitCredit extends Model
             $state_code = $data[0]['state_code'];
         }
 
-        if($trans_type='Credit'){
+        if($trans_type=='Invoice'){
+            $type = 'tax_invoice';
+            $code = $year . "/Invoice/" . $month . "/" . $state_code;
+        } else if($trans_type=='Credit'){
             $type = 'credit_note';
+            $code = $year . "/Credit Note/" . $month . "/" . $state_code;
         } else {
             $type = 'debit_note';
+            $code = $year . "/Debit Note/" . $month . "/" . $state_code;
         }
+
+        // echo $code;
 
         $sql = "select * from acc_series_master where type = '$type' and company_id = '$company_id'";
         $command = Yii::$app->db->createCommand($sql);
@@ -384,11 +432,240 @@ class OtherDebitCredit extends Model
             $count = $command->execute();
         }
 
-        $code = $year . "/" . $month . "/" . $state_code;
         $code = $code . "/" . str_pad($series, 3, "0", STR_PAD_LEFT);
 
         // echo $code;
         return $code;
+    }
+
+    public function getInvoiceDetails($id, $vendor_id){
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $invoice_details = array();
+        $i = 0;
+        $inv_tax_details = array();
+        $k = 0;
+        $purchase_amt = 0;
+        $purchase_amt = 0;
+        $total_tax_rate = 0;
+        $total_tax_amt = 0;
+        $total_amt = 0;
+        $total_cgst = 0;
+        $total_sgst = 0;
+        $total_igst = 0;
+
+        $vendor_acc_id = '';
+        $sql = "select * from acc_master where vendor_id = '$vendor_id'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if(count($data)>0){
+            $vendor_acc_id = $data[0]['id'];
+        }
+
+        $sql = "select account_name, sum(debit_amt) as total_debit_amt, sum(credit_amt) as total_credit_amt from acc_other_debit_credit_entries 
+                where other_debit_credit_id = '$id' and is_active = '1' and company_id = '$company_id' and account_name not like '%gst%' and 
+                    account_id <> '$vendor_acc_id' group by account_name";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if(count($data)>0){
+            if($data[0]['total_credit_amt']>0){
+                $purchase_amt = $data[0]['total_credit_amt'];
+            } else {
+                $purchase_amt = $data[0]['total_debit_amt'];
+            }
+            $account_name = $data[0]['account_name'];
+            $tax_per = 0;
+            if(strrpos($account_name, '-')!==false){
+                $tax_per = substr($account_name, strrpos($account_name, '-')+1);
+            }
+            if(strrpos($tax_per, '%')!==false){
+                $tax_per = substr($tax_per, 0, strrpos($tax_per, '%'));
+            }
+            $invoice_details[$i]['sr_no'] = $i + 1;
+            // $invoice_details[$i]['particulars'] = 'Service Income';
+            $invoice_details[$i]['particulars'] = $account_name;
+            $invoice_details[$i]['code'] = '998311';
+            $invoice_details[$i]['qty'] = '';
+            $invoice_details[$i]['rate'] = '';
+            $invoice_details[$i]['per'] = '';
+            $invoice_details[$i]['amount'] = $purchase_amt;
+            $i = $i + 1;
+
+            $total_amt = $total_amt + $purchase_amt;
+        }
+
+        $sql = "select account_name, sum(debit_amt) as total_debit_amt, sum(credit_amt) as total_credit_amt from acc_other_debit_credit_entries 
+                where other_debit_credit_id = '$id' and is_active = '1' and company_id = '$company_id' and account_name like '%cgst%' 
+                group by account_name";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if(count($data)>0){
+            $k = 0;
+
+            for($j=0; $j<count($data); $j++){
+                if($data[$j]['total_credit_amt']>0){
+                    $amount = $data[$j]['total_credit_amt'];
+                } else {
+                    $amount = $data[$j]['total_debit_amt'];
+                }
+                $account_name = $data[$j]['account_name'];
+                $tax_per = 0;
+                if(strrpos($account_name, '-')!==false){
+                    $tax_per = substr($account_name, strrpos($account_name, '-')+1);
+                }
+                if(strrpos($tax_per, '%')!==false){
+                    $tax_per = substr($tax_per, 0, strrpos($tax_per, '%'));
+                }
+                
+                $invoice_details[$i]['sr_no'] = $i + 1;
+                $invoice_details[$i]['particulars'] = $account_name;
+                $invoice_details[$i]['code'] = '';
+                $invoice_details[$i]['qty'] = '';
+                $invoice_details[$i]['rate'] = $tax_per;
+                $invoice_details[$i]['per'] = '%';
+                $invoice_details[$i]['amount'] = $amount;
+                $i = $i + 1;
+
+                $inv_tax_details[$k]['hsn'] = '998311';
+                $inv_tax_details[$k]['value'] = $purchase_amt;
+                $inv_tax_details[$k]['tax_rate'] = $total_tax_rate;
+                $inv_tax_details[$k]['tax_amt'] = $total_tax_amt + $amount;
+                $inv_tax_details[$k]['cgst_rate'] = $tax_per.'%';
+                $inv_tax_details[$k]['cgst_amt'] = $amount;
+                $k = $k + 1;
+
+                $total_amt = $total_amt + $amount;
+                $total_cgst = $total_cgst + $amount;
+            }
+        }
+
+        $sql = "select account_name, sum(debit_amt) as total_debit_amt, sum(credit_amt) as total_credit_amt from acc_other_debit_credit_entries 
+                where other_debit_credit_id = '$id' and is_active = '1' and company_id = '$company_id' and account_name like '%sgst%' 
+                group by account_name";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if(count($data)>0){
+            $k = 0;
+
+            for($j=0; $j<count($data); $j++){
+                if($data[$j]['total_credit_amt']>0){
+                    $amount = $data[$j]['total_credit_amt'];
+                } else {
+                    $amount = $data[$j]['total_debit_amt'];
+                }
+                $account_name = $data[$j]['account_name'];
+                $tax_per = 0;
+                if(strrpos($account_name, '-')!==false){
+                    $tax_per = substr($account_name, strrpos($account_name, '-')+1);
+                }
+                if(strrpos($tax_per, '%')!==false){
+                    $tax_per = substr($tax_per, 0, strrpos($tax_per, '%'));
+                }
+                
+                $invoice_details[$i]['sr_no'] = $i + 1;
+                $invoice_details[$i]['particulars'] = $account_name;
+                $invoice_details[$i]['code'] = '';
+                $invoice_details[$i]['qty'] = '';
+                $invoice_details[$i]['rate'] = $tax_per;
+                $invoice_details[$i]['per'] = '%';
+                $invoice_details[$i]['amount'] = $amount;
+                $i = $i + 1;
+
+                $inv_tax_details[$k]['hsn'] = '998311';
+                $inv_tax_details[$k]['value'] = $purchase_amt;
+                $inv_tax_details[$k]['tax_rate'] = $total_tax_rate;
+                $inv_tax_details[$k]['tax_amt'] = $total_tax_amt + $amount;
+                $inv_tax_details[$k]['sgst_rate'] = $tax_per.'%';
+                $inv_tax_details[$k]['sgst_amt'] = $amount;
+                $k = $k + 1;
+
+                $total_amt = $total_amt + $amount;
+                $total_sgst = $total_sgst + $amount;
+            }
+        }
+
+        $sql = "select account_name, sum(debit_amt) as total_debit_amt, sum(credit_amt) as total_credit_amt from acc_other_debit_credit_entries 
+                where other_debit_credit_id = '$id' and is_active = '1' and company_id = '$company_id' and account_name like '%igst%' 
+                group by account_name";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if(count($data)>0){
+            for($j=0; $j<count($data); $j++){
+                if($data[$j]['total_credit_amt']>0){
+                    $amount = $data[$j]['total_credit_amt'];
+                } else {
+                    $amount = $data[$j]['total_debit_amt'];
+                }
+                $account_name = $data[$j]['account_name'];
+                $tax_per = 0;
+                if(strrpos($account_name, '-')!==false){
+                    $tax_per = substr($account_name, strrpos($account_name, '-')+1);
+                }
+                if(strrpos($tax_per, '%')!==false){
+                    $tax_per = substr($tax_per, 0, strrpos($tax_per, '%'));
+                }
+                
+                $invoice_details[$i]['sr_no'] = $i + 1;
+                $invoice_details[$i]['particulars'] = $account_name;
+                $invoice_details[$i]['code'] = '';
+                $invoice_details[$i]['qty'] = '';
+                $invoice_details[$i]['rate'] = $tax_per;
+                $invoice_details[$i]['per'] = '%';
+                $invoice_details[$i]['amount'] = $amount;
+                $i = $i + 1;
+
+                $inv_tax_details[$k]['hsn'] = '998311';
+                $inv_tax_details[$k]['value'] = $purchase_amt;
+                $inv_tax_details[$k]['tax_rate'] = $total_tax_rate;
+                $inv_tax_details[$k]['tax_amt'] = $total_tax_amt + $amount;
+                $inv_tax_details[$k]['igst_rate'] = $tax_per.'%';
+                $inv_tax_details[$k]['igst_amt'] = $amount;
+                $k = $k + 1;
+
+                $total_amt = $total_amt + $amount;
+                $total_igst = $total_igst + $amount;
+            }
+        }
+
+        $invoice_details[$i]['sr_no'] = $i + 1;
+        $invoice_details[$i]['particulars'] = 'Less - Rounded Off';
+        $invoice_details[$i]['code'] = '';
+        $invoice_details[$i]['qty'] = '';
+        $invoice_details[$i]['rate'] = '';
+        $invoice_details[$i]['per'] = '';
+        $invoice_details[$i]['amount'] = '0';
+        $i = $i + 1;
+
+        $invoice_details[$i]['sr_no'] = '';
+        $invoice_details[$i]['particulars'] = 'Total';
+        $invoice_details[$i]['code'] = '';
+        $invoice_details[$i]['qty'] = '';
+        $invoice_details[$i]['rate'] = '';
+        $invoice_details[$i]['per'] = '';
+        $invoice_details[$i]['amount'] = $total_amt;
+        $i = $i + 1;
+
+        $k = count($inv_tax_details);
+        $inv_tax_details[$k]['hsn'] = '998311';
+        $inv_tax_details[$k]['value'] = 'Total';
+        $inv_tax_details[$k]['cgst_rate'] = '';
+        $inv_tax_details[$k]['cgst_amt'] = $total_cgst;
+        $inv_tax_details[$k]['sgst_rate'] = '';
+        $inv_tax_details[$k]['sgst_amt'] = $total_sgst;
+        $inv_tax_details[$k]['igst_rate'] = '';
+        $inv_tax_details[$k]['igst_amt'] = $total_igst;
+        $inv_tax_details[$k]['total_amt'] = $total_amt;
+
+        $result['invoice_details'] = $invoice_details;
+        $result['inv_tax_details'] = $inv_tax_details;
+
+        return $result;
     }
 
     public function getDebitNoteDetails($id){
@@ -402,26 +679,58 @@ class OtherDebitCredit extends Model
 
         if(count($debit_note)>0) {
             $trans_type = $debit_note[0]['trans_type'];
-            $vendor_code = '';
+            $vendor_id = $debit_note[0]['vendor_id'];
 
-            $sql = "select * from acc_other_debit_credit_entries where other_debit_credit_id = '$id' and 
-                    transaction = '$trans_type' and is_active = '1' and company_id = '$company_id'";
-            $command = Yii::$app->db->createCommand($sql);
-            $reader = $command->query();
-            $result = $reader->readAll();
-            if(count($result)>0){
-                $vendor_code = $result[0]['account_code'];
+            if($trans_type == 'Invoice'){
+                $result = $this->getInvoiceDetails($id, $vendor_id);
+                $invoice_details = $result['invoice_details'];
+                $inv_tax_details = $result['inv_tax_details'];
+            } else {
+                $invoice_details = array();
+                $inv_tax_details = array();
             }
 
-            $vendor_id = '';
-            $sql = "select * from vendor_master where vendor_code like '%".$vendor_code."%' and 
-                    is_active = '1' and company_id = '$company_id'";
-            $command = Yii::$app->db->createCommand($sql);
-            $reader = $command->query();
-            $result = $reader->readAll();
-            if(count($result)>0){
-                $vendor_id = $result[0]['id'];
-            }
+            // $vendor_code = '';
+
+            // $sql = "select * from acc_other_debit_credit_entries where other_debit_credit_id = '$id' and 
+            //         transaction = '$trans_type' and is_active = '1' and company_id = '$company_id'";
+            // $command = Yii::$app->db->createCommand($sql);
+            // $reader = $command->query();
+            // $result = $reader->readAll();
+            // if(count($result)>0){
+            //     $vendor_code = $result[0]['account_code'];
+            // }
+
+            // $vendor_id = '';
+            // $sql = "select * from vendor_master where vendor_code like '%".$vendor_code."%' and 
+            //         is_active = '1' and company_id = '$company_id'";
+            // $command = Yii::$app->db->createCommand($sql);
+            // $reader = $command->query();
+            // $result = $reader->readAll();
+            // if(count($result)>0){
+            //     $vendor_id = $result[0]['id'];
+            // }
+
+            // $sql = "select C.*, D.contact_name, D.contact_email, D.contact_phone, D.contact_mobile, D.contact_fax from 
+            //         (select A.*, B.* from 
+            //         (select AA.*, BB.legal_entity_name from vendor_master AA left join legal_entity_type_master BB 
+            //             on (AA.legal_entity_type_id = BB.id) where AA.id = '$vendor_id' and AA.company_id = '$company_id' and BB.is_active = '1') A 
+            //         left join 
+            //         (select AA.vendor_id, AA.office_address_line_1, AA.office_address_line_2, AA.office_address_line_3, 
+            //                 AA.pincode, BB.city_code, BB.city_name, CC.state_code, CC.state_name, 
+            //                 DD.country_code, DD.country_name from 
+            //         vendor_office_address AA left join city_master BB on (AA.city_id = BB.id) left join 
+            //         state_master CC on (AA.state_id = CC.id) left join country_master DD on (AA.country_id = DD.id) 
+            //         where AA.vendor_id = '$vendor_id' and AA.is_active = '1' and BB.is_active = '1' 
+            //                 and CC.is_active = '1' and DD.is_active = '1') B 
+            //         on (A.id = B.vendor_id)) C 
+            //         left join 
+            //         (select * from vendor_contacts where vendor_id = '$vendor_id' and is_active = '1' and 
+            //             (is_purchase_related = 'yes' or is_accounts_related = 'yes') limit 1) D 
+            //         on (C.vendor_id = D.vendor_id)";
+            // $command = Yii::$app->db->createCommand($sql);
+            // $reader = $command->query();
+            // $vendor_details = $reader->readAll();
 
             $sql = "select C.*, D.contact_name, D.contact_email, D.contact_phone, D.contact_mobile, D.contact_fax from 
                     (select A.*, B.* from 
@@ -445,23 +754,38 @@ class OtherDebitCredit extends Model
             $vendor_details = $reader->readAll();
 
             $mpdf=new mPDF();
-            $mpdf->WriteHTML(Yii::$app->controller->renderPartial('debit_note', ['debit_note' => $debit_note, 'vendor_details' => $vendor_details]));
+            // $mpdf->WriteHTML(Yii::$app->controller->renderPartial('debit_note', ['debit_note' => $debit_note, 'vendor_details' => $vendor_details]));
+
+            if($trans_type == 'Invoice'){
+                $mpdf->WriteHTML(Yii::$app->controller->renderPartial('tax_invoice', ['debit_note' => $debit_note, 'vendor_details' => $vendor_details, 
+                                            'invoice_details' => $invoice_details, 'inv_tax_details' => $inv_tax_details]));
+            } else {
+                $mpdf->WriteHTML(Yii::$app->controller->renderPartial('debit_note', ['debit_note' => $debit_note, 'vendor_details' => $vendor_details]));
+            }
+
+            if($trans_type=='Invoice') {
+                $type = 'invoice';
+            } else if($trans_type=='Credit') {
+                $type = 'credit_note';
+            } else {
+                $type = 'debit_note';
+            }
 
             $upload_path = './uploads';
             if(!is_dir($upload_path)) {
                 mkdir($upload_path, 0777, TRUE);
             }
-            $upload_path = './uploads/other_debit_credit_notes';
+            $upload_path = './uploads/other_debit_credit_notes_'.$type;
             if(!is_dir($upload_path)) {
                 mkdir($upload_path, 0777, TRUE);
             }
-            $upload_path = './uploads/other_debit_credit_notes/'.$id;
+            $upload_path = './uploads/other_debit_credit_notes_'.$type.'/'.$id;
             if(!is_dir($upload_path)) {
                 mkdir($upload_path, 0777, TRUE);
             }
 
-            $file_name = $upload_path . '/debit_credit_note_' . $id . '.pdf';
-            $file_path = 'uploads/other_debit_credit_notes/' . $id . '/debit_credit_note_' . $id . '.pdf';
+            $file_name = $upload_path . '/' . $type . '_' . $id . '.pdf';
+            $file_path = 'uploads/other_debit_credit_notes_'.$type.'/' . $id . '/' . $type . '_' . $id . '.pdf';
 
             // $mpdf->Output('MyPDF.pdf', 'D');
             $mpdf->Output($file_name, 'F');
@@ -479,10 +803,14 @@ class OtherDebitCredit extends Model
         } else {
             $debit_note = array();
             $vendor_details = array();
+            $invoice_details = array();
+            $inv_tax_details = array();
         }
 
         $data['debit_note'] = $debit_note;
         $data['vendor_details'] = $vendor_details;
+        $data['invoice_details'] = $invoice_details;
+        $data['inv_tax_details'] = $inv_tax_details;
         
         return $data;
     }

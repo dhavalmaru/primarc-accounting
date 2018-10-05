@@ -65,7 +65,11 @@ class JournalVoucher extends Model
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-        $sql = "select * from acc_jv_entries where jv_id='$id' and company_id = '$company_id' and is_active='1' order by id";
+        $sql = "Select A.* ,B.bill_wise From
+                (select * from acc_jv_entries where jv_id='$id' 
+                and company_id = '$company_id' and is_active='1' order by id) A 
+                left join 
+                (Select bill_wise,id from acc_master) B on A.account_id=B.id";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -91,6 +95,13 @@ class JournalVoucher extends Model
         $company_id = $session['company_id'];
 
         $sql = "select * from acc_master where is_active = '1' and status = 'approved' and company_id = '$company_id' ".$cond." order by legal_name";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
+    public function getJvInvoiceDetails($id){
+        $sql = "select * from acc_jv_invoices_entries where jv_entries_id = '$id' ";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -144,11 +155,15 @@ class JournalVoucher extends Model
         $reference = $request->post('reference');
         $narration = $request->post('narration');
         $jv_date = $request->post('jv_date');
+        $entry_value = $request->post('entry_value');
+        $bill_wise  = $request->post('bill_wise');
         if($jv_date==''){
             $jv_date=NULL;
         } else {
             $jv_date=$mycomponent->formatdate($jv_date);
         }
+
+
         $remarks = $request->post('remarks');
         $approver_id = $request->post('approver_id');
 
@@ -240,6 +255,10 @@ class JournalVoucher extends Model
         $sql = "delete from acc_ledger_entries where ref_id = '".$id."' and ref_type = 'journal_voucher'";
         Yii::$app->db->createCommand($sql)->execute();
 
+        $sql = "delete from acc_jv_invoices_entries where jv_details_id = '".$id."'";
+                Yii::$app->db->createCommand($sql)->execute();
+
+                
         for($i=0; $i<count($acc_id); $i++){
             $acc_jv_entries = array('jv_id' => $id, 
                                     'account_id' => $acc_id[$i], 
@@ -262,68 +281,102 @@ class JournalVoucher extends Model
                         ->insert("acc_jv_entries", $acc_jv_entries)
                         ->execute();
             $entry_id[$i] = Yii::$app->db->getLastInsertID();
-
-            // if (isset($entry_id[$i]) && $entry_id[$i]!=""){
-            //     $count = Yii::$app->db->createCommand()
-            //                 ->update("acc_jv_entries", $acc_jv_entries, "id = '".$entry_id[$i]."'")
-            //                 ->execute();
-            // } else {
-            //     $acc_jv_entries['created_by'] = $curusr;
-            //     $acc_jv_entries['created_date'] = $now;
-
-            //     $count = Yii::$app->db->createCommand()
-            //                 ->insert("acc_jv_entries", $acc_jv_entries)
-            //                 ->execute();
-            //     $entry_id[$i] = Yii::$app->db->getLastInsertID();
-            // }
-
-            if($transaction[$i]=="Debit"){
+            
+            if($bill_wise[$i]!=1)
+            {
+                if($transaction[$i]=="Debit"){
                 $amount = $debit_amt[$i];
-            } else {
-                $amount = $credit_amt[$i];
+                } else {
+                    $amount = $credit_amt[$i];
+                }
+
+                $ledgerArray=[
+                                'ref_id'=>$id,
+                                'sub_ref_id'=>$entry_id[$i],
+                                'ref_type'=>'journal_voucher',
+                                'entry_type'=>'Journal Voucher',
+                                'invoice_no'=>$reference,
+                                // 'vendor_id'=>$vendor_id,
+                                'voucher_id' => $voucher_id, 
+                                'ledger_type' => $ledger_type, 
+                                'acc_id'=>$acc_id[$i],
+                                'ledger_name'=>$legal_name[$i],
+                                'ledger_code'=>$acc_code[$i],
+                                'type'=>$transaction[$i],
+                                'amount'=>$mycomponent->format_number($amount,2),
+                                'status'=>'pending',
+                                'is_active'=>'1',
+                                'updated_by'=>$curusr,
+                                'updated_date'=>$now,
+                                'ref_date'=>$jv_date,
+                                'approver_comments'=>$remarks,
+                                'company_id'=>$company_id
+                            ];
+
+                $ledgerArray['created_by'] = $curusr;
+                $ledgerArray['created_date'] = $now;
+                $count = Yii::$app->db->createCommand()
+                            ->insert("acc_ledger_entries", $ledgerArray)
+                            ->execute();
             }
+            else
+            {  
+                $index = $entry_value[$i];
+                $invoice_amount = $request->post('invoice_amount_'.$index);
+                $invoice_date = $request->post('invoice_date_'.$index);
+                $invoice_no = $request->post('invoice_no_'.$index);
 
-            $ledgerArray=[
-                            'ref_id'=>$id,
-                            'sub_ref_id'=>$entry_id[$i],
-                            'ref_type'=>'journal_voucher',
-                            'entry_type'=>'Journal Voucher',
-                            'invoice_no'=>$reference,
-                            // 'vendor_id'=>$vendor_id,
-                            'voucher_id' => $voucher_id, 
-                            'ledger_type' => $ledger_type, 
-                            'acc_id'=>$acc_id[$i],
-                            'ledger_name'=>$legal_name[$i],
-                            'ledger_code'=>$acc_code[$i],
-                            'type'=>$transaction[$i],
-                            'amount'=>$mycomponent->format_number($amount,2),
-                            'status'=>'pending',
-                            'is_active'=>'1',
-                            'updated_by'=>$curusr,
-                            'updated_date'=>$now,
-                            'ref_date'=>$jv_date,
-                            'approver_comments'=>$remarks,
-                            'company_id'=>$company_id
-                        ];
+                for ($j=0; $j <count($invoice_amount) ; $j++) { 
+                  
+                    $jv_invoices_entries = ["jv_details_id"=>$id,
+                                            "jv_entries_id"=>$entry_id[$i],
+                                            "invoice_number"=>$invoice_no[$j],
+                                            "invoice_date"=>$mycomponent->formatdate($invoice_date[$j]),
+                                            "invoice_amount"=>$invoice_amount[$j],
+                                            "created_by"=>$curusr,
+                                            "created_on"=>$now];
 
-            $ledgerArray['created_by'] = $curusr;
-            $ledgerArray['created_date'] = $now;
-            $count = Yii::$app->db->createCommand()
-                        ->insert("acc_ledger_entries", $ledgerArray)
-                        ->execute();
+                    Yii::$app->db->createCommand()
+                                ->insert("acc_jv_invoices_entries", $jv_invoices_entries)
+                                ->execute();
 
-            // $count = Yii::$app->db->createCommand()
-            //             ->update("acc_ledger_entries", $ledgerArray, "ref_id = '".$id."' and sub_ref_id = '".$entry_id[$i]."' and ref_type = 'journal_voucher'")
-            //             ->execute();
+                    
+                    if($transaction[$i]=="Debit"){
+                        $amount = $invoice_amount[$j];
+                        } else {
+                            $amount = $invoice_amount[$j];
+                        }
+                    $ledgerArray=[
+                                'ref_id'=>$id,
+                                'sub_ref_id'=>$entry_id[$i],
+                                'ref_type'=>'journal_voucher',
+                                'entry_type'=>'Journal Voucher',
+                                'invoice_no'=>$invoice_no[$j],
+                                // 'vendor_id'=>$vendor_id,
+                                'voucher_id' => $voucher_id, 
+                                'ledger_type' => $ledger_type, 
+                                'acc_id'=>$acc_id[$i],
+                                'ledger_name'=>$legal_name[$i],
+                                'ledger_code'=>$acc_code[$i],
+                                'type'=>$transaction[$i],
+                                'amount'=>$mycomponent->format_number($amount,2),
+                                'status'=>'pending',
+                                'is_active'=>'1',
+                                'updated_by'=>$curusr,
+                                'updated_date'=>$now,
+                                'ref_date'=>$jv_date,
+                                'approver_comments'=>$remarks,
+                                'company_id'=>$company_id
+                            ];
 
-            // if ($count==0){
-            //     $ledgerArray['created_by'] = $curusr;
-            //     $ledgerArray['created_date'] = $now;
+                $ledgerArray['created_by'] = $curusr;
+                $ledgerArray['created_date'] = $now;
+                $count = Yii::$app->db->createCommand()
+                            ->insert("acc_ledger_entries", $ledgerArray)
+                            ->execute();  
 
-            //     $count = Yii::$app->db->createCommand()
-            //                 ->insert("acc_ledger_entries", $ledgerArray)
-            //                 ->execute();
-            // }
+                }
+            }
         }
 
 

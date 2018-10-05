@@ -55,9 +55,10 @@ class AccountMaster extends Model
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-        $sql = "select A.*, concat_ws(',', A.category_1, A.category_2, A.category_3) as acc_category, B.bus_category from 
-                (select A.*, B.username as updater, C.username as approver from 
+        $sql = "select A.*, B.bus_category from 
+                (select A.*, B.username as updater, C.username as approver, D.account_type as acc_category from 
                     acc_master A left join user B on (A.updated_by = B.id) left join user C on (A.approved_by = C.id) 
+                    left join acc_group_master D on (A.sub_account_type = D.id) 
                     where A.is_active = '1'" . $cond . " and A.company_id = '$company_id') A 
                 left join 
                 (select acc_id, GROUP_CONCAT(category_name) as bus_category from acc_categories where is_active = '1'" . $cond2 . " 
@@ -75,6 +76,52 @@ class AccountMaster extends Model
 
         $sql = "select * from vendor_master where is_active = '1' and company_id = '$company_id' and 
                 id not in (select distinct vendor_id from acc_master where vendor_id != '$vendor_id') order by vendor_name";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
+	public function getCustomers($customer_id=""){
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $sql = "select * from customer_master where is_active = '1' and company_id = '$company_id' and id not in (select distinct customer_id from acc_master where customer_id != '$customer_id') order by customer_name";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
+	public function getState($state_id=""){
+        $session = Yii::$app->session;
+       // $company_id = $session['company_id'];
+
+        $sql = "select * from state_master where is_active = '1' order by state_name";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+		
+        return $reader->readAll();
+    }
+	
+	public function getTax($tax_id=""){
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $cond="";
+        if($tax_id!=""){
+            $cond=" and id='$tax_id'";
+        }
+
+        $sql = "select * from acc_gst_tax_type_master where status='approved' and is_active = '1' and 
+                company_id = '$company_id' ".$cond." order by tax_name";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
+    public function getTaxPercent(){
+        $session = Yii::$app->session;
+
+        $sql = "select distinct tax_rate from tax_rate_master where is_active = '1' and entity_type = 'child' order by tax_rate";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -108,6 +155,34 @@ class AccountMaster extends Model
         return $data;
     }
 
+	public function getCustomerDetails(){
+        $request = Yii::$app->request;
+        $customer_id = $request->post('customer_id');
+        $company_id = $request->post('company_id');
+
+        $sql = "select A.*, B.* from 
+                (select AA.*, BB.legal_entity_name from customer_master AA left join legal_entity_type_master BB 
+                    on (AA.legal_entity_type_id = BB.id) where AA.id = '$customer_id' and BB.is_active = '1') A 
+                left join 
+                (select AA.customer_id, AA.office_address_line_1, AA.office_address_line_2, AA.office_address_line_3, 
+                        AA.pincode, BB.city_name, CC.state_name, DD.country_name from 
+                customer_office_address AA left join city_master BB on (AA.city_id = BB.id) left join 
+                state_master CC on (AA.state_id = CC.id) left join country_master DD on (AA.country_id = DD.id) 
+                where AA.customer_id = '$customer_id' and AA.is_active = '1' and BB.is_active = '1' 
+                        and CC.is_active = '1' and DD.is_active = '1') B 
+                on (A.id = B.customer_id)";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data['customer_details'] = $reader->readAll();
+
+        $sql = "select distinct id, category_name from product_main_category where company_id = '$company_id' and is_active = '1'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data['category_details'] = $reader->readAll();
+
+        return $data;
+	}
+
     public function getTaxDetails(){
         $sql = "select C.*, D.tax_type_name from 
                 (select A.*, B.tax_zone_name from 
@@ -122,6 +197,106 @@ class AccountMaster extends Model
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
+    }
+
+    public function getGroupChild($id=""){
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $final_data = '';
+
+        $sql = "select A.* from acc_group_master A where A.is_active = '1' and A.status = 'approved' and 
+                A.company_id = '$company_id' and A.parent_id = '$id' order by A.id";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if(count($data)>0){
+            for($i=0; $i<count($data); $i++){
+                if($data[$i]['parent_id']!='0'){
+                    $final_data = $final_data . $data[$i]['id'] . ', ';
+                }
+                
+                $final_data = $final_data . $this->getGroupChild($data[$i]['id']);
+            }
+        } else {
+            $final_data = $final_data . $id . ', ';
+        }
+        
+        return $final_data;
+    }
+
+    public function getSubAccountTypes() {
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+        $request = Yii::$app->request;
+        $account_type = $request->post('account_type');
+        $sub_account_type = $request->post('sub_account_type');
+
+        $parent_id = 0;
+        $sql = "select * from acc_group_master where is_active = '1' and status = 'approved' and company_id = '$company_id' and 
+                parent_id = '0' and account_type = '$account_type'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if(count($data)>0){
+            $parent_id = $data[0]['id'];
+        }
+
+        $group_id = $this->getGroupChild($parent_id);
+        if($group_id!=''){
+            if(strrpos($group_id, ',')>0){
+                $group_id = substr($group_id, 0, strrpos($group_id, ','));
+            }
+        }
+
+        $data2 = array();
+        if($group_id!=''){
+            $sql = "select * from acc_group_master where status = 'approved' and company_id = '$company_id' and id in (".$group_id.")";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $data2 = $reader->readAll();
+        }
+
+        $result = '<option value="">Select</option>';
+        for($i=0; $i<count($data2); $i++){
+            $result = $result . '<option value="'.$data2[$i]['id'].'" '.(($sub_account_type==$data2[$i]['id'])?'selected':'').' >'.$data2[$i]['account_type'].'</option>';
+        }
+
+        return $result;
+    }
+
+    public function getSubAccountPath() {
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+        $request = Yii::$app->request;
+        $sub_account_type = $request->post('sub_account_type');
+
+        $data2 = array();
+        $j = 0;
+        $parent_id = $sub_account_type;
+        while ($parent_id != 0){
+            $sql = "select * from acc_group_master where is_active = '1' and status = 'approved' and 
+                    company_id = '$company_id' and id = '$parent_id'";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $data = $reader->readAll();
+            if(count($data)>0){
+                $parent_id = $data[0]['parent_id'];
+                $data2[$j] = $data[0]['account_type'];
+                $j = $j + 1;
+            }
+        }
+
+        $result = '';
+        for($i=count($data2)-1; $i>=0; $i--){
+            $result = $result . $data2[$i] . ' > ';
+        }
+
+        if($result!=''){
+            $result = substr($result, 0, strrpos($result, '>'));
+        }
+
+        return $result;
     }
 
     public function getAccCategories($id){
@@ -148,6 +323,7 @@ class AccountMaster extends Model
     public function getCode(){
         $request = Yii::$app->request;
         $type = $request->post('type');
+        $main_type = $request->post('main_type');
         $company_id = $request->post('company_id');
 
         if($type=="Vendor Expenses"){
@@ -168,7 +344,11 @@ class AccountMaster extends Model
             $code = "GS";
         } else if($type=="Employee"){
             $code = "EM";
-        } else {
+        } else if($type=="Marketplace"){
+            $code = "MP";
+        } else if($type=="Branch Type"){
+            $code = "BT";
+		} else {
             $code = "OT";
         }
 
@@ -207,6 +387,10 @@ class AccountMaster extends Model
             $code = "GS";
         } else if($type=="Employee"){
             $code = "EM";
+        } else if($type=="Marketplace"){
+            $code = "MP";		
+		} else if($type=="Branch Type"){
+            $code = "BT";
         } else {
             $code = "OT";
         }
@@ -237,7 +421,77 @@ class AccountMaster extends Model
 
         return $code;
     }
+	
+    public function getCode1(){
+        $request = Yii::$app->request;
+        //  $type = $request->post('type');
+        $tax_id = $request->post('tax_id');
+        $company_id = $request->post('company_id');
 
+      
+		if($tax_id=="CGST"){
+            $code = "CGST";
+        } else if($tax_id=="SGST"){
+            $code = "SGST";
+        } else if($tax_id=="IGST"){
+            $code = "IGST";
+		} else {
+            $code = "OT";
+        }
+
+        $sql = "select * from acc_series_master where type = '$code' and company_id = '$company_id'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+
+        if (count($data)>0){
+            $series = intval($data[0]['series']) + 1;
+        } else {
+            $series = 1;
+        }
+
+        $code = $code . str_pad($series, 4, "0", STR_PAD_LEFT);
+
+        return $code;
+    }
+
+    public function setCode1($tax_id){
+		if($tax_id=="CGST"){
+            $code = "CGST";
+        } else if($tax_id=="SGST"){
+            $code = "SGST";
+        } else if($tax_id=="IGST"){
+            $code = "IGST";
+		} else {
+            $code = "OT";
+        }
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $sql = "select * from acc_series_master where type = '$code' and company_id = '$company_id'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+
+        if (count($data)>0){
+            $series = intval($data[0]['series']) + 1;
+
+            $sql = "update acc_series_master set series = '$series' where type = '$code' and company_id = '$company_id'";
+            $command = Yii::$app->db->createCommand($sql);
+            $count = $command->execute();
+        } else {
+            $series = 1;
+
+            $sql = "insert into acc_series_master (type, series, company_id) values ('".$code."', '".$series."', '".$company_id."')";
+            $command = Yii::$app->db->createCommand($sql);
+            $count = $command->execute();
+        }
+
+        $code = $code . str_pad($series, 4, "0", STR_PAD_LEFT);
+
+        return $code;
+    }
+	
     public function save(){
         $request = Yii::$app->request;
 
@@ -274,16 +528,26 @@ class AccountMaster extends Model
         $legal_name = $request->post('legal_name');
         $code = $request->post('code');
         $account_type = $request->post('account_type');
+        $sub_account_type = $request->post('sub_account_type');
         $details = $request->post('details');
-        $category_1 = $request->post('ac_category_1');
-        $category_2 = $request->post('ac_category_2');
-        $category_3 = $request->post('ac_category_3');
+        // $category_1 = $request->post('ac_category_1');
+        // $category_2 = $request->post('ac_category_2');
+        // $category_3 = $request->post('ac_category_3');
         $department = $request->post('department');
         $remarks = $request->post('remarks');
         $approver_id = $request->post('approver_id');
         $company_id = $request->post('company_id');
-
+        $tax_id = $request->post('tax_id');
+        $tax_id_val = $request->post('tax_id_val');
+		$state_id =$request->post('state_id');
+		$state_type =$request->post('state_type');
+		$bus_type =$request->post('bus_type');
+		$gst_rate =$request->post('gst_rate');
+		$input_output =$request->post('input_output');
+		$legal_name_tree =$request->post('legal_name_tree');
+        $bill_wise = $request->post('bill_wise');
         $vendor_id = "";
+        $customer_id = "";
         $pan_no = "";
         $address = "";
         $legal_entity_name = "";
@@ -309,7 +573,24 @@ class AccountMaster extends Model
             $bus_category = $request->post('bus_category');
             $bus_category_name = $request->post('bus_category_name');
             $gst_id = $request->post('gst_id');
-        } else if($type=="Vendor Expenses"){
+        } else if($type=="Customer") {
+			$customer_id = $request->post('customer_id');
+            $code = $request->post('customer_code');
+            $pan_no = $request->post('pan_no');
+            $address = $request->post('address');
+            $legal_entity_name = $request->post('legal_entity_name');
+            $vat_no = $request->post('vat_no');
+            $bus_category = $request->post('bus_category');
+            $bus_category_name = $request->post('bus_category_name');
+		} else if($type=="Marketplace") {
+			$pan_no = $request->post('pan_no');
+            $address = $request->post('address');
+            $legal_entity_name = $request->post('legal_entity_name');
+            $vat_no = $request->post('vat_no');
+            $bus_category = $request->post('bus_category');
+            $bus_category_name = $request->post('bus_category_name');
+            $gst_id = $request->post('gst_id');
+		} else if($type=="Vendor Expenses"){
             $expense_type = $request->post('expense_type');
             $location = $request->post('location');
             $address = $request->post('address');
@@ -329,7 +610,7 @@ class AccountMaster extends Model
             $other = $request->post('other');
         }
 
-        if($type=="Vendor Goods" || $type=="Vendor Expenses" || $type=="Bank Account" || $type=="Employee"){
+        if($type=="Vendor Goods" || $type=="Vendor Expenses" || $type=="Bank Account" || $type=="Employee"||$type=="Customer"||$type=="Marketplace"){
             $account_holder_name = $request->post('account_holder_name');
             $bank_name = $request->post('bank_name');
             $branch = $request->post('branch');
@@ -344,22 +625,50 @@ class AccountMaster extends Model
         }
 
         if (!isset($id) || $id==""){
-            if ($type!="Vendor Goods"){
-                $code = $this->setCode($type, $company_id);
+            if ($type!="Vendor Goods" && $type!="Customer"){
+                if($type=="GST Tax"){
+                    $tax_name = "";
+                    $result = $this->getTax($tax_id);
+                    if(count($result)>0){
+                        $tax_name = $result[0]['tax_name'];
+                    }
+                    $code = $this->setCode1($tax_name, $company_id);
+                } else {
+                    $code = $this->setCode($type, $company_id);
+                }
             }
+        }
+
+        if($tax_id_val=="CGST"){
+            $type = "CGST";
+        } else if($tax_id_val=="SGST"){
+            $type = "SGST";
+        } else if($tax_id_val=="IGST"){
+            $type = "IGST";
         }
 
         $array = array('type' => $type, 
                         'vendor_id' => $vendor_id, 
-                        'legal_name' => ucwords(strtolower($legal_name)), 
+						'customer_id' => $customer_id, 
+						'state_id' => $state_id, 
+						'tax_id' => $tax_id, 
+						'state_type' => $state_type, 
+						'bus_type' => $bus_type, 
+						'input_output' => $input_output, 
+						'gst_rate' => $gst_rate, 
+						'legal_name_tree' => $legal_name_tree, 
+					
+                        // 'legal_name' => ucwords(strtolower($legal_name)), 
+                        'legal_name' => $legal_name, 
                         'department' => $department,
                         'code' => $code, 
+
                         'description' => $description, 
                         'account_type' => $account_type, 
                         'details' => $details,
-                        'category_1' => $category_1,
-                        'category_2' => $category_2,
-                        'category_3' => $category_3,
+                        // 'category_1' => $category_1,
+                        // 'category_2' => $category_2,
+                        // 'category_3' => $category_3,
                         'pan_no' => $pan_no,
                         'address' => $address,
                         'legal_entity_name' => $legal_entity_name,
@@ -383,7 +692,9 @@ class AccountMaster extends Model
                         'approver_comments'=>$remarks,
                         'approver_id'=>$approver_id,
                         'gst_id'=>$gst_id,
-                        'company_id'=>$company_id
+                        'company_id'=>$company_id,
+                        'sub_account_type'=>$sub_account_type,
+                        'bill_wise'=>(($bill_wise=='Yes')?'1':'0')
                         );
 
         if(count($array)>0){
@@ -410,7 +721,7 @@ class AccountMaster extends Model
         $sql = "delete from acc_categories where acc_id = '$id'";
         Yii::$app->db->createCommand($sql)->execute();
 
-        if ($type=="Vendor Goods"){
+        if ($type=="Vendor Goods"||$type=="Customer"||$type=="Marketplace"){
             $acc_categories = array();
             if(count($bus_category)>0){
                 for($i=0; $i<count($bus_category); $i++){
@@ -579,8 +890,8 @@ class AccountMaster extends Model
     }
 
     public function getAccountCategories(){
-        $request = Yii::$app->request;
-        $company_id = $request->post('company_id');
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
 
         $sql = "select * from acc_category_master where status = 'approved' and company_id = '$company_id'";
         $command = Yii::$app->db->createCommand($sql);
@@ -631,6 +942,23 @@ class AccountMaster extends Model
         $company_id = $request->post('company_id');
 
         $sql = "SELECT * FROM acc_master WHERE id!='".$id."' and legal_name='".$legal_name."' and company_id='".$company_id."'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if (count($data)>0){
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    public function checkLegalNameAvailablityInAccMaster(){
+        $request = Yii::$app->request;
+        $id = $request->post('id');
+        $legal_name = $request->post('legal_name');
+        $company_id = $request->post('company_id');
+
+        $sql = "SELECT * FROM acc_group_master WHERE status='approved' and account_type='".$legal_name."' and company_id='".$company_id."'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $data = $reader->readAll();

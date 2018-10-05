@@ -44,9 +44,12 @@ class OtherdebitcreditController extends Controller
             if($access[0]['r_insert']==1) {
                 $action = 'insert';
                 $acc_details = $model->getAccountDetails();
+                $vendor = $model->getVendors();
+                $warehouse_gst = $model->getWarehouseDetails();
 
                 $model->setLog('OtherDebitCredit', '', 'Insert', '', 'Insert Other Debit Credit Details', 'acc_other_debit_credit_details', '');
-                return $this->render('otherdebitcredit_details', ['action' => $action, 'acc_details' => $acc_details]);
+                return $this->render('otherdebitcredit_details', ['action' => $action, 'acc_details' => $acc_details, 
+                                                                'vendor' => $vendor, 'warehouse_gst' => $warehouse_gst]);
             } else {
                 return $this->render('/message', [
                     'title'  => \Yii::t('user', 'Access Denied'),
@@ -67,11 +70,14 @@ class OtherdebitcreditController extends Controller
     public function actionRedirect($action, $id) {
         $model = new OtherDebitCredit();
         $data = $model->getOtherDebitCreditDetails($id, "");
+        $vendor = $model->getVendors();
         $acc_details = $model->getAccountDetails();
+        $warehouse_gst = $model->getWarehouseDetails();
         $other_debit_credit_entries = $model->gerOtherDebitCreditEntries($id);
         // $approver_list = $model->getApprover($action);
 
         return $this->render('otherdebitcredit_details', ['action' => $action, 'data' => $data, 'acc_details' => $acc_details, 
+                                                        'vendor' => $vendor, 'warehouse_gst' => $warehouse_gst, 
                                                         'other_debit_credit_entries' => $other_debit_credit_entries]);
     }
 
@@ -136,6 +142,43 @@ class OtherdebitcreditController extends Controller
         $model = new OtherDebitCredit();
         $result = $model->save();
         $this->redirect(array('otherdebitcredit/index'));
+    }
+
+    public function actionViewtaxinvoice($id){
+        $model = new OtherDebitCredit();
+        $data = $model->getDebitNoteDetails($id);
+        
+        $this->layout = false;
+        return $this->render('tax_invoice', ['debit_note' => $data['debit_note'], 'vendor_details' => $data['vendor_details'], 
+                                            'invoice_details' => $data['invoice_details'], 'inv_tax_details' => $data['inv_tax_details']]);
+    }
+
+    public function actionDownloadtaxinvoice($id){
+        $model = new OtherDebitCredit();
+        $data = $model->getDebitNoteDetails($id);
+        $file = "";
+
+        if(isset($data['debit_note'])){
+            if(count($data['debit_note'])>0){
+                $debit_note = $data['debit_note'];
+                $file = $debit_note[0]['debit_credit_note_path'];
+            }
+        }
+
+        if( file_exists( $file ) ){
+            Yii::$app->response->sendFile($file);
+        } else {
+            echo $file;
+        }
+    }
+
+    public function actionEmailtaxinvoice($id){
+        $model = new OtherDebitCredit();
+        $data = $model->getDebitNoteDetails($id);
+        $file = "";
+
+        return $this->render('email', ['debit_note' => $data['debit_note'], 'vendor_details' => $data['vendor_details'], 
+                                        'invoice_details' => $data['invoice_details'], 'inv_tax_details' => $data['inv_tax_details']]);
     }
 
     public function actionViewdebitcreditnote($id){

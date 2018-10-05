@@ -7,7 +7,7 @@ use yii\base\Model;
 use yii\web\Session;
 use mPDF;
 
-class GoodsOutward extends Model
+class Goodsoutward extends Model
 {
     public function getAccess(){
         $session = Yii::$app->session;
@@ -49,8 +49,7 @@ class GoodsOutward extends Model
         $sql = "select * from 
                 (select A.*, B.gi_go_id as b_gi_go_id from 
                 (select A.* from goods_inward_outward A where A.is_active = '1' and A.company_id='$company_id' and 
-                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01') and 
-                    A.type_outward in ('VENDOR', 'INTER-DEPOT')) A 
+                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01')) A 
                 left join 
                 (select distinct gi_go_id from acc_go_debit_details) B 
                 on (A.gi_go_id = B.gi_go_id)) C 
@@ -81,8 +80,7 @@ class GoodsOutward extends Model
         $sql = "select count(*) as count from 
                 (select A.*, B.gi_go_id as b_gi_go_id from 
                 (select A.* from goods_inward_outward A where is_active = '1' and A.company_id='$company_id' and 
-                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01') and 
-                    A.type_outward in ('VENDOR', 'INTER-DEPOT')) A 
+                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01')) A 
                 left join 
                 (select distinct gi_go_id from acc_go_debit_details) B 
                 on (A.gi_go_id = B.gi_go_id)) C 
@@ -213,8 +211,7 @@ class GoodsOutward extends Model
         $sql = "select C.*, D.is_paid from 
                 (select A.*, B.gi_go_id as b_gi_go_id, B.status as go_debit_status from 
                 (select A.* from goods_inward_outward A where is_active = '1' and A.company_id='$company_id' and 
-                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01') and 
-                    A.type_outward in ('VENDOR', 'INTER-DEPOT')) A 
+                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01')) A 
                 left join 
                 (select distinct gi_go_id, status from acc_go_debit_details) B 
                 on (A.gi_go_id = B.gi_go_id)) C 
@@ -250,8 +247,7 @@ class GoodsOutward extends Model
         $sql = "select count(*) as count from 
                 (select A.*, B.gi_go_id as b_gi_go_id, B.status as go_debit_status from 
                 (select A.* from goods_inward_outward A where is_active = '1' and A.company_id='$company_id' and 
-                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01') and 
-                    A.type_outward in ('VENDOR', 'INTER-DEPOT')) A 
+                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01')) A 
                 left join 
                 (select distinct gi_go_id, status from acc_go_debit_details) B 
                 on (A.gi_go_id = B.gi_go_id)) C 
@@ -421,20 +417,20 @@ class GoodsOutward extends Model
 
         if(!isset($voucher_id) || $voucher_id==''){
             $series = 1;
-            $sql = "select * from acc_series_master where type = 'Voucher' and company_id = '$company_id'";
+            $sql = "select * from acc_series_master where type = 'Voucher'";
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $data = $reader->readAll();
             if (count($data)>0){
                 $series = intval($data[0]['series']) + 1;
 
-                $sql = "update acc_series_master set series = '$series' where type = 'Voucher' and company_id = '$company_id'";
+                $sql = "update acc_series_master set series = '$series' where type = 'Voucher'";
                 $command = Yii::$app->db->createCommand($sql);
                 $count = $command->execute();
             } else {
                 $series = 1;
 
-                $sql = "insert into acc_series_master (type, series, company_id) values ('Voucher', '".$series."', '".$company_id."')";
+                $sql = "insert into acc_series_master (type, series) values ('Voucher', '".$series."')";
                 $command = Yii::$app->db->createCommand($sql);
                 $count = $command->execute();
             }
@@ -621,20 +617,20 @@ class GoodsOutward extends Model
 
         $code = $year . "/" . $month . "/" . $state_code;
 
-        $sql = "select * from acc_series_master where type = 'debit_note' and company_id = '$company_id'";
+        $sql = "select * from acc_series_master where type = '$code' and company_id = '$company_id'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $data = $reader->readAll();
         if (count($data)>0){
             $series = intval($data[0]['series']) + 1;
 
-            $sql = "update acc_series_master set series = '$series' where type = 'debit_note' and company_id = '$company_id'";
+            $sql = "update acc_series_master set series = '$series' where type = '$code' and company_id = '$company_id'";
             $command = Yii::$app->db->createCommand($sql);
             $count = $command->execute();
         } else {
             $series = 1;
 
-            $sql = "insert into acc_series_master (type, series, company_id) values ('debit_note', '".$series."', '".$company_id."')";
+            $sql = "insert into acc_series_master (type, series, company_id) values ('".$code."', '".$series."', '".$company_id."')";
             $command = Yii::$app->db->createCommand($sql);
             $count = $command->execute();
         }

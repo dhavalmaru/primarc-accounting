@@ -141,18 +141,42 @@ $session = Yii::$app->session;
             <li style="<?php if(isset($session['S_Account_Master'])) {if($session['S_Account_Master']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
                 <a href="<?php echo Url::base(); ?>index.php?r=groupmaster%2Findex"><i class="fa fa-users"></i> <span>Group Master</span></a>
             </li> 
-            <li style="<?php if(isset($session['S_Account_Master'])) {if($session['S_Account_Master']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
-                <a href="<?php echo Url::base(); ?>index.php?r=accountmaster%2Findex"><i class="fa fa-book"></i> <span>Account Master</span></a>
+            <!-- <li style="<?php //if(isset($session['S_Account_Master'])) {if($session['S_Account_Master']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="<?php //echo Url::base(); ?>index.php?r=accountmaster%2Findex"><i class="fa fa-book"></i> <span>Account Master</span></a>
+            </li> -->
+            <li class="treeview" style="<?php if(isset($session['S_Account_Master'])) {if($session['S_Account_Master']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="#">
+                    <i class="fa fa-book"></i> <span>Account Master</span>
+                    <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li><a href="<?php echo Url::base(); ?>index.php?r=accountmaster%2Findex"><i class="fa fa-circle-o"></i> Account Details </a></li>
+                    <li><a href="<?php echo Url::base(); ?>index.php?r=taxtype%2Findex"><i class="fa fa-circle-o"></i> Tax Master </a></li>
+                </ul>
             </li> 
             <li style="<?php if(isset($session['S_Purchase'])) {if($session['S_Purchase']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
                 <a href="<?php echo Url::base(); ?>index.php?r=pendinggrn%2Findex"><i class="fa fa-credit-card"></i> <span>Purchase</span></a>
             </li>
+            <li style="<?php if(isset($session['S_Purchase'])) {if($session['S_Purchase']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="<?php echo Url::base(); ?>index.php?r=pendinggo%2Findex"><i class="fa fa-credit-card"></i> <span>Sales</span></a>
+            </li>
             <li style="<?php if(isset($session['S_Journal_Voucher'])) {if($session['S_Journal_Voucher']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
                 <a href="<?php echo Url::base(); ?>index.php?r=journalvoucher%2Findex"><i class="fa fa-book"></i> <span>Journal Voucher</span></a>
             </li>
-            <li style="<?php if(isset($session['S_Payment_Receipt'])) {if($session['S_Payment_Receipt']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
-                <a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Findex"><i class="fa fa-money"></i> <span>Payment / Receipt</span></a>
-            </li> 
+            <li class="treeview" style="<?php if(isset($session['S_Payment_Receipt'])) {if($session['S_Payment_Receipt']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                <a href="#">
+                    <i class="fa fa-book"></i> <span>Payment / Receipt</span>
+                    <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li><a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Findex"><i class="fa fa-circle-o"></i> Payment / Receipt Details </a></li>
+                    <li><a href="<?php echo Url::base(); ?>index.php?r=accreport%2Freconsile"><i class="fa fa-circle-o"></i> Reconciliation </a></li>
+                </ul>
+            </li>  
             <li style="<?php if(isset($session['S_Email_Log'])) {if($session['S_Email_Log']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
                 <a href="<?php echo Url::base(); ?>index.php?r=emaillog%2Findex"><i class="fa fa-money"></i> <span>Email Log</span></a>
             </li> 
@@ -164,7 +188,20 @@ $session = Yii::$app->session;
                     </span>
                 </a>
                 <ul class="treeview-menu">
-                    <li class="active"><a href="<?php echo Url::base(); ?>index.php?r=goodsoutward%2Findex"><i class="fa fa-circle-o"></i> Goods Outward</a></li>
+                    <li class="treeview" style="<?php if(isset($session['S_Purchase'])) {if($session['S_Purchase']=='0') echo 'display: none;';} else  echo 'display: none;'; ?>">
+                        <a href="#">
+                            <i class="fa fa-book"></i> <span>Goods Outward</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li class="active"><a href="<?php echo Url::base(); ?>index.php?r=goodsoutward%2Findex"><i class="fa fa-circle-o"></i> RTV</a></li>
+                            <li><a href="<?php echo Url::base(); ?>index.php?r=gointerdepot%2Findex"><i class="fa fa-circle-o"></i> Inter Depot </a></li>
+                        </ul>
+                    </li>
+
+                    <!-- <li class="active"><a href="<?php //echo Url::base(); ?>index.php?r=goodsoutward%2Findex"><i class="fa fa-circle-o"></i> Goods Outward</a></li> -->
                     <li><a href="<?php echo Url::base(); ?>index.php?r=promotion%2Findex"><i class="fa fa-circle-o"></i> Promotion </a></li>
                     <li><a href="<?php echo Url::base(); ?>index.php?r=otherdebitcredit%2Findex"><i class="fa fa-circle-o"></i> Other </a></li>
                 </ul>
@@ -196,6 +233,8 @@ $session = Yii::$app->session;
                     <li class="active"><a href="<?php echo Url::base(); ?>index.php?r=accreport%2Fgetsummeryreport"><i class="fa fa-circle-o"></i> Ledger Summary</a></li>
                     <li class="active"><a href="<?php echo Url::base(); ?>index.php?r=accreport%2Fgetledgertotalreport"><i class="fa fa-circle-o"></i>Vendor Credit/Debit</a></li>
                     <li><a href="<?php echo Url::base(); ?>index.php?r=accreport%2Ftrialbalancereport"><i class="fa fa-circle-o"></i> Trial Balance </a></li>
+                    <li><a href="<?php echo Url::base(); ?>index.php?r=accreport%2Fdetailledgerreport"><i class="fa fa-circle-o"></i> Purchase Register Report </a></li>
+                    <!-- <li><a href="<?php //echo Url::base(); ?>index.php?r=accreport%2Freconsile"><i class="fa fa-circle-o"></i> Reconciliation Report </a></li> -->
                 </ul>
             </li>
         </ul>

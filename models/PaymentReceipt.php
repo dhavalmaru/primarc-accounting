@@ -65,7 +65,23 @@ class PaymentReceipt extends Model
         return $reader->readAll();
     }
 
-    public function getAccountDetails($id=""){
+    // public function getAccountDetails($id=""){
+        // $cond = "";
+        // if($id!=""){
+            // $cond = " and id = '$id'";
+        // }
+
+        // $session = Yii::$app->session;
+        // $company_id = $session['company_id'];
+
+        // $sql = "select * from acc_master where is_active = '1' and status = 'approved' and 
+                // type = 'Bank Account' and company_id = '$company_id' ".$cond." order by legal_name";
+        // $command = Yii::$app->db->createCommand($sql);
+        // $reader = $command->query();
+        // return $reader->readAll();
+    // }
+
+	  public function getAccountDetails($id=""){
         $cond = "";
         if($id!=""){
             $cond = " and id = '$id'";
@@ -74,13 +90,42 @@ class PaymentReceipt extends Model
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-        $sql = "select * from acc_master where is_active = '1' and status = 'approved' and 
-                type = 'Vendor Goods' and company_id = '$company_id' ".$cond." order by legal_name";
+        $sql = "select * from acc_master where is_active = '1' and status = 'approved' and company_id = '$company_id' ".$cond." order by legal_name";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+	
+	  public function getacc1($trans_type="")
+	{
+       
+
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+		$sql = "select * from acc_master where is_active = '1' and status = 'approved' and 
+                type = 'Vendor Goods' and company_id = '$company_id' order by legal_name";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
     }
 
+    public function getaccbank1($trans_type="")
+	{
+        if($trans_type=="Contra Entry"){
+            $type = 'Bank Account';
+        } else {
+            $type = 'Vendor Goods';
+        }
+
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+		$sql = "select * from acc_master where is_active = '1' and status = 'approved' and company_id = '$company_id' and type = '$type' order by legal_name ";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+	
     public function getVendors(){
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
@@ -101,7 +146,7 @@ class PaymentReceipt extends Model
         $company_id = $session['company_id'];
 
         $sql = "select * from acc_master where is_active = '1' and status = 'approved' and company_id = '$company_id' and 
-                type = 'Bank Account'".$cond." order by legal_name";
+                type = 'Bank Account'".$cond." order by bank_name";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -144,13 +189,18 @@ class PaymentReceipt extends Model
                     A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
                     A.created_by, A.updated_by, A.created_date, A.updated_date, 
                     A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
-                    null as gi_date, null as invoice_date, null as due_date, 
-                    B.acc_id as cp_acc_id, B.ledger_name as cp_ledger_name, B.ledger_code as cp_ledger_code from 
-                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
-                    ref_type = 'journal_voucher' and acc_id!='$acc_id' and company_id = '$company_id') A 
+                    A.gi_date, A.invoice_date, null as due_date, 
+                    B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.jv_date as gi_date, C.invoice_date from acc_ledger_entries A 
+                    left join acc_jv_details B on(A.ref_id=B.id and A.ref_type='journal_voucher') 
+                    left join acc_jv_invoices_entries C 
+                    on (A.ref_id=C.jv_details_id and A.ref_type='journal_voucher' and A.invoice_no = C.invoice_number and A.amount = C.invoice_amount) 
+                    where A.status = '$status' and A.is_active = '1' and 
+                        A.ref_type = 'journal_voucher' and A.acc_id='$acc_id' and A.company_id = '$company_id') A 
                 left join 
-                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
-                    ref_type = 'journal_voucher' and acc_id='$acc_id' and company_id = '$company_id') B 
+                (select distinct ref_id, voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'journal_voucher' and acc_id!='$acc_id' and company_id = '$company_id') B 
                 on (A.ref_id=B.ref_id) 
 
                 union all 
@@ -177,15 +227,39 @@ class PaymentReceipt extends Model
                     A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
                     A.gi_date, A.invoice_date, A.due_date, 
                     B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
-                (select A.*, B.date_of_transaction as gi_date, null as invoice_date, null as due_date from acc_ledger_entries A 
-                    left join acc_go_debit_details B on(A.ref_id = B.gi_go_id and A.ref_type = 'go_debit_details') 
-                    where A.status = '$status' and A.is_active = '1' and B.status = 'Approved' and B.is_active = '1' and 
-                        A.ref_type = 'go_debit_details' and A.ledger_type != 'Main Entry' and A.company_id = '$company_id' and B.company_id = '$company_id') A 
+                (select A.*, B.gi_go_date_time as gi_date, null as invoice_date, null as due_date 
+                    from acc_ledger_entries A 
+                    left join goods_inward_outward B on(A.ref_id = B.gi_go_id and A.ref_type = 'go_debit_details') 
+                    where A.status = '$status' and A.is_active = '1' and B.is_active = '1' and 
+                        A.ref_type = 'go_debit_details' and A.ledger_type != 'Main Entry' and 
+                        A.company_id = '$company_id' and B.company_id = '$company_id') A 
                 left join 
                 (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
                     ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
                     ref_type = 'go_debit_details' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
                 on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
+                    A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, 
+                    A.narration, A.ref_date, A.gi_date, A.invoice_date, A.due_date, 
+                    B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.gi_go_date_time as gi_date, null as invoice_date, null as due_date 
+                    from acc_ledger_entries A 
+                    left join goods_inward_outward B on(A.ref_id = B.gi_go_id and A.ref_type = 'go_debit_details') 
+                    where A.status = '$status' and A.is_active = '1' and B.is_active = '1' and 
+                        A.ref_type = 'go_debit_details' and A.acc_id!='$acc_id' and A.ledger_type = 'Main Entry' and 
+                        A.company_id = '$company_id' and B.company_id = '$company_id' and 
+                        A.entry_type in ('Purchase Stock Transfer', 'Sales Stock Transfer')) A 
+                left join 
+                (select distinct ref_id, voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'go_debit_details' and acc_id='$acc_id' and ledger_type = 'Main Entry' and company_id = '$company_id' and 
+                    entry_type in ('Purchase Stock Transfer', 'Sales Stock Transfer')) B 
+                on(A.ref_id=B.ref_id) 
 
                 union all 
 
@@ -200,6 +274,21 @@ class PaymentReceipt extends Model
                 left join 
                 (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
                     ref_type = 'other_debit_credit' and acc_id='$acc_id' and company_id = '$company_id') B 
+                on (A.ref_id=B.ref_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
+                    A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    null as gi_date, null as invoice_date, null as due_date, 
+                    B.acc_id as cp_acc_id, B.ledger_name as cp_ledger_name, B.ledger_code as cp_ledger_code from 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'promotion' and acc_id!='$acc_id' and company_id = '$company_id') A 
+                left join 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'promotion' and acc_id='$acc_id' and company_id = '$company_id') B 
                 on (A.ref_id=B.ref_id) 
 
                 ) AA 
@@ -255,6 +344,7 @@ class PaymentReceipt extends Model
         $acc_id = $request->post('acc_id');
         $legal_name = $request->post('legal_name');
         $acc_code = $request->post('acc_code');
+        $acc_code1 = $request->post('acc_code1');
         $bank_id = $request->post('bank_id');
         $bank_name = $request->post('bank_name');
         $payment_type = $request->post('payment_type');
@@ -316,6 +406,7 @@ class PaymentReceipt extends Model
                 'account_id'=>$acc_id,
                 'account_name'=>$legal_name,
                 'account_code'=>$acc_code,
+                'account_code1'=>$acc_code1,
                 'bank_id'=>$bank_id,
                 'bank_name'=>$bank_name,
                 'payment_type'=>$payment_type,

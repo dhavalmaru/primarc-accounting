@@ -71,13 +71,19 @@ class PromotionController extends Controller
 
     public function actionRedirect($action, $id) {
         $model = new Promotion();
-        $data = $model->getPromotionDetails($id, "");
         $acc_details = $model->getAccountDetails();
-        $other_debit_credit_entries = $model->gerPromotionEntries($id);
+        $vendor = $model->getVendors();
+        $promotion_type = $model->getPromoTypes();
+        $warehouse_gst = $model->getWarehouseDetails();
+        $data = $model->getPromotionDetails($id, "");
+        $promotion_entries = $model->gerPromotionEntries($id);
         // $approver_list = $model->getApprover($action);
 
-        return $this->render('promotion_details', ['action' => $action, 'data' => $data, 'acc_details' => $acc_details, 
-                                                        'other_debit_credit_entries' => $other_debit_credit_entries]);
+
+        return $this->render('promotion_details', ['action' => $action, 'acc_details' => $acc_details, 
+                                                    'vendor' => $vendor, 'promotion_type' => $promotion_type, 
+                                                    'warehouse_gst' => $warehouse_gst, 'data' => $data, 
+                                                    'promotion_entries' => $promotion_entries]);
     }
 
     public function actionView($id) {
@@ -148,14 +154,32 @@ class PromotionController extends Controller
     public function actionGetpromocodes(){
         $model = new Promotion();
         $request = Yii::$app->request;
+        $id = $request->post('id');
         $vendor_id = $request->post('vendor_id');
         $promotion_type = $request->post('promotion_type');
         $debit_note_ref = $request->post('debit_note_ref');
-        $data = $model->getPromoCodes($vendor_id, $promotion_type, $debit_note_ref);
 
+        // $vendor_id = '504';
+        // $promotion_type = 'Normal Promo';
+        // $debit_note_ref = '1819/Jul/MH/016';
+
+        $promotion_codes = '';
+        $data = $model->getPromotionDetails($id, "");
+        if(count($data)>0){
+            $promotion_codes = $data[0]['promotion_code'];
+        }
+
+
+        $data = $model->getPromoCodes($vendor_id, $promotion_type, $debit_note_ref);
         $promotion_code = '';
+        $selected='selected';
         for($i=0; $i<count($data); $i++){
-            $promotion_code = $promotion_code . '<option value="'.$data[$i]['promotion_code'].'">'.$data[$i]['promotion_code'].'</option>';
+            if(strpos($promotion_codes, $data[$i]['promotion_code'])!==false){
+                $selected='selected';
+            } else {
+                $selected='';
+            }
+            $promotion_code = $promotion_code . '<option value="'.$data[$i]['promotion_code'].'" '.$selected.' >'.$data[$i]['promotion_code'].'</option>';
         }
 
         $result['promotion_code'] = $promotion_code;
@@ -196,8 +220,8 @@ class PromotionController extends Controller
         $result = '';
         $data = $model->getDetails($vendor_id, $promotion_type, $promotion_code, $debit_note_ref);
         if(count($data)>0){
-            // $total_amount = $data['total_amount'];
-            $total_amount = 1500;
+            $total_amount = $data[0]['total_amount'];
+            // $total_amount = 1500;
             $acc_id = '';
             $tax_code = '';
             $vendor_details = $model->getVendorDetails($vendor_id);
@@ -248,7 +272,12 @@ class PromotionController extends Controller
             //                 <td><input class="form-control" type="text credit_amt" name="credit_amt[]" id="credit_amt_0" value="" onChange="get_total();" readonly /></td>
             //             </tr>';
 
-            $tax = 5;
+
+            if($trans_type == "Invoice"){
+                $tax = 18;
+            } else {
+               $tax = 0; 
+            }
             
             $warehouse_details = $model->getWarehouseDetails($warehouse_id);
 
@@ -335,15 +364,16 @@ class PromotionController extends Controller
         $this->redirect(array('promotion/index'));
     }
 
-    public function actionViewdebitcreditnote($id){
+    public function actionViewtaxinvoice($id){
         $model = new Promotion();
         $data = $model->getDebitNoteDetails($id);
         
         $this->layout = false;
-        return $this->render('debit_note', ['debit_note' => $data['debit_note'], 'vendor_details' => $data['vendor_details']]);
+        return $this->render('tax_invoice', ['debit_note' => $data['debit_note'], 'vendor_details' => $data['vendor_details'], 
+                                            'invoice_details' => $data['invoice_details'], 'inv_tax_details' => $data['inv_tax_details']]);
     }
 
-    public function actionDownloaddebitcreditnote($id){
+    public function actionDownloadtaxinvoice($id){
         $model = new Promotion();
         $data = $model->getDebitNoteDetails($id);
         $file = "";
@@ -351,7 +381,7 @@ class PromotionController extends Controller
         if(isset($data['debit_note'])){
             if(count($data['debit_note'])>0){
                 $debit_note = $data['debit_note'];
-                $file = $debit_note[0]['debit_credit_note_path'];
+                $file = $debit_note[0]['debit_note_path'];
             }
         }
 
@@ -362,16 +392,48 @@ class PromotionController extends Controller
         }
     }
 
-    public function actionEmaildebitcreditnote($id){
+    public function actionEmailtaxinvoice($id){
         $model = new Promotion();
         $data = $model->getDebitNoteDetails($id);
         $file = "";
 
-        return $this->render('email', [
-            'invoice_details' => $data['invoice_details'], 'debit_note' => $data['debit_note'], 
-            'deduction_details' => $data['deduction_details'], 'vendor_details' => $data['vendor_details'], 
-            'grn_details' => $data['grn_details']
-        ]);
+        return $this->render('email', ['debit_note' => $data['debit_note'], 'vendor_details' => $data['vendor_details'], 
+                                        'invoice_details' => $data['invoice_details'], 'inv_tax_details' => $data['inv_tax_details']]);
+    }
+
+    public function actionViewdebitnote($id){
+        $model = new Promotion();
+        $data = $model->getDebitNoteDetails($id);
+        
+        $this->layout = false;
+        return $this->render('debit_note', ['debit_note' => $data['debit_note'], 'vendor_details' => $data['vendor_details']]);
+    }
+
+    public function actionDownloaddebitnote($id){
+        $model = new Promotion();
+        $data = $model->getDebitNoteDetails($id);
+        $file = "";
+
+        if(isset($data['debit_note'])){
+            if(count($data['debit_note'])>0){
+                $debit_note = $data['debit_note'];
+                $file = $debit_note[0]['debit_note_path'];
+            }
+        }
+
+        if( file_exists( $file ) ){
+            Yii::$app->response->sendFile($file);
+        } else {
+            echo $file;
+        }
+    }
+
+    public function actionEmaildebitnote($id){
+        $model = new Promotion();
+        $data = $model->getDebitNoteDetails($id);
+        $file = "";
+
+        return $this->render('email', ['debit_note' => $data['debit_note'], 'vendor_details' => $data['vendor_details']]);
     }
 
     public function actionEmail(){

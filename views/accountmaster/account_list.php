@@ -36,9 +36,10 @@ $this->params['breadcrumbs'][] = $this->title;
 											<th>Code</th> 
 											<th>Account Type</th> 
 											<th>Legal Name</th>
-											<th>Category_1</th>
+											<th>Category</th>
+											<!-- <th>Category_1</th>
 											<th>Category_2</th>
-											<th>Category_3</th>
+											<th>Category_3</th> -->
 											<th>Business Category</th>
 											<th>Status</th> 
 											<th>Updated By</th> 
@@ -57,10 +58,17 @@ $this->params['breadcrumbs'][] = $this->title;
 											<td><?php echo $pending[$i]['type']; ?></td> 
 											<td><?php echo $pending[$i]['code']; ?></td> 
 											<td><?php echo $pending[$i]['account_type']; ?></td> 
+											<?php /*if( $pending[$i]['type']="Goods Purchase"||$pending[$i]['type']="Goods Purchase"||$pending[$i]['type']="Goods Purchase") 	{?>
+											<td><?php echo $pending[$i]['legal_name_tree']; ?></td>
+											<?php } else{?>
 											<td><?php echo $pending[$i]['legal_name']; ?></td> 
-											<td><?php echo $pending[$i]['category_1']; ?></td> 
-											<td><?php echo $pending[$i]['category_2']; ?></td> 
-											<td><?php echo $pending[$i]['category_3']; ?></td> 
+											<?php }*/?>
+											<td><?php echo $pending[$i]['legal_name']; ?></td> 
+											<td><?php echo $pending[$i]['acc_category']; ?></td> 
+											
+											<!-- <td><?php //echo $pending[$i]['category_1']; ?></td> 
+											<td><?php //echo $pending[$i]['category_2']; ?></td> 
+											<td><?php //echo $pending[$i]['category_3']; ?></td>  -->
 											<td><?php echo $pending[$i]['bus_category']; ?></td> 
 											<td><?php echo $pending[$i]['status']; ?></td> 
 											<td><?php echo $pending[$i]['updater']; ?></td> 
@@ -82,9 +90,10 @@ $this->params['breadcrumbs'][] = $this->title;
 											<th>Code</th> 
 											<th>Account Type</th> 
 											<th>Legal Name</th>
-											<th>Category_1</th>
+											<th>Category</th>
+											<!-- <th>Category_1</th>
 											<th>Category_2</th>
-											<th>Category_3</th>
+											<th>Category_3</th> -->
 											<th>Business Category</th>
 											<th>Status</th> 
 											<th>Updated By</th> 
@@ -102,9 +111,10 @@ $this->params['breadcrumbs'][] = $this->title;
 											<td><?php echo $approved[$i]['code']; ?></td> 
 											<td><?php echo $approved[$i]['account_type']; ?></td> 
 											<td><?php echo $approved[$i]['legal_name']; ?></td> 
-											<td><?php echo $approved[$i]['category_1']; ?></td> 
-											<td><?php echo $approved[$i]['category_2']; ?></td> 
-											<td><?php echo $approved[$i]['category_3']; ?></td> 
+											<td><?php echo $approved[$i]['acc_category']; ?></td> 
+											<!-- <td><?php //echo $approved[$i]['category_1']; ?></td> 
+											<td><?php //echo $approved[$i]['category_2']; ?></td> 
+											<td><?php //echo $approved[$i]['category_3']; ?></td>  -->
 											<td><?php echo $approved[$i]['bus_category']; ?></td> 
 											<td><?php echo $approved[$i]['status']; ?></td> 
 											<td><?php echo $approved[$i]['updater']; ?></td> 
@@ -126,9 +136,10 @@ $this->params['breadcrumbs'][] = $this->title;
 											<th>Code</th> 
 											<th>Account Type</th> 
 											<th>Legal Name</th>
-											<th>Category_1</th>
+											<th>Category</th>
+											<!-- <th>Category_1</th>
 											<th>Category_2</th>
-											<th>Category_3</th>
+											<th>Category_3</th> -->
 											<th>Business Category</th>
 											<th>Status</th> 
 											<th>Updated By</th> 
@@ -147,9 +158,10 @@ $this->params['breadcrumbs'][] = $this->title;
 											<td><?php echo $rejected[$i]['code']; ?></td> 
 											<td><?php echo $rejected[$i]['account_type']; ?></td> 
 											<td><?php echo $rejected[$i]['legal_name']; ?></td> 
-											<td><?php echo $rejected[$i]['category_1']; ?></td> 
-											<td><?php echo $rejected[$i]['category_2']; ?></td> 
-											<td><?php echo $rejected[$i]['category_3']; ?></td> 
+											<td><?php echo $rejected[$i]['acc_category']; ?></td> 
+											<!-- <td><?php //echo $rejected[$i]['category_1']; ?></td> 
+											<td><?php //echo $rejected[$i]['category_2']; ?></td> 
+											<td><?php //echo $rejected[$i]['category_3']; ?></td>  -->
 											<td><?php echo $rejected[$i]['bus_category']; ?></td> 
 											<td><?php echo $rejected[$i]['status']; ?></td> 
 											<td><?php echo $rejected[$i]['updater']; ?></td> 

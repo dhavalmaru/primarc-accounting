@@ -67,51 +67,51 @@ function change_date_criteria(){
 
 
 // $("#generate").click(function(){
-//     var account = $('#account').val();
-//     var from_date = $('#from_date').val();
-//     var to_date = $('#to_date').val();
-//     var csrfToken = $('meta[name="csrf-token"]').attr("content");
+    //     var account = $('#account').val();
+    //     var from_date = $('#from_date').val();
+    //     var to_date = $('#to_date').val();
+    //     var csrfToken = $('meta[name="csrf-token"]').attr("content");
 
-//     // console.log(account);
-//     // console.log(from_date);
-//     // console.log(to_date);
+    //     // console.log(account);
+    //     // console.log(from_date);
+    //     // console.log(to_date);
 
-//     $.ajax({
-//         url: BASE_URL+'index.php?r=accreport%2Fgetledger',
-//         type: 'post',
-//         async: false,
-//         data: {
-//                 account : account,
-//                 from_date : from_date,
-//                 to_date : to_date,
-//                 _csrf : csrfToken
-//              },
-//         dataType: 'html',
-//         success: function (data) {
-//             if(data != null){
-//                 $('#example').html(data);
-//                 $("#company_name").html("Primarc Pecan Retail Pvt Ltd");
-//                 $("#account_name").html($("#account option:selected").text());
-//                 $("#from").html('From: '+from_date);
-//                 $("#to").html('To: '+to_date);
+    //     $.ajax({
+    //         url: BASE_URL+'index.php?r=accreport%2Fgetledger',
+    //         type: 'post',
+    //         async: false,
+    //         data: {
+    //                 account : account,
+    //                 from_date : from_date,
+    //                 to_date : to_date,
+    //                 _csrf : csrfToken
+    //              },
+    //         dataType: 'html',
+    //         success: function (data) {
+    //             if(data != null){
+    //                 $('#example').html(data);
+    //                 $("#company_name").html("Primarc Pecan Retail Pvt Ltd");
+    //                 $("#account_name").html($("#account option:selected").text());
+    //                 $("#from").html('From: '+from_date);
+    //                 $("#to").html('To: '+to_date);
 
-//                 show_narration();
-//             } else {
-//                 $('#example').html("");
-//                 $("#company_name").html("Primarc Pecan Retail Pvt Ltd");
-//                 $("#account_name").html("");
-//                 $("#from").html("");
-//                 $("#to").html("");
-//             }
+    //                 show_narration();
+    //             } else {
+    //                 $('#example').html("");
+    //                 $("#company_name").html("Primarc Pecan Retail Pvt Ltd");
+    //                 $("#account_name").html("");
+    //                 $("#from").html("");
+    //                 $("#to").html("");
+    //             }
 
-//             set_table();
-//             show_narration();
-//         },
-//         error: function (xhr, ajaxOptions, thrownError) {
-//             alert(xhr.status);
-//             alert(thrownError);
-//         }
-//     });
+    //             set_table();
+    //             show_narration();
+    //         },
+    //         error: function (xhr, ajaxOptions, thrownError) {
+    //             alert(xhr.status);
+    //             alert(thrownError);
+    //         }
+    //     });
 // })
 
 $('#narration').change(function(){

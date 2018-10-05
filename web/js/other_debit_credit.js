@@ -48,25 +48,52 @@ function set_view(){
 }
 
 $("#repeat_row").click(function(){
-	var $tableBody = $('#other_debit_credit').find("tbody"),
-	$trLast = $tableBody.find("tr:last"),
-	$trNew = $trLast.clone();
+    // var $tableBody = $('#other_debit_credit').find("tbody"),
+    // $trLast = $tableBody.find("tr:last"),
+    // $trNew = $trLast.clone();
 
-	var id = $trNew.attr('id');
-	var index = id.substr(id.lastIndexOf('_')+1);
-	var newIndex = parseInt(index) + 1;
-	$trNew.attr('id', 'row_'+newIndex);
-    $trNew.find('#delete_row_'+index).attr('id', 'delete_row_'+newIndex).val("");
-	$trNew.find('#sr_no_'+index).attr('id', 'sr_no_'+newIndex).html(newIndex+1);
-    $trNew.find('#entry_id_'+index).attr('id', 'entry_id_'+newIndex).val("");
-	$trNew.find('#acc_id_'+index).attr('id', 'acc_id_'+newIndex).val("");
-	$trNew.find('#legal_name_'+index).attr('id', 'legal_name_'+newIndex).val("");
-	$trNew.find('#acc_code_'+index).attr('id', 'acc_code_'+newIndex).val("");
-	$trNew.find('#trans_'+index).attr('id', 'trans_'+newIndex).val("");
-	$trNew.find('#debit_amt_'+index).attr('id', 'debit_amt_'+newIndex).val("");
-	$trNew.find('#credit_amt_'+index).attr('id', 'credit_amt_'+newIndex).val("");
+    // var id = $trNew.attr('id');
+    // var index = id.substr(id.lastIndexOf('_')+1);
+    // var newIndex = parseInt(index) + 1;
+    // $trNew.attr('id', 'row_'+newIndex);
+    // $trNew.find('#delete_row_'+index).attr('id', 'delete_row_'+newIndex).val("");
+    // $trNew.find('#sr_no_'+index).attr('id', 'sr_no_'+newIndex).html(newIndex+1);
+    // $trNew.find('#entry_id_'+index).attr('id', 'entry_id_'+newIndex).val("");
+    // $trNew.find('#acc_id_'+index).attr('id', 'acc_id_'+newIndex).val("");
+    // $trNew.find('#legal_name_'+index).attr('id', 'legal_name_'+newIndex).val("");
+    // $trNew.find('#acc_code_'+index).attr('id', 'acc_code_'+newIndex).val("");
+    // $trNew.find('#trans_'+index).attr('id', 'trans_'+newIndex).val("");
+    // $trNew.find('#debit_amt_'+index).attr('id', 'debit_amt_'+newIndex).val("");
+    // $trNew.find('#credit_amt_'+index).attr('id', 'credit_amt_'+newIndex).val("");
 
-	$trLast.after($trNew);
+    // $trLast.after($trNew);
+
+    var counter = $('.debit_amt').length;
+    var newRow = jQuery('<tr id="row_'+counter+'">' + 
+                            '<td style="text-align: center;" class="action_delete"><button type="button" class="btn btn-sm btn-success" id="delete_row_'+counter+'" onClick="delete_row(this);">-</button></td>' + 
+                            '<td  style="text-align: center; display: none;" id="sr_no_'+counter+'">'+(counter+1)+'</td>' + 
+                            '<td>' + 
+                                '<input class="form-control" type="hidden" name="entry_id[]" id="entry_id_'+counter+'" value="" />' + 
+                                '<select class="form-control select2" name="acc_id[]" id="acc_id_'+counter+'" onchange="get_acc_details(this);">' + 
+                                    acc_details + 
+                                '</select>' + 
+                                '<input class="form-control" type="hidden" name="legal_name[]" id="legal_name_'+counter+'" value="" />' + 
+                            '</td>' + 
+                            '<td><input class="form-control" type="text" name="acc_code[]" id="acc_code_'+counter+'" value="" readonly /></td>' + 
+                            '<td>' + 
+                                '<select class="form-control select2" name="transaction[]" id="trans_'+counter+'" onchange="set_transaction(this);">' + 
+                                    '<option value="">Select</option>' + 
+                                    '<option value="Debit">Debit</option>' + 
+                                    '<option value="Credit">Credit</option>' + 
+                                '</select>' + 
+                            '</td>' + 
+                            '<td><input class="form-control debit_amt" type="text" name="debit_amt[]" id="debit_amt_'+counter+'" value="" onChange="get_total();" /></td>' + 
+                            '<td><input class="form-control credit_amt" type="text" name="credit_amt[]" id="credit_amt_'+counter+'" value="" onChange="get_total();" /></td>' + 
+                        '</tr>');
+    var $tableBody = $('#acc_other_debit_credit_details').find("tbody");
+    $trLast = $tableBody.find("tr:last");
+    $trLast.after(newRow);
+    $('.select2').select2();
 })
 
 function delete_row(elem){
@@ -142,4 +169,14 @@ function set_transaction(elem){
     }
 
     get_total();
+}
+
+function set_trans_type(){
+    var trans_type = $('#trans_type').val();
+    
+    if(trans_type=="Invoice") {
+        $('#warehouse_gst_div').show();
+    } else {
+        $('#warehouse_gst_div').hide();
+    }
 }

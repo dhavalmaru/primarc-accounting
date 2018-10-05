@@ -15,18 +15,16 @@ $this->params['breadcrumbs'][] = $this->title;
 $session = Yii::$app->session;
 ?>
 <style type="text/css">
-input:-webkit-autofill {
-    background-color: white !important;
-}
-/*select {
-	width: 100%;
-}*/
-.form-horizontal .control-label { font-size: 12px; letter-spacing: .5px; margin-top:5px; }
-.form-devident { margin-top: 10px; }
-.form-devident h4 { border-bottom: 1px dashed #ddd; padding-bottom: 10px; }
-.download_file {display: block;}
-
-
+	input:-webkit-autofill {
+	    background-color: white !important;
+	}
+	/*select {
+		width: 100%;
+	}*/
+	.form-horizontal .control-label { font-size: 12px; letter-spacing: .5px; margin-top:5px; }
+	.form-devident { margin-top: 10px; }
+	.form-devident h4 { border-bottom: 1px dashed #ddd; padding-bottom: 10px; }
+	.download_file {display: block;}
 </style>
 <div class="grn-index">
 	<div class=" col-md-12">  
@@ -40,37 +38,69 @@ input:-webkit-autofill {
 					<input type="hidden" id="company_id" name="company_id" value="<?php if(isset($data)) echo $data[0]['company_id']; else if(isset($session['company_id'])) echo $session['company_id']; ?>" />
 					<input type="hidden" id="status" name="status" value="<?php if(isset($data)) echo $data[0]['status']; ?>" />
 					<input type="hidden" id="type_val" name="type_val" value="<?php if(isset($data)) echo $data[0]['type']; ?>" />
-					<select class="form-control select2 " id="type" name="type" <?php if(isset($data)) echo 'disabled'; ?>>
+					<select class="form-control select2 " id="type" name="type" data-error="#err_type" <?php if(isset($data)) echo 'disabled'; ?>>
 						<option value="">Select</option>
 						<option value="Vendor Goods" <?php if(isset($data)) { if($data[0]['type']=="Vendor Goods") echo "selected"; } ?>>Vendor Goods</option>
 						<option value="Vendor Expenses" <?php if(isset($data)) { if($data[0]['type']=="Vendor Expenses") echo "selected"; } ?>>Vendor Expenses</option>
 						<option value="Bank Account" <?php if(isset($data)) { if($data[0]['type']=="Bank Account") echo "selected"; } ?>>Bank Account</option>
 						<option value="Goods Purchase" <?php if(isset($data)) { if($data[0]['type']=="Goods Purchase") echo "selected"; } ?>>Goods Purchase</option>
 						<option value="Tax" <?php if(isset($data)) { if($data[0]['type']=="Tax") echo "selected"; } ?>>Tax</option>
-						<option value="CGST" <?php if(isset($data)) { if($data[0]['type']=="CGST") echo "selected"; } ?>>CGST</option>
-						<option value="SGST" <?php if(isset($data)) { if($data[0]['type']=="SGST") echo "selected"; } ?>>SGST</option>
-						<option value="IGST" <?php if(isset($data)) { if($data[0]['type']=="IGST") echo "selected"; } ?>>IGST</option>
+						<option value="GST Tax" <?php if(isset($data)) { if($data[0]['type']=="GST Tax" || $data[0]['type']=="CGST" || $data[0]['type']=="SGST" || $data[0]['type']=="IGST") echo "selected"; } ?>>GST Tax</option>
 						<option value="Goods Sales" <?php if(isset($data)) { if($data[0]['type']=="Goods Sales") echo "selected"; } ?>>Goods Sales</option>
 						<option value="Employee" <?php if(isset($data)) { if($data[0]['type']=="Employee") echo "selected"; } ?>>Employee</option>
+						<option value="Customer" <?php if(isset($data)) { if($data[0]['type']=="Customer") echo "selected"; } ?>>Customer</option>
+						<option value="Marketplace" <?php if(isset($data)) { if($data[0]['type']=="Marketplace") echo "selected"; } ?>>Marketplace</option>
+						<option value="Branch Type" <?php if(isset($data)) { if($data[0]['type']=="Branch Type") echo "selected"; } ?>>Branch Type</option>
 						<option value="Others" <?php if(isset($data)) { if($data[0]['type']=="Others") echo "selected"; } ?>>Others</option>
 					</select>
+					<span id="err_type"></span>
 				</div>
+				
+				<div class="col-md-3 col-sm-3 col-xs-6 tax_type">
+					<label class="control-label">Tax Type</label>
+					<select id="tax_id" name="tax_id" class="form-control select2" data-error="#err_tax_id">
+						<option value="">Select</option>
+						<?php for($i=0; $i<count($tax); $i++) { ?>
+							<option value="<?php echo $tax[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['tax_id']==$tax[$i]['id']) echo "selected"; } ?>><?php echo $tax[$i]['tax_name']; ?></option>
+						<?php } ?>
+					</select>
+					<span id="err_tax_id"></span>
+					<input type="hidden" id="tax_id_val" name="tax_id_val" />
+				</div>
+
 				<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Legal Name</label>
 					<span id="type_vendor_id">
-					<select id="vendor_id" name="vendor_id" class="form-control select2" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Goods') echo 'display: none;'; } else { echo 'display: none;'; } ?>">
+					<select id="vendor_id" name="vendor_id" data-error="#err_vendor_id" class="form-control select2" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Goods') echo 'display: none;'; } else { echo 'display: none;'; } ?>">
 						<option value="">Select</option>
 						<?php for($i=0; $i<count($vendor); $i++) { ?>
 							<option value="<?php echo $vendor[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['vendor_id']==$vendor[$i]['id']) echo "selected"; } ?>><?php echo $vendor[$i]['vendor_name']; ?></option>
 						<?php } ?>
 					</select>
+					<span id="err_vendor_id"></span>
 					</span>
-					<input id="legal_name" name="legal_name" class="form-control" type="text" value="<?php if(isset($data[0])) echo $data[0]['legal_name']; ?>" style="<?php if(isset($data[0])) { if($data[0]['type'] == 'Vendor Goods') echo 'display: none;'; } ?>" />
+					
+					<span id="type_customer_id">
+					<select id="customer_id" name="customer_id" class="form-control select2" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Customer') echo 'display: none;'; } else { echo 'display: none;'; } ?>">
+						<option value="">Select</option>
+						<?php for($i=0; $i<count($customers); $i++) { ?>
+							<option value="<?php echo $customers[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['customer_id']==$customers[$i]['id']) echo "selected"; } ?>><?php echo $customers[$i]['customer_name']; ?></option>
+						<?php } ?>
+					</select>
+				
+					</span>
+					<input id="legal_name" name="legal_name" class="form-control" type="text" value="<?php if(isset($data[0])) echo $data[0]['legal_name']; ?>" style="<?php if(isset($data[0])) {if($data[0]['type']=='Vendor Goods' || $data[0]['type']=='GST Tax' || $data[0]['type']=='CGST' || $data[0]['type']=='SGST' || $data[0]['type']=='IGST' || $data[0]['type']=='Goods Sales' || $data[0]['type']=='Goods Purchase') echo 'display: none;'; } ?>" />
+				
+			  		
 				</div>
+				
+				
 				<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Code</label>
 					<input id="code" name="code" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['code']; ?>" style="<?php if(isset($data[0])) { if($data[0]['type'] == 'Vendor Goods') echo 'display: none;'; } ?>" readonly />
 					<input id="vendor_code" name="vendor_code" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['code']; ?>" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Goods') echo 'display: none;'; } else { echo 'display: none;'; } ?>" readonly />
+					
+					<input id="customer_code" name="customer_code" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['code']; ?>" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Customer') echo 'display: none;'; } else { echo 'display: none;'; } ?>" readonly />
 				</div>
 				<div class=" col-md-3 col-sm-3 col-xs-6 vendor_goods" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Goods') echo 'display: none;'; } else echo 'display: none;'; ?>">
 					<label class="control-label">Type Of Company</label>
@@ -83,25 +113,88 @@ input:-webkit-autofill {
 			</div>
 
 		 	<div class="form-group">
+			  	<div class="col-md-3 col-sm-3 col-xs-6 gst_tax"  style="display:none">
+					<label class="control-label">Input/Output</label>
+					<select class="form-control select2" id="input_output" name="input_output" data-error="#err_input_output" >
+						<option value="">Select</option>
+						<option value="Input" <?php if(isset($data)) { if($data[0]['input_output']=="Input") echo "selected"; } ?>>Input</option>
+						<option value="Output" <?php if(isset($data)) { if($data[0]['input_output']=="Output") echo "selected"; } ?>>Output</option>
+					
+					</select>
+					<span id="err_input_output"></span>
+				</div>
+				<div class="col-md-3 col-sm-3 col-xs-6 state"  style="display:none" data-error="#err_state">
+					<label class="control-label">State</label>
+					<select id="state_id" name="state_id" class="form-control select2">
+						<option value="">Select</option>
+						<?php for($i=0; $i<count($state); $i++) { ?>
+							<option value="<?php echo $state[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['state_id']==$state[$i]['id']) echo "selected"; } ?>><?php echo $state[$i]['state_name']; ?></option>
+						<?php } ?>
+					</select>
+					<span id="err_state"></span>
+				</div>
+				<div class="col-md-3 col-sm-3 col-xs-6 state_type"  style="display:none" >
+					<label class="control-label">State Type</label>
+					<select class="form-control select2" id="state_type" name="state_type" data-error="#err_state_type" >
+						<option value="">Select</option>
+						<option value="Local" <?php if(isset($data)) { if($data[0]['state_type']=="Local") echo "selected"; } ?>>Local</option>
+						<option value="Inter State" <?php if(isset($data)) { if($data[0]['state_type']=="Inter State") echo "selected"; } ?>>Inter</option>
+					
+					</select>
+					<span id="err_state_type"></span>
+				</div>
+				
+				<div class="col-md-3 col-sm-3 col-xs-6 bus_type"  style="display:none">
+					<label class="control-label">Business Type</label>
+					<select class="form-control select2" id="bus_type" name="bus_type" data-error="#err_business" >
+						<option value="">Select</option>
+						<option value="B2B" <?php if(isset($data)) { if($data[0]['bus_type']=="B2B") echo "selected"; } ?>>B2B</option>
+						<option value="B2C" <?php if(isset($data)) { if($data[0]['bus_type']=="B2C") echo "selected"; } ?>>B2C </option>
+					
+					</select>
+					<span id="err_business"></span>
+				</div>
+				
+				<div class="col-md-3 col-sm-3 col-xs-6 gst_rate"  style="display:none">
+					<label class="control-label">Gst Rate</label>
+					<select class="form-control select2" id="gst_rate" name="gst_rate" data-error="#err_gst_rate">
+						<option value="">Select</option>
+						<?php for($i=0; $i<count($tax_per); $i++) { ?>
+							<option value="<?php echo round($tax_per[$i]['tax_rate'],2); ?>" <?php if(isset($data[0])) { if($data[0]['gst_rate']==round($tax_per[$i]['tax_rate'],2)) echo "selected"; } ?>><?php echo round($tax_per[$i]['tax_rate'],2); ?></option>
+						<?php } ?>
+					</select>
+					<span id="err_gst_rate"></span>
+			
+					<!-- <input id="gst_rate" name="gst_rate" class="form-control" type="text" value="<?php //if(isset($data)) echo $data[0]['gst_rate']; ?>"  /> -->
+				</div>
+				
+				
+			
+			</div>
+		
+			
+			<div class="form-group">
 			  	<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Account Type</label>
-					<select class="form-control select2" id="account_type" name="account_type" onchange="get_sub_account_type();">
+					<select class="form-control select2" id="account_type" name="account_type" data-error="#err_account_type" onchange="get_sub_account_type();">
 						<option value="">Select</option>
 						<option value="Income" <?php if(isset($data)) { if($data[0]['account_type']=="Income") echo "selected"; } ?>>Income</option>
 						<option value="Expense" <?php if(isset($data)) { if($data[0]['account_type']=="Expense") echo "selected"; } ?>>Expense</option>
 						<option value="Asset" <?php if(isset($data)) { if($data[0]['account_type']=="Asset") echo "selected"; } ?>>Asset</option>
 						<option value="Liability" <?php if(isset($data)) { if($data[0]['account_type']=="Liability") echo "selected"; } ?>>Liability</option>
 					</select>
+					<span id="err_account_type"></span>
 				</div>
 			  	<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Sub Account Type</label>
 					<input type="hidden" id="sub_account_type_id" name="sub_account_type_id" value="<?php if(isset($data)) echo $data[0]['sub_account_type']; ?>" />
-					<select class="form-control" id="sub_account_type" name="sub_account_type" onchange="get_account_path();">
+					<select class="form-control select2" id="sub_account_type" name="sub_account_type" data-error="#err_sub_account_type" onchange="get_account_path();">
 						<option value="">Select</option>
 						<?php //for($i=0; $i<count($category); $i++) { ?>
 							<!-- <option value="<?php //echo $category[$i]['id']; ?>" <?php //if(isset($data)) { if($data[0]['sub_account_type']==$category[$i]['id']) echo "selected"; } ?>><?php //echo $category[$i]['account_type']; ?></option> -->
 						<?php //} ?>
 					</select>
+					<span id="err_sub_account_type"></span>
 				</div>
 			  	<div class="col-md-6 col-sm-6 col-xs-12">
 			  		<label class="control-label">Path</label>
@@ -109,10 +202,16 @@ input:-webkit-autofill {
 				</div>
 			</div>
 			
+			
 		 	<div class="form-group">
 	         	<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Details</label>
 					<input id="details" name="details" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['details']; ?>" />
+				</div>
+	         	<div class="col-md-3 col-sm-3 col-xs-6">
+					<label class="control-label">Bill Wise</label><br/>
+					<input name="bill_wise" type="radio" value="Yes" <?php if(isset($data)) {if($data[0]['bill_wise']=='1') echo 'checked';} ?> /> Yes &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<input name="bill_wise" type="radio" value="No" <?php if(isset($data)) {if($data[0]['bill_wise']!='1') echo 'checked';} ?> /> No
 				</div>
 	         	<div class="col-md-3 col-sm-3 col-xs-6 vendor_goods">
 					<label class="control-label">GSTIN</label>
@@ -418,12 +517,13 @@ input:-webkit-autofill {
 				</div>
 				<div class="col-md-3 col-sm-3 col-xs-6">
 					<label class="control-label">Approver</label>
-					<select id="approver_id" name="approver_id" class="form-control select2">
+					<select id="approver_id" name="approver_id" class="form-control select2" data-error="#err_approver_id">
 						<option value="">Select</option>
 						<?php for($i=0; $i<count($approver_list); $i++) { ?>
 							<option value="<?php echo $approver_list[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['approver_id']==$approver_list[$i]['id']) echo "selected"; } ?>><?php echo $approver_list[$i]['username']; ?></option>
 						<?php } ?>
 					</select>
+					<span id="err_approver_id"></span>
 				</div>
 			</div>
 
@@ -490,7 +590,10 @@ input:-webkit-autofill {
     var cat_1 = "<?php if(isset($data)) echo $data[0]['category_1']; ?>";
     var cat_2 = "<?php if(isset($data)) echo $data[0]['category_2']; ?>";
     var cat_3 = "<?php if(isset($data)) echo $data[0]['category_3']; ?>";
+	
+	
 </script>
+
 
 
 <?php 

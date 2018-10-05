@@ -50,8 +50,7 @@ class JournalvoucherController extends Controller
                 $approver_list = $journal_voucher->getApprover($action);
 
                 $journal_voucher->setLog('JournalVoucher', '', 'Insert', '', 'Insert Journal Voucher Details', 'acc_jv_details', '');
-                return $this->render('journalvoucher_details', ['action' => $action, 'acc_details' => $acc_details, 
-                                                                'approver_list' => $approver_list]);
+                return $this->render('journalvoucher_details', ['action' => $action, 'acc_details' => $acc_details,'approver_list' => $approver_list]);
             } else {
                 return $this->render('/message', [
                     'title'  => \Yii::t('user', 'Access Denied'),
@@ -72,11 +71,23 @@ class JournalvoucherController extends Controller
     public function actionRedirect($action, $id) {
         $journal_voucher = new JournalVoucher();
         $data = $journal_voucher->getJournalVoucherDetails($id, "");
+
+
         $acc_details = $journal_voucher->getAccountDetails();
         $jv_entries = $journal_voucher->gerJournalVoucherEntries($id);
+        for($i=0;$i<count($jv_entries);$i++)
+        {
+            if($jv_entries[$i]['bill_wise']==1)
+            {
+                
+                $invoice_detail = $journal_voucher->getJvInvoiceDetails($jv_entries[$i]['id']);
+                $jv_entries[$i]['invoice_detail']=$invoice_detail;
+            }
+        }
         $jv_docs = $journal_voucher->gerJournalVoucherDocs($id);
         $approver_list = $journal_voucher->getApprover($action);
 
+       
         return $this->render('journalvoucher_details', ['action' => $action, 'data' => $data, 'acc_details' => $acc_details, 
                                                         'jv_entries' => $jv_entries, 'jv_docs' => $jv_docs, 
                                                         'approver_list' => $approver_list]);

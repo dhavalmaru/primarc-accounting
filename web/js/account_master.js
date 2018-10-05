@@ -3,7 +3,7 @@ $('.datepicker').datepicker({changeMonth: true,changeYear: true});
 $(document).ready(function(){
     set_acc_type();
 
-	addMultiInputNamingRules('#acc_category_master', 'input[name="category_1[]"]', { required: true });
+    addMultiInputNamingRules('#acc_category_master', 'input[name="category_1[]"]', { required: true });
     // addMultiInputNamingRules('#acc_category_master', 'input[name="category_2[]"]', { required: true });
     // addMultiInputNamingRules('#acc_category_master', 'input[name="category_3[]"]', { required: true });
 
@@ -12,40 +12,101 @@ $(document).ready(function(){
 
     get_sub_account_type();
     get_account_path();
-	$('.select2').select2();
-	$("#type").change(function(){
-    set_acc_type();
+    $('.select2').select2();
+    set_tax_type();
 
-    $("#details").val("");
-    $("#vendor_id").val("");
-    $("#legal_name").val("");
-    $("#code").val("");
-    $("#vendor_code").val("");
-    $("#pan_no").val("");
-    $("#address").val("");
-    $("#legal_entity_name").val("");
-    $("#vat_no").val("");
-    $("#account_type").val("");
-    $("#account_holder_name").val("");
-    $("#bank_name").val("");
-    $("#branch").val("");
-    $("#acc_no").val("");
-    $("#ifsc_code").val("");
-    $("#category_1").val("");
-    $("#category_2").val("");
-    $("#category_3").val("");
+    $("#type").change(function(){
+        set_acc_type();
 
-    $("#type_val").val($("#type").val());
-    get_code();
+        $("#details").val("");
+        $("#vendor_id").val("");
+        $("#legal_name").val("");
+        $("#code").val("");
+        $("#vendor_code").val("");
+        $("#pan_no").val("");
+        $("#address").val("");
+        $("#legal_entity_name").val("");
+        $("#vat_no").val("");
+        $("#account_type").val("");
+        $("#account_holder_name").val("");
+        $("#bank_name").val("");
+        $("#branch").val("");
+        $("#acc_no").val("");
+        $("#ifsc_code").val("");
+        $("#category_1").val("");
+        $("#category_2").val("");
+        $("#category_3").val("");
+
+        $("#type_val").val($("#type").val());
+        get_code();
+    });
+
+    $("#vendor_id").change(function(){
+        $("#legal_name").val($("#vendor_id option:selected").text());
+        get_code();
+    });
+
+    $("#customer_id").change(function(){
+        $("#legal_name").val($("#customer_id option:selected").text());
+        get_code();
+    });
+        
+    $("#tax_id").change(function(){
+        get_code1();
+        set_tax_type();
+    });
+
+    $("#gst_rate,#bus_type,#state_id,#state_type,#tax_id,#input_output").change(function(){
+        get_tree();
+        set_tax_type();
+    });
 });
-	$("#vendor_id").change(function(){
-    $("#legal_name").val($("#vendor_id option:selected").text());
-    get_code();
 
-});
-});
+function set_tax_type(){
+    if($("#tax_id option:selected").text()=="CGST"||$("#tax_id option:selected").text()=="SGST"||$("#tax_id option:selected").text()=="IGST"){
+        $("#tax_id_val").val($("#tax_id option:selected").text());
+    } else {
+        $("#tax_id_val").val('');
+    }
+}
 
-function set_view(){
+function get_tree() {
+    var input_output = $("#input_output").val();
+    var gst_rate = $("#gst_rate").val();
+    var bus_type = $("#bus_type").val();
+    
+    var state_id = $("#state_id option:selected").text();
+    var tax_id = $("#tax_id option:selected").text();
+
+    var company_name = $("#session_company option:selected").text();
+    
+    var state_type = $("#state_type").val();
+    if($("#type").val()=="Goods Purchase")
+    {
+        $("#legal_name").val('Purchase-'+state_id+'-'+state_type+'-'+gst_rate+'%');
+    
+    }
+    else if($("#type").val()=="Goods Sales")
+    {
+        $("#legal_name").val('Sales-'+state_id+'-'+state_type+'-'+bus_type+'-'+gst_rate+'%');
+    }
+    else if($("#type").val()=="GST Tax")
+    {
+        
+        $("#legal_name").val(''+input_output+'-'+state_id+'-'+tax_id+'-'+gst_rate+'%');
+    }
+    else if($("#type").val()=="Branch Type")
+    {
+        $("#legal_name").val(company_name+'-'+state_id);
+    
+    }
+    else 
+    {
+        $("#legal_name").val("");
+    }
+}
+
+function set_view() {
     if($('#action').val()=='view' || $('#status').val()=='approved'){
         $('#add_category_div').hide();
         $('#business_category tfoot').hide();
@@ -80,7 +141,7 @@ function set_view(){
     }
 }
 
-function delete_row(elem){
+function delete_row(elem) {
     var id = elem.id;
     var index = id.substr(id.lastIndexOf('_')+1);
 
@@ -89,21 +150,25 @@ function delete_row(elem){
     }
 }
 
-
-
-
-
 function set_acc_type(){
-	
     if($("#type").val()=="Vendor Goods"){
         $("#vendor_id").show();
-		$("#type_vendor_id").show();
+        $("#type_vendor_id").show();
+        $("#customer_id").hide();
+        $("#type_customer_id").hide();
         $("#legal_name").hide();
         $("#vendor_code").show();
         $("#code").hide();
         $(".vendor_expenses").hide();
         $(".employee").hide();
         $(".vendor_goods").show();
+        $("#customer_code").hide();
+        $(".state").hide();
+        $(".state_type").hide();
+        $(".gst_rate").hide();
+        $(".bus_type").hide();
+        $(".gst_tax").hide();
+        $(".tax_type").hide();
         // $("#vendor_details").show();
         // $("#acc_hold_name").show();
         // $("#bank_details").show();
@@ -114,16 +179,26 @@ function set_acc_type(){
         // $("#branch").attr('readonly',true);
         // $("#acc_no").attr('readonly',true);
         // $("#ifsc_code").attr('readonly',true);
+        
     } else if($("#type").val()=="Vendor Expenses"){
        // $("#vendor_id").hide();
-		$("#vendor_id").css("display", "none");
-		$("#type_vendor_id").hide();
-        $("#legal_name").show();
+        $("#vendor_id").css("display", "none");
+        $("#type_vendor_id").hide();
+        $("#customer_id").hide();
+        $("#type_customer_id").hide();
+        $('#legal_name').show();
+        $('#legal_name').attr("readonly", false);
         $("#vendor_code").hide();
         $("#code").show();
         $(".vendor_goods").hide();
         $(".employee").hide();
         $(".vendor_expenses").show();
+        $(".state").hide();
+        $(".state_type").hide();
+        $(".gst_rate").hide();
+        $(".bus_type").hide();
+        $(".gst_tax").hide();
+        $(".tax_type").hide();
         // $("#vendor_details").hide();
         // $("#acc_hold_name").show();
         // $("#bank_details").show();
@@ -134,16 +209,26 @@ function set_acc_type(){
         // $("#branch").attr('readonly',false);
         // $("#acc_no").attr('readonly',false);
         // $("#ifsc_code").attr('readonly',false);
+        $("#customer_code").hide();
     } else if($("#type").val()=="Bank Account"){
         $("#vendor_id").hide();
         $("#type_vendor_id").hide();
-        $("#legal_name").show();
+        $("#customer_id").hide();
+        $("#type_customer_id").hide();
+        $('#legal_name').show();
+        $('#legal_name').attr("readonly", false);
         $("#vendor_code").hide();
         $("#code").show();
         $(".vendor_goods").hide();
         $(".vendor_expenses").hide();
         $(".employee").hide();
         $(".bank_account").show();
+        $(".state").hide();
+        $(".state_type").hide();
+        $(".gst_rate").hide();
+        $(".bus_type").hide();
+        $(".gst_tax").hide();
+        $(".tax_type").hide();
         // $("#vendor_details").hide();
         // $("#acc_hold_name").show();
         // $("#bank_details").show();
@@ -154,9 +239,12 @@ function set_acc_type(){
         // $("#branch").attr('readonly',false);
         // $("#acc_no").attr('readonly',false);
         // $("#ifsc_code").attr('readonly',false);
+        $("#customer_code").hide();
     } else if($("#type").val()=="Employee"){
         $("#vendor_id").hide();
         $("#type_vendor_id").hide();
+        $("#customer_id").hide();
+        $("#type_customer_id").hide();
         $("#legal_name").show();
         $("#vendor_code").hide();
         $("#code").show();
@@ -164,6 +252,7 @@ function set_acc_type(){
         $(".vendor_expenses").hide();
         $(".bank_account").hide();
         $(".employee").show();
+    
         // $("#vendor_details").hide();
         // $("#acc_hold_name").show();
         // $("#bank_details").show();
@@ -174,16 +263,175 @@ function set_acc_type(){
         // $("#branch").attr('readonly',false);
         // $("#acc_no").attr('readonly',false);
         // $("#ifsc_code").attr('readonly',false);
-    } else {
+        $("#customer_code").hide();
+        $(".state").hide();
+        $(".state_type").hide();
+        $(".gst_rate").hide();
+        $(".bus_type").hide();
+        $(".gst_tax").hide();
+        $(".tax_type").hide();
+    } else if($("#type").val()=="Marketplace"){
+       // $("#vendor_id").hide();
+        $("#customer_id").hide();
+        $("#type_customer_id").hide();
+        $("#vendor_id").css("display", "none");
+        $("#type_vendor_id").hide();
+        $("#legal_name").show();
+        $("#vendor_code").hide();
+        $("#code").show();
+        $(".vendor_expenses").hide();
+        $(".employee").hide();
+        $(".vendor_goods").show();
+        $('#legal_name').attr("readonly", false);
+    
+         $("#customer_code").hide();
+        // $("#vendor_details").hide();
+        // $("#acc_hold_name").show();
+        // $("#bank_details").show();
+        // $("#business_category_label").hide();
+        // $("#category_details").hide();
+        // $("#account_holder_name").attr('readonly',false);
+        // $("#bank_name").attr('readonly',false);
+        // $("#branch").attr('readonly',false);
+        // $("#acc_no").attr('readonly',false);
+        // $("#ifsc_code").attr('readonly',false);
+        
+        $(".state").hide();
+        $(".state_type").hide();
+        $(".gst_rate").hide();
+        $(".bus_type").hide();
+        $(".gst_tax").hide();
+        $(".tax_type").hide();
+    } else if($("#type").val()=="Customer"){
+       // $("#vendor_id").hide();
+        $("#vendor_id").css("display", "none");
+        $("#type_vendor_id").hide();
+        $("#legal_name").hide();
+        $("#customer_id").show();
+        $("#type_customer_id").show();
+        $("#vendor_code").hide();
+        $("#customer_code").show();
+        $("#code").hide();
+        $(".vendor_expenses").hide();
+        $(".employee").hide();
+        $(".vendor_goods").show();
+        $(".state").hide();
+        $(".state_type").hide();
+        $(".gst_rate").hide();
+        $(".bus_type").hide();
+        $(".gst_tax").hide();
+        $(".tax_type").hide();
+        
+        // $("#vendor_details").hide();
+        // $("#acc_hold_name").show();
+        // $("#bank_details").show();
+        // $("#business_category_label").hide();
+        // $("#category_details").hide();
+        // $("#account_holder_name").attr('readonly',false);
+        // $("#bank_name").attr('readonly',false);
+        // $("#branch").attr('readonly',false);
+        // $("#acc_no").attr('readonly',false);
+        // $("#ifsc_code").attr('readonly',false);
+    } else if($("#type").val()=="Goods Purchase"){
+        $("#customer_id").hide();
+        $("#type_customer_id").hide();
         $("#vendor_id").hide();
         $("#type_vendor_id").hide();
         $("#legal_name").show();
+        $('#legal_name').attr("readonly", true);
         $("#vendor_code").hide();
         $("#code").show();
         $(".vendor_goods").hide();
         $(".vendor_expenses").hide();
         $(".bank_account").hide();
         $(".employee").hide();
+        $("#customer_code").hide();
+        $(".state").show();
+        $(".state_type").show();
+        $(".gst_rate").show();
+        $(".bus_type").hide();
+        $(".gst_tax").hide();
+        $(".tax_type").hide();
+    } else if($("#type").val()=="Goods Sales"){
+        $("#customer_id").hide();
+        $("#type_customer_id").hide();
+        $("#vendor_id").hide();
+        $("#type_vendor_id").hide();
+        $("#legal_name").show();
+        $('#legal_name').attr("readonly", true);
+        $("#vendor_code").hide();
+        $("#code").show();
+        $(".vendor_goods").hide();
+        $(".vendor_expenses").hide();
+        $(".bank_account").hide();
+        $(".employee").hide();
+        $("#customer_code").hide();
+        $(".state").show();
+        $(".state_type").show();
+        $(".gst_rate").show();
+        $(".bus_type").show();
+        $(".gst_tax").hide();
+        $(".tax_type").hide();
+    } else if($("#type").val()=="GST Tax"){
+        $("#customer_id").hide();
+        $("#type_customer_id").hide();
+        $("#vendor_id").hide();
+        $("#type_vendor_id").hide();
+        $("#legal_name").show();
+        $('#legal_name').attr("readonly", true);
+        $("#vendor_code").hide();
+        $("#code").show();
+        $(".vendor_goods").hide();
+        $(".vendor_expenses").hide();
+        $(".bank_account").hide();
+        $(".employee").hide();
+        $(".state").show();
+        $(".state_type").hide();
+        $(".gst_rate").show();
+        $(".bus_type").hide();
+        $(".gst_tax").show();
+        $(".tax_type").show();
+        $("#customer_code").hide();
+    } else if($("#type").val()=="Branch Type"){
+        $("#customer_id").hide();
+        $("#type_customer_id").hide();
+        $("#vendor_id").hide();
+        $("#type_vendor_id").hide();
+        $("#legal_name").show();
+        $('#legal_name').attr("readonly", true);
+        $("#vendor_code").hide();
+        $("#code").show();
+        $(".vendor_goods").hide();
+        $(".vendor_expenses").hide();
+        $(".bank_account").hide();
+        $(".employee").hide();
+        $("#customer_code").hide();
+        $(".state").show();
+        $(".state_type").hide();
+        $(".gst_rate").hide();
+        $(".bus_type").hide();
+        $(".gst_tax").hide();
+        $(".tax_type").hide();
+    } else {
+        $("#customer_id").hide();
+        $("#type_customer_id").hide();
+        $("#vendor_id").hide();
+        $("#type_vendor_id").hide();
+        $('#legal_name').show();
+        $('#legal_name').attr("readonly", false);
+        $("#vendor_code").hide();
+        $("#code").show();
+        $(".vendor_goods").hide();
+        $(".vendor_expenses").hide();
+        $(".bank_account").hide();
+        $(".employee").hide();
+        $("#customer_code").hide();
+        $(".state").hide();
+        $(".state_type").hide();
+        $(".gst_rate").hide();
+        $(".bus_type").hide();
+        $(".gst_tax").hide();
+        $(".tax_type").hide();
         // $("#vendor_details").hide();
         // $("#acc_hold_name").hide();
         // $("#bank_details").hide();
@@ -197,10 +445,38 @@ function set_acc_type(){
     }
 }
 
-function get_code(){
+function get_code1() {
     var result = 1;
     var csrfToken = $('meta[name="csrf-token"]').attr("content");
     
+    if($("#tax_id option:selected").text()=="CGST"||$("#tax_id option:selected").text()=="SGST"||$("#tax_id option:selected").text()=="IGST")
+    {
+        $.ajax({
+            url: BASE_URL+'index.php?r=accountmaster%2Fgetcode1',
+            type: 'post',
+            data:   {
+                        tax_id :$("#tax_id option:selected").text(),
+                        company_id : $("#company_id").val(),
+                        _csrf : csrfToken
+                    },
+            success: function (data) {
+                if(data != null){
+                    $("#code").val(data);
+                } else {
+                    $("#code").val("");
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        });
+    }
+}
+
+function get_code() {
+    var result = 1;
+    var csrfToken = $('meta[name="csrf-token"]').attr("content");
     if($("#type").val()=="Vendor Goods"){
         $.ajax({
             url: BASE_URL+'index.php?r=accountmaster%2Fgetvendordetails',
@@ -279,6 +555,105 @@ function get_code(){
                 alert(thrownError);
             }
         });
+    } else if ($("#type").val()=="Customer"){
+        $.ajax({
+            url: BASE_URL+'index.php?r=accountmaster%2Fgetcustomerdetails',
+            type: 'post',
+            data: {
+                    customer_id : $("#customer_id").val(),
+                    company_id : $("#company_id").val(),
+                    _csrf : csrfToken
+                },
+            dataType: 'json',
+            success: function (data) {
+                if(data != null){
+                    var customer_details = data['customer_details'];
+                    var category_details = data['category_details'];
+
+                    if(customer_details.length>0){
+                        $("#customer_code").val(customer_details[0].customer_code);
+                        $("#pan_no").val(customer_details[0].pan_or_tin_no);
+
+                        var address = customer_details[0].office_address_line_1 + ' ' + customer_details[0].office_address_line_2 + ' ' + 
+                                        customer_details[0].office_address_line_3 + ' ' + customer_details[0].city_name + ' ' + customer_details[0].pincode + ' ' + 
+                                        customer_details[0].state_name + ' ' + customer_details[0].country_name;
+
+                        $("#address").val(address);
+                        $("#legal_entity_name").val(customer_details[0].legal_entity_name);
+                        $("#vat_no").val(customer_details[0].vat_no);
+                        $("#account_holder_name").val(customer_details[0].account_holder_name);
+                        $("#bank_name").val(customer_details[0].bank_name);
+                        $("#branch").val(customer_details[0].branch);
+                        $("#acc_no").val(customer_details[0].account_number);
+                        $("#ifsc_code").val(customer_details[0].ifsc_code);
+                        $("#gst_id").val(customer_details[0].gst_id);
+                    }
+
+                    // var bus_cat_list = '<option value="">Select</option>';
+                    // if(category_details.length>0){
+                    //     for(var i=0; i<category_details.length; i++){
+                    //         bus_cat_list = bus_cat_list + '<option value="'+category_details[i].id+'">'+category_details[i].category_name+'</option>';
+                    //     }
+                    // }
+                    // jQuery('select[name="bus_category[]"]').each(function() {
+                    //     var cat_val = this.value;
+                    //     // var id = this.id;
+                    //     // $('#'+id).html(bus_cat_list);
+                    //     // $('#'+id).val(cat_val);
+
+                    //     // console.log(bus_cat_list);
+
+                    //     this.innerHTML = bus_cat_list;
+                    //     this.value = cat_val;
+                    // });
+                } else {
+                    $("#vendor_code").val("");
+                    $("#pan_no").val("");
+                    $("#address").val("");
+                    $("#legal_entity_name").val("");
+                    $("#vat_no").val("");
+                    $("#account_holder_name").val("");
+                    $("#bank_name").val("");
+                    $("#branch").val("");
+                    $("#acc_no").val("");
+                    $("#ifsc_code").val("");
+
+                    jQuery('select[name="bus_category[]"]').each(function() {
+                        // // var cat_val = this.value;
+                        // var id = this.id;
+                        // // $('#'+id).html(bus_cat_list);
+                        // $('#'+id).val('');
+
+                        this.value = '';
+                    });
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        });
+    } else if($("#type").val()=="GST Tax") {
+        $.ajax({
+            url: BASE_URL+'index.php?r=accountmaster%2Fgetcode',
+            type: 'post',
+            data: {
+                    type : $("#type").val(),
+                    company_id : $("#company_id").val(),
+                    _csrf : csrfToken
+                },
+            success: function (data) {
+                if(data != null){
+                   $("#code").val("");
+                } else {
+                    $("#code").val("");
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        });
     } else {
         $.ajax({
             url: BASE_URL+'index.php?r=accountmaster%2Fgetcode',
@@ -343,18 +718,18 @@ function get_code(){
 
 $("#add_category").click(function(){
     $("#account_category_modal").modal('show');
-})
+});
 
 $("#repeat_category").click(function(){
-  	var tr = '<tr>' + 
-				'<td>'+(cat_cnt+1).toString()+'<input type="hidden" class="form-control" name="category_id[]" id="category_id_'+cat_cnt.toString()+'" value=""></td>' + 
-				'<td><input type="text" class="form-control" name="category_1[]" id="category_1_'+cat_cnt.toString()+'" value=""></td>' + 
-				'<td><input type="text" class="form-control" name="category_2[]" id="category_2_'+cat_cnt.toString()+'" value=""></td>' + 
-				'<td><input type="text" class="form-control" name="category_3[]" id="category_3_'+cat_cnt.toString()+'" value=""></td>' + 
-			'</tr>';
-	$("#category_body").append(tr);
+    var tr = '<tr>' + 
+                '<td>'+(cat_cnt+1).toString()+'<input type="hidden" class="form-control" name="category_id[]" id="category_id_'+cat_cnt.toString()+'" value=""></td>' + 
+                '<td><input type="text" class="form-control" name="category_1[]" id="category_1_'+cat_cnt.toString()+'" value=""></td>' + 
+                '<td><input type="text" class="form-control" name="category_2[]" id="category_2_'+cat_cnt.toString()+'" value=""></td>' + 
+                '<td><input type="text" class="form-control" name="category_3[]" id="category_3_'+cat_cnt.toString()+'" value=""></td>' + 
+            '</tr>';
+    $("#category_body").append(tr);
 
-	removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_1[]"]');
+    removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_1[]"]');
     // removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_2[]"]');
     // removeMultiInputNamingRules('#acc_category_master', 'input[alt="category_3[]"]');
 
@@ -362,40 +737,40 @@ $("#repeat_category").click(function(){
     // addMultiInputNamingRules('#acc_category_master', 'input[name="category_2[]"]', { required: true });
     // addMultiInputNamingRules('#acc_category_master', 'input[name="category_3[]"]', { required: true });
 
-	cat_cnt++;
-})
+    cat_cnt++;
+});
 
 $("#btn_save_category").click(function(){
-	if ($("#acc_category_master").valid()) {
-	    save_categories();
-	    // get_categories();
-	}
-})
+    if ($("#acc_category_master").valid()) {
+        save_categories();
+        // get_categories();
+    }
+});
 
 $("#category_1").change(function(){
-	cat_1 = $("#category_1").val();
-})
+    cat_1 = $("#category_1").val();
+});
 
 $("#category_2").change(function(){
-	cat_2 = $("#category_2").val();
-})
+    cat_2 = $("#category_2").val();
+});
 
 $("#category_3").change(function(){
-	cat_3 = $("#category_3").val();
-})
+    cat_3 = $("#category_3").val();
+});
 
 function save_categories(){
-	$.ajax({
+    $.ajax({
         url: BASE_URL+'index.php?r=accountmaster%2Fsavecategories',
         type: 'post',
         data: $("#acc_category_master").serialize(),
         dataType: 'json',
         success: function (data) {
-      		// if (parseInt(data)) {
-		    //     $("#account_category_modal").modal('hide');
-		    // }
-		    set_categories(data);
-		    $("#account_category_modal").modal('hide');
+            // if (parseInt(data)) {
+            //     $("#account_category_modal").modal('hide');
+            // }
+            set_categories(data);
+            $("#account_category_modal").modal('hide');
             get_categories();
         },
         error: function (xhr, ajaxOptions, thrownError) {
@@ -406,7 +781,7 @@ function save_categories(){
 }
 
 function get_categories(){
-	$.ajax({
+    $.ajax({
         url: BASE_URL+'index.php?r=accountmaster%2Fgetcategories',
         type: 'post',
         data: $("#acc_category_master").serialize(),
@@ -422,30 +797,30 @@ function get_categories(){
 }
 
 function update_categories(data){
-	var cat_data = '';
+    var cat_data = '';
     var category = '';
     var category_1 = '<option value="">Select</option>';
     var category_2 = '<option value="">Select</option>';
     var category_3 = '<option value="">Select</option>';
 
     for(var i=0; i<data.length; i++){
-    	cat_data = data[i];
+        cat_data = data[i];
 
-    	category = category + '<tr>' + 
-	                				'<td>'+(i+1)+'<input type="hidden" class="form-control" name="category_id[]" id="category_id_'+i+'" value="'+cat_data.id+'"></td>' + 
-	                				'<td><input type="text" class="form-control" name="category_1[]" id="category_1_'+i+'" value="'+cat_data.category_1+'" readonly /></td>' + 
-	                				'<td><input type="text" class="form-control" name="category_2[]" id="category_2_'+i+'" value="'+cat_data.category_2+'" readonly /></td>' + 
-	                				'<td><input type="text" class="form-control" name="category_3[]" id="category_3_'+i+'" value="'+cat_data.category_3+'" readonly /></td>' + 
-	                			'</tr>';
+        category = category + '<tr>' + 
+                                    '<td>'+(i+1)+'<input type="hidden" class="form-control" name="category_id[]" id="category_id_'+i+'" value="'+cat_data.id+'"></td>' + 
+                                    '<td><input type="text" class="form-control" name="category_1[]" id="category_1_'+i+'" value="'+cat_data.category_1+'" readonly /></td>' + 
+                                    '<td><input type="text" class="form-control" name="category_2[]" id="category_2_'+i+'" value="'+cat_data.category_2+'" readonly /></td>' + 
+                                    '<td><input type="text" class="form-control" name="category_3[]" id="category_3_'+i+'" value="'+cat_data.category_3+'" readonly /></td>' + 
+                                '</tr>';
 
         if(cat_data.category_1!=null && cat_data.category_1!=''){
             category_1 = category_1 + '<option value="'+cat_data.category_1+'">'+cat_data.category_1+'</option>';
         }
-    	if(cat_data.category_2!=null && cat_data.category_2!=''){
-    	   category_2 = category_2 + '<option value="'+cat_data.category_2+'">'+cat_data.category_2+'</option>';
+        if(cat_data.category_2!=null && cat_data.category_2!=''){
+           category_2 = category_2 + '<option value="'+cat_data.category_2+'">'+cat_data.category_2+'</option>';
         }
         if(cat_data.category_3!=null && cat_data.category_3!=''){
-    	   category_3 = category_3 + '<option value="'+cat_data.category_3+'">'+cat_data.category_3+'</option>';
+           category_3 = category_3 + '<option value="'+cat_data.category_3+'">'+cat_data.category_3+'</option>';
         }
     }
 
@@ -519,7 +894,7 @@ $('#repeat_business_category').click(function(){
     // $trNew.find('#credit_amt_'+index).attr('id', 'credit_amt_'+newIndex).val("");
 
     $trLast.after($trNew);
-})
+});
 
 function set_bus_category(elem){
     var id = elem.id;
@@ -586,5 +961,5 @@ function get_account_path(){
             alert(xhr.status);
             alert(thrownError);
         }
-    });
+    });   
 }

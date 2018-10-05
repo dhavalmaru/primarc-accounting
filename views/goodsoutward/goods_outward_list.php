@@ -15,7 +15,8 @@ $mycomponent = Yii::$app->mycomponent;
 <style type="text/css">
 	.tab-content table tr td { border:1px solid #eee; }
 </style>
-<link href="http://localhost/primarc_pecan/web/css/export.css" rel="stylesheet">
+<!-- <link href="http://localhost/primarc_pecan/web/css/export.css" rel="stylesheet"> -->
+<link href="<?php echo Url::base(); ?>/css/export.css" rel="stylesheet">
 
 <div class="grn-index">
 	<div class=" col-md-12">  
@@ -39,13 +40,13 @@ $mycomponent = Yii::$app->mycomponent;
 										<tr> 
 											<th width="45" style="text-align: center;">Sr. No.</th> 
 											<th>Action</th> 
-											<th>Grn Id</th> 
-											<th>Gi Id</th>
+											<th>Go Id</th> 
+											<th>Go No</th>
 											<th>Warehouse</th> 
 											<th>Vendor Name</th> 
-											<th>Idt Warehouse</th> 
+											<!-- <th>Idt Warehouse</th>  -->
 											<th>Total Value</th> 
-											<th>Gi Date</th> 
+											<th>Go Date</th> 
 											<th>Updated By</th> 
 										</tr>  
 									</thead>
@@ -63,15 +64,15 @@ $mycomponent = Yii::$app->mycomponent;
 										<tr> 
 											<th style="text-align: center;">Sr. No.</th> 
 											<th>Action</th> 
-											<th>Grn Id</th> 
-											<th>Gi Id</th> 
+											<th>Go Id</th> 
+											<th>Go No</th> 
 											<th>Warehouse</th>  
 											<th>Vendor Name</th> 
-											<th>Idt Warehouse</th> 
+											<!-- <th>Idt Warehouse</th>  -->
 											<th>Total Value</th> 
-											<th>Gi Date</th> 
+											<th>Go Date</th> 
 											<th>Updated By</th> 
-											<th>Debit Note</th> 
+											<th>Ledger</th> 
 										</tr>  
 									</thead>
 									<tbody> 
@@ -88,13 +89,13 @@ $mycomponent = Yii::$app->mycomponent;
 										<tr> 
 											<th width="45" style="text-align: center;">Sr. No.</th> 
 											<th>Action</th> 
-											<th>Grn Id</th> 
-											<th>Gi Id</th>
+											<th>Go Id</th> 
+											<th>Go No</th>
 											<th>Warehouse</th> 
 											<th>Vendor Name</th> 
-											<th>Idt Warehouse</th> 
+											<!-- <th>Idt Warehouse</th>  -->
 											<th>Total Value</th> 
-											<th>Gi Date</th> 
+											<th>Go Date</th> 
 											<th>Updated By</th> 
 										</tr>  
 									</thead>

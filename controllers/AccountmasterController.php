@@ -46,14 +46,21 @@ class AccountmasterController extends Controller
         if(count($access)>0) {
             if($access[0]['r_insert']==1) {
                 $action = 'insert';
-                $category = $acc_master->getAccountCategories();
+                // $category = $acc_master->getAccountCategories();
                 $vendor = $acc_master->getVendors();
+                $customers = $acc_master->getCustomers();
+				$tax = $acc_master->getTax();
+                $tax_per = $acc_master->getTaxPercent();
+               	$state = $acc_master->getState();
                 $category_list = $acc_master->getBusinessCategories();
                 $approver_list = $acc_master->getApprover($action);
 
                 $acc_master->setLog('AccountMaster', '', 'Insert', '', 'Insert Account Master Details', 'acc_master', '');
-                return $this->render('account_details', ['action' => $action, 'category' => $category, 'vendor' => $vendor, 
-                                                         'category_list' => $category_list, 'approver_list' => $approver_list]);
+                // return $this->render('account_details', ['action' => $action, 'category' => $category, 'vendor' => $vendor, 
+                //                                          'category_list' => $category_list, 'approver_list' => $approver_list]);
+                return $this->render('account_details', ['action' => $action, 'vendor' => $vendor, 'tax' => $tax, 
+                                                        'tax_per' => $tax_per, 'customers' => $customers,'state' => $state, 
+                                                        'category_list' => $category_list, 'approver_list' => $approver_list]);
             } else {
                 return $this->render('/message', [
                     'title'  => \Yii::t('user', 'Access Denied'),
@@ -74,20 +81,45 @@ class AccountmasterController extends Controller
     public function actionRedirect($action, $id) {
         $acc_master = new AccountMaster();
         $data = $acc_master->getAccountDetails($id, "");
-        $category = $acc_master->getAccountCategories();
-        $vendor = $acc_master->getVendors();
-        $acc_category = $acc_master->getAccCategories($id);
-        $category_list = $acc_master->getBusinessCategories();
-        $approver_list = $acc_master->getApprover($action);
+        // $category = $acc_master->getAccountCategories();
+
+        $vendor_id = '';
+        $tax_id = '';
+        $customer_id = '';
+        $state_id = '';
 
         if(count($data)>0){
             if($data[0]['type']=="Vendor Goods"){
                 $vendor_id = $data[0]['vendor_id'];
-                $vendor = $acc_master->getVendors($vendor_id);
+            } else if($data[0]['type']=="GST Tax") {
+                $tax_id = $data[0]['tax_id'];
+            } else if($data[0]['type']=="Customer") {
+                $customer_id = $data[0]['customer_id'];
+            } else if($data[0]['type']=="Goods Purchase" || $data[0]['type']=="Goods Sales"){
+                $state_id = $data[0]['state_id'];
             }
         }
-        return $this->render('account_details', ['action' => $action, 'category' => $category, 'vendor' => $vendor, 
-                                                    'category_list' => $category_list, 'data' => $data, 
+
+        $vendor = $acc_master->getVendors($vendor_id);
+        $customers = $acc_master->getCustomers($customer_id);
+        $tax = $acc_master->getTax($tax_id);
+        $tax_per = $acc_master->getTaxPercent();
+        $state = $acc_master->getState($state_id);
+        $acc_category = $acc_master->getAccCategories($id);
+        $category_list = $acc_master->getBusinessCategories();
+        $approver_list = $acc_master->getApprover($action);
+
+        // return $this->render('account_details', ['action' => $action, 'category' => $category, 'vendor' => $vendor, 
+        //                                             'category_list' => $category_list, 'data' => $data, 
+        //                                             'acc_category' => $acc_category, 'approver_list' => $approver_list]);
+
+        // echo json_encode($data);
+        // echo '<br/>';
+        // echo '<br/>';
+        // echo json_encode($vendor);
+
+        return $this->render('account_details', ['action' => $action, 'vendor' => $vendor, 'customers' => $customers,'state' => $state,  
+                                                    'category_list' => $category_list, 'data' => $data, 'tax' => $tax, 'tax_per' => $tax_per, 
                                                     'acc_category' => $acc_category, 'approver_list' => $approver_list]);
     }
 
@@ -165,9 +197,10 @@ class AccountmasterController extends Controller
         }
     }
 
-    public function actionSave() {   
+    public function actionSave() {
         $acc_master = new AccountMaster();
         $result = $acc_master->save();
+		
         $this->redirect(array('accountmaster/index'));
     }
 
@@ -181,6 +214,29 @@ class AccountmasterController extends Controller
     public function actionGetcode() {
         $acc_master = new AccountMaster();
         echo $acc_master->getCode();
+    }
+	
+    public function actionGetcode1() {
+        $acc_master = new AccountMaster();
+        echo $acc_master->getCode1();
+    }
+
+    public function actionTest() {
+        $acc_master = new AccountMaster();
+        $account_types = $acc_master->getSubAccountPath();
+        echo $account_types;
+    }
+
+    public function actionGetsubaccountpath() {
+        $acc_master = new AccountMaster();
+        $path = $acc_master->getSubAccountPath();
+        echo $path;
+    }
+
+    public function actionGetsubaccounttypes() {
+        $acc_master = new AccountMaster();
+        $account_types = $acc_master->getSubAccountTypes();
+        echo $account_types;
     }
 
     public function actionGetcategories() {
@@ -201,9 +257,39 @@ class AccountmasterController extends Controller
         echo json_encode($data);
     }
 
+	public function actionGetstate() {
+        $acc_master = new AccountMaster();
+        $state = $acc_master->getState();
+        echo json_encode($state);
+    }
+    
+	public function actionGettax() {
+        $acc_master = new AccountMaster();
+        $tax = $acc_master->getTax();
+        echo json_encode($tax);
+    }
+	
+	public function actionGetCustomers() {
+        $acc_master = new AccountMaster();
+        $customers = $acc_master->getCustomers();
+        echo json_encode($customers);
+    }
+
+    public function actionGetcustomerdetails() {
+        $acc_master = new AccountMaster();
+        $data = $acc_master->getCustomerDetails();
+        echo json_encode($data);
+    }
+
     public function actionChecklegalnameavailablity() {
         $acc_master = new AccountMaster();
         $result = $acc_master->checkLegalNameAvailablity();
+        echo $result;
+    }
+
+    public function actionChecklegalnameavailablityinaccmaster() {
+        $acc_master = new AccountMaster();
+        $result = $acc_master->checkLegalNameAvailablityInAccMaster();
         echo $result;
     }
 }

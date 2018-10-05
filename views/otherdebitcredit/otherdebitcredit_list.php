@@ -62,9 +62,15 @@ $this->params['breadcrumbs'][] = $this->title;
 											<td><?php echo $approved[$i]['status']; ?></td> 
 											<td><?php echo $approved[$i]['updater']; ?></td> 
 											<td>
+												<?php if($approved[$i]['trans_type']=='Invoice') { ?>
+												<a href="<?php echo Url::base() .'index.php?r=otherdebitcredit%2Fviewtaxinvoice&id='.$approved[$i]['id']; ?>" target="_blank">View </a> <br/>
+												<a href="<?php echo Url::base() .'index.php?r=otherdebitcredit%2Fdownloadtaxinvoice&id='.$approved[$i]['id']; ?>" target="_blank">Download </a> <br/>
+												<a href="<?php echo Url::base() .'index.php?r=otherdebitcredit%2Femailtaxinvoice&id='.$approved[$i]['id']; ?>" >Email </a> <br/>
+												<?php } else { ?>
 												<a href="<?php echo Url::base() .'index.php?r=otherdebitcredit%2Fviewdebitcreditnote&id='.$approved[$i]['id']; ?>" target="_blank">View </a> <br/>
 												<a href="<?php echo Url::base() .'index.php?r=otherdebitcredit%2Fdownloaddebitcreditnote&id='.$approved[$i]['id']; ?>" target="_blank">Download </a> <br/>
 												<a href="<?php echo Url::base() .'index.php?r=otherdebitcredit%2Femaildebitcreditnote&id='.$approved[$i]['id']; ?>" >Email </a> <br/>
+												<?php } ?>
 											</td> 
 											<td style="display: none;"><?php echo $approved[$i]['approver']; ?></td> 
 										</tr> 

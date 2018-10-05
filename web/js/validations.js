@@ -15,6 +15,14 @@ $.validator.addMethod("checkemail", function(value, element) {
     return this.optional(element) || (/^[a-z0-9]+([-._][a-z0-9]+)*@([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,4}$/i.test(value) && /^(?=.{1,64}@.{4,64}$)(?=.{6,100}$).*/i.test(value));
 }, "Please enter valid email address");
 
+$.validator.addMethod("numbersandcommaanddotonly", function(value, element) {
+    return this.optional(element) || /^(0*[1-9][0-9.,]*)$/i.test(value);
+}, "Not Valid Input");
+
+jQuery.validator.addMethod("validDate", function(value, element) {
+    return this.optional(element) || moment(value,"DD/MM/YYYY").isValid();
+}, "Please enter a valid date in the format DD/MM/YYYY");
+
 function addMultiInputNamingRules(form, field, rules, type){
     // alert(field);
     $(form).find(field).each(function(index){
@@ -85,7 +93,8 @@ $("#account_master").validate({
         },
         legal_name: {
             required: true,
-            check_legal_name_availablity: true
+            check_legal_name_availablity: true,
+            check_legal_name_availablity_in_acc_master: true
         },
         code: {
             required: true
@@ -195,15 +204,64 @@ $("#account_master").validate({
         approver_id: {
             required: true
         },
-        // address_doc_file: {
-        //     required: function(element) {
-        //                 if($("#type").val()=="Employee" && $("#address_doc_path").val()==""){
-        //                     return true;
-        //                 } else {
-        //                     return false;
-        //                 }
-        //             }
-        // },
+        state_id: {
+            required: function(element) {
+                        if($("#type").val()=="Goods Purchase" ||$("#type").val()=="Goods Sales"||$("#type").val()=="GST Tax"){
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+        },
+        
+        gst_rate: {
+            required: function(element) {
+                        if($("#type").val()=="Goods Purchase" ||$("#type").val()=="Goods Sales"||$("#type").val()=="GST Tax"){
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+        },
+        
+        tax_id: {
+            required: function(element) {
+                        if($("#type").val()=="GST Tax"){
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+        },
+        input_output: {
+            required: function(element) {
+                        if($("#type").val()=="GST Tax"){
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+        },
+        state_type: {
+            required: function(element) {
+                        if($("#type").val()=="Goods Purchase" ||$("#type").val()=="Goods Sales"){
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+        },
+        
+        bus_type: {
+            required: function(element) {
+                        if($("#type").val()=="Goods Sales"){
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+        },
+        
         // pan_no_doc_file: {
         //     required: function(element) {
         //                 if($("#pan_no_doc_path").val()==""){
@@ -330,6 +388,33 @@ $.validator.addMethod("check_legal_name_availablity", function (value, element) 
         return true;
     }
 }, 'Legal Name already in use.');
+
+$.validator.addMethod("check_legal_name_availablity_in_acc_master", function (value, element) {
+    var validator = $("#account_master").validate();
+    var result = 1;
+
+    $.ajax({
+        url: BASE_URL+'index.php?r=accountmaster%2Fchecklegalnameavailablityinaccmaster',
+        type: 'post',
+        data: $("#account_master").serialize(),
+        dataType: 'html',
+        global: false,
+        async: false,
+        success: function (data) {
+            result = data;
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status);
+            alert(thrownError);
+        }
+    });
+
+    if (result==1) {
+        return false;
+    } else {
+        return true;
+    }
+}, 'Legal Name already in use in group master.');
 
 
 
@@ -957,25 +1042,46 @@ $('#journal_voucher').submit(function() {
     removeMultiInputNamingRules('#journal_voucher', 'select[alt="transaction[]"]');
     removeMultiInputNamingRules('#journal_voucher', 'input[alt="debit_amt[]"]');
     removeMultiInputNamingRules('#journal_voucher', 'input[alt="credit_amt[]"]');
+    removeMultiInputNamingRules('#journal_voucher', 'input[alt="invoice_no[]"]');
+    removeMultiInputNamingRules('#journal_voucher', 'input[alt="invoice_date[]"]');
+    removeMultiInputNamingRules('#journal_voucher', 'input[alt="invoice_amount[]"]');
 
     addMultiInputNamingRules('#journal_voucher', 'select[name="acc_id[]"]', { required: true });
     addMultiInputNamingRules('#journal_voucher', 'input[name="acc_code[]"]', { required: true });
     addMultiInputNamingRules('#journal_voucher', 'select[name="transaction[]"]', { required: true });
     addMultiInputNamingRules('#journal_voucher', 'input[name="debit_amt[]"]', { required: true });
     addMultiInputNamingRules('#journal_voucher', 'input[name="credit_amt[]"]', { required: true });
+    addMultiInputNamingRules('#journal_voucher', 'input[name="invoice_no[]"]', { required: true });
+    addMultiInputNamingRules('#journal_voucher', 'input[name="invoice_date[]"]', { required: true });
+    addMultiInputNamingRules('#journal_voucher', 'input[name="invoice_amount[]"]', { required: true });
+   
+    $('.invoice_no,.invoice_date,.invoice_amount').each(function(){
+        $(this).rules('add', { required: true });
+    });  
+
+      
 
     if (!$("#journal_voucher").valid()) {
-
+        jv_invalid_handler();
         return false;
     } else {
         if (check_acc_jv_details()==false) {
+            jv_invalid_handler();
             return false;
-        } else {
+        }else if(check_jv_invoice_details()==false)
+        {
+            jv_invalid_handler();
+            return false;
+        }else {
+
             removeMultiInputNamingRules('#journal_voucher', 'select[alt="acc_id[]"]');
             removeMultiInputNamingRules('#journal_voucher', 'input[alt="acc_code[]"]');
             removeMultiInputNamingRules('#journal_voucher', 'select[alt="transaction[]"]');
             removeMultiInputNamingRules('#journal_voucher', 'input[alt="debit_amt[]"]');
             removeMultiInputNamingRules('#journal_voucher', 'input[alt="credit_amt[]"]');
+            removeMultiInputNamingRules('#journal_voucher', 'input[alt="invoice_no[]"]');
+            removeMultiInputNamingRules('#journal_voucher', 'input[alt="invoice_date[]"]');
+            removeMultiInputNamingRules('#journal_voucher', 'input[alt="invoice_amount[]"]');
 
             return true;
         }
@@ -995,6 +1101,71 @@ function check_acc_jv_details() {
     }
 
     return valid;
+}
+
+function check_jv_invoice_details(){
+    var validator = $("#journal_voucher").validate();
+    var valid = true;
+    $('.voucher .debit_amt , .credit_amt').each(function(){
+        var element_val = get_number($(this).val(),2);
+        if(parseInt(element_val)!=0 && element_val!="")
+        {
+            var id = $(this).attr('id');
+            console.log('id'+id);
+            var elem_id = id.substr(id.lastIndexOf('_')+1);
+            console.log('elem_id'+elem_id);
+            var total_val = $('#sum_total_'+elem_id).text();
+            console.log('sum_total'+total_val);
+            if(total_val!=undefined && total_val!="")
+            {
+                if(parseInt(element_val)!=parseInt(total_val))
+                {
+                    console.log('total_val'+total_val);
+                    var errors = {};
+                    var name = $(this).attr('name');
+                    console.log('name'+elem_id);
+                    errors[name] = "Invoice Amount and Actual Amount Should Be Same";
+                    validator.showErrors(errors);
+                    valid = false;
+                }   
+            }
+        }
+        
+    });
+
+    /*$('.voucher  .credit_amt').each(function(){
+        var element_val = $(this).val();
+        var id = $(this).attr('id');
+        var elem_id = id.substr(id.lastIndexOf('_')+1);
+        var total_val = $('#sum_total_'+elem_id).val();
+        if(total_val!=undefined)
+        {
+            if(parseInt(element_val)!=parseInt(total_val))
+            {
+                var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Invoice Amount and Debit Amount Should Be Same";
+                validator.showErrors(errors);
+                valid = false;
+            }   
+        }  
+    });*/
+
+     return valid;
+}
+
+function jv_invalid_handler() {
+    $('.errors').remove();
+    $('.jv_body_detail').each(function(){
+        var id = $(this).attr('id');
+       
+        var index = id.substr(id.lastIndexOf('_')+1);
+        if ($('#jv_'+index).find("input.error").length>0) {
+           var errors = "<span>Please Clear Errors</span> <br/>";
+           
+            $('#'+index).after('<div class="errors" style="color: #dd4b39!important;"><br>'+errors+'</div>');
+        }
+    });
 }
 
 
@@ -1019,7 +1190,7 @@ $("#payment_receipt").validate({
         },
         amount: {
             required: true,
-			numbersandcommaonly: true
+			numbersandcommaanddotonly: true
         },
         // ref_no: {
         //     required: true
@@ -1085,6 +1256,14 @@ function check_acc_payment_receipt() {
             var errors = {};
             var name = "payable_debit_amt";
             errors[name] = "Payable amount should be debit.";
+            validator.showErrors(errors);
+            valid = false;
+        }
+    } else {
+        if(parseFloat(get_number($('#amount').val(),2))==0){
+            var errors = {};
+            var name = "amount";
+            errors[name] = "Amount should be greater than zero.";
             validator.showErrors(errors);
             valid = false;
         }
@@ -1361,6 +1540,21 @@ function check_acc_debit_details() {
 // ----------------- OTHER DEBIT CREDIT FORM VALIDATION -------------------------------------
 $("#other_debit_credit").validate({
     rules: {
+        vendor_id: {
+            required: true
+        },
+        trans_type: {
+            required: true
+        },
+        warehouse_id: {
+            required: function(element) {
+                        if($("#trans_type").val()=="Invoice"){
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+        },
         date_of_transaction: {
             required: true
         },
@@ -1540,22 +1734,990 @@ $("#detailledger_report").validate({
 });
 
 $('#detailledger_report').submit(function() {
-    removeMultiInputNamingRules('#detailledger_report', 'select[alt="account[]"]');
-    removeMultiInputNamingRules('#detailledger_report', 'select[alt="vouchertype[]"]');
-    removeMultiInputNamingRules('#detailledger_report', 'select[alt="state[]"]');
+    // removeMultiInputNamingRules('#detailledger_report', 'select[alt="account[]"]');
+    // removeMultiInputNamingRules('#detailledger_report', 'select[alt="vouchertype[]"]');
+    // removeMultiInputNamingRules('#detailledger_report', 'select[alt="state[]"]');
 
-    addMultiInputNamingRules('#detailledger_report', 'select[name="account[]"]', { required: true }, "");
-    addMultiInputNamingRules('#detailledger_report', 'select[name="vouchertype[]"]', { required: true }, "");
-    addMultiInputNamingRules('#detailledger_report', 'select[name="state[]"]', { required: true }, "");
+    // addMultiInputNamingRules('#detailledger_report', 'select[name="account[]"]', { required: true }, "");
+    // addMultiInputNamingRules('#detailledger_report', 'select[name="vouchertype[]"]', { required: true }, "");
+    // addMultiInputNamingRules('#detailledger_report', 'select[name="state[]"]', { required: true }, "");
 
     if (!$("#detailledger_report").valid()) {
         return false;
     } else {
-
-        removeMultiInputNamingRules('#detailledger_report', 'select[alt="account[]"]');
-        removeMultiInputNamingRules('#detailledger_report', 'select[alt="vouchertype[]"]');
-        removeMultiInputNamingRules('#detailledger_report', 'select[alt="state[]"]');
+        // removeMultiInputNamingRules('#detailledger_report', 'select[alt="account[]"]');
+        // removeMultiInputNamingRules('#detailledger_report', 'select[alt="vouchertype[]"]');
+        // removeMultiInputNamingRules('#detailledger_report', 'select[alt="state[]"]');
 
         return true;
     }
 });
+
+
+
+
+
+
+// ----------------- RECONSILATION REPORT VALIDATION -------------------------------------
+$("#reconsilation_form").validate({
+    rules: {
+        
+    },
+
+    ignore: false,
+
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
+
+$("#reconsilation_form").submit(function() {
+    removeMultiInputNamingRules('#reconsilation_form', 'input[alt="payment_date[]"]');
+    addMultiInputNamingRules('#reconsilation_form', 'input[name="payment_date[]"]', { validDate: true }, "");
+    
+    if($('#form_val').val()=='true'){
+        if (!$("#reconsilation_form").valid()) {
+            return false;
+        } else {
+            if(reconsiled()==false) {
+                return false;
+            } else {
+                removeMultiInputNamingRules('#reconsilation_form', 'input[alt="payment_date[]"]');
+                return true;
+            }
+        }
+    }
+});
+
+function set_form_val(elem){
+    if(elem.value=="submit"){
+        $('#form_val').val('true');
+    } else {
+        $('#form_val').val('false');
+    }
+}
+
+function reconsiled()
+{
+    var validator = $("#reconsilation_form").validate();
+    var count = $(".payment_date").length;
+    var valid = true;
+    for(var i=0;i<count;i++)
+    {
+        paymentdate = $("#payment_date_"+i).val();
+        var ref_date = $("#payment_date_"+i).closest('tr').children('td.ref_date').text();   
+            ref_date = splidate(ref_date);
+            ref_date = Date.parse(ref_date); 
+
+
+        var todate = $("#to_date").val();
+        todate = splidate(todate);
+        todate = Date.parse(todate);
+
+        var from_date = $("#from_date").val();
+        from_date = splidate(from_date);
+        from_date = Date.parse(from_date);
+
+        var bool = true;
+
+        if(paymentdate!="")
+        {
+            if(paymentdate!="")
+            {
+                paymentdate = splidate(paymentdate);
+                paymentdate = Date.parse(paymentdate);
+            }
+
+
+            /*if (to_date > Date.now())
+             {
+                if(paymentdate >Date.now()){
+                    bool = false;
+                    var errors = {};
+                    var name = $("#payment_date_"+i).attr('name');
+                    errors[name] = "Date Should be smaller than Today's Date";
+                    validator.showErrors(errors);
+                    valid = false;
+                 }
+            }*/
+            /*else if(to_date < Date.now())
+            {
+                if(paymentdate > to_date){
+                     bool = false;
+                    var errors = {};
+                    var name = $("#payment_date_"+i).attr('name');
+                    errors[name] = "Date Should be smaller than To Date";
+                    validator.showErrors(errors);
+                    valid = false;
+                } 
+            }*/
+            if(paymentdate>Date.now())
+            {
+                var errors = {};
+                var name = $('#payment_date_'+i).attr('name');
+                errors[name] = "Date Should Be Less Then Todays Date";
+                validator.showErrors(errors);
+                valid = false;
+            }
+            if(paymentdate>todate)
+            {
+                var errors = {};
+                var name = $('#payment_date_'+i).attr('name');
+                errors[name] = "Date Should Be Less Then Selected Todate Date";
+                validator.showErrors(errors);
+                valid = false;
+            }
+
+            if(paymentdate<ref_date)
+                {
+                        var errors = {};
+                        var name = $('#payment_date_'+i).attr('name');
+                        errors[name] = "Date Should Be Greater Then Payment Date";
+                        validator.showErrors(errors);
+                        valid = false;
+                }       
+        }
+    }
+
+    return valid;
+}
+
+function splidate(dateStr) {
+  var parts = dateStr.split("/")
+  return new Date(parts[2], parts[1] - 1, parts[0])
+}
+
+
+
+
+
+// ----------------- TAX MASTER FORM VALIDATION -------------------------------------
+$("#tax_type").validate({
+    rules: {
+        tax_name: {
+            required: true,
+            check_tax_type_availablity: true
+        },
+        // tax_details: {
+        //     required: true
+        // },
+        approver_id: {
+            required: true
+        },
+        // remarks: {
+        //     required: true
+        // }
+      
+    },
+
+    ignore: false,
+
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
+
+$('#tax_type').submit(function() {
+    if (!$("#tax_type").valid()) {
+        return false;
+    } else {
+        return true;
+    }
+});
+
+$.validator.addMethod("check_tax_type_availablity", function (value, element) {
+    var validator = $("#tax_type").validate();
+    var result = 1;
+
+    $.ajax({
+        url: BASE_URL+'index.php?r=taxtype%2Fchecktaxtypeavailablity',
+        type: 'post',
+        data: $("#tax_type").serialize(),
+        dataType: 'html',
+        global: false,
+        async: false,
+        success: function (data) {
+            result = data;
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status);
+            alert(thrownError);
+        }
+    });
+
+    if (result==1) {
+        return false;
+    } else {
+        return true;
+    }
+}, 'Tax type already in use.');
+
+
+
+
+
+// ----------------- Sale DETAILS FORM VALIDATION -------------------------------------
+$(function() {
+    $("#form_sale_details").validate({
+        rules: {
+            other_charges_acc_id: {
+                required: function(){
+                    var blFlag = false;
+                    $('.edited_other_charges').each(function() {
+                        if($(this).val()!=""){
+                            if(parseFloat($(this).val())>0){
+                                console.log("entered"+diffval);
+                                blFlag = true;
+                            }
+                        }
+                    });
+
+                    return blFlag;
+                }
+            }
+        },
+
+        ignore: ":not(:visible)",
+
+        errorPlacement: function (error, element) {
+            var placement = $(element).data('error');
+            if (placement) {
+                $(placement).append(error);
+            } else {
+                error.insertAfter(element);
+            }
+        },
+
+        invalidHandler: function(e,validator) {
+            sale_invalid_handler();
+        }
+    });
+
+    addMultiInputNamingRules_form_sale_details();
+})
+
+function addMultiInputNamingRules_form_sale_details(){
+    addMultiInputNamingRules('#form_sale_details', 'select[name="invoice_cost_acc_id[]"]', { required: true });
+    // addMultiInputNamingRules('#form_sale_details', 'select[name="invoice_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="invoice_cgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="invoice_sgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="invoice_igst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="shortage_psku[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="shortage_invoice_no[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="shortage_cost_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="expiry_psku[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="expiry_invoice_no[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="expiry_cost_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="damaged_psku[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="damaged_invoice_no[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="damaged_cost_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="margindiff_psku[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="margindiff_invoice_no[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="margindiff_cost_acc_id[]"]', { required: true });
+    // addMultiInputNamingRules('#form_sale_details', 'select[name="shortage_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="shortage_cgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="shortage_sgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="shortage_igst_acc_id[]"]', { required: true });
+    // addMultiInputNamingRules('#form_sale_details', 'select[name="expiry_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="expiry_cgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="expiry_sgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="expiry_igst_acc_id[]"]', { required: true });
+    // addMultiInputNamingRules('#form_sale_details', 'select[name="damaged_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="damaged_cgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="damaged_sgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="damaged_igst_acc_id[]"]', { required: true });
+    // addMultiInputNamingRules('#form_sale_details', 'select[name="margindiff_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="margindiff_cgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="margindiff_sgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'select[name="margindiff_igst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'input[name="shortage_qty[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'input[name="expiry_qty[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'input[name="damaged_qty[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_details', 'input[name="margindiff_qty[]"]', { required: true });
+}
+
+function removeMultiInputNamingRules_form_sale_details(){
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="invoice_cost_acc_id[]"]');
+    // removeMultiInputNamingRules('#form_sale_details', 'select[alt="invoice_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="invoice_cgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="invoice_sgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="invoice_igst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="shortage_psku[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="shortage_invoice_no[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="shortage_cost_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="expiry_psku[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="expiry_invoice_no[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="expiry_cost_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="damaged_psku[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="damaged_invoice_no[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="damaged_cost_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="margindiff_psku[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="margindiff_invoice_no[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="margindiff_cost_acc_id[]"]');
+    // removeMultiInputNamingRules('#form_sale_details', 'select[alt="shortage_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="shortage_cgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="shortage_sgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="shortage_igst_acc_id[]"]');
+    // removeMultiInputNamingRules('#form_sale_details', 'select[alt="expiry_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="expiry_cgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="expiry_sgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="expiry_igst_acc_id[]"]');
+    // removeMultiInputNamingRules('#form_sale_details', 'select[alt="damaged_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="damaged_cgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="damaged_sgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="damaged_igst_acc_id[]"]');
+    // removeMultiInputNamingRules('#form_sale_details', 'select[alt="margindiff_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="margindiff_cgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="margindiff_sgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'select[alt="margindiff_igst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'input[alt="shortage_qty[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'input[alt="expiry_qty[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'input[alt="damaged_qty[]"]');
+    removeMultiInputNamingRules('#form_sale_details', 'input[alt="margindiff_qty[]"]');
+}
+
+$('#form_sale_details').submit(function() {
+    removeMultiInputNamingRules_form_sale_details();
+    addMultiInputNamingRules_form_sale_details();
+    removeMultiInputNamingRules_sale_details();
+    addMultiInputNamingRules_sale_details();
+    console.log('form submit');
+
+    if (!$("#form_sale_details").valid()) {
+        console.log('error');
+        sale_invalid_handler();
+        return false;
+    } else {
+        if (check_sale_details()==false) {
+            
+            sale_invalid_handler();
+            return false;
+        } else {
+            //removeMultiInputNamingRules_sale_details();
+            removeMultiInputNamingRules_form_sale_details();
+            return true;
+        }
+    } 
+});
+
+function addMultiInputNamingRules_sale_details(){
+    console.log('multinaming rule');
+    removeMultiInputNamingRules_sale_details();
+
+    $('.narration').each(function(){
+        var th= $(this);
+        var name1 = th.attr('id');
+        var splited = name1.split("_");
+        var lastname = 'diff'+'_'+splited[2]+'_'+splited[1]+'_'+splited[2];
+        var diffval = $("#"+lastname).val();
+
+        console.log(lastname);
+       
+        if(parseFloat(diffval)!==parseFloat(0) && $(this).val()=="")
+        {
+            var name = $(this).attr('name');
+            console.log('after multinaming rule'+name);
+            addMultiInputNamingRules('#form_sale_details', 'input[name="'+name+'"]', { required: true });
+        }
+    });
+
+    if(parseFloat($("#diff_other_charges_0").val())!==parseFloat(0) && $("#diff_other_charges_0").val()=="")
+    {
+        addMultiInputNamingRules('#form_sale_details', 'input[name="narration_other_charges"]', { required: true });
+    }
+}
+
+function removeMultiInputNamingRules_sale_details(){
+    $('.narration').each(function(){
+        // var th= $(this);
+        // var name1 = th.attr('id');
+        // var splited = name1.split("_");
+        // var lastname = 'diff'+'_'+splited[2]+'_'+splited[1]+'_'+splited[2];
+        // var diffval = $("#"+lastname).val();
+        var name = $(this).attr('name');
+
+        console.log(name);
+        
+        //removeMultiInputNamingRules('#form_sale_details', 'input[alt="'+name+'"]');
+        removeMultiInputNamingRules('#form_sale_details', 'input[name='+name+']');
+        /*if(parseFloat(diffval)!==parseFloat(0))
+        {
+            var name = $(this).attr('name');
+            console.log('enteredremove'+name);
+            removeMultiInputNamingRules('#form_sale_details', 'input[alt="'+name+'"]');
+        }*/
+        /*if(parseFloat($("#diff_other_charges_0").val())!==parseFloat(0))
+        {
+            removeMultiInputNamingRules('#form_sale_details', 'input[alt="narration_other_charges"]');
+        }*/
+    });
+
+    removeMultiInputNamingRules('#form_sale_details', 'input[name="narration_other_charges"]');
+}
+
+function check_sale_details() {
+    var validator = $("#form_sale_details").validate();
+    var valid = true;
+    var purchase_acc_id = [];
+    var tax_acc_id = [];
+    var cgst_acc_id = [];
+    var sgst_acc_id = [];
+    var igst_acc_id = [];
+    var errors = {};
+
+
+    /*$('.narration').each(function(){
+        var th= $(this);
+        var name1 = th.attr('id');
+
+        var splited = name1.split("_");
+
+        var lastname = 'diff'+'_'+splited[2]+'_'+splited[1]+'_'+splited[2];
+        var diffval = $("#"+lastname).val();
+        // console.log(diffval);
+        if(parseFloat(diffval)!=0)
+        {
+            // var errors = {};
+            var name = $(this).attr('name');
+            // console.log(name);
+            errors[name] = "Narration is required";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });*/
+
+    $("#form_sale_details").find('select[alt="invoice_cost_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            purchase_acc_id.push($(this).val());
+        }
+    });
+    // $("#form_sale_details").find('select[alt="invoice_tax_acc_id[]"]').each(function(index){
+    //     if($(this).val()!=null && $(this).val()!=''){
+    //         tax_acc_id.push($(this).val());
+    //     }
+    // });
+    $("#form_sale_details").find('select[alt="invoice_cgst_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            cgst_acc_id.push($(this).val());
+        }
+    });
+    $("#form_sale_details").find('select[alt="invoice_sgst_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            sgst_acc_id.push($(this).val());
+        }
+    });
+    $("#form_sale_details").find('select[alt="invoice_igst_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            igst_acc_id.push($(this).val());
+        }
+    });
+
+    $("#form_sale_details").find('select[alt="shortage_cost_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), purchase_acc_id)==-1){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please select account id as per purchase.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+    // $("#form_sale_details").find('select[alt="shortage_tax_acc_id[]"]').each(function(index){
+    //     if($.inArray($(this).val(), tax_acc_id)==-1){
+    //         // var errors = {};
+    //         var name = $(this).attr('name');
+    //         errors[name] = "Please select account id as per purchase.";
+    //         // validator.showErrors(errors);
+    //         valid = false;
+    //     }
+    // });
+    $("#form_sale_details").find('select[alt="shortage_cgst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), cgst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTRA'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_sale_details").find('select[alt="shortage_sgst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), sgst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTRA'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_sale_details").find('select[alt="shortage_igst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), igst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTER'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_sale_details").find('input[alt="shortage_qty[]"]').each(function(index){
+        if(parseFloat($(this).val())==0){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please enter shortage qty.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+
+    $("#form_sale_details").find('select[alt="expiry_cost_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), purchase_acc_id)==-1){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please select account id as per purchase.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+    // $("#form_sale_details").find('select[alt="expiry_tax_acc_id[]"]').each(function(index){
+    //     if($.inArray($(this).val(), tax_acc_id)==-1){
+    //         // var errors = {};
+    //         var name = $(this).attr('name');
+    //         errors[name] = "Please select account id as per purchase.";
+    //         // validator.showErrors(errors);
+    //         valid = false;
+    //     }
+    // });
+    $("#form_sale_details").find('select[alt="expiry_cgst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), cgst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTRA'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_sale_details").find('select[alt="expiry_sgst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), sgst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTRA'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_sale_details").find('select[alt="expiry_igst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), igst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTER'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_sale_details").find('input[alt="expiry_qty[]"]').each(function(index){
+        if(parseFloat($(this).val())==0){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please enter expiry qty.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+
+    $("#form_sale_details").find('select[alt="damaged_cost_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), purchase_acc_id)==-1){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please select account id as per purchase.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+    // $("#form_sale_details").find('select[alt="damaged_tax_acc_id[]"]').each(function(index){
+    //     if($.inArray($(this).val(), tax_acc_id)==-1){
+    //         // var errors = {};
+    //         var name = $(this).attr('name');
+    //         errors[name] = "Please select account id as per purchase.";
+    //         // validator.showErrors(errors);
+    //         valid = false;
+    //     }
+    // });
+    $("#form_sale_details").find('select[alt="damaged_cgst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), cgst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTRA'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_sale_details").find('select[alt="damaged_sgst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), sgst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTRA'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_sale_details").find('select[alt="damaged_igst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), igst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTER'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_sale_details").find('input[alt="damaged_qty[]"]').each(function(index){
+        if(parseFloat($(this).val())==0){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please enter damaged qty.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+
+    $("#form_sale_details").find('select[alt="margindiff_cost_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), purchase_acc_id)==-1){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please select account id as per purchase.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+    // $("#form_sale_details").find('select[alt="margindiff_tax_acc_id[]"]').each(function(index){
+    //     if($.inArray($(this).val(), tax_acc_id)==-1){
+    //         // var errors = {};
+    //         var name = $(this).attr('name');
+    //         errors[name] = "Please select account id as per purchase.";
+    //         // validator.showErrors(errors);
+    //         valid = false;
+    //     }
+    // });
+    $("#form_sale_details").find('select[alt="margindiff_cgst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), cgst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTRA'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_sale_details").find('select[alt="margindiff_sgst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), sgst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTRA'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_sale_details").find('select[alt="margindiff_igst_acc_id[]"]').each(function(index){
+        if($.inArray($(this).val(), igst_acc_id)==-1){
+            if($('#vat_cst').val()=='INTER'){
+                // var errors = {};
+                var name = $(this).attr('name');
+                errors[name] = "Please select account id as per purchase.";
+                // validator.showErrors(errors);
+                valid = false;
+            }
+        }
+    });
+    $("#form_sale_details").find('input[alt="margindiff_qty[]"]').each(function(index){
+        if(parseFloat($(this).val())==0){
+            // var errors = {};
+            var name = $(this).attr('name');
+            errors[name] = "Please enter margin difference qty.";
+            // validator.showErrors(errors);
+            valid = false;
+        }
+    });
+
+    validator.showErrors(errors);
+    return valid;
+}
+
+function sale_invalid_handler(){
+    var errors="";
+    if ($('#shortage_modal').find("input.error, select.error").length>0) {
+        errors=errors+"<span>Please Clear errors in Shortage details.</span> <br/>";
+        $('#shortage_validation_icon').show();
+    } else {
+        $('#shortage_validation_icon').hide();
+    }
+    if ($('#expiry_modal').find("input.error, select.error").length>0) {
+        errors=errors+"<span>Please Clear errors in Expiry Details.</span> <br/>";
+        $('#expiry_validation_icon').show();
+    } else {
+        $('#expiry_validation_icon').hide();
+    }
+    if ($('#damaged_modal').find("input.error, select.error").length>0) {
+        errors=errors+"<span>Please Clear errors in Damaged Details.</span> <br/>";
+        $('#damaged_validation_icon').show();
+    } else {
+        $('#damaged_validation_icon').hide();
+    }
+    if ($('#margindiff_modal').find("input.error, select.error").length>0) {
+        errors=errors+"<span>Please Clear errors in Margin Difference Details.</span> <br/>";
+        $('#margindiff_validation_icon').show();
+    } else {
+        $('#margindiff_validation_icon').hide();
+    }
+
+    $('#form_errors').html(errors);
+
+    if(errors!=""){
+        $('#form_errors_group').show();
+        $('#form_errors').show();
+    } else {
+        $('#form_errors_group').hide();
+        $('#form_errors').hide();
+    }
+}
+
+
+
+
+// ----------------- GO INTER DEPOT DETAILS FORM VALIDATION -------------------------------------
+$(function() {
+    $("#form_go_inter_depot_details").validate({
+        rules: {
+            sales_other_charges_acc_id: {
+                required: function(){
+                    var blFlag = false;
+                    $('.sales_edited_other_charges').each(function() {
+                        if($(this).val()!=""){
+                            if(parseFloat($(this).val())>0){
+                                blFlag = true;
+                            }
+                        }
+                    });
+
+                    return blFlag;
+                }
+            },
+            other_charges_acc_id: {
+                required: function(){
+                    var blFlag = false;
+                    $('.edited_other_charges').each(function() {
+                        if($(this).val()!=""){
+                            if(parseFloat($(this).val())>0){
+                                blFlag = true;
+                            }
+                        }
+                    });
+
+                    return blFlag;
+                }
+            },
+            sales_stock_transfer_acc_id: {
+                required: function(){
+                    var blFlag = false;
+                    $('.edited_sales_stock_transfer').each(function() {
+                        if($(this).val()!=""){
+                            if(parseFloat($(this).val())>0){
+                                blFlag = true;
+                            }
+                        }
+                    });
+
+                    return blFlag;
+                }
+            },
+            purchase_stock_transfer_acc_id: {
+                required: function(){
+                    var blFlag = false;
+                    $('.edited_purchase_stock_transfer').each(function() {
+                        if($(this).val()!=""){
+                            if(parseFloat($(this).val())>0){
+                                blFlag = true;
+                            }
+                        }
+                    });
+
+                    return blFlag;
+                }
+            }
+        },
+
+        ignore: ":not(:visible)",
+
+        errorPlacement: function (error, element) {
+            var placement = $(element).data('error');
+            if (placement) {
+                $(placement).append(error);
+            } else {
+                error.insertAfter(element);
+            }
+        },
+
+        invalidHandler: function(e,validator) {
+            go_inter_depot_invalid_handler();
+        }
+    });
+
+    addMultiInputNamingRules_form_go_inter_depot_details();
+})
+
+function addMultiInputNamingRules_form_go_inter_depot_details(){
+    addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="invoice_cost_acc_id[]"]', { required: true });
+    // addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="invoice_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="invoice_cgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="invoice_sgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="invoice_igst_acc_id[]"]', { required: true });
+
+    addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="sales_invoice_cost_acc_id[]"]', { required: true });
+    // addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="sales_invoice_tax_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="sales_invoice_cgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="sales_invoice_sgst_acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_go_inter_depot_details', 'select[name="sales_invoice_igst_acc_id[]"]', { required: true });
+}
+function removeMultiInputNamingRules_form_go_inter_depot_details(){
+    removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="invoice_cost_acc_id[]"]');
+    // removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="invoice_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="invoice_cgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="invoice_sgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="invoice_igst_acc_id[]"]');
+
+    removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="sales_invoice_cost_acc_id[]"]');
+    // removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="sales_invoice_tax_acc_id[]"]');
+    removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="sales_invoice_cgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="sales_invoice_sgst_acc_id[]"]');
+    removeMultiInputNamingRules('#form_go_inter_depot_details', 'select[alt="sales_invoice_igst_acc_id[]"]');
+}
+
+$('#form_go_inter_depot_details').submit(function() {
+    removeMultiInputNamingRules_form_go_inter_depot_details();
+    addMultiInputNamingRules_form_go_inter_depot_details();
+
+    if (!$("#form_go_inter_depot_details").valid()) {
+        go_inter_depot_invalid_handler();
+        return false;
+    } else {
+        if (check_go_inter_depot_details()==false) {
+            go_inter_depot_invalid_handler();
+            return false;
+        } else {
+            removeMultiInputNamingRules_form_go_inter_depot_details();
+            
+            return true;
+        }
+    }
+});
+function check_go_inter_depot_details() {
+    var validator = $("#form_go_inter_depot_details").validate();
+    var valid = true;
+    var purchase_acc_id = [];
+    var tax_acc_id = [];
+    var cgst_acc_id = [];
+    var sgst_acc_id = [];
+    var igst_acc_id = [];
+    var errors = {};
+
+    $("#form_go_inter_depot_details").find('select[alt="invoice_cost_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            purchase_acc_id.push($(this).val());
+        }
+    });
+    // $("#form_go_inter_depot_details").find('select[alt="invoice_tax_acc_id[]"]').each(function(index){
+    //     if($(this).val()!=null && $(this).val()!=''){
+    //         tax_acc_id.push($(this).val());
+    //     }
+    // });
+    $("#form_go_inter_depot_details").find('select[alt="invoice_cgst_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            cgst_acc_id.push($(this).val());
+        }
+    });
+    $("#form_go_inter_depot_details").find('select[alt="invoice_sgst_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            sgst_acc_id.push($(this).val());
+        }
+    });
+    $("#form_go_inter_depot_details").find('select[alt="invoice_igst_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            igst_acc_id.push($(this).val());
+        }
+    });
+
+    $("#form_go_inter_depot_details").find('select[alt="sales_invoice_cost_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            purchase_acc_id.push($(this).val());
+        }
+    });
+    // $("#form_go_inter_depot_details").find('select[alt="sales_invoice_tax_acc_id[]"]').each(function(index){
+    //     if($(this).val()!=null && $(this).val()!=''){
+    //         tax_acc_id.push($(this).val());
+    //     }
+    // });
+    $("#form_go_inter_depot_details").find('select[alt="sales_invoice_cgst_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            cgst_acc_id.push($(this).val());
+        }
+    });
+    $("#form_go_inter_depot_details").find('select[alt="sales_invoice_sgst_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            sgst_acc_id.push($(this).val());
+        }
+    });
+    $("#form_go_inter_depot_details").find('select[alt="sales_invoice_igst_acc_id[]"]').each(function(index){
+        if($(this).val()!=null && $(this).val()!=''){
+            igst_acc_id.push($(this).val());
+        }
+    });
+
+    validator.showErrors(errors);
+    return valid;
+}
+function go_inter_depot_invalid_handler(){
+    var errors="";
+    if ($('#gointerdepot_modal').find("input.error, select.error").length>0) {
+        errors=errors+"<span>Please Clear errors in Go Inter Depot details.</span> <br/>";
+        $('#gointerdepot_validation_icon').show();
+    } else {
+        $('#gointerdepot_validation_icon').hide();
+    }
+
+    $('#form_errors').html(errors);
+
+    if(errors!=""){
+        $('#form_errors_group').show();
+        $('#form_errors').show();
+    } else {
+        $('#form_errors_group').hide();
+        $('#form_errors').hide();
+    }
+}
