@@ -46,10 +46,12 @@ class OtherdebitcreditController extends Controller
                 $acc_details = $model->getAccountDetails();
                 $vendor = $model->getVendors();
                 $warehouse_gst = $model->getWarehouseDetails();
+                $vendor_gst = $model->getVendorGSTNos();
 
                 $model->setLog('OtherDebitCredit', '', 'Insert', '', 'Insert Other Debit Credit Details', 'acc_other_debit_credit_details', '');
                 return $this->render('otherdebitcredit_details', ['action' => $action, 'acc_details' => $acc_details, 
-                                                                'vendor' => $vendor, 'warehouse_gst' => $warehouse_gst]);
+                                                                'vendor' => $vendor, 'warehouse_gst' => $warehouse_gst, 
+                                                                'vendor_gst' => $vendor_gst]);
             } else {
                 return $this->render('/message', [
                     'title'  => \Yii::t('user', 'Access Denied'),
@@ -73,11 +75,17 @@ class OtherdebitcreditController extends Controller
         $vendor = $model->getVendors();
         $acc_details = $model->getAccountDetails();
         $warehouse_gst = $model->getWarehouseDetails();
+        $vendor_id = '';
+        if(count($data)>0){
+            $vendor_id = $data[0]['vendor_id'];
+        }
+        $vendor_gst = $model->getVendorGSTNos($vendor_id);
         $other_debit_credit_entries = $model->gerOtherDebitCreditEntries($id);
         // $approver_list = $model->getApprover($action);
 
         return $this->render('otherdebitcredit_details', ['action' => $action, 'data' => $data, 'acc_details' => $acc_details, 
                                                         'vendor' => $vendor, 'warehouse_gst' => $warehouse_gst, 
+                                                        'vendor_gst' => $vendor_gst, 
                                                         'other_debit_credit_entries' => $other_debit_credit_entries]);
     }
 
@@ -151,7 +159,8 @@ class OtherdebitcreditController extends Controller
         $this->layout = false;
         return $this->render('tax_invoice', ['debit_note' => $data['debit_note'], 'vendor_details' => $data['vendor_details'], 
                                             'invoice_details' => $data['invoice_details'], 'inv_tax_details' => $data['inv_tax_details'], 
-                                            'warehouse_details' => $data['warehouse_details']]);
+                                            'warehouse_details' => $data['warehouse_details'], 
+                                            'vendor_warehouse_details' => $data['vendor_warehouse_details']]);
     }
 
     public function actionDownloadtaxinvoice($id){
@@ -180,7 +189,8 @@ class OtherdebitcreditController extends Controller
 
         return $this->render('email', ['debit_note' => $data['debit_note'], 'vendor_details' => $data['vendor_details'], 
                                         'invoice_details' => $data['invoice_details'], 'inv_tax_details' => $data['inv_tax_details'], 
-                                        'warehouse_details' => $data['warehouse_details']]);
+                                        'warehouse_details' => $data['warehouse_details'], 
+                                        'vendor_warehouse_details' => $data['vendor_warehouse_details']]);
     }
 
     public function actionViewdebitcreditnote($id){
@@ -189,7 +199,9 @@ class OtherdebitcreditController extends Controller
         
         $this->layout = false;
         return $this->render('debit_note', ['debit_note' => $data['debit_note'], 'vendor_details' => $data['vendor_details'], 
-                                        'warehouse_details' => $data['warehouse_details']]);
+                                        'invoice_details' => $data['invoice_details'], 'inv_tax_details' => $data['inv_tax_details'], 
+                                        'warehouse_details' => $data['warehouse_details'], 
+                                        'vendor_warehouse_details' => $data['vendor_warehouse_details']]);
     }
 
     public function actionDownloaddebitcreditnote($id){
@@ -219,7 +231,8 @@ class OtherdebitcreditController extends Controller
         return $this->render('email', [
             'invoice_details' => $data['invoice_details'], 'debit_note' => $data['debit_note'], 
             'deduction_details' => $data['deduction_details'], 'vendor_details' => $data['vendor_details'], 
-            'grn_details' => $data['grn_details'], 'warehouse_details' => $data['warehouse_details']
+            'grn_details' => $data['grn_details'], 'warehouse_details' => $data['warehouse_details'], 
+            'vendor_warehouse_details' => $data['vendor_warehouse_details']
         ]);
     }
 
@@ -277,6 +290,34 @@ class OtherdebitcreditController extends Controller
                                 $attachment_type, $email_sent_status, $error_message, $company_id);
 
         return $this->render('email_response', ['data' => $data]);
+    }
+
+    public function actionGetvendorgstid(){
+        $model = new OtherDebitCredit();
+        $request = Yii::$app->request;
+        $vendor_warehouse_id = $request->post('vendor_warehouse_id');
+        $data = $model->getVendorGSTId($vendor_warehouse_id);
+
+        $vendor_gst_id = '';
+        if(isset($data)) { 
+            $vendor_gst_id = $data[0]['warehouse_gst'];
+        }
+        echo $vendor_gst_id;
+    }
+
+    public function actionGetvendorgstnos(){
+        $model = new OtherDebitCredit();
+        $request = Yii::$app->request;
+        $vendor_id = $request->post('vendor_id');
+        $data = $model->getVendorGSTNos($vendor_id);
+
+        $vendor_gst = '<option value="">Select</option>';
+        if(isset($data)) { 
+            for($i=0; $i<count($data); $i++) { 
+                $vendor_gst = $vendor_gst . '<option value="'.$data[$i]['id'].'">'.$data[$i]['warehouse_gst'].'</option>';
+            }
+        }
+        echo $vendor_gst;
     }
 
 }

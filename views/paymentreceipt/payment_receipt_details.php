@@ -175,8 +175,13 @@ $mycomponent = Yii::$app->mycomponent;
 								<th class="text-center">  GI Date </th>
 								<th class="text-center">  Invoice Date </th>
 								<th class="text-center">  Due Date </th>
-								<th class="text-center" width="120"> Debit </th>
-								<th class="text-center" width="120">  Credit </th> 
+								<!-- <th class="text-center" width="120"> Debit </th>
+								<th class="text-center" width="120">  Credit </th>  -->
+								<th class="text-center" width="120">  Transaction </th>
+								<th class="text-center" width="120">  Amount </th>
+								<th class="text-center" width="120">  Paid Amount </th>
+								<th class="text-center" width="120">  Amount To Pay </th>
+								<th class="text-center" width="120">  Bal Amount </th>
 							</tr>
 						</thead>
 						<tbody id="ledger_details">
@@ -236,8 +241,8 @@ $mycomponent = Yii::$app->mycomponent;
                 <td><?php echo $mycomponent->format_money($data[0]['amount'],2); ?></td>
                 <td><a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Fviewpaymentadvice&id=<?php echo $data[0]['id']; ?>" target="_blank">View</a></td>
                 <td><a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Fdownload&id=<?php echo $data[0]['id']; ?>" target="_blank">Download</a></td>
-                <td style="<?php if(isset($data)) {if($data[0]['status']=='approved') echo ''; else echo 'display: none;';} else echo 'display: none;'; ?>">
-                	<a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Femailpaymentadvice&id=<?php echo $data[0]['id']; ?>">Email</a>
+                <td>
+                	<a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Femailpaymentadvice&id=<?php echo $data[0]['id']; ?>" style="<?php if(isset($data)) {if($data[0]['status']=='approved') echo ''; else echo 'display: none;';} else echo 'display: none;'; ?>">Email</a>
                 </td>
             </tr>
         </table>

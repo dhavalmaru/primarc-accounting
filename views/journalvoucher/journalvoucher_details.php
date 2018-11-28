@@ -366,7 +366,7 @@ $mycomponent = Yii::$app->mycomponent;
 					                           	   	'.$td.'
 						                           	<td><input class="form-control invoice_no" type="text" name="invoice_no_'.$k.'[]" value="'.$invoice_detail[$j]['invoice_number'].'" id="invoice_no_'.$k.'-'.$j.'" >
 						                           	<td><input class="form-control datepicker" type="text" name="invoice_date_'.$k.'[]"  value="'.$invoice_date.'" id="invoice_date_'.$k.'-'.$j.'">
-						                          	<td><input class="form-control invoice_amount" type="text" name="invoice_amount_'.$k.'[]" id="invoice_amount_'.$k.'-'.$j.'" value="'.$invoice_detail[$j]['invoice_amount'].'"  onchange="checkamount('.$k.')"></td>
+						                          	<td><input class="form-control invoice_amount" type="text" name="invoice_amount_'.$k.'[]" id="invoice_amount_'.$k.'-'.$j.'" value="'.$invoice_detail[$j]['invoice_amount'].'"  onchange="checkamount(this)"></td>
 					                      	  	</tr>';
 						                      	 
 								    			$count++;

@@ -68,9 +68,8 @@ $session = Yii::$app->session;
 					<input type="hidden" id="tax_id_val" name="tax_id_val" />
 				</div>
 
-				<div class="col-md-3 col-sm-3 col-xs-6">
-					<label class="control-label">Legal Name</label>
-					<span id="type_vendor_id">
+				<div id="type_vendor_id" class="col-md-3 col-sm-3 col-xs-6">
+					<label class="control-label">Select Vendor</label>
 					<select id="vendor_id" name="vendor_id" data-error="#err_vendor_id" class="form-control select2" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Goods') echo 'display: none;'; } else { echo 'display: none;'; } ?>">
 						<option value="">Select</option>
 						<?php for($i=0; $i<count($vendor); $i++) { ?>
@@ -78,37 +77,39 @@ $session = Yii::$app->session;
 						<?php } ?>
 					</select>
 					<span id="err_vendor_id"></span>
-					</span>
-					
-					<span id="type_customer_id">
-					<select id="customer_id" name="customer_id" class="form-control select2" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Customer') echo 'display: none;'; } else { echo 'display: none;'; } ?>">
+				</div>
+
+				<div id="type_customer_id" class="col-md-3 col-sm-3 col-xs-6">
+					<label class="control-label">Select Customer</label>
+					<select id="customer_id" name="customer_id" data-error="#err_customer_id" class="form-control select2" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Customer') echo 'display: none;'; } else { echo 'display: none;'; } ?>">
 						<option value="">Select</option>
-						<?php for($i=0; $i<count($Customers); $i++) { ?>
-							<option value="<?php echo $Customers[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['customer_id']==$Customers[$i]['id']) echo "selected"; } ?>><?php echo $Customers[$i]['customer_name']; ?></option>
+						<?php for($i=0; $i<count($customers); $i++) { ?>
+							<option value="<?php echo $customers[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['customer_id']==$customers[$i]['id']) echo "selected"; } ?>><?php echo $customers[$i]['customer_name']; ?></option>
 						<?php } ?>
 					</select>
-				
-					</span>
-					<input id="legal_name" name="legal_name" class="form-control" type="text" value="<?php if(isset($data[0])) echo $data[0]['legal_name']; ?>" style="<?php if(isset($data[0])) {if($data[0]['type']=='Vendor Goods' || $data[0]['type']=='GST Tax' || $data[0]['type']=='CGST' || $data[0]['type']=='SGST' || $data[0]['type']=='IGST' || $data[0]['type']=='Goods Sales' || $data[0]['type']=='Goods Purchase') echo 'display: none;'; } ?>" />
-				
-			  		
+					<span id="err_customer_id"></span>
 				</div>
-				
 				
 				<div class="col-md-3 col-sm-3 col-xs-6">
-					<label class="control-label">Code</label>
-					<input id="code" name="code" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['code']; ?>" style="<?php if(isset($data[0])) { if($data[0]['type'] == 'Vendor Goods') echo 'display: none;'; } ?>" readonly />
-					<input id="vendor_code" name="vendor_code" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['code']; ?>" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Goods') echo 'display: none;'; } else { echo 'display: none;'; } ?>" readonly />
-					
-					<input id="customer_code" name="customer_code" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['code']; ?>" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Customer') echo 'display: none;'; } else { echo 'display: none;'; } ?>" readonly />
+					<label class="control-label">Legal Name</label>
+					<input id="legal_name" name="legal_name" class="form-control" type="text" value="<?php if(isset($data[0])) echo $data[0]['legal_name']; ?>" style="<?php //if(isset($data[0])) {if($data[0]['type']=='Vendor Goods' || $data[0]['type']=='GST Tax' || $data[0]['type']=='CGST' || $data[0]['type']=='SGST' || $data[0]['type']=='IGST' || $data[0]['type']=='Goods Sales' || $data[0]['type']=='Goods Purchase') echo 'display: none;'; } ?>" />
 				</div>
-				<div class=" col-md-3 col-sm-3 col-xs-6 vendor_goods" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Goods') echo 'display: none;'; } else echo 'display: none;'; ?>">
-					<label class="control-label">Type Of Company</label>
-					<input id="legal_entity_name" name="legal_entity_name" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['legal_entity_name']; ?>" readonly />
-				</div>
-				<div class=" col-md-3 col-sm-3 col-xs-6 employee" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Employee') echo 'display: none;'; } else echo 'display: none;'; ?>">
-					<label class="control-label">Department</label>
-					<input id="department" name="department" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['department']; ?>" readonly />
+
+				<div class="col-md-3 col-sm-3 col-xs-6">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<label class="control-label">Code</label>
+						<input id="code" name="code" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['code']; ?>" style="<?php if(isset($data[0])) { if($data[0]['type'] == 'Vendor Goods') echo 'display: none;'; } ?>" readonly />
+						<input id="vendor_code" name="vendor_code" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['code']; ?>" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Goods') echo 'display: none;'; } else { echo 'display: none;'; } ?>" readonly />
+						<input id="customer_code" name="customer_code" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['code']; ?>" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Customer') echo 'display: none;'; } else { echo 'display: none;'; } ?>" readonly />
+					</div>
+					<div class=" col-md-6 col-sm-6 col-xs-12 vendor_goods" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Vendor Goods') echo 'display: none;'; } else echo 'display: none;'; ?>">
+						<label class="control-label">Company Type</label>
+						<input id="legal_entity_name" name="legal_entity_name" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['legal_entity_name']; ?>" readonly />
+					</div>
+					<div class=" col-md-6 col-sm-6 col-xs-12 employee" style="<?php if(isset($data[0])) { if($data[0]['type'] != 'Employee') echo 'display: none;'; } else echo 'display: none;'; ?>">
+						<label class="control-label">Department</label>
+						<input id="department" name="department" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['department']; ?>" readonly />
+					</div>
 				</div>
 			</div>
 
@@ -416,6 +417,13 @@ $session = Yii::$app->session;
 					<label class="control-label">&nbsp;</label>
                     <?php if(isset($data)) { if($data[0]['other_doc_path']!= '') { ?><a target="_blank" id="other_doc_file_download" class="download_file" href="<?php if(isset($data)) echo Url::base().$data[0]['other_doc_path']; ?>">
                     <span class="fa download fa-download" ></span></a><?php }} ?>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="col-md-3 col-sm-3 col-xs-6">
+					<label class="control-label">HSN Code</label>
+					<input id="hsn_code" name="hsn_code" class="form-control" type="text" value="<?php if(isset($data)) echo $data[0]['hsn_code']; ?>" />
 				</div>
 			</div>
 

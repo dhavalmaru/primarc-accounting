@@ -221,6 +221,7 @@ $mycomponent = Yii::$app->mycomponent;
                     <th class="sticky-cell" style="width: 250px; border: none!important;">Ledger Name</th>
                     <th class="sticky-cell" style="width: 100px; border: none!important;">Ledger Code</th>
                     <th class="sticky-cell" style="width: 25px; border: none!important;">Tax <br/> Percent</th>
+                    <th class="sticky-cell" style="width: 25px; border: none!important;">Transaction</th>
                     <th class="sticky-cell" style="width: 200px; border: none!important;">Value</th>
                     <?php for($i=0; $i<count($invoice_details); $i++) { ?>
                         <th class="text-center" style="width: 100px;">
@@ -453,6 +454,7 @@ $mycomponent = Yii::$app->mycomponent;
                             <?php //echo 'Purchase_'.$total_tax2[$j]['tax_zone_code'].'_'.$total_tax2[$j]['vat_cst'].'_'.$total_tax2[$j]['vat_percen']; ?>
                             <?php echo $mycomponent->format_money($total_tax2[$j]['vat_percent'],2); ?>
                         </td>
+                        <td class="sticky-cell" style="border: none!important;">Credit</td>
                         <td class="sticky-cell text-right" style="border: none!important;">
                             <input type="text" class="text-right" id="sales_total_cost_<?php echo $j;?>" name="sales_total_cost_<?php echo $j;?>" value="<?php echo $mycomponent->format_money($total_tax2[$j]['total_cost'], 2); ?>" readonly />
                         </td>
@@ -484,6 +486,7 @@ $mycomponent = Yii::$app->mycomponent;
                             <?php //echo 'Tax_'.$total_tax2[$j]['tax_zone_code'].'_'.$total_tax2[$j]['vat_cst'].'_'.$total_tax2[$j]['vat_percen']; ?>
                             <?php echo $mycomponent->format_money($total_tax2[$j]['vat_percent'],2); ?>
                         </td>
+                        <td class="sticky-cell" style="border: none!important;">Credit</td>
                         <td class="sticky-cell text-right" style="border: none!important;">
                             <input type="text" class="text-right " id="sales_total_tax_<?php echo $j;?>" name="sales_total_tax_<?php echo $j;?>" value="<?php echo $mycomponent->format_money($total_tax2[$j]['total_tax'], 2); ?>" readonly />
                         </td>
@@ -514,6 +517,7 @@ $mycomponent = Yii::$app->mycomponent;
                             <?php //echo 'Tax_cgst_'.$total_tax2[$j]['cgst']; ?>
                             <?php echo $mycomponent->format_money($total_tax2[$j]['cgst_rate'],2); ?>
                         </td>
+                        <td class="sticky-cell" style="border: none!important;">Credit</td>
                         <td class="sticky-cell text-right" style="border: none!important;">
                             <input type="text" class="text-right " id="sales_total_cgst_<?php echo $j;?>" name="sales_total_cgst_<?php echo $j;?>" value="<?php echo $mycomponent->format_money($total_tax2[$j]['total_cgst'], 2); ?>" readonly />
                         </td>
@@ -544,6 +548,7 @@ $mycomponent = Yii::$app->mycomponent;
                             <?php //echo 'Tax_sgst_'.$total_tax2[$j]['sgst']; ?>
                             <?php echo $mycomponent->format_money($total_tax2[$j]['sgst_rate'],2); ?>
                         </td>
+                        <td class="sticky-cell" style="border: none!important;">Credit</td>
                         <td class="sticky-cell text-right" style="border: none!important;">
                             <input type="text" class="text-right " id="sales_total_sgst_<?php echo $j;?>" name="sales_total_sgst_<?php echo $j;?>" value="<?php echo $mycomponent->format_money($total_tax2[$j]['total_sgst'], 2); ?>" readonly />
                         </td>
@@ -574,6 +579,7 @@ $mycomponent = Yii::$app->mycomponent;
                             <?php //echo 'Tax_igst_'.$total_tax2[$j]['igst']; ?>
                             <?php echo $mycomponent->format_money($total_tax2[$j]['igst_rate'],2); ?>
                         </td>
+                        <td class="sticky-cell" style="border: none!important;">Credit</td>
                         <td class="sticky-cell text-right" style="border: none!important;">
                             <input type="text" class="text-right " id="sales_total_igst_<?php echo $j;?>" name="sales_total_igst_<?php echo $j;?>" value="<?php echo $mycomponent->format_money($total_tax2[$j]['total_igst'], 2); ?>" readonly />
                         </td>
@@ -602,6 +608,7 @@ $mycomponent = Yii::$app->mycomponent;
                         <input type="text" id="salesothercharges_ledger_code_0" name="sales_other_charges_ledger_code" value="<?php echo $acc['other_charges_ledger_code2']; ?>" style="border: none;" readonly />
                     </td>
                     <td class="sticky-cell" style="border: none!important;"></td>
+                    <td class="sticky-cell" style="border: none!important;">Credit</td>
                     <td class="sticky-cell" style="border: none!important;">
                         <input type="text" class="text-right" id="sales_other_charges" name="sales_other_charges" value="<?php echo $mycomponent->format_money($total_val2[0]['other_charges'], 2); ?>" readonly />
                     </td>
@@ -625,14 +632,14 @@ $mycomponent = Yii::$app->mycomponent;
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">Total Amount</td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">
 
-                        <?php if($grn_details[0]['warehouse_state']!=""){ ?>
+                        <?php if($grn_details[0]['to_state']!=""){ ?>
                             <select id="salestotalamount_acc_id_0" class="form-control acc_id " name="sales_total_amount_acc_id" onChange="get_acc_details(this)" style="display: none;">
                                 <option value="">Select</option>
                                 <?php 
                                 for($i=0; $i<count($acc_master); $i++) { 
                                     if($acc_master[$i]['type']=="Branch Type") { 
                                         if($acc['total_amount_acc_id2']==""){
-                                            if(strpos(strtoupper(trim($acc_master[$i]['legal_name'])), strtoupper(trim($grn_details[0]['warehouse_state'])))!==false) {
+                                            if(strpos(strtoupper(trim($acc_master[$i]['legal_name'])), strtoupper(trim($grn_details[0]['to_state'])))!==false) {
                                                 $acc['total_amount_acc_id2'] = $acc_master[$i]['id'];
                                                 $acc['total_amount_ledger_name2'] = $acc_master[$i]['legal_name'];
                                                 $acc['total_amount_ledger_code2'] = $acc_master[$i]['code'];
@@ -668,7 +675,7 @@ $mycomponent = Yii::$app->mycomponent;
                       
                         <?php
                             $la_code = '';
-                            if($grn_details[0]['warehouse_state']!=""){
+                            if($grn_details[0]['to_state']!=""){
                                 $la_code =  $acc['total_amount_ledger_code2']; 
                             } else {
                                 $la_code =  $ware_array2['total_amount_ledger_code2'];
@@ -678,6 +685,7 @@ $mycomponent = Yii::$app->mycomponent;
                         <input type="text" id="salestotalamount_ledger_code_0" name="sales_total_amount_ledger_code" value="<?php echo $la_code; ?>" style="display: none;" readonly />
                     </td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">Debit</td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">
                         <input type="text" class="text-right" id="sales_total_amount" name="sales_total_amount" value="<?php echo $mycomponent->format_money($total_val2[0]['total_amount'], 2); ?>" readonly />
                     </td>
@@ -704,6 +712,7 @@ $mycomponent = Yii::$app->mycomponent;
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
+                    <td class="sticky-cell" style="border: none!important;"></td>
                     <td id="sales_total_payable_amount" class="text-right sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
                     <?php for($i=0; $i<count($invoice_details2); $i++) { ?>
                         <td id="sales_invoice_total_payable_amount_<?php echo $i;?>" class="text-right">
@@ -721,7 +730,7 @@ $mycomponent = Yii::$app->mycomponent;
 
 
                 <tr>
-                    <td colspan="10">&nbsp;</td>
+                    <td colspan="11">&nbsp;</td>
                     <!-- <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
@@ -954,6 +963,7 @@ $mycomponent = Yii::$app->mycomponent;
                             <?php //echo 'Purchase_'.$total_tax[$j]['tax_zone_code'].'_'.$total_tax[$j]['vat_cst'].'_'.$total_tax[$j]['vat_percen']; ?>
                             <?php echo $mycomponent->format_money($total_tax[$j]['vat_percent'],2); ?>
                         </td>
+                        <td class="sticky-cell" style="border: none!important;">Debit</td>
                         <td class="sticky-cell text-right" style="border: none!important;">
                             <input type="text" class="text-right" id="total_cost_<?php echo $j;?>" name="total_cost_<?php echo $j;?>" value="<?php echo $mycomponent->format_money($total_tax[$j]['total_cost'], 2); ?>" readonly />
                         </td>
@@ -984,6 +994,7 @@ $mycomponent = Yii::$app->mycomponent;
                             <?php //echo 'Tax_'.$total_tax[$j]['tax_zone_code'].'_'.$total_tax[$j]['vat_cst'].'_'.$total_tax[$j]['vat_percen']; ?>
                             <?php echo $mycomponent->format_money($total_tax[$j]['vat_percent'],2); ?>
                         </td>
+                        <td class="sticky-cell" style="border: none!important;">Debit</td>
                         <td class="sticky-cell text-right" style="border: none!important;">
                             <input type="text" class="text-right " id="total_tax_<?php echo $j;?>" name="total_tax_<?php echo $j;?>" value="<?php echo $mycomponent->format_money($total_tax[$j]['total_tax'], 2); ?>" readonly />
                         </td>
@@ -1014,6 +1025,7 @@ $mycomponent = Yii::$app->mycomponent;
                             <?php //echo 'Tax_cgst_'.$total_tax[$j]['cgst']; ?>
                             <?php echo $mycomponent->format_money($total_tax[$j]['cgst_rate'],2); ?>
                         </td>
+                        <td class="sticky-cell" style="border: none!important;">Debit</td>
                         <td class="sticky-cell text-right" style="border: none!important;">
                             <input type="text" class="text-right " id="total_cgst_<?php echo $j;?>" name="total_cgst_<?php echo $j;?>" value="<?php echo $mycomponent->format_money($total_tax[$j]['total_cgst'], 2); ?>" readonly />
                         </td>
@@ -1044,6 +1056,7 @@ $mycomponent = Yii::$app->mycomponent;
                             <?php //echo 'Tax_sgst_'.$total_tax[$j]['sgst']; ?>
                             <?php echo $mycomponent->format_money($total_tax[$j]['sgst_rate'],2); ?>
                         </td>
+                        <td class="sticky-cell" style="border: none!important;">Debit</td>
                         <td class="sticky-cell text-right" style="border: none!important;">
                             <input type="text" class="text-right " id="total_sgst_<?php echo $j;?>" name="total_sgst_<?php echo $j;?>" value="<?php echo $mycomponent->format_money($total_tax[$j]['total_sgst'], 2); ?>" readonly />
                         </td>
@@ -1074,6 +1087,7 @@ $mycomponent = Yii::$app->mycomponent;
                             <?php //echo 'Tax_igst_'.$total_tax[$j]['igst']; ?>
                             <?php echo $mycomponent->format_money($total_tax[$j]['igst_rate'],2); ?>
                         </td>
+                        <td class="sticky-cell" style="border: none!important;">Debit</td>
                         <td class="sticky-cell text-right" style="border: none!important;">
                             <input type="text" class="text-right " id="total_igst_<?php echo $j;?>" name="total_igst_<?php echo $j;?>" value="<?php echo $mycomponent->format_money($total_tax[$j]['total_igst'], 2); ?>" readonly />
                         </td>
@@ -1102,6 +1116,7 @@ $mycomponent = Yii::$app->mycomponent;
                         <input type="text" id="othercharges_ledger_code_0" name="other_charges_ledger_code" value="<?php echo $acc['other_charges_ledger_code']; ?>" style="border: none;" readonly />
                     </td>
                     <td class="sticky-cell" style="border: none!important;"></td>
+                    <td class="sticky-cell" style="border: none!important;">Debit</td>
                     <td class="sticky-cell" style="border: none!important;">
                         <input type="text" class="text-right" id="other_charges" name="other_charges" value="<?php echo $mycomponent->format_money($total_val[0]['other_charges'], 2); ?>" readonly />
                     </td>
@@ -1125,7 +1140,7 @@ $mycomponent = Yii::$app->mycomponent;
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">Total Amount</td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">
 
-                        <?php if($grn_details[0]['to_state']!=""){ ?>
+                        <?php if($grn_details[0]['warehouse_state']!=""){ ?>
 
                             <select id="totalamount_acc_id_0" class="form-control acc_id " name="total_amount_acc_id" onChange="get_acc_details(this)" style="display: none;">
                                 <option value="">Select</option>
@@ -1133,7 +1148,7 @@ $mycomponent = Yii::$app->mycomponent;
                                 for($i=0; $i<count($acc_master); $i++) {
                                     if($acc_master[$i]['type']=="Branch Type") {  
                                         if($acc['total_amount_acc_id']==""){
-                                            if(strpos(strtoupper(trim($acc_master[$i]['legal_name'])), strtoupper(trim($grn_details[0]['to_state'])))!==false) {
+                                            if(strpos(strtoupper(trim($acc_master[$i]['legal_name'])), strtoupper(trim($grn_details[0]['warehouse_state'])))!==false) {
                                                 $acc['total_amount_acc_id'] = $acc_master[$i]['id'];
                                                 $acc['total_amount_ledger_name'] = $acc_master[$i]['legal_name'];
                                                 $acc['total_amount_ledger_code'] = $acc_master[$i]['code'];  
@@ -1169,7 +1184,7 @@ $mycomponent = Yii::$app->mycomponent;
                       
                         <?php
                             $la_code = '';
-                            if($grn_details[0]['to_state']!=""){
+                            if($grn_details[0]['warehouse_state']!=""){
                                 $la_code =  $acc['total_amount_ledger_code']; 
                             } else {
                                 $la_code =  $ware_array['total_amount_ledger_code'];
@@ -1179,6 +1194,7 @@ $mycomponent = Yii::$app->mycomponent;
                         <input type="text" id="totalamount_ledger_code_0" name="total_amount_ledger_code" value="<?php echo $la_code; ?>" style="display: none;" readonly />
                     </td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">Credit</td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">
                         <input type="text" class="text-right" id="total_amount" name="total_amount" value="<?php echo $mycomponent->format_money($total_val[0]['total_amount'], 2); ?>" readonly />
                     </td>
@@ -1205,6 +1221,7 @@ $mycomponent = Yii::$app->mycomponent;
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
+                    <td class="sticky-cell" style="border: none!important;"></td>
                     <td id="total_payable_amount" class="text-right sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
                     <?php for($i=0; $i<count($invoice_details); $i++) { ?>
                         <td id="invoice_total_payable_amount_<?php echo $i;?>" class="text-right">
@@ -1222,7 +1239,7 @@ $mycomponent = Yii::$app->mycomponent;
 
 
                 <tr>
-                    <td colspan="10">&nbsp;</td>
+                    <td colspan="11">&nbsp;</td>
                     <!-- <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
@@ -1252,6 +1269,7 @@ $mycomponent = Yii::$app->mycomponent;
                         <input type="text" id="salesstocktransfer_ledger_code_0" name="sales_stock_transfer_ledger_code" value="<?php echo $acc['sales_stock_transfer_ledger_code']; ?>" style="border: none;" readonly />
                     </td>
                     <td class="sticky-cell" style="border: none!important;"></td>
+                    <td class="sticky-cell" style="border: none!important;">Credit</td>
                     <td class="sticky-cell" style="border: none!important;">
                         <input type="text" class="text-right" id="sales_stock_transfer" name="sales_stock_transfer" value="<?php echo $mycomponent->format_money($total_val[0]['sales_stock_transfer'], 2); ?>" readonly />
                     </td>
@@ -1290,6 +1308,7 @@ $mycomponent = Yii::$app->mycomponent;
                         <input type="text" id="purchasestocktransfer_ledger_code_0" name="purchase_stock_transfer_ledger_code" value="<?php echo $acc['purchase_stock_transfer_ledger_code']; ?>" style="border: none;" readonly />
                     </td>
                     <td class="sticky-cell" style="border: none!important;"></td>
+                    <td class="sticky-cell" style="border: none!important;">Debit</td>
                     <td class="sticky-cell" style="border: none!important;">
                         <input type="text" class="text-right" id="purchase_stock_transfer" name="purchase_stock_transfer" value="<?php echo $mycomponent->format_money($total_val[0]['purchase_stock_transfer'], 2); ?>" readonly />
                     </td>

@@ -209,7 +209,6 @@ class PaymentreceiptController extends Controller
         $data = $payment_receipt->getLedger($id, $acc_id);
         $mycomponent = Yii::$app->mycomponent;
         $tbody = "";
-        // $table = "";
 
         if(count($data)>0){
             $total_debit_amt = 0;
@@ -218,25 +217,60 @@ class PaymentreceiptController extends Controller
             $paying_credit_amt = 0;
             $net_debit_amt = 0;
             $net_credit_amt = 0;
+            $total_transaction = '';
+            $total_amount_total = 0;
+            $total_paid_transaction = '';
+            $total_paid_amount_total = 0;
+            $paying_transaction = '';
+            $paying_amount_total = 0;
+            $bal_transaction = '';
+            $bal_amount_total = 0;
 
             for($i=0; $i<count($data); $i++){
                 $ledger_code = '';
                 $ledger_name = '';
+                $transaction = '';
+
+                $transaction = $data[$i]['type'];
+                $amount = $data[$i]['amount'];
+                $total_paid_amount = $data[$i]['total_paid_amount'];
+                $amount_to_pay = $data[$i]['amount_to_pay'];
+                $bal_amount = $data[$i]['bal_amount'];
+
+                $bal_amount = ($amount-$total_paid_amount-$amount_to_pay);
                 
-                if($data[$i]['type']=="Debit"){
-                    $debit_amt = $data[$i]['amount'];
+                if(strtoupper(trim($transaction))=="DEBIT"){
+                    $amount = $amount*-1;
+                    $total_paid_amount = $total_paid_amount*-1;
+                    $amount_to_pay = $amount_to_pay*-1;
+                    $bal_amount = $bal_amount*-1;
+                }
+
+                // if(strtoupper(trim($transaction))=="DEBIT"){
+                //     $total_amount_total = $total_amount_total-$amount;
+                //     $total_paid_amount_total = $total_paid_amount_total-$total_paid_amount;
+                //     $paying_amount_total = $paying_amount_total-$amount_to_pay;
+                //     $bal_amount_total = $bal_amount_total-$bal_amount;
+                // } else {
+                //     $total_amount_total = $total_amount_total+$amount;
+                //     $total_paid_amount_total = $total_paid_amount_total+$total_paid_amount;
+                //     $paying_amount_total = $paying_amount_total+$amount_to_pay;
+                //     $bal_amount_total = $bal_amount_total+$bal_amount;
+                // }
+
+                $total_amount_total = $total_amount_total+$amount;
+                $total_paid_amount_total = $total_paid_amount_total+$total_paid_amount;
+                $paying_amount_total = $paying_amount_total+$amount_to_pay;
+                $bal_amount_total = $bal_amount_total+$bal_amount;
+
+                if(strtoupper(trim($transaction))=="DEBIT"){
+                    $debit_amt = $amount;
                     $credit_amt = 0;
                 } else {
                     $debit_amt = 0;
-                    $credit_amt = $data[$i]['amount'];
+                    $credit_amt = $amount;
                 }
-                if($data[$i]['is_paid']=="1"){
-                    if($data[$i]['type']=="Debit"){
-                        $paying_debit_amt = $paying_debit_amt + $data[$i]['amount'];
-                    } else {
-                        $paying_credit_amt = $paying_credit_amt + $data[$i]['amount'];
-                    }
-                }
+
                 if(isset($data[$i]['cp_acc_id'])){
                     if($data[$i]['cp_acc_id']!=$acc_id){
                         $ledger_code = $data[$i]['cp_ledger_code'];
@@ -245,14 +279,15 @@ class PaymentreceiptController extends Controller
                 }
                 if($ledger_code == ''){
                     $ledger_code = $data[$i]['ledger_code'];
-                    $ledger_name = $data[$i]['ledger_name'];
+                    // $ledger_name = $data[$i]['new_ledger_name'];
+                    $ledger_name = $data[$i]['ref_type'];
                 }
 
                 $tbody = $tbody . '<tr>
                                         <td class="text-center"> 
                                             <div class="checkbox"> 
-                                                <input type="checkbox" class="check" id="chk_'.$i.'" value="1" '.(($data[$i]['is_paid']=="1")?"checked":"").' onChange="getLedgerTotal();" /> 
-                                                <input type="hidden" class="form-control" name="chk[]" id="chk_val_'.$i.'" value="'.(($data[$i]['is_paid']=="1")?"1":"0").'" />
+                                                <input type="checkbox" class="check" id="chk_'.$i.'" value="1" onChange="setAmount(this);" />
+                                                <input type="hidden" class="form-control" name="chk[]" id="chk_val_'.$i.'" value="" />
                                             </div> 
                                         </td>
                                         <td>
@@ -273,12 +308,27 @@ class PaymentreceiptController extends Controller
                                         <td> 
                                             <input type="text" class="form-control" id="due_date_'.$i.'" name="due_date[]" value="'.(($data[$i]['due_date']!=null && $data[$i]['due_date']!='')?date('d/m/Y',strtotime($data[$i]['due_date'])):'').'" readonly />
                                         </td>
-                                        <td class="text-right">
+                                        <!-- <td class="text-right">
                                             <input type="text" class="form-control text-right" id="debit_amt_'.$i.'" name="debit_amt[]" value="'.$mycomponent->format_money($debit_amt,2).'" readonly />
                                         </td>
                                         <td class="text-right">
                                             <input type="text" class="form-control text-right" id="credit_amt_'.$i.'" name="credit_amt[]" value="'.$mycomponent->format_money($credit_amt,2).'" readonly />
-                                        </td> 
+                                        </td> -->
+                                        <td class="text-right">
+                                            <input type="text" class="form-control text-right" id="transaction_'.$i.'" name="transaction[]" value="'.$transaction.'" readonly />
+                                        </td>
+                                        <td class="text-right">
+                                            <input type="text" class="form-control text-right" id="total_amount_'.$i.'" name="total_amount[]" value="'.$mycomponent->format_money($amount,2).'" readonly />
+                                        </td>
+                                        <td class="text-right">
+                                            <input type="text" class="form-control text-right" id="total_paid_amount_'.$i.'" name="total_paid_amount[]" value="'.$mycomponent->format_money($total_paid_amount,2).'" readonly />
+                                        </td>
+                                        <td class="text-right">
+                                            <input type="text" class="form-control text-right" id="amount_to_pay_'.$i.'" name="amount_to_pay[]" value="'.$mycomponent->format_money($amount_to_pay,2).'" onChange="getTotal();" />
+                                        </td>
+                                        <td class="text-right">
+                                            <input type="text" class="form-control text-right" id="bal_amount_'.$i.'" name="bal_amount[]" value="'.$mycomponent->format_money($bal_amount,2).'" readonly />
+                                        </td>
                                     </tr>';
 
                 $total_debit_amt = $total_debit_amt + $debit_amt;
@@ -292,8 +342,34 @@ class PaymentreceiptController extends Controller
                 $payable_credit_amt = $paying_credit_amt-$paying_debit_amt;
                 $payable_debit_amt = 0;
             } else {
-                $payable_debit_amt = ($paying_credit_amt-$paying_debit_amt)*-1;
+                // $payable_debit_amt = ($paying_credit_amt-$paying_debit_amt)*-1;
+                $payable_debit_amt = $paying_credit_amt-$paying_debit_amt;
                 $payable_credit_amt = 0;
+            }
+
+            if($total_amount_total<0){
+                // $total_amount_total = $total_amount_total*-1;
+                $total_transaction = 'Debit';
+            } else {
+                $total_transaction = 'Credit';
+            }
+            if($total_paid_amount_total<0){
+                // $total_paid_amount_total = $total_paid_amount_total*-1;
+                $total_paid_transaction = 'Debit';
+            } else {
+                $total_paid_transaction = 'Credit';
+            }
+            if($paying_amount_total<0){
+                // $paying_amount_total = $paying_amount_total*-1;
+                $paying_transaction = 'Debit';
+            } else {
+                $paying_transaction = 'Credit';
+            }
+            if($bal_amount_total<0){
+                // $bal_amount_total = $bal_amount_total*-1;
+                $bal_transaction = 'Debit';
+            } else {
+                $bal_transaction = 'Credit';
             }
 
             $tbody = $tbody . '<tr class="bold-text">
@@ -301,30 +377,94 @@ class PaymentreceiptController extends Controller
                                     <td class="text-center"></td>
                                     <td class="text-center"></td>
                                     <td class="text-center"></td>
-                                    <td class="text-center"></td>
-                                    <td class="text-right">Total Amount</td>
-                                    <td class="text-right">
+                                    <!-- <td class="text-center"></td> -->
+                                    <td class="text-right" colspan="2">Total Amount</td>
+                                    <!-- <td class="text-right">
                                         <input type="text" class="form-control text-right" id="total_debit_amt" name="total_debit_amt" value="'.$mycomponent->format_money($total_debit_amt,2).'" readonly />
                                     </td>
                                     <td class="text-right">
                                         <input type="text" class="form-control text-right" id="total_credit_amt" name="total_credit_amt" value="'.$mycomponent->format_money($total_credit_amt,2).'" readonly />
-                                    </td> 
+                                    </td> -->
+                                    <td class="text-right">
+                                        <input type="text" class="form-control text-right" id="total_transaction" name="total_transaction" value="'.$total_transaction.'" readonly />
+                                    </td>
+                                    <td class="text-right">
+                                        <input type="text" class="form-control text-right" id="total_amount_total" name="total_amount_total" value="'.$mycomponent->format_money($total_amount_total,2).'" readonly />
+                                    </td>
+                                    <td class="text-right"></td>
+                                    <td class="text-right"></td>
+                                    <td class="text-right"></td>
                                 </tr>
                                 <tr class="bold-text">
                                     <td class="text-center"></td>
                                     <td class="text-center"></td>
                                     <td class="text-center"></td>
                                     <td class="text-center"></td>
-                                    <td class="text-center"></td>
-                                    <td class="text-right">Amount Paying</td>
-                                    <td class="text-right">
+                                    <!-- <td class="text-center"></td> -->
+                                    <td class="text-right" colspan="2">Total Paid Amount</td>
+                                    <!-- <td class="text-right">
                                         <input type="text" class="form-control text-right" id="paying_debit_amt" name="paying_debit_amt" value="'.$mycomponent->format_money($paying_debit_amt,2).'" readonly />
                                     </td>
                                     <td class="text-right">
                                         <input type="text" class="form-control text-right" id="paying_credit_amt" name="paying_credit_amt" value="'.$mycomponent->format_money($paying_credit_amt,2).'" readonly />
-                                    </td> 
+                                    </td> -->
+                                    <td class="text-right">
+                                        <input type="text" class="form-control text-right" id="total_paid_transaction" name="total_paid_transaction" value="'.$total_paid_transaction.'" readonly />
+                                    </td>
+                                    <td class="text-right">
+                                        <input type="text" class="form-control text-right" id="total_paid_amount_total" name="total_paid_amount_total" value="'.$mycomponent->format_money($total_paid_amount_total,2).'" readonly />
+                                    </td>
+                                    <td class="text-right"></td>
+                                    <td class="text-right"></td>
+                                    <td class="text-right"></td>
                                 </tr>
                                 <tr class="bold-text">
+                                    <td class="text-center"></td>
+                                    <td class="text-center"></td>
+                                    <td class="text-center"></td>
+                                    <td class="text-center"></td>
+                                    <!-- <td class="text-center"></td> -->
+                                    <td class="text-right" colspan="2">Amount Paying</td>
+                                    <!-- <td class="text-right">
+                                        <input type="text" class="form-control text-right" id="paying_debit_amt" name="paying_debit_amt" value="'.$mycomponent->format_money($paying_debit_amt,2).'" readonly />
+                                    </td>
+                                    <td class="text-right">
+                                        <input type="text" class="form-control text-right" id="paying_credit_amt" name="paying_credit_amt" value="'.$mycomponent->format_money($paying_credit_amt,2).'" readonly />
+                                    </td> -->
+                                    <td class="text-right">
+                                        <input type="text" class="form-control text-right" id="paying_transaction" name="paying_transaction" value="'.$paying_transaction.'" readonly />
+                                    </td>
+                                    <td class="text-right">
+                                        <input type="text" class="form-control text-right" id="paying_amount_total" name="paying_amount_total" value="'.$mycomponent->format_money($paying_amount_total,2).'" readonly />
+                                    </td>
+                                    <td class="text-right"></td>
+                                    <td class="text-right"></td>
+                                    <td class="text-right"></td>
+                                </tr>
+                                <tr class="bold-text">
+                                    <td class="text-center"></td>
+                                    <td class="text-center"></td>
+                                    <td class="text-center"></td>
+                                    <td class="text-center"></td>
+                                    <!-- <td class="text-center"></td> -->
+                                    <td class="text-right" colspan="2">Balance Amount</td>
+                                    <!-- <td class="text-right">
+                                        <input type="text" class="form-control text-right" id="net_debit_amt" name="net_debit_amt" value="'.$mycomponent->format_money($net_debit_amt,2).'" readonly />
+                                    </td>
+                                    <td class="text-right">
+                                        <input type="text" class="form-control text-right" id="net_credit_amt" name="net_credit_amt" value="'.$mycomponent->format_money($net_credit_amt,2).'" readonly />
+                                    </td> -->
+                                    <td class="text-right">
+                                        <input type="text" class="form-control text-right" id="bal_transaction" name="bal_transaction" value="'.$bal_transaction.'" readonly />
+                                    </td>
+                                    <td class="text-right">
+                                        <input type="text" class="form-control text-right" id="bal_amount_total" name="bal_amount_total" value="'.$mycomponent->format_money($bal_amount_total,2).'" readonly />
+                                    </td>
+                                    <td class="text-right"></td>
+                                    <td class="text-right"></td>
+                                    <td class="text-right"></td>
+                                </tr>
+                                <!-- <tr class="bold-text">
                                     <td class="text-center"></td>
                                     <td class="text-center"></td>
                                     <td class="text-center"></td>
@@ -351,7 +491,7 @@ class PaymentreceiptController extends Controller
                                     <td class="text-right">
                                         <input type="text" class="form-control text-right" id="payable_credit_amt" name="payable_credit_amt" value="'.$mycomponent->format_money($payable_credit_amt,2).'" readonly />
                                     </td> 
-                                </tr>';
+                                </tr> -->';
         }
 
         echo $tbody;

@@ -48,7 +48,7 @@ class AccountmasterController extends Controller
                 $action = 'insert';
                 // $category = $acc_master->getAccountCategories();
                 $vendor = $acc_master->getVendors();
-                $Customers = $acc_master->getCustomers();
+                $customers = $acc_master->getCustomers();
 				$tax = $acc_master->getTax();
                 $tax_per = $acc_master->getTaxPercent();
                	$state = $acc_master->getState();
@@ -59,7 +59,7 @@ class AccountmasterController extends Controller
                 // return $this->render('account_details', ['action' => $action, 'category' => $category, 'vendor' => $vendor, 
                 //                                          'category_list' => $category_list, 'approver_list' => $approver_list]);
                 return $this->render('account_details', ['action' => $action, 'vendor' => $vendor, 'tax' => $tax, 
-                                                        'tax_per' => $tax_per, 'Customers' => $Customers,'state' => $state, 
+                                                        'tax_per' => $tax_per, 'customers' => $customers,'state' => $state, 
                                                         'category_list' => $category_list, 'approver_list' => $approver_list]);
             } else {
                 return $this->render('/message', [
@@ -82,36 +82,43 @@ class AccountmasterController extends Controller
         $acc_master = new AccountMaster();
         $data = $acc_master->getAccountDetails($id, "");
         // $category = $acc_master->getAccountCategories();
-        $vendor = $acc_master->getVendors();
-		$state = $acc_master->getState();
-		$tax = $acc_master->getTax();
+
+        $vendor_id = '';
+        $tax_id = '';
+        $customer_id = '';
+        $state_id = '';
+
+        if(count($data)>0){
+            if($data[0]['type']=="Vendor Goods"){
+                $vendor_id = $data[0]['vendor_id'];
+            } else if($data[0]['type']=="GST Tax") {
+                $tax_id = $data[0]['tax_id'];
+            } else if($data[0]['type']=="Customer") {
+                $customer_id = $data[0]['customer_id'];
+            } else if($data[0]['type']=="Goods Purchase" || $data[0]['type']=="Goods Sales"){
+                $state_id = $data[0]['state_id'];
+            }
+        }
+
+        $vendor = $acc_master->getVendors($vendor_id);
+        $customers = $acc_master->getCustomers($customer_id);
+        $tax = $acc_master->getTax($tax_id);
         $tax_per = $acc_master->getTaxPercent();
-        $Customers = $acc_master->getCustomers();
+        $state = $acc_master->getState($state_id);
         $acc_category = $acc_master->getAccCategories($id);
         $category_list = $acc_master->getBusinessCategories();
         $approver_list = $acc_master->getApprover($action);
-
-        // if(count($data)>0){
-        //     if($data[0]['type']=="Vendor Goods"){
-        //         $vendor_id = $data[0]['vendor_id'];
-        //         $vendor = $acc_master->getVendors($vendor_id);
-        //     } else if($data[0]['type']=="GST Tax") {
-        //         $tax_id = $data[0]['tax_id'];
-        //         $tax = $acc_master->getTax($tax_id);
-        //     } else if($data[0]['type']=="Customer") {
-        //         $customer_id = $data[0]['customer_id'];
-        //         $Customers = $acc_master->getCustomers($customer_id);
-        //     } else if($data[0]['type']=="Goods Purchase" || $data[0]['type']=="Goods Sales"){
-        //         $state_id = $data[0]['state_id'];
-        //         $state = $acc_master->getState($state);
-        //     }
-        // }
 
         // return $this->render('account_details', ['action' => $action, 'category' => $category, 'vendor' => $vendor, 
         //                                             'category_list' => $category_list, 'data' => $data, 
         //                                             'acc_category' => $acc_category, 'approver_list' => $approver_list]);
 
-        return $this->render('account_details', ['action' => $action, 'vendor' => $vendor, 'Customers' => $Customers,'state' => $state,  
+        // echo json_encode($data);
+        // echo '<br/>';
+        // echo '<br/>';
+        // echo json_encode($vendor);
+
+        return $this->render('account_details', ['action' => $action, 'vendor' => $vendor, 'customers' => $customers,'state' => $state,  
                                                     'category_list' => $category_list, 'data' => $data, 'tax' => $tax, 'tax_per' => $tax_per, 
                                                     'acc_category' => $acc_category, 'approver_list' => $approver_list]);
     }
@@ -264,8 +271,8 @@ class AccountmasterController extends Controller
 	
 	public function actionGetCustomers() {
         $acc_master = new AccountMaster();
-        $Customers = $acc_master->getCustomers();
-        echo json_encode($Customers);
+        $customers = $acc_master->getCustomers();
+        echo json_encode($customers);
     }
 
     public function actionGetcustomerdetails() {

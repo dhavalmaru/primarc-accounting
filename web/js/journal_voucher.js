@@ -216,7 +216,7 @@ function add_billwise(element) {
     '<td><button type="button" class="btn btn-sm btn-success delete_row" id="delete_row_'+index+'-'+counter+'" onClick="delete_billwise(this)">-</button></td>'+
     '<td><input class="form-control invoice_no datepicker" type="text" name="invoice_no_'+index+'[]"  id="invoice_no_'+index+'-'+counter+'"  value="" >'+
     '<td><input class="form-control  invoice_date" type="text" name="invoice_date_'+index+'[]" id="invoice_date_'+index+'-'+counter+'" " value="">'+
-    '<td><input class="form-control invoice_amount" type="text" name="invoice_amount_'+index+'[]"  id="invoice_amount_'+index+'-'+counter+'" value="'+remaining_amount+'" onchange="checkamount('+index+')"></td>'+
+    '<td><input class="form-control invoice_amount" type="text" name="invoice_amount_'+index+'[]"  id="invoice_amount_'+index+'-'+counter+'" value="'+remaining_amount+'" onchange="checkamount(this)"></td>'+
     '</tr>';
     //$('#'+tbody_id).append(html);
     $('#'+tbody_id+' .table_foot').before(html);
@@ -260,10 +260,41 @@ function delete_billwise(elem){
     }*/
 }
 
-function checkamount(val){
+function checkamount(elem){
     /* var length = $("#jv_"+val+' .invoice_amount').length;
     var last_invoice_amount = $("#invoice_amount_"+val+'-'+length).val();*/
-    detect = jvcalculation(val);
+    // detect = jvcalculation(val);
+
+    var id = elem.id;
+    var index = id.substr(id.lastIndexOf('_')+1);
+    index = index.substr(0, index.indexOf('-'));
+
+    var total_amount = 0;
+    $('#jv_'+index+' .invoice_amount').each(function(){
+        if($(this).val()!="") {
+            total_amount = total_amount+parseFloat($(this).val());
+        }
+    });
+
+    var amount = 0;
+    var remaining_amount = 0;
+    if($('#debit_amt_'+index).val()!="" && parseInt($('#debit_amt_'+index).val())!=0) {
+        amount  = get_number($('#debit_amt_'+index).val(),2);
+    } else {
+        amount  = get_number($('#credit_amt_'+index).val(),2);
+    }
+
+    remaining_amount = amount-total_amount;
+
+    var new_id = '';
+    $('#jv_'+index+' .invoice_amount').each(function(){
+        if($(this).val()!="" && $(this).attr('id')!=id) {
+            new_id = $(this).attr('id');
+        }
+    });
+
+    amount = parseFloat($('#'+new_id).val());
+    $('#'+new_id).val(amount+remaining_amount);
 }
 
 function get_acc_details(elem){
@@ -322,7 +353,7 @@ function get_acc_details(elem){
                                 '<td>&nbsp</td>'+
                                 '<td><input class="form-control invoice_no" type="text" name="invoice_no_'+index+'[]"  id="invoice_no_'+index+'-0"value="" >'+
                                 '<td><input class="form-control invoice_date datepicker" type="text" name="invoice_date_'+index+'[]"  id="invoice_date_'+index+'-0" value="">'+
-                                '<td><input class="form-control invoice_amount" type="text" name="invoice_amount_'+index+'[]" id="invoice_amount_'+index+'-0" value=""  onchange="checkamount('+index+')"></td>'+
+                                '<td><input class="form-control invoice_amount" type="text" name="invoice_amount_'+index+'[]" id="invoice_amount_'+index+'-0" value=""  onchange="checkamount(this)"></td>'+
                                 '</tr>'+
                                 '<tr class="table_foot">'+
                                 '<td><button type="button" class="btn btn-sm btn-success" id="jv_repeat_row_'+index+'" onclick="add_billwise(this)">+</button></td>'+            
@@ -358,12 +389,9 @@ function jv_invoices(elment) {
     var id =elment.id;
    
     var amount = 0;
-    if($('#debit_amt_'+id).val()!="" && parseInt($('#debit_amt_'+id).val())!=0)
-    {
+    if($('#debit_amt_'+id).val()!="" && parseInt($('#debit_amt_'+id).val())!=0) {
         amount  = $('#debit_amt_'+id).val();
-    }
-    else if($('#credit_amt_'+id).val()!="" &&  parseInt($('#credit_amt_'+id).val())!=0)
-    {
+    } else if ($('#credit_amt_'+id).val()!="" &&  parseInt($('#credit_amt_'+id).val())!=0) {
         amount  = $('#credit_amt_'+id).val();
     }
 
@@ -381,18 +409,14 @@ function jv_invoices(elment) {
         }
     });
 
-    if(($('#debit_amt_'+id).val()!="" && parseInt($('#debit_amt_'+id).val())!=0) ||  ($('#credit_amt_'+id).val()!="" && parseInt($('#credit_amt_'+id).val())!=0))
-    {
+    if(($('#debit_amt_'+id).val()!="" && parseInt($('#debit_amt_'+id).val())!=0) ||  ($('#credit_amt_'+id).val()!="" && parseInt($('#credit_amt_'+id).val())!=0)) {
         $('.errors').remove();
-        if($('#invoice_amount_'+id+'-0').val()=="")
-        {
+        if($('#invoice_amount_'+id+'-0').val()=="") {
             $('#invoice_amount_'+id+'-0').val(amount);
         }
         
         $('#jv_modal').modal('show');
-    }
-    else
-    {
+    } else {
         $('.errors').remove();
         $(elment).after('<div class="errors" style="color: #dd4b39!important;"><br>Enter Debit/Credit Amount</div>');
     }
@@ -406,19 +430,16 @@ function jvcalculation(val) {
     $('#jv_'+val+' .invoice_amount').each(function(){
         if($(this).val()!="")
         {
-            total_amount = total_amount+parseInt($(this).val());
+            total_amount = total_amount+parseFloat($(this).val());
         }
         
     });
     $('#sum_total_'+val).text(total_amount);
     var amount = 0;
     var remaining_amount = 0;
-    if($('#debit_amt_'+val).val()!="")
-    {
+    if($('#debit_amt_'+val).val()!="" && parseInt($('#debit_amt_'+val).val())!=0) {
         amount  = get_number($('#debit_amt_'+val).val(),2);
-    }
-    else
-    {
+    } else {
         amount  = get_number($('#credit_amt_'+val).val(),2);
     }
 

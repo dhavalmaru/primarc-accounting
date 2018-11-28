@@ -99,7 +99,7 @@
         <tr style="border:none;">
             <td width="17%" style="border:none;"><p> Party's GSTIN</p></td>
             <td width="3%" style="border:none;">:</td>
-            <td width="40%" style="border:none;"><p><b> <?php if(isset($vendor_details[0]['gst_id'])) echo $debit_note[0]['gst_id']; ?> </b></p></td>
+            <td width="40%" style="border:none;"><p><b> <?php if(isset($vendor_warehouse_details[0]['gst_id'])) echo $vendor_warehouse_details[0]['gst_id']; else if(isset($debit_note[0]['vendor_gst_id'])) echo $debit_note[0]['vendor_gst_id']; ?> </b></p></td>
             <td width="22%" style="border:none;"><p>Warehouse GSTIN</p></td>
             <td width="4%" style="border:none;">:</td>
             <td width="14%" style="border:none;">

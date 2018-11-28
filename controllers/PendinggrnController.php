@@ -2573,13 +2573,13 @@ class PendinggrnController extends Controller
                     $cost_excl_tax_per_unit = floatval($rows[$i]["cost_excl_vat"]);
                     $total_per_unit = floatval($rows[$i]["cost_incl_vat_cst"]);
 
-                    // $po_cost_excl_tax = $qty*floatval($rows[$i]["po_unit_rate_excl_tax"]);
-                    // $po_cost_excl_tax = floatval($rows[$i]["po_unit_rate_excl_tax"]);
+                    // $po_cost_excl_tax = $qty*floatval($rows[$i]["po_cost_price_exc_tax"]);
+                    // $po_cost_excl_tax = floatval($rows[$i]["po_cost_price_exc_tax"]);
 
                     // $po_tax = $qty*floatval($rows[$i]["po_unit_tax"]);
                     // $po_total = $po_cost_excl_tax + $po_tax;
 
-                    $po_total = floatval($rows[$i]["po_unit_rate_incl_tax"]);
+                    $po_total = floatval($rows[$i]["po_cost_price_inc_tax"]);
                     $diff_cost_excl_tax = round(floatval($rows[$i]["margindiff_cost"]),2);
                 }
                 

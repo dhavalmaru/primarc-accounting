@@ -131,8 +131,9 @@ class AccountMaster extends Model
         $request = Yii::$app->request;
         $vendor_id = $request->post('vendor_id');
         $company_id = $request->post('company_id');
+        $id = $request->post('id');
 
-        $sql = "select A.*, B.* from 
+        $sql = "select A.*, B.*, A.vendor_name as legal_name from 
                 (select AA.*, BB.legal_entity_name from vendor_master AA left join legal_entity_type_master BB 
                     on (AA.legal_entity_type_id = BB.id) where AA.id = '$vendor_id' and BB.is_active = '1') A 
                 left join 
@@ -146,6 +147,16 @@ class AccountMaster extends Model
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $data['vendor_details'] = $reader->readAll();
+        if(count($data['vendor_details'])>0){
+            $vendor_name = $data['vendor_details'][0]['vendor_name'];
+            $sql = "select * from acc_master where status='approved' and legal_name like '".$vendor_name."%' and id<>'$id'";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $acc_details = $reader->readAll();
+            if(count($acc_details)>0){
+                $data['vendor_details'][0]['legal_name'] = $vendor_name . ' ' . (count($acc_details)+1);
+            }
+        }
 
         $sql = "select distinct id, category_name from product_main_category where company_id = '$company_id' and is_active = '1'";
         $command = Yii::$app->db->createCommand($sql);
@@ -159,8 +170,9 @@ class AccountMaster extends Model
         $request = Yii::$app->request;
         $customer_id = $request->post('customer_id');
         $company_id = $request->post('company_id');
+        $id = $request->post('id');
 
-        $sql = "select A.*, B.* from 
+        $sql = "select A.*, B.*, A.customer_name as legal_name from 
                 (select AA.*, BB.legal_entity_name from customer_master AA left join legal_entity_type_master BB 
                     on (AA.legal_entity_type_id = BB.id) where AA.id = '$customer_id' and BB.is_active = '1') A 
                 left join 
@@ -174,6 +186,16 @@ class AccountMaster extends Model
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $data['customer_details'] = $reader->readAll();
+        if(count($data['customer_details'])>0){
+            $customer_name = $data['customer_details'][0]['customer_name'];
+            $sql = "select * from acc_master where status='approved' and legal_name like '".$customer_name."%' and id<>'$id'";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $acc_details = $reader->readAll();
+            if(count($acc_details)>0){
+                $data['customer_details'][0]['legal_name'] = $customer_name . ' ' . (count($acc_details)+1);
+            }
+        }
 
         $sql = "select distinct id, category_name from product_main_category where company_id = '$company_id' and is_active = '1'";
         $command = Yii::$app->db->createCommand($sql);
@@ -546,6 +568,7 @@ class AccountMaster extends Model
 		$input_output =$request->post('input_output');
 		$legal_name_tree =$request->post('legal_name_tree');
         $bill_wise = $request->post('bill_wise');
+        $hsn_code = $request->post('hsn_code');
         $vendor_id = "";
         $customer_id = "";
         $pan_no = "";
@@ -582,6 +605,7 @@ class AccountMaster extends Model
             $vat_no = $request->post('vat_no');
             $bus_category = $request->post('bus_category');
             $bus_category_name = $request->post('bus_category_name');
+            $gst_id = $request->post('gst_id');
 		} else if($type=="Marketplace") {
 			$pan_no = $request->post('pan_no');
             $address = $request->post('address');
@@ -694,7 +718,8 @@ class AccountMaster extends Model
                         'gst_id'=>$gst_id,
                         'company_id'=>$company_id,
                         'sub_account_type'=>$sub_account_type,
-                        'bill_wise'=>(($bill_wise=='Yes')?'1':'0')
+                        'bill_wise'=>(($bill_wise=='Yes')?'1':'0'),
+                        'hsn_code'=>$hsn_code
                         );
 
         if(count($array)>0){

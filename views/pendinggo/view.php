@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /* @var $model app\models\Grn */
 
 $this->title = $model->grn_id;
-$this->params['breadcrumbs'][] = ['label' => 'Grns', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'GO', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="grn-view">

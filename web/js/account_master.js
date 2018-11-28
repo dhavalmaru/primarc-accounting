@@ -156,7 +156,8 @@ function set_acc_type(){
         $("#type_vendor_id").show();
         $("#customer_id").hide();
         $("#type_customer_id").hide();
-        $("#legal_name").hide();
+        // $("#legal_name").hide();
+        $('#legal_name').attr("readonly", true);
         $("#vendor_code").show();
         $("#code").hide();
         $(".vendor_expenses").hide();
@@ -186,7 +187,7 @@ function set_acc_type(){
         $("#type_vendor_id").hide();
         $("#customer_id").hide();
         $("#type_customer_id").hide();
-        $('#legal_name').show();
+        // $('#legal_name').show();
         $('#legal_name').attr("readonly", false);
         $("#vendor_code").hide();
         $("#code").show();
@@ -215,7 +216,7 @@ function set_acc_type(){
         $("#type_vendor_id").hide();
         $("#customer_id").hide();
         $("#type_customer_id").hide();
-        $('#legal_name').show();
+        // $('#legal_name').show();
         $('#legal_name').attr("readonly", false);
         $("#vendor_code").hide();
         $("#code").show();
@@ -245,7 +246,8 @@ function set_acc_type(){
         $("#type_vendor_id").hide();
         $("#customer_id").hide();
         $("#type_customer_id").hide();
-        $("#legal_name").show();
+        // $("#legal_name").show();
+        $('#legal_name').attr("readonly", false);
         $("#vendor_code").hide();
         $("#code").show();
         $(".vendor_goods").hide();
@@ -276,13 +278,13 @@ function set_acc_type(){
         $("#type_customer_id").hide();
         $("#vendor_id").css("display", "none");
         $("#type_vendor_id").hide();
-        $("#legal_name").show();
+        // $("#legal_name").show();
+        $('#legal_name').attr("readonly", false);
         $("#vendor_code").hide();
         $("#code").show();
         $(".vendor_expenses").hide();
         $(".employee").hide();
         $(".vendor_goods").show();
-        $('#legal_name').attr("readonly", false);
     
          $("#customer_code").hide();
         // $("#vendor_details").hide();
@@ -306,7 +308,8 @@ function set_acc_type(){
        // $("#vendor_id").hide();
         $("#vendor_id").css("display", "none");
         $("#type_vendor_id").hide();
-        $("#legal_name").hide();
+        // $("#legal_name").hide();
+        $('#legal_name').attr("readonly", true);
         $("#customer_id").show();
         $("#type_customer_id").show();
         $("#vendor_code").hide();
@@ -337,7 +340,7 @@ function set_acc_type(){
         $("#type_customer_id").hide();
         $("#vendor_id").hide();
         $("#type_vendor_id").hide();
-        $("#legal_name").show();
+        // $("#legal_name").show();
         $('#legal_name').attr("readonly", true);
         $("#vendor_code").hide();
         $("#code").show();
@@ -357,7 +360,7 @@ function set_acc_type(){
         $("#type_customer_id").hide();
         $("#vendor_id").hide();
         $("#type_vendor_id").hide();
-        $("#legal_name").show();
+        // $("#legal_name").show();
         $('#legal_name').attr("readonly", true);
         $("#vendor_code").hide();
         $("#code").show();
@@ -377,7 +380,7 @@ function set_acc_type(){
         $("#type_customer_id").hide();
         $("#vendor_id").hide();
         $("#type_vendor_id").hide();
-        $("#legal_name").show();
+        // $("#legal_name").show();
         $('#legal_name').attr("readonly", true);
         $("#vendor_code").hide();
         $("#code").show();
@@ -397,7 +400,7 @@ function set_acc_type(){
         $("#type_customer_id").hide();
         $("#vendor_id").hide();
         $("#type_vendor_id").hide();
-        $("#legal_name").show();
+        // $("#legal_name").show();
         $('#legal_name').attr("readonly", true);
         $("#vendor_code").hide();
         $("#code").show();
@@ -417,7 +420,7 @@ function set_acc_type(){
         $("#type_customer_id").hide();
         $("#vendor_id").hide();
         $("#type_vendor_id").hide();
-        $('#legal_name').show();
+        // $('#legal_name').show();
         $('#legal_name').attr("readonly", false);
         $("#vendor_code").hide();
         $("#code").show();
@@ -484,6 +487,7 @@ function get_code() {
             data: {
                     vendor_id : $("#vendor_id").val(),
                     company_id : $("#company_id").val(),
+                    id : $("#id").val(),
                     _csrf : csrfToken
                 },
             dataType: 'json',
@@ -493,6 +497,7 @@ function get_code() {
                     var category_details = data['category_details'];
 
                     if(vendor_details.length>0){
+                        $("#legal_name").val(vendor_details[0].legal_name);
                         $("#vendor_code").val(vendor_details[0].vendor_code);
                         $("#pan_no").val(vendor_details[0].pan_or_tin_no);
 
@@ -562,6 +567,7 @@ function get_code() {
             data: {
                     customer_id : $("#customer_id").val(),
                     company_id : $("#company_id").val(),
+                    id : $("#id").val(),
                     _csrf : csrfToken
                 },
             dataType: 'json',
@@ -571,6 +577,7 @@ function get_code() {
                     var category_details = data['category_details'];
 
                     if(customer_details.length>0){
+                        $("#legal_name").val(customer_details[0].legal_name);
                         $("#customer_code").val(customer_details[0].customer_code);
                         $("#pan_no").val(customer_details[0].pan_or_tin_no);
 

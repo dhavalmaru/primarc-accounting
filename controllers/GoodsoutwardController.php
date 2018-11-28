@@ -35,7 +35,7 @@ class GoodsoutwardController extends Controller
                         ''.$grn[$i]['warehouse_name'].'',
                         ''.$grn[$i]['vendor_name'].'',
                         ''.$mycomponent->format_money($grn[$i]['total_amount'], 2).'',
-                        ''.$grn[$i]['gi_go_date_time'].'',
+                        ''.$grn[$i]['gi_go_final_commit_date'].'',
                         ''.$grn[$i]['updated_by'].''
                         ) ;
            $grn_data[] = $row;
@@ -70,7 +70,7 @@ class GoodsoutwardController extends Controller
                         ''.$grn[$i]['warehouse_name'].'',
                         ''.$grn[$i]['vendor_name'].'',
                         ''.$mycomponent->format_money($grn[$i]['total_amount'], 2).'',
-                       ''.$grn[$i]['gi_go_date_time'].'',
+                       ''.$grn[$i]['gi_go_final_commit_date'].'',
                         ''.$grn[$i]['username'].'',
                         '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fledger&id='.$grn[$i]['gi_go_id'].'" target="_new"> <span class="fa fa-file-pdf-o"></span> </a>'
                         ) ;
@@ -96,18 +96,29 @@ class GoodsoutwardController extends Controller
         $mycomponent = Yii::$app->mycomponent;
         $start = $request->post('start');
 
-        for($i=0; $i<count($grn); $i++) { 
+        for($i=0; $i<count($grn); $i++) {
+            $link = '';
+            if($grn[$i]['go_status']=='GRN Not Posted') {
+                $link = '';
+            } else if($grn[$i]['go_status']=='GRN Posted & GO Balance') {
+                $link = '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" >Post </a>';
+            } else if($grn[$i]['go_status']=='GO Posted') {
+                $link = '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>
+                        <a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>';
+            }
+
             $row = array(
                         $start+1,
-                        '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>
-                        <a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>',
+                        $link,
                         ''.$grn[$i]['gi_go_id'].'',
                         ''.$grn[$i]['gi_go_ref_no'].'',
+                        ''.$grn[$i]['grn_no'].'',
                         ''.$grn[$i]['warehouse_name'].'',
                         ''.$grn[$i]['vendor_name'].'',
                         ''.$mycomponent->format_money($grn[$i]['total_amount'], 2).'',
-                        ''.$grn[$i]['gi_go_date_time'].'',
-                        ''.$grn[$i]['updated_by'].''
+                        ''.$grn[$i]['gi_go_final_commit_date'].'',
+                        ''.$grn[$i]['updated_by'].'',
+                        ''.$grn[$i]['go_status'].''
                         ) ;
 
            $grn_data[] = $row;
@@ -480,7 +491,7 @@ class GoodsoutwardController extends Controller
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-        $tax_per =     $model->getTaxPercent();
+        $tax_per = $model->getTaxPercent();
         $grn_entries = $model->getGrnAccEntries($id);
         $grn_details = $model->getGrnDetails($id);
 
@@ -490,17 +501,13 @@ class GoodsoutwardController extends Controller
         $gi_go_id = $grn_details[0]['pre_go_ref'];
         $resulsku = $model->getskugoItems($gi_go_id);
 
-        if($resulsku[0]['skucount']>0)
-        {
+        if($resulsku[0]['skucount']>0) {
             $skuentries=true;
-        }
-        else
-        {
-          $skuentries=false;  
+        } else {
+            $skuentries=false;  
         }
 
-        $data = $this->actionGetgrnpostingdetails($id,$skuentries);
-
+        $data = $this->actionGetgrnpostingdetails($id, $skuentries);
 
         $total_val =  $data['total_val'];
         $total_tax =  $data['total_tax'];
@@ -511,44 +518,36 @@ class GoodsoutwardController extends Controller
         $acc_master = $model->getAccountDetails('', 'approved');
         $tax_zone_code = '';//$grn_details[0]['vat_cst'];
 
+        if(count($grn_details)>0) {
+            if($grn_details[0]['tax_zone_code']=='INTRA') {
+                $tax_type = 'Local';
+            } else {
+                $tax_type = 'Inter State';
+            }
 
-        if(count($grn_details)>0)
-        {
-              if($grn_details[0]['tax_zone_code']=='INTRA')
-                {
-                    $tax_type = 'Local';
+            $grn_details[0]['warehouse_id'];   
+            if($grn_details[0]['warehouse_id']!="") {
+                if(is_numeric($tax_percent)){
+                    $tax_percent = floatval($tax_percent);
+                }
+
+                $tax_code = 'Purchase-'.$grn_details[0]['to_state'].'-'.$tax_type.'-'.$tax_percent.'%';
+                $result2 = $model->getAccountDetails('','',$tax_code);
+               
+                /*echo "<pre>";
+                print_r($result2);
+                echo "</pre>";*/ 
+
+                if(count($result2)>0){
+                   $ware_array['total_amount_acc_id'] = $result2[0]['id'];
+                   $ware_array['total_amount_ledger_name'] = $result2[0]['legal_name'];
+                   $ware_array['total_amount_ledger_code'] = $result2[0]['code'];
                 } else {
-                    $tax_type = 'Inter State';
+                    $ware_array['total_amount_acc_id'] = '';
+                    $ware_array['total_amount_ledger_name'] = '';
+                    $ware_array['total_amount_ledger_code'] = '';
                 }
-
-                
-                $grn_details[0]['warehouse_id'];   
-                if($grn_details[0]['warehouse_id']!="")
-                {
-                        if(is_numeric($tax_percent)){
-                            $tax_percent = floatval($tax_percent);
-                        }
-
-                        $tax_code = 'Purchase-'.$grn_details[0]['to_state'].'-'.$tax_type.'-'.$tax_percent.'%';
-                        $result2 = $model->getAccountDetails('','',$tax_code);
-                       
-                        /*echo "<pre>";
-                        print_r($result2);
-                        echo "</pre>";*/ 
-
-                        if(count($result2)>0){
-
-                           $ware_array['total_amount_acc_id'] = $result2[0]['id'];
-                           $ware_array['total_amount_ledger_name'] = $result2[0]['legal_name'];
-                           $ware_array['total_amount_ledger_code'] = $result2[0]['code'];
-                        }
-                        else
-                        {
-                            $ware_array['total_amount_acc_id'] = '';
-                            $ware_array['total_amount_ledger_name'] = '';
-                            $ware_array['total_amount_ledger_code'] = '';
-                        }
-                }
+            }
         }
 
         if (count($grn_entries) > 0){
@@ -881,6 +880,7 @@ class GoodsoutwardController extends Controller
             $grn_details['isNewRecord']=1;
             $debit_note = array();
         }
+
         $deductions = [];
         
         if (count($grn_details)>0) {
@@ -905,11 +905,12 @@ class GoodsoutwardController extends Controller
 
         $model = new GoodsOutward();
         $result = $model->getGrnPostingDetails($id,$skuentries);
-        $result_skuentries = $model->getGrnskuDetails($id,$skuentries);
+        // $result_skuentries = $model->getGrnskuDetails($id,$skuentries);
         $tax_percent = ""   ;
 
         if(count($result)>0){
-            $data['skuwise'] = $result_skuentries;
+            // $data['skuwise'] = $result_skuentries;
+            $data['skuwise'] = $result;
             $tax_percent = $result[0]['vat_percent'];
             $total_val[0]['total_amount'] = 0;
             $total_val[0]['total_payable_amount'] = 0;
@@ -1023,7 +1024,6 @@ class GoodsoutwardController extends Controller
             $blFlag = false;
 
             for($i=0; $i<count($result); $i++){
-                
                 $cost_excl_vat = floatval($result[$i]['cost_excl_vat']);
                 $cost_incl_vat_cst = floatval($result[$i]['value_at_mrp']);
                 $invoice_qty = floatval($result[$i]['invoice_qty']);
@@ -1299,7 +1299,7 @@ class GoodsoutwardController extends Controller
                     $invoice_details[$k]['invoice_number'] = $result[$i]['invoice_number'];
                     $invoice_details[$k]['invoice_total_cost'] = $tot_cost;
                     $invoice_details[$k]['invoice_total_tax'] = $tot_tax;
-                     $invoice_details[$k]['invoice_other_charges'] = $other_charge;
+                    $invoice_details[$k]['invoice_other_charges'] = $other_charge;
                     $invoice_details[$k]['invoice_total_amount'] = $tot_cost + $tot_tax + $other_charge;
                     $invoice_details[$k]['invoice_total_payable_amount'] = $invoice_details[$k]['invoice_total_amount'] ;
                     $invoice_details[$k]['edited_total_cost'] = $tot_cost;
@@ -1597,15 +1597,13 @@ class GoodsoutwardController extends Controller
         $data['tax_percent'] = $tax_percent;
         $data['invoice_details'] = $invoice_details;
         $data['invoice_tax'] = $invoice_tax;
-        $data['result_skuentries'] = $result_skuentries;
+        // $data['result_skuentries'] = $result_skuentries;
         return $data;
     }
 
-    public function get_skuEntires()
-    {
+    public function get_skuEntires() {
         $model = new GoodsOutward();
         $request = Yii::$app->request;
-
     }
     
     public function actionGetaccdetails(){

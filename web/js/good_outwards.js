@@ -54,7 +54,7 @@ function calcDifference(elem){
 function getTotal(){
     // var taxable_amount = get_number($("#taxable_amount").val(),2);
     // var total_tax = get_number($("#total_tax").val(),2);
-    console.log('taxes'+taxes);
+    // console.log('taxes'+taxes);
     var taxable_amount = 0;
     var total_cgst = 0;
     var total_sgst = 0;
@@ -564,7 +564,7 @@ function getDifference(elem){
     }
 
     calcDifference(elem);
-    console.log('taxsesbefore enter'+taxes);
+    // console.log('taxsesbefore enter'+taxes);
     getTotal();
 }
 

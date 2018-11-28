@@ -229,7 +229,7 @@ class GointerdepotController extends Controller
                     $tax_percent = floatval($tax_percent);
                 }
 
-                $tax_code = $company_name.'-'.$grn_details[0]['warehouse_state'];
+                $tax_code = $company_name.'-'.$grn_details[0]['to_state'];
                 $result2 = $model->getAccountDetails('','',$tax_code);
                 if(count($result2)>0){
                    $ware_array2['total_amount_acc_id2'] = $result2[0]['id'];
@@ -241,7 +241,7 @@ class GointerdepotController extends Controller
                     $ware_array2['total_amount_ledger_code2'] = '';
                 }
 
-                $tax_code = $company_name.'-'.$grn_details[0]['to_state'];
+                $tax_code = $company_name.'-'.$grn_details[0]['warehouse_state'];
                 $result2 = $model->getAccountDetails('','',$tax_code);
                 if(count($result2)>0){
                    $ware_array['total_amount_acc_id'] = $result2[0]['id'];
@@ -2856,6 +2856,7 @@ class GointerdepotController extends Controller
                     <input type="hidden" id="sub_particular_cost_'.$j.'" name="sub_particular_cost[]" value="Purchase_'.$total_tax[$j]['tax_zone_code'].'_'.$total_tax[$j]['vat_cst'].'_'.$total_tax[$j]['vat_percent'].'" />
                     '.$mycomponent->format_money($total_tax[$j]['vat_percent'],2).'
                 </td>
+                <td class="sticky-cell" style="border: none!important;">Debit</td>
                 <td class="sticky-cell text-right" style="border: none!important;">
                     <input type="text" class="text-right" id="edited_total_cost_'.$j.'" name="total_cost_'.$j.'" value="0" readonly />
                 </td>
@@ -2878,6 +2879,7 @@ class GointerdepotController extends Controller
                     <input type="hidden" id="sub_particular_tax_'.$j.'" name="sub_particular_tax[]" value="Tax_'.$total_tax[$j]['tax_zone_code'].'_'.$total_tax[$j]['vat_percent'].'" />
                  '.$mycomponent->format_money($total_tax[$j]['vat_percent'],2).'
                 </td>
+                <td class="sticky-cell" style="border: none!important;">Debit</td>
                 <td class="sticky-cell text-right" style="border: none!important;">
                     <input type="text" class="text-right " id="total_tax_'.$j.'" name="total_tax_'.$j.'" value="'.$mycomponent->format_money($total_tax[$j]['total_tax'], 2).'" readonly />
                 </td>
@@ -2909,6 +2911,7 @@ class GointerdepotController extends Controller
                     <input type="hidden" id="sub_particular_cgst_'.$j.'" name="sub_particular_cgst[]" value="Tax_cgst_'.$total_tax[$j]['cgst_rate'].'" />
                   '.$mycomponent->format_money($total_tax[$j]['cgst_rate'],2).'
                 </td>
+                <td class="sticky-cell" style="border: none!important;">Debit</td>
                 <td class="sticky-cell text-right" style="border: none!important;">
                     <input type="text" class="text-right " id="total_cgst_'.$j.'" name="total_cgst_'.$j.'" value="0" readonly />
                 </td>
@@ -2940,6 +2943,7 @@ class GointerdepotController extends Controller
                     <input type="hidden" id="sub_particular_sgst_'.$j.'" name="sub_particular_sgst[]" value="Tax_sgst_'.$total_tax[$j]['sgst_rate'].'" />
                     '.$mycomponent->format_money($total_tax[$j]['sgst_rate'],2).'
                 </td>
+                <td class="sticky-cell" style="border: none!important;">Debit</td>
                 <td class="sticky-cell text-right" style="border: none!important;">
                     <input type="text" class="text-right " id="total_sgst_'.$j.'" name="total_sgst_'.$j.'" value="0" readonly />
                 </td>
@@ -2974,6 +2978,7 @@ class GointerdepotController extends Controller
                  
                     '.$mycomponent->format_money($total_tax[$j]['igst_rate'],2).'
                 </td>
+                <td class="sticky-cell" style="border: none!important;">Debit</td>
                 <td class="sticky-cell text-right" style="border: none!important;">
                     <input type="text" class="text-right " id="total_igst_'.$j.'" name="total_igst_'.$j.'" value="0" readonly />
                 </td>
@@ -3229,6 +3234,7 @@ class GointerdepotController extends Controller
                     <input type="hidden" id="sales_sub_particular_cost_'.$j.'" name="sales_sub_particular_cost[]" value="Purchase_'.$total_tax[$j]['tax_zone_code'].'_'.$total_tax[$j]['vat_cst'].'_'.$total_tax[$j]['vat_percent'].'" />
                     '.$mycomponent->format_money($total_tax[$j]['vat_percent'],2).'
                 </td>
+                <td class="sticky-cell" style="border: none!important;">Credit</td>
                 <td class="sticky-cell text-right" style="border: none!important;">
                     <input type="text" class="text-right" id="sales_edited_total_cost_'.$j.'" name="sales_total_cost_'.$j.'" value="0" readonly />
                 </td>
@@ -3251,6 +3257,7 @@ class GointerdepotController extends Controller
                     <input type="hidden" id="sales_sub_particular_tax_'.$j.'" name="sales_sub_particular_tax[]" value="Tax_'.$total_tax[$j]['tax_zone_code'].'_'.$total_tax[$j]['vat_percent'].'" />
                  '.$mycomponent->format_money($total_tax[$j]['vat_percent'],2).'
                 </td>
+                <td class="sticky-cell" style="border: none!important;">Credit</td>
                 <td class="sticky-cell text-right" style="border: none!important;">
                     <input type="text" class="text-right " id="sales_total_tax_'.$j.'" name="sales_total_tax_'.$j.'" value="'.$mycomponent->format_money($total_tax[$j]['total_tax'], 2).'" readonly />
                 </td>
@@ -3282,6 +3289,7 @@ class GointerdepotController extends Controller
                     <input type="hidden" id="sales_sub_particular_cgst_'.$j.'" name="sales_sub_particular_cgst[]" value="Tax_cgst_'.$total_tax[$j]['cgst_rate'].'" />
                   '.$mycomponent->format_money($total_tax[$j]['cgst_rate'],2).'
                 </td>
+                <td class="sticky-cell" style="border: none!important;">Credit</td>
                 <td class="sticky-cell text-right" style="border: none!important;">
                     <input type="text" class="text-right " id="sales_total_cgst_'.$j.'" name="sales_total_cgst_'.$j.'" value="0" readonly />
                 </td>
@@ -3313,6 +3321,7 @@ class GointerdepotController extends Controller
                     <input type="hidden" id="sales_sub_particular_sgst_'.$j.'" name="sales_sub_particular_sgst[]" value="Tax_sgst_'.$total_tax[$j]['sgst_rate'].'" />
                     '.$mycomponent->format_money($total_tax[$j]['sgst_rate'],2).'
                 </td>
+                <td class="sticky-cell" style="border: none!important;">Credit</td>
                 <td class="sticky-cell text-right" style="border: none!important;">
                     <input type="text" class="text-right " id="sales_total_sgst_'.$j.'" name="sales_total_sgst_'.$j.'" value="0" readonly />
                 </td>
@@ -3347,6 +3356,7 @@ class GointerdepotController extends Controller
                  
                     '.$mycomponent->format_money($total_tax[$j]['igst_rate'],2).'
                 </td>
+                <td class="sticky-cell" style="border: none!important;">Credit</td>
                 <td class="sticky-cell text-right" style="border: none!important;">
                     <input type="text" class="text-right " id="sales_total_igst_'.$j.'" name="sales_total_igst_'.$j.'" value="0" readonly />
                 </td>

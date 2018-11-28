@@ -8,7 +8,7 @@ use mPDF;
 
 class PaymentReceipt extends Model
 {
-    public function getAccess(){
+    public function getAccess() {
         $session = Yii::$app->session;
         $session_id = $session['session_id'];
         $role_id = $session['role_id'];
@@ -20,7 +20,7 @@ class PaymentReceipt extends Model
         return $reader->readAll();
     }
 
-    public function getApprover($action){
+    public function getApprover($action) {
         $session = Yii::$app->session;
         $session_id = $session['session_id'];
         $company_id = $session['company_id'];
@@ -40,7 +40,7 @@ class PaymentReceipt extends Model
         return $reader->readAll();
     }
 
-    public function getDetails($trans_id="", $status=""){
+    public function getDetails($trans_id="", $status="") {
         $cond = "";
         if($trans_id!=""){
             $cond = " and A.id = '$trans_id'";
@@ -65,23 +65,7 @@ class PaymentReceipt extends Model
         return $reader->readAll();
     }
 
-    // public function getAccountDetails($id=""){
-        // $cond = "";
-        // if($id!=""){
-            // $cond = " and id = '$id'";
-        // }
-
-        // $session = Yii::$app->session;
-        // $company_id = $session['company_id'];
-
-        // $sql = "select * from acc_master where is_active = '1' and status = 'approved' and 
-                // type = 'Bank Account' and company_id = '$company_id' ".$cond." order by legal_name";
-        // $command = Yii::$app->db->createCommand($sql);
-        // $reader = $command->query();
-        // return $reader->readAll();
-    // }
-
-	  public function getAccountDetails($id=""){
+	public function getAccountDetails($id="") {
         $cond = "";
         if($id!=""){
             $cond = " and id = '$id'";
@@ -96,10 +80,7 @@ class PaymentReceipt extends Model
         return $reader->readAll();
     }
 	
-	  public function getacc1($trans_type="")
-	{
-       
-
+	public function getacc1($trans_type="") {
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
@@ -110,17 +91,18 @@ class PaymentReceipt extends Model
         return $reader->readAll();
     }
 
-    public function getaccbank1($trans_type="")
-	{
-        if($trans_type=="Contra Entry"){
-            $type = 'Bank Account';
+    public function getaccbank1($trans_type="") {
+        $cond = "";
+        if(strtoupper(trim($trans_type))=="CONTRA ENTRY") {
+            $cond = " and type = 'Bank Account' ";
         } else {
-            $type = 'Vendor Goods';
+            $cond = " and (type = 'Vendor Goods' or type = 'Customer') ";
         }
 
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
-		$sql = "select * from acc_master where is_active = '1' and status = 'approved' and company_id = '$company_id' and type = '$type' order by legal_name ";
+		$sql = "select * from acc_master where is_active = '1' and status = 'approved' and 
+                company_id = '$company_id' ".$cond." order by legal_name";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -158,30 +140,73 @@ class PaymentReceipt extends Model
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-        $sql = "select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
-                    A.ledger_code, A.type, A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, A.voucher_id, A.ledger_type, 
-                    A.narration, A.ref_date, A.gi_date, A.invoice_date, A.due_date, A.cp_acc_id, A.cp_ledger_name, A.cp_ledger_code, 
-                    case when B.id is not null then '1' else '' end as is_paid, B.ref_id as payment_ref from 
-                (select * from 
+        // case when (instr(A.ledger_name,'-CGST')!=0 or instr(A.ledger_name,'-SGST')!=0 or 
+        //                 instr(A.ledger_name,'-IGST')!=0 or instr(A.ledger_name,'Purchase-')!=0 or 
+        //                 instr(A.ledger_name,'Sales-')!=0) then concat(A.new_ledger_name,percentage,'%') 
+        //                 else A.ledger_name end as new_ledger_name from 
+
+        // select A.* from 
+        //         (select group_concat(A.id) as id, A.ref_id, group_concat(A.sub_ref_id) as sub_ref_id, A.ref_type, 
+        //             group_concat(A.entry_type) as entry_type, A.invoice_no, A.vendor_id, 
+        //             group_concat(A.acc_id) as acc_id, group_concat(A.ledger_name) as ledger_name, group_concat(A.ledger_code) as ledger_code, 
+        //             A.type, sum(A.amount) as amount, sum(A.paid_amount) as paid_amount, sum(A.pending_paid_amount) as pending_paid_amount, 
+        //             sum(A.total_paid_amount) as total_paid_amount, sum(A.amount_to_pay) as amount_to_pay, sum(A.bal_amount) as bal_amount, 
+        //             A.status, A.voucher_id, A.ledger_type, A.ref_date, A.gi_date, A.invoice_date, A.due_date, 
+        //             A.cp_acc_id, A.cp_ledger_name, A.cp_ledger_code, A.new_ledger_name from 
+
+        $sql = "select A.* from 
+                (select group_concat(A.id) as id, A.ref_id, group_concat(A.sub_ref_id) as sub_ref_id, A.ref_type, 
+                    group_concat(A.entry_type) as entry_type, A.invoice_no, A.vendor_id, 
+                    group_concat(A.acc_id) as acc_id, group_concat(A.ledger_name) as ledger_name, group_concat(A.ledger_code) as ledger_code, 
+                    A.type, sum(A.amount) as amount, sum(A.paid_amount) as paid_amount, sum(A.pending_paid_amount) as pending_paid_amount, 
+                    sum(A.total_paid_amount) as total_paid_amount, sum(A.amount_to_pay) as amount_to_pay, sum(A.bal_amount) as bal_amount, 
+                    A.status, A.voucher_id, A.ledger_type, A.ref_date, A.gi_date, A.invoice_date, A.due_date, 
+                    A.cp_acc_id, A.cp_ledger_name, A.cp_ledger_code from 
+                (select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, 
+                    A.acc_id, A.ledger_name, A.ledger_code, A.type, A.amount, A.paid_amount, A.pending_paid_amount, 
+                    A.total_paid_amount, A.amount_to_pay, A.bal_amount, A.status, A.created_by, A.updated_by, 
+                    A.created_date, A.updated_date, A.voucher_id, A.ledger_type, 
+                    A.narration, A.ref_date, A.gi_date, A.invoice_date, A.due_date, 
+                    A.cp_acc_id, A.cp_ledger_name, A.cp_ledger_code, 
+                    case when (instr(A.ledger_name,'-CGST')!=0 or instr(A.ledger_name,'-SGST')!=0 or 
+                        instr(A.ledger_name,'-IGST')!=0 or instr(A.ledger_name,'Purchase-')!=0 or 
+                        instr(A.ledger_name,'Sales-')!=0) then A.new_ledger_name 
+                        else A.ledger_name end as new_ledger_name from 
+                (select AA.*, (AA.paid_amount+AA.pending_paid_amount) as total_paid_amount, 
+                    round((AA.amount-AA.paid_amount-AA.pending_paid_amount),2) as bal_amount, 
+                    replace(replace(replace(replace(replace(replace(replace(replace(replace(AA.ledger_name,'Input-','Purchase-'),
+                        'Output-','Sales-'),'CGST','Local'),'SGST','Local'),'IGST','Inter State'),'-B2B',''),'-B2C',''),'--',''),
+                        Substring_index(AA.ledger_name, '-', -1),'') as new_ledger_name, 
+                    case when (instr(AA.ledger_name,'-CGST')!=0 or instr(AA.ledger_name,'-SGST')!=0) 
+                    then (2 * Replace(Substring_index(AA.ledger_name, '-', -1),'%', '')) 
+                    else Replace(Substring_index(AA.ledger_name, '-', -1), '%', '') end as percentage from 
                 (
 
                 select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
                     A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
                     A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
                     A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
-                    A.gi_date, A.invoice_date, A.due_date, 
+                    A.gi_date, A.invoice_date, A.due_date, ifnull(C.paid_amount,0) as paid_amount, 
+                    ifnull(C.pending_paid_amount,0) as pending_paid_amount, ifnull(C.amount_to_pay,0) as amount_to_pay, 
                     B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
                 (select A.*, B.gi_date, C.invoice_date, D.due_date from acc_ledger_entries A 
                     left join grn B on(A.ref_id = B.grn_id and A.ref_type = 'purchase') 
                     left join goods_inward_outward_invoices C on(A.invoice_no = C.invoice_no and A.ref_type = 'purchase' and B.gi_id = C.gi_go_ref_no) 
-                    left join invoice_tracker D on(A.ref_id=D.gi_id and A.invoice_no=D.invoice_id) 
-                    where A.status = '$status' and A.is_active = '1' and B.status = 'Approved' and B.is_active = '1' and 
+                    left join invoice_tracker D on(A.ref_id=D.grn_id and C.gi_go_invoice_id=D.invoice_id) 
+                    where A.status = '$status' and A.is_active = '1' and B.status = 'Approved' and B.is_active = '1' and date(A.ref_date)>date('2018-04-01') and 
                         A.ref_type = 'purchase' and A.ledger_type != 'Main Entry' and A.company_id = '$company_id' and B.company_id = '$company_id') A 
                 left join 
                 (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
                     ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
-                    ref_type = 'purchase' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
+                    date(ref_date)>date('2018-04-01') and ref_type = 'purchase' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
                 on (A.voucher_id = B.cp_voucher_id) 
+                left join 
+                (select sub_ref_id, sum(case when (ref_id != '$id' and status = 'approved') then amount else 0 end) as paid_amount, 
+                    sum(case when (ref_id != '$id' and status = 'pending') then amount else 0 end) as pending_paid_amount, 
+                    sum(case when ref_id = '$id' then amount else 0 end) as amount_to_pay from acc_ledger_entries 
+                    where is_active = '1' and company_id = '$company_id' and sub_ref_id is not null and 
+                        date(ref_date)>date('2018-04-01') and ref_type = 'payment_receipt' and ledger_type = 'Sub Entry' group by sub_ref_id) C 
+                on (A.id = C.sub_ref_id) 
 
                 union all 
 
@@ -189,19 +214,27 @@ class PaymentReceipt extends Model
                     A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
                     A.created_by, A.updated_by, A.created_date, A.updated_date, 
                     A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
-                    A.gi_date, A.invoice_date, null as due_date, 
+                    A.gi_date, A.invoice_date, null as due_date, ifnull(C.paid_amount,0) as paid_amount, 
+                    ifnull(C.pending_paid_amount,0) as pending_paid_amount, ifnull(C.amount_to_pay,0) as amount_to_pay, 
                     B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
                 (select A.*, B.jv_date as gi_date, C.invoice_date from acc_ledger_entries A 
                     left join acc_jv_details B on(A.ref_id=B.id and A.ref_type='journal_voucher') 
                     left join acc_jv_invoices_entries C 
                     on (A.ref_id=C.jv_details_id and A.ref_type='journal_voucher' and A.invoice_no = C.invoice_number and A.amount = C.invoice_amount) 
-                    where A.status = '$status' and A.is_active = '1' and 
+                    where A.status = '$status' and A.is_active = '1' and date(A.ref_date)>date('2018-04-01') and 
                         A.ref_type = 'journal_voucher' and A.acc_id!='$acc_id' and A.company_id = '$company_id') A 
                 left join 
                 (select distinct ref_id, voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
                     ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
-                    ref_type = 'journal_voucher' and acc_id='$acc_id' and company_id = '$company_id') B 
+                    date(ref_date)>date('2018-04-01') and ref_type = 'journal_voucher' and acc_id='$acc_id' and company_id = '$company_id') B 
                 on (A.ref_id=B.ref_id) 
+                left join 
+                (select sub_ref_id, sum(case when (ref_id != '$id' and status = 'approved') then amount else 0 end) as paid_amount, 
+                    sum(case when (ref_id != '$id' and status = 'pending') then amount else 0 end) as pending_paid_amount, 
+                    sum(case when ref_id = '$id' then amount else 0 end) as amount_to_pay from acc_ledger_entries 
+                    where is_active = '1' and company_id = '$company_id' and sub_ref_id is not null and 
+                        date(ref_date)>date('2018-04-01') and ref_type = 'payment_receipt' and ledger_type = 'Sub Entry' group by sub_ref_id) C 
+                on (A.id = C.sub_ref_id) 
 
                 union all 
 
@@ -209,57 +242,81 @@ class PaymentReceipt extends Model
                     A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
                     A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
                     A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
-                    null as gi_date, null as invoice_date, null as due_date, 
+                    null as gi_date, null as invoice_date, null as due_date, ifnull(C.paid_amount,0) as paid_amount, 
+                    ifnull(C.pending_paid_amount,0) as pending_paid_amount, ifnull(C.amount_to_pay,0) as amount_to_pay, 
                     B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
-                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
                     ref_type = 'payment_receipt' and ledger_type = 'Sub Entry' and company_id = '$company_id') A 
                 left join 
                 (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
                     ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
-                    ref_type = 'payment_receipt' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
+                    date(ref_date)>date('2018-04-01') and ref_type = 'payment_receipt' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
                 on (A.voucher_id = B.cp_voucher_id) 
+                left join 
+                (select sub_ref_id, sum(case when (ref_id != '$id' and status = 'approved') then amount else 0 end) as paid_amount, 
+                    sum(case when (ref_id != '$id' and status = 'pending') then amount else 0 end) as pending_paid_amount, 
+                    sum(case when ref_id = '$id' then amount else 0 end) as amount_to_pay from acc_ledger_entries 
+                    where is_active = '1' and company_id = '$company_id' and sub_ref_id is not null and 
+                        date(ref_date)>date('2018-04-01') and ref_type = 'payment_receipt' and ledger_type = 'Sub Entry' group by sub_ref_id) C 
+                on (A.id = C.sub_ref_id) 
 
                 union all 
 
-                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, inv_no as invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
                     A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
                     A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
                     A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
-                    A.gi_date, A.invoice_date, A.due_date, 
+                    A.gi_date, A.invoice_date, A.due_date, ifnull(C.paid_amount,0) as paid_amount, 
+                    ifnull(C.pending_paid_amount,0) as pending_paid_amount, ifnull(C.amount_to_pay,0) as amount_to_pay, 
                     B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
-                (select A.*, B.gi_go_date_time as gi_date, null as invoice_date, null as due_date 
+                (select A.*, B.gi_go_date_time as gi_date, null as invoice_date, null as due_date, B.gi_go_ref_no as inv_no 
                     from acc_ledger_entries A 
                     left join goods_inward_outward B on(A.ref_id = B.gi_go_id and A.ref_type = 'go_debit_details') 
                     where A.status = '$status' and A.is_active = '1' and B.is_active = '1' and 
-                        A.ref_type = 'go_debit_details' and A.ledger_type != 'Main Entry' and 
+                        date(A.ref_date)>date('2018-04-01') and A.ref_type = 'go_debit_details' and A.ledger_type != 'Main Entry' and 
                         A.company_id = '$company_id' and B.company_id = '$company_id') A 
                 left join 
                 (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
                     ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
-                    ref_type = 'go_debit_details' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
+                    date(ref_date)>date('2018-04-01') and ref_type = 'go_debit_details' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
                 on (A.voucher_id = B.cp_voucher_id) 
+                left join 
+                (select sub_ref_id, sum(case when (ref_id != '$id' and status = 'approved') then amount else 0 end) as paid_amount, 
+                    sum(case when (ref_id != '$id' and status = 'pending') then amount else 0 end) as pending_paid_amount, 
+                    sum(case when ref_id = '$id' then amount else 0 end) as amount_to_pay from acc_ledger_entries 
+                    where is_active = '1' and company_id = '$company_id' and sub_ref_id is not null and 
+                        date(ref_date)>date('2018-04-01') and ref_type = 'payment_receipt' and ledger_type = 'Sub Entry' group by sub_ref_id) C 
+                on (A.id = C.sub_ref_id) 
 
                 union all 
 
-                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, inv_no as invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
                     A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
                     A.created_by, A.updated_by, A.created_date, A.updated_date, 
-                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, 
-                    A.narration, A.ref_date, A.gi_date, A.invoice_date, A.due_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    A.gi_date, A.invoice_date, A.due_date, ifnull(C.paid_amount,0) as paid_amount, 
+                    ifnull(C.pending_paid_amount,0) as pending_paid_amount, ifnull(C.amount_to_pay,0) as amount_to_pay, 
                     B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
-                (select A.*, B.gi_go_date_time as gi_date, null as invoice_date, null as due_date 
+                (select A.*, B.gi_go_date_time as gi_date, null as invoice_date, null as due_date, B.gi_go_ref_no as inv_no 
                     from acc_ledger_entries A 
                     left join goods_inward_outward B on(A.ref_id = B.gi_go_id and A.ref_type = 'go_debit_details') 
-                    where A.status = '$status' and A.is_active = '1' and B.is_active = '1' and 
+                    where A.status = '$status' and A.is_active = '1' and B.is_active = '1' and date(A.ref_date)>date('2018-04-01') and 
                         A.ref_type = 'go_debit_details' and A.acc_id!='$acc_id' and A.ledger_type = 'Main Entry' and 
                         A.company_id = '$company_id' and B.company_id = '$company_id' and 
                         A.entry_type in ('Purchase Stock Transfer', 'Sales Stock Transfer')) A 
                 left join 
                 (select distinct ref_id, voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
-                    ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
                     ref_type = 'go_debit_details' and acc_id='$acc_id' and ledger_type = 'Main Entry' and company_id = '$company_id' and 
                     entry_type in ('Purchase Stock Transfer', 'Sales Stock Transfer')) B 
                 on(A.ref_id=B.ref_id) 
+                left join 
+                (select sub_ref_id, sum(case when (ref_id != '$id' and status = 'approved') then amount else 0 end) as paid_amount, 
+                    sum(case when (ref_id != '$id' and status = 'pending') then amount else 0 end) as pending_paid_amount, 
+                    sum(case when ref_id = '$id' then amount else 0 end) as amount_to_pay from acc_ledger_entries 
+                    where is_active = '1' and company_id = '$company_id' and sub_ref_id is not null and 
+                        date(ref_date)>date('2018-04-01') and ref_type = 'payment_receipt' and ledger_type = 'Sub Entry' group by sub_ref_id) C 
+                on (A.id = C.sub_ref_id) 
 
                 union all 
 
@@ -267,14 +324,22 @@ class PaymentReceipt extends Model
                     A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
                     A.created_by, A.updated_by, A.created_date, A.updated_date, 
                     A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
-                    null as gi_date, null as invoice_date, null as due_date, 
+                    null as gi_date, null as invoice_date, null as due_date, ifnull(C.paid_amount,0) as paid_amount, 
+                    ifnull(C.pending_paid_amount,0) as pending_paid_amount, ifnull(C.amount_to_pay,0) as amount_to_pay, 
                     B.acc_id as cp_acc_id, B.ledger_name as cp_ledger_name, B.ledger_code as cp_ledger_code from 
-                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
                     ref_type = 'other_debit_credit' and acc_id!='$acc_id' and company_id = '$company_id') A 
                 left join 
-                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
                     ref_type = 'other_debit_credit' and acc_id='$acc_id' and company_id = '$company_id') B 
                 on (A.ref_id=B.ref_id) 
+                left join 
+                (select sub_ref_id, sum(case when (ref_id != '$id' and status = 'approved') then amount else 0 end) as paid_amount, 
+                    sum(case when (ref_id != '$id' and status = 'pending') then amount else 0 end) as pending_paid_amount, 
+                    sum(case when ref_id = '$id' then amount else 0 end) as amount_to_pay from acc_ledger_entries 
+                    where is_active = '1' and company_id = '$company_id' and sub_ref_id is not null and 
+                        date(ref_date)>date('2018-04-01') and ref_type = 'payment_receipt' and ledger_type = 'Sub Entry' group by sub_ref_id) C 
+                on (A.id = C.sub_ref_id) 
 
                 union all 
 
@@ -282,24 +347,82 @@ class PaymentReceipt extends Model
                     A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
                     A.created_by, A.updated_by, A.created_date, A.updated_date, 
                     A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
-                    null as gi_date, null as invoice_date, null as due_date, 
+                    null as gi_date, null as invoice_date, null as due_date, ifnull(C.paid_amount,0) as paid_amount, 
+                    ifnull(C.pending_paid_amount,0) as pending_paid_amount, ifnull(C.amount_to_pay,0) as amount_to_pay, 
                     B.acc_id as cp_acc_id, B.ledger_name as cp_ledger_name, B.ledger_code as cp_ledger_code from 
-                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
                     ref_type = 'promotion' and acc_id!='$acc_id' and company_id = '$company_id') A 
                 left join 
-                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
                     ref_type = 'promotion' and acc_id='$acc_id' and company_id = '$company_id') B 
                 on (A.ref_id=B.ref_id) 
+                left join 
+                (select sub_ref_id, sum(case when (ref_id != '$id' and status = 'approved') then amount else 0 end) as paid_amount, 
+                    sum(case when (ref_id != '$id' and status = 'pending') then amount else 0 end) as pending_paid_amount, 
+                    sum(case when ref_id = '$id' then amount else 0 end) as amount_to_pay from acc_ledger_entries 
+                    where is_active = '1' and company_id = '$company_id' and sub_ref_id is not null and 
+                        date(ref_date)>date('2018-04-01') and ref_type = 'payment_receipt' and ledger_type = 'Sub Entry' group by sub_ref_id) C 
+                on (A.id = C.sub_ref_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    null as gi_date, null as invoice_date, null as due_date, ifnull(C.paid_amount,0) as paid_amount, 
+                    ifnull(C.pending_paid_amount,0) as pending_paid_amount, ifnull(C.amount_to_pay,0) as amount_to_pay, 
+                    B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
+                    ref_type = 'B2B Sales' and ledger_type != 'Main Entry' and company_id = '$company_id') A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    date(ref_date)>date('2018-04-01') and ref_type = 'B2B Sales' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
+                on (A.voucher_id = B.cp_voucher_id) 
+                left join 
+                (select sub_ref_id, sum(case when (ref_id != '$id' and status = 'approved') then amount else 0 end) as paid_amount, 
+                    sum(case when (ref_id != '$id' and status = 'pending') then amount else 0 end) as pending_paid_amount, 
+                    sum(case when ref_id = '$id' then amount else 0 end) as amount_to_pay from acc_ledger_entries 
+                    where is_active = '1' and company_id = '$company_id' and sub_ref_id is not null and 
+                        date(ref_date)>date('2018-04-01') and ref_type = 'payment_receipt' and ledger_type = 'Sub Entry' group by sub_ref_id) C 
+                on (A.id = C.sub_ref_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
+                    A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    A.gi_date, A.invoice_date, null as due_date, ifnull(C.paid_amount,0) as paid_amount, 
+                    ifnull(C.pending_paid_amount,0) as pending_paid_amount, ifnull(C.amount_to_pay,0) as amount_to_pay, 
+                    B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.jv_date as gi_date, C.invoice_date from acc_ledger_entries A 
+                    left join acc_jv_details B on(A.ref_id=B.id and A.ref_type='journal_voucher') 
+                    left join acc_jv_invoices_entries C 
+                    on (A.ref_id=C.jv_details_id and A.ref_type='journal_voucher' and A.invoice_no = C.invoice_number and A.amount = C.invoice_amount) 
+                    where A.status = '$status' and A.is_active = '1' and date(A.ref_date)<date('2018-04-01') and 
+                        A.ref_type = 'journal_voucher' and A.acc_id='$acc_id' and A.company_id = '$company_id') A 
+                left join 
+                (select distinct ref_id, voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    date(ref_date)<date('2018-04-01') and ref_type = 'journal_voucher' and acc_id!='$acc_id' and acc_id='716' and company_id = '$company_id') B 
+                on (A.ref_id=B.ref_id) 
+                left join 
+                (select sub_ref_id, sum(case when (ref_id != '$id' and status = 'approved') then amount else 0 end) as paid_amount, 
+                    sum(case when (ref_id != '$id' and status = 'pending') then amount else 0 end) as pending_paid_amount, 
+                    sum(case when ref_id = '$id' then amount else 0 end) as amount_to_pay from acc_ledger_entries 
+                    where is_active = '1' and company_id = '$company_id' and sub_ref_id is not null and 
+                        date(ref_date)<date('2018-04-01') and ref_type = 'payment_receipt' and ledger_type = 'Sub Entry' group by sub_ref_id) C 
+                on (A.id = C.sub_ref_id) 
 
                 ) AA 
                 where (AA.acc_id = '$acc_id' or AA.cp_acc_id = '$acc_id') and AA.amount!=0 and 
-                        (AA.ref_type!='payment_receipt' or AA.entry_type='Bank Entry' or AA.entry_type='Payment' or AA.entry_type='Receipt') and 
-                        (AA.is_paid is null or AA.is_paid!='1' or AA.payment_ref='$id')) A 
-                left join 
-                (select * from acc_ledger_entries where is_active = '1' and ref_id = '$id' and ref_type = 'payment_receipt' and company_id = '$company_id') B 
-                on (A.id = B.sub_ref_id)
-
-                order by A.ref_date, A.id";
+                        (AA.ref_type!='payment_receipt' or AA.entry_type='Bank Entry' or AA.entry_type='Payment' or AA.entry_type='Receipt')) A 
+                where A.bal_amount!=0) A 
+                group by A.ref_id, A.ref_type, A.invoice_no, A.vendor_id, A.type, A.status, A.voucher_id, A.ledger_type, A.ref_date, 
+                    A.gi_date, A.invoice_date, A.due_date, A.cp_acc_id, A.cp_ledger_name, A.cp_ledger_code) A 
+                order by A.ref_date";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -361,16 +484,18 @@ class PaymentReceipt extends Model
         $ref_no = $request->post('ref_no');
 
         $amount = 0;
-        if($payment_type == "Adhoc"){
+        if(strtoupper(trim($payment_type)) == "ADHOC"){
             $amount = $mycomponent->format_number($request->post('amount'),2);
+            $paying_transaction = 'Credit';
         } else {
-            $payable_debit_amt = $mycomponent->format_number($request->post('payable_debit_amt'),2);
-            $payable_credit_amt = $mycomponent->format_number($request->post('payable_credit_amt'),2);
+            $paying_transaction = $request->post('paying_transaction');
+            $paying_amount_total = $mycomponent->format_number($request->post('paying_amount_total'),2);
 
-            if($payable_debit_amt>0){
-                $amount = $payable_debit_amt*-1;
+            if(strtoupper(trim($paying_transaction))=='DEBIT'){
+                // $amount = $paying_amount_total*-1;
+                $amount = $paying_amount_total;
             } else {
-                $amount = $payable_credit_amt;
+                $amount = $paying_amount_total;
             }
         }
 
@@ -410,7 +535,7 @@ class PaymentReceipt extends Model
                 'bank_id'=>$bank_id,
                 'bank_name'=>$bank_name,
                 'payment_type'=>$payment_type,
-                'amount'=>($amount<0?$amount*-1:$amount),
+                'amount'=>((strtoupper(trim($paying_transaction))=='DEBIT')?$amount*-1:$amount),
                 'ref_no'=>$ref_no,
                 'narration'=>$narration,
                 'status'=>'pending',
@@ -441,12 +566,12 @@ class PaymentReceipt extends Model
             $this->setLog('PaymentReceipt', '', 'Save', '', 'Insert Payment Receipt Details', 'acc_payment_receipt', $id);
         }
 
-        if($payment_type == "Adhoc") {
+        if(strtoupper(trim($payment_type)) == "ADHOC") {
             $data = $this->getAccountDetails($acc_id);
             if(count($data)>0){
                 $vendor_id = $data[0]['vendor_id'];
             }
-            if($trans_type="Payment"){
+            if(strtoupper(trim($trans_type))=="PAYMENT"){
                 $type = "Debit";
             } else {
                 $type = "Credit";
@@ -498,7 +623,7 @@ class PaymentReceipt extends Model
                 $bank_legal_name = '';
                 $bank_acc_code = '';
             }
-            if($trans_type="Payment"){
+            if(strtoupper(trim($trans_type))=="PAYMENT"){
                 $type = "Credit";
             } else {
                 $type = "Debit";
@@ -544,72 +669,162 @@ class PaymentReceipt extends Model
             $chk = $request->post('chk');
             $ledger_id = $request->post('ledger_id');
             $ledger_type = $request->post('ledger_type');
-            $debit_amt = $request->post('debit_amt');
-            $credit_amt = $request->post('credit_amt');
+            // $debit_amt = $request->post('debit_amt');
+            // $credit_amt = $request->post('credit_amt');
             $invoice_no = $request->post('invoice_no');
             $vendor_id = $request->post('vendor_id');
+            $transaction = $request->post('transaction');
+            $amount_to_pay = $request->post('amount_to_pay');
+            $total_amount = $request->post('total_amount');
+            $total_paid_amount = $request->post('total_paid_amount');
 
             if (isset($ledger_id)){
                 for($i=0; $i<count($ledger_id); $i++){
-                    if($chk[$i]=="1"){
-                        // $sql = "update acc_ledger_entries set is_paid = '1', payment_ref = '".$id."' 
-                        //         where id = '".$ledger_id[$i]."'";
-                        // $command = Yii::$app->db->createCommand($sql);
-                        // $count = $command->execute();
-
-                        if($mycomponent->format_number($debit_amt[$i],2)>0){
-                            $type = 'Credit';
-                            $amt = $mycomponent->format_number($debit_amt[$i],2);
-                        } else {
-                            $type = 'Debit';
-                            $amt = $mycomponent->format_number($credit_amt[$i],2);
+                    if($amount_to_pay[$i]!="" && $amount_to_pay[$i]!="0" && $amount_to_pay[$i]!=null){
+                        $type = $transaction[$i];
+                        $amt = $mycomponent->format_number($amount_to_pay[$i],2);
+                        $tot_amt = $mycomponent->format_number($total_amount[$i],2);
+                        $tot_paid_amt = $mycomponent->format_number($total_paid_amount[$i],2);
+                        if(strtoupper(trim($type))=='DEBIT'){
+                            $amt = $amt * -1;
+                            $tot_amt = $tot_amt * -1;
+                            $tot_paid_amt = $tot_paid_amt * -1;
                         }
+                        $tot_bal_amt = $tot_amt - $tot_paid_amt;
 
-                        $ledgerArray=[
-                                            'ref_id'=>$id,
-                                            'sub_ref_id'=>$ledger_id[$i],
-                                            'ref_type'=>'payment_receipt',
-                                            'entry_type'=>$ledger_type[$i],
-                                            'invoice_no'=>$invoice_no[$i],
-                                            'vendor_id'=>$vendor_id[$i],
-                                            'voucher_id' => $voucher_id, 
-                                            'ledger_type' => 'Sub Entry', 
-                                            'acc_id'=>$acc_id,
-                                            'ledger_name'=>$legal_name,
-                                            'ledger_code'=>$acc_code,
-                                            'type'=>$type,
-                                            'amount'=>$amt,
-                                            'narration'=>$narration,
-                                            'status'=>'pending',
-                                            'is_active'=>'1',
-                                            'updated_by'=>$curusr,
-                                            'updated_date'=>$now,
-                                            'ref_date'=>$payment_date,
-                                            'approver_comments'=>$remarks,
-                                            'company_id'=>$company_id
-                                        ];
+                        $led_id = explode(',', $ledger_id[$i]);
 
-                        $count = Yii::$app->db->createCommand()
-                                    ->update("acc_ledger_entries", $ledgerArray, "ref_id = '".$id."' and sub_ref_id = '".$ledger_id[$i]."' and ref_type = 'payment_receipt'")
-                                    ->execute();
+                        for($j=0; $j<count($led_id); $j++){
+                            $led_id[$j] = trim($led_id[$j]);
+                            $led_amt = $amt;
 
-                        if ($count==0){
-                            $ledgerArray['created_by']=$curusr;
-                            $ledgerArray['created_date']=$now;
+                            if($led_id[$j]!="" && $led_id[$j]!=null){
+                                $sql = "select A.*, B.paid_amount, B.pending_paid_amount, B.amount_to_pay from 
+                                    (select * from acc_ledger_entries where id = '".$led_id[$j]."') A 
+                                    left join 
+                                    (select sub_ref_id, sum(case when (ref_id != '$id' and status = 'approved') then amount else 0 end) as paid_amount, 
+                                        sum(case when (ref_id != '$id' and status = 'pending') then amount else 0 end) as pending_paid_amount, 
+                                        sum(case when ref_id = '$id' then amount else 0 end) as amount_to_pay from acc_ledger_entries 
+                                    where is_active = '1' and company_id = '$company_id' and sub_ref_id is not null and date(ref_date)>date('2018-04-01') and 
+                                        ref_type = 'payment_receipt' and ledger_type = 'Sub Entry' and sub_ref_id = '".$led_id[$j]."' 
+                                    group by sub_ref_id) B 
+                                    on (A.id = B.sub_ref_id)";
+                                $command = Yii::$app->db->createCommand($sql);
+                                $reader = $command->query();
+                                $result = $reader->readAll();
 
-                            $count = Yii::$app->db->createCommand()
-                                        ->insert("acc_ledger_entries", $ledgerArray)
-                                        ->execute();
+                                if(count($result)>0){
+                                    $led_acc_name = $result[0]['ledger_name'];
+                                    $led_amount = $result[0]['amount'];
+                                    $led_per = 0;
+
+                                    $paid_amount = 0;
+                                    if(isset($result[0]['paid_amount'])){
+                                        if($result[0]['paid_amount']!=''){
+                                            $paid_amount = $result[0]['paid_amount'];
+                                        }
+                                    }
+                                    $pending_paid_amount = 0;
+                                    if(isset($result[0]['pending_paid_amount'])){
+                                        if($result[0]['pending_paid_amount']!=''){
+                                            $pending_paid_amount = $result[0]['pending_paid_amount'];
+                                        }
+                                    }
+                                    $tot_paid_amount = $paid_amount + $pending_paid_amount;
+
+                                    // if(strpos($led_acc_name, 'Purchase-')!==false || strpos($led_acc_name, 'Sales-')!==false || 
+                                    //    strpos($led_acc_name, 'CGST-')!==false || strpos($led_acc_name, 'SGST-')!==false || 
+                                    //    strpos($led_acc_name, 'IGST-')!==false){
+                                    //     // $led_per = substr($led_acc_name, strrpos($led_acc_name, '-')+1);
+                                    //     // $led_per = str_replace('%', '', $led_per);
+                                    //     // $led_per = floatval($led_per);
+
+                                    //     // if(strpos($led_acc_name, 'CGST-')!==false || strpos($led_acc_name, 'SGST-')!==false){
+                                    //     //     $led_amt = $amt/(1+(($led_per*2)/100));
+                                    //     //     $led_amt = round($led_amt*$led_per/100, 4);
+                                    //     // } else if(strpos($led_acc_name, 'IGST-')!==false){
+                                    //     //     $led_amt = $amt/(1+($led_per/100));
+                                    //     //     $led_amt = round($led_amt*$led_per/100, 4);
+                                    //     // } else {
+                                    //     //     $led_amt = round($amt/(1+($led_per/100)), 4);
+                                    //     // }
+
+                                    //     $led_amt = $led_amount - $tot_paid_amount;
+                                    //     echo $led_amt;
+                                    //     echo '<br/>';
+                                    //     $led_amt = round($led_amt*$amt/$tot_bal_amt,4);
+
+                                    //     echo $amt;
+                                    //     echo '<br/>';
+                                    //     echo $tot_bal_amt;
+                                    //     echo '<br/>';
+
+                                    //     // $led_amt_diff = $led_amount - $led_amt;
+                                    //     // if($led_amt_diff<0.5 && $led_amt_diff>-0.5){
+                                    //     //     $led_amt = $led_amount;
+                                    //     // }
+                                    // }
+
+                                    $led_amt = $led_amount - $tot_paid_amount;
+                                    $led_amt = round($led_amt*$amt/$tot_bal_amt,4);
+
+                                    // echo $led_acc_name;
+                                    // echo '<br/>';
+                                    // echo $led_per;
+                                    // echo '<br/>';
+                                    // echo $led_amt;
+                                    // echo '<br/>';
+                                }
+
+                                $ledgerArray=[
+                                                'ref_id'=>$id,
+                                                'sub_ref_id'=>$led_id[$j],
+                                                'ref_type'=>'payment_receipt',
+                                                'entry_type'=>$ledger_type[$i],
+                                                'invoice_no'=>$invoice_no[$i],
+                                                'vendor_id'=>$vendor_id[$i],
+                                                'voucher_id' => $voucher_id, 
+                                                'ledger_type' => 'Sub Entry', 
+                                                'acc_id'=>$acc_id,
+                                                'ledger_name'=>$legal_name,
+                                                'ledger_code'=>$acc_code,
+                                                'type'=>$type,
+                                                'amount'=>$led_amt,
+                                                'narration'=>$narration,
+                                                'status'=>'pending',
+                                                'is_active'=>'1',
+                                                'updated_by'=>$curusr,
+                                                'updated_date'=>$now,
+                                                'ref_date'=>$payment_date,
+                                                'approver_comments'=>$remarks,
+                                                'company_id'=>$company_id
+                                            ];
+
+                                $count = Yii::$app->db->createCommand()
+                                            ->update("acc_ledger_entries", $ledgerArray, "ref_id = '".$id."' and sub_ref_id = '".$led_id[$j]."' and ref_type = 'payment_receipt'")
+                                            ->execute();
+
+                                if ($count==0){
+                                    $ledgerArray['created_by']=$curusr;
+                                    $ledgerArray['created_date']=$now;
+
+                                    $count = Yii::$app->db->createCommand()
+                                                ->insert("acc_ledger_entries", $ledgerArray)
+                                                ->execute();
+                                }
+
+                                // echo json_encode($ledgerArray);
+                                // echo '<br/>';
+                            }
                         }
                     } else {
-                        // $sql = "update acc_ledger_entries set is_paid = null, payment_ref = null 
-                        //         where id = '".$ledger_id[$i]."'";
-                        // $command = Yii::$app->db->createCommand($sql);
-                        // $count = $command->execute();
-
-                        $count = Yii::$app->db->createCommand()
-                                    ->delete("acc_ledger_entries", "ref_id = '".$id."' and sub_ref_id = '".$ledger_id[$i]."' and ref_type = 'payment_receipt'")
+                        if($ledger_id[$i]!="" && $ledger_id[$i]!=null){
+                            $count = Yii::$app->db->createCommand()
+                                    ->delete("acc_ledger_entries", "ref_id = '".$id."' and 
+                                                sub_ref_id in (".$ledger_id[$i].") and 
+                                                ref_type = 'payment_receipt'")
                                     ->execute();
+                        }
                     }
                 }
             }
@@ -667,18 +882,20 @@ class PaymentReceipt extends Model
                             ->execute();
             }
         }
+
+        $this->authorise('approved', $id, $voucher_id);
         
         return true;
     }
 
-    public function authorise($status){
+    public function authorise($status, $id, $voucher_id){
         $request = Yii::$app->request;
         $session = Yii::$app->session;
 
         $curusr = $session['session_id'];
         $now = date('Y-m-d H:i:s');
-        $id = $request->post('id');
-        $voucher_id = $request->post('voucher_id');
+        // $id = $request->post('id');
+        // $voucher_id = $request->post('voucher_id');
         $remarks = $request->post('remarks');
         // $payment_type = $request->post('payment_type');
 
@@ -707,7 +924,7 @@ class PaymentReceipt extends Model
                         ->execute();
 
         if($status=='approved'){
-            if($payment_type=='Knock off'){
+            if(strtoupper(trim($payment_type))=='KNOCK OFF'){
                 $sql = "select group_concat(distinct sub_ref_id) as pay_id from acc_ledger_entries 
                         where ref_id = '".$id."' and ref_type = 'payment_receipt' and 
                         voucher_id = '".$voucher_id."' and sub_ref_id is not null";
@@ -717,7 +934,8 @@ class PaymentReceipt extends Model
 
                 if(count($result)>0){
                     $pay_id = $result[0]['pay_id'];
-                    $sql = "update acc_ledger_entries set is_paid = '1', payment_ref = '".$id."' 
+                    $sql = "update acc_ledger_entries set is_paid = '1', payment_ref = (case when payment_ref is null or payment_ref = '' 
+                            then '".$id."' else concat(payment_ref,', ','".$id."') end) 
                             where id in (".$pay_id.")";
                     $command = Yii::$app->db->createCommand($sql);
                     $count = $command->execute();
@@ -792,7 +1010,7 @@ class PaymentReceipt extends Model
                 $vendor_details = array();
             }
 
-            if($payment_details[0]['payment_type']=='Knock off'){
+            if(strtoupper(trim($payment_details[0]['payment_type']))=='KNOCK OFF'){
                 // $sql = "select B.id, B.invoice_no, B.vendor_id, B.acc_id as account_id, B.ledger_name as account_name, 
                 //             B.ledger_code as account_code, B.ledger_name, 
                 //             B.type, B.amount, B.is_paid, B.payment_ref, B.ref_type as ledger_type, 
@@ -807,7 +1025,7 @@ class PaymentReceipt extends Model
                 $sql = "select sr_no, ledger_type, type, ref_no, ref_date, sum(amount) as tot_amount from 
                         (select B.id, B.invoice_no as ref_no, B.vendor_id, B.acc_id as account_id, B.ledger_name as account_name, 
                             B.ledger_code as account_code, B.ledger_name, 
-                            B.type, B.amount, B.is_paid, B.payment_ref, B.ref_type as ledger_type, C.gi_date, 
+                            B.type, A.amount, B.is_paid, B.payment_ref, B.ref_type as ledger_type, C.gi_date, 
                             case when B.ref_type ='purchase' then D.invoice_date when B.ref_type ='journal_voucher' then E.jv_date 
                                 when B.ref_type ='payment_receipt' then F.payment_date else D.invoice_date end as ref_date, 
                             case when B.ref_type ='purchase' then 1 when B.ref_type ='journal_voucher' then 2 
@@ -819,7 +1037,7 @@ class PaymentReceipt extends Model
                         left join acc_jv_details E on(B.ref_id = E.id and B.ref_type = 'journal_voucher') 
                         left join acc_payment_receipt F on(B.ref_id = F.id and B.ref_type = 'payment_receipt') 
                         where A.is_active = '1' and A.ref_type = 'payment_receipt' and A.company_id = '$company_id' and 
-                            A.ref_id = '$id' and A.entry_type != 'payment_entry' and B.is_active = '1') C 
+                            date(A.ref_date)>date('2018-04-01') and A.ref_id = '$id' and A.entry_type != 'payment_entry' and B.is_active = '1') C 
                         group by sr_no, ledger_type, type, ref_no, ref_date 
                         order by sr_no, ledger_type, type, ref_no, ref_date";
             } else {

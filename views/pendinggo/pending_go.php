@@ -48,7 +48,7 @@ $mycomponent = Yii::$app->mycomponent;
 											<th>Location (To)</th> 
 											<th>Customer name</th> 
 											<th>Scanned Qty</th> 
-											<th>Receivable after tax</th> 
+											<!-- <th>Receivable after tax</th>  -->
 											<th>GO Date (dd/mm/yyyy)</th> 
 											<th>Status</th> 
 											<th>Updated By</th> 
@@ -120,7 +120,7 @@ $mycomponent = Yii::$app->mycomponent;
 											<th>Location From</th>
 											<th>Location To</th>
 											<th>Customer name</th>
-											<th>Receivable after tax</th> 
+											<!-- <th>Receivable after tax</th>  -->
 											<th>GO Date (dd/mm/yyyy)</th> 
 											<th>Status</th> 
 											<th>Updated By</th> 
@@ -148,7 +148,7 @@ $mycomponent = Yii::$app->mycomponent;
 											<th>Location (From)</th> 
 											<th>Location To</th>
 											<th>Customer name</th>
-											<th>Receivable after tax</th> 
+											<!-- <th>Receivable after tax</th>  -->
 											<th>GO Date (dd/mm/yyyy)</th> 
 											<th>Status</th> 
 											<th>Updated By</th> 
