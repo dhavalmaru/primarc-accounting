@@ -37,10 +37,19 @@ class PendinggoController extends Controller
         $mycomponent = Yii::$app->mycomponent;
         $start = $request->post('start');    
         //$params['start'].", ".$params['length']
+
+        $access = $grn_cnt->getAccess();
+        $r_edit = 0;
+        if(isset($access[0])) { 
+            if($access[0]['r_insert']=='1' || $access[0]['r_edit']=='1') { 
+                $r_edit = 1;
+            } 
+        }
+
         for($i=0; $i<count($grn); $i++) { 
-           $row = array(
+            $row = array(
                         $start+1,
-                        '<a href="'.Url::base() .'index.php?r=pendinggo%2Fupdate&id='.$grn[$i]['gi_go_id'].'" >Post </a>',
+                        (($r_edit == 1)?'<a href="'.Url::base() .'index.php?r=pendinggo%2Fupdate&id='.$grn[$i]['gi_go_id'].'" >Post </a>':''),
                         /*''.$grn[$i]['gi_go_id'].'',*/
                         ''.$grn[$i]['gi_go_ref_no'].'',
                         ''.$grn[$i]['po_number'].'',
@@ -79,14 +88,20 @@ class PendinggoController extends Controller
         $mycomponent = Yii::$app->mycomponent;
         $start = $request->post('start');    
         //$params['start'].", ".$params['length']
-        /*
-            <a href="'.Url::base() .'index.php?r=pendinggo%2Fupdate&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>
-        */
-         for($i=0; $i<count($grn); $i++) { 
+
+        $access = $grn_cnt->getAccess();
+        $r_edit = 0;
+        if(isset($access[0])) { 
+            if($access[0]['r_insert']=='1' || $access[0]['r_edit']=='1') { 
+                $r_edit = 1;
+            } 
+        }
+        
+        for($i=0; $i<count($grn); $i++) { 
            $row = array(
                         $start+1,
-                        '<a href="'.Url::base() .'index.php?r=pendinggo%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>
-                        <a href="'.Url::base() .'index.php?r=pendinggo%2Fupdate&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>',
+                        '<a href="'.Url::base() .'index.php?r=pendinggo%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>'.
+                        (($r_edit == 1)?'<a href="'.Url::base() .'index.php?r=pendinggo%2Fupdate&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>':''),
                         /*''.$grn[$i]['gi_go_id'].'',*/
                         ''.$grn[$i]['gi_go_id'].'',
                         ''.$grn[$i]['po_number'].'',
@@ -123,10 +138,19 @@ class PendinggoController extends Controller
         $mycomponent = Yii::$app->mycomponent;
         $start = $request->post('start');    
         //$params['start'].", ".$params['length']
+
+        $access = $grn_cnt->getAccess();
+        $r_edit = 0;
+        if(isset($access[0])) { 
+            if($access[0]['r_insert']=='1' || $access[0]['r_edit']=='1') { 
+                $r_edit = 1;
+            } 
+        }
+        
         for($i=0; $i<count($grn); $i++) { 
            $row = array(
                         $start+1,
-                        '<a href="'.Url::base() .'index.php?r=pendinggo%2Fupdate&id='.$grn[$i]['gi_go_id'].'" >Post </a>',
+                        (($r_edit == 1)?'<a href="'.Url::base() .'index.php?r=pendinggo%2Fupdate&id='.$grn[$i]['gi_go_id'].'" >Post </a>':''),
                         /*''.$grn[$i]['gi_go_id'].'',*/
                         ''.$grn[$i]['gi_go_id'].'',
                         ''.$grn[$i]['po_number'].'',

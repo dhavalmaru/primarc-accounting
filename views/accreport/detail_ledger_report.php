@@ -9,95 +9,96 @@ $mycomponent = Yii::$app->mycomponent;
 ?>
 
 <style>
-.form-horizontal .checkbox, .form-horizontal .radio { padding:0;  margin:0; min-height:auto; line-height:20px;}
-.checkbox input[type=checkbox], .checkbox-inline input[type=checkbox], .radio input[type=radio], .radio-inline input[type=radio] { position:relative; margin:0;}
-.table>thead>tr>th {   vertical-align: middle;  border-bottom: 2px solid #ddd;}
-.checkbox, .radio { margin:0; padding:0;}
-.bold-text {    background-color: #f1f1f1; text-align:right;}
-.bold-text th {text-align:right!important;}
-.ad_hock{display:none;}
-#knock_off{display:none;}
-.form-horizontal .control-label {font-size: 12px; letter-spacing: .5px; margin-top:5px; }
-.form-devident { margin-top: 10px; }
-.table-hover>tbody>tr:hover {
-    background:none!important;
-}
-table tr td { border: 1px solid #eee!important; }
-/*.form-devident h3 { border-bottom: 1px dashed #ddd; padding-bottom: 10px; }*/
-#report_filter { border-bottom: 1px dashed #ddd; }
-#report_header label { display: block; padding-bottom: 0px; margin-bottom: 0px;}
-.ui-datepicker {z-index: 1000!important;}
-.show_narration {word-break: break-all;}
-@media print {
-	#report_filter, #btn_print {
-		display:none;
+	.form-horizontal .checkbox, .form-horizontal .radio { padding:0;  margin:0; min-height:auto; line-height:20px;}
+	.checkbox input[type=checkbox], .checkbox-inline input[type=checkbox], .radio input[type=radio], .radio-inline input[type=radio] { position:relative; margin:0;}
+	.table>thead>tr>th {   vertical-align: middle;  border-bottom: 2px solid #ddd;}
+	.checkbox, .radio { margin:0; padding:0;}
+	.bold-text {    background-color: #f1f1f1; text-align:right;}
+	.bold-text th {text-align:right!important;}
+	.ad_hock{display:none;}
+	#knock_off{display:none;}
+	.form-horizontal .control-label {font-size: 12px; letter-spacing: .5px; margin-top:5px; }
+	.form-devident { margin-top: 10px; }
+	.table-hover>tbody>tr:hover {
+	    background:none!important;
 	}
-	@page {size: landscape;}
-	.btn-group {display: none;}
-}
-#example_wrapper .row:first-child .col-md-6:last-child .btn-group { margin-right: 0px; }
-#example_wrapper .row:nth-child(1) {margin-top: -60px;}
-#example_wrapper .row:nth-child(2) {margin-top: 20px;}
-#example {
-	width: 1040px !important;
-}
+	table tr td { border: 1px solid #eee!important; }
+	/*.form-devident h3 { border-bottom: 1px dashed #ddd; padding-bottom: 10px; }*/
+	#report_filter { border-bottom: 1px dashed #ddd; }
+	#report_header label { display: block; padding-bottom: 0px; margin-bottom: 0px;}
+	.ui-datepicker {z-index: 1000!important;}
+	.show_narration {word-break: break-all;}
+	@media print {
+		#report_filter, #btn_print {
+			display:none;
+		}
+		@page {size: landscape;}
+		.btn-group {display: none;}
+	}
+	#example_wrapper .row:first-child .col-md-6:last-child .btn-group { margin-right: 0px; }
+	#example_wrapper .row:nth-child(1) {margin-top: -60px;}
+	#example_wrapper .row:nth-child(2) {margin-top: 20px;}
+	#example {
+		width: 1040px !important;
+	}
 
-/*tbody{
-   	height:150px;display:block;overflow:scroll
-}*/
-/*table {
-    width: 100%;
-    display:block;
-}
-thead {
-    display: inline-block;
-    width: 100%;
-    height: 30px;
-}
-tbody {
-    height: 300px;
-    display: inline-block;
-    width: 100%;
-    overflow: auto;
-}*/
+	/*tbody{
+	   	height:150px;display:block;overflow:scroll
+	}*/
+	/*table {
+	    width: 100%;
+	    display:block;
+	}
+	thead {
+	    display: inline-block;
+	    width: 100%;
+	    height: 30px;
+	}
+	tbody {
+	    height: 300px;
+	    display: inline-block;
+	    width: 100%;
+	    overflow: auto;
+	}*/
 
-#example_wrapper .row:first-child .col-md-6:last-child .btn-group {
-	margin-bottom:94px; 
-	float: right;
-	margin-right: -178px;
-	float: left!important;
-}
-.form-control{
-	height: 32px!important;
-}
-.select2-container--default .select2-selection--multiple .select2-selection__choice {
-	background-color: #3c8dbc!important;
-}
-.error {
-	font-weight: 500;
-	color: #f95353!important;
-	font-size: 12px;
-	letter-spacing: .5px;
-	border: 0px solid #f95353;
-	margin: 0; 
-}
-.dataTables_scroll {
-	overflow:auto;
-}
-#example_wrapper .row:first-child .col-md-6:last-child .btn-group {
-	margin-bottom: 0px!important; 
-	float: right!important; 
-	margin-right: 0px!important; 
-}
-#example_wrapper .row:first-child{
-	margin-top: 0px;
-}
-#example_wrapper .row:nth-child(2){
-	margin-top: 0px;
-}
-
-</style><!-- 
+	#example_wrapper .row:first-child .col-md-6:last-child .btn-group {
+		margin-bottom:94px; 
+		float: right;
+		margin-right: -178px;
+		float: left!important;
+	}
+	.form-control{
+		height: 32px!important;
+	}
+	.select2-container--default .select2-selection--multiple .select2-selection__choice {
+		background-color: #3c8dbc!important;
+	}
+	.error {
+		font-weight: 500;
+		color: #f95353!important;
+		font-size: 12px;
+		letter-spacing: .5px;
+		border: 0px solid #f95353;
+		margin: 0; 
+	}
+	.dataTables_scroll {
+		overflow:auto;
+	}
+	#example_wrapper .row:first-child .col-md-6:last-child .btn-group {
+		margin-bottom: 0px!important; 
+		float: right!important; 
+		margin-right: 0px!important; 
+	}
+	#example_wrapper .row:first-child{
+		margin-top: 0px;
+	}
+	#example_wrapper .row:nth-child(2){
+		margin-top: 0px;
+	}
+</style>
+<!-- 
  <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/css/select2.min.css" /> -->
+
 <?php 
 $this->registerCssFile(
         '@web/css/select2.min.css',

@@ -11,7 +11,9 @@ $mycomponent = Yii::$app->mycomponent;
 
 <div class="grn-index"> 
 	<div class=" col-md-12">  
-		<a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Fcreate"> <button type="button" class="btn btn-grid btn-success btn-sm pull-right">Add New Payment Details </button></a>
+		<a href="<?php echo Url::base(); ?>index.php?r=paymentreceipt%2Fcreate" style="<?php if(isset($access[0]['r_insert'])) { if($access[0]['r_insert']=='1') echo ''; else echo 'display: none;'; } else { echo 'display: none;'; } ?>">
+			<button type="button" class="btn btn-grid btn-success btn-sm pull-right">Add New Payment Details </button>
+		</a>
 		<div class="panel with-nav-tabs panel-primary">
 			<div class="panel-heading">
 				<ul class="nav nav-tabs">

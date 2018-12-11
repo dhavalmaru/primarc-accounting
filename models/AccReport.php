@@ -189,6 +189,23 @@ class AccReport extends Model
                     ref_type = 'B2B Sales' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
                 on (A.voucher_id = B.cp_voucher_id) 
 
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, 
+                    A.narration, A.ref_date, B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and 
+                    ref_type = 'sales_upload' and ledger_type != 'Main Entry' and company_id = '$company_id') A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and 
+                    ref_type = 'sales_upload' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
+                on (A.voucher_id = B.cp_voucher_id) 
+
                 ) AA 
                 where AA.acc_id = '$acc_id' or AA.cp_acc_id = '$acc_id' 
                 order by AA.ref_date, AA.id";
@@ -477,7 +494,7 @@ class AccReport extends Model
         }
     }
     
-    public function gettaxwisebifercation($account, $vouchertype,$from_date, $to_date,$date_type,$state) {
+    public function gettaxwisebifercation($account, $vouchertype, $from_date, $to_date, $date_type, $state) {
         if($date_type=='invoice_date')
             $where_condition = "date(invoice_date)>='$from_date' and date(invoice_date)<='$to_date'";
         else if($date_type=='grn_approved_date_time')
@@ -1269,9 +1286,24 @@ class AccReport extends Model
                     ref_type = 'B2B Sales' and ledger_type != 'Main Entry' and company_id = '$company_id') A 
                 left join 
                 (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
-                    ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
-                    date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and 
                     ref_type = 'B2B Sales' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
+                    A.amount as amount1, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, 
+                    A.narration, A.ref_date, B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and 
+                    ref_type = 'sales_upload' and ledger_type != 'Main Entry' and company_id = '$company_id') A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and date(ref_date) >= date('$from_date') and date(ref_date) <= date('$to_date') and 
+                    ref_type = 'sales_upload' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
                 on (A.voucher_id = B.cp_voucher_id) 
 
                 ) AA 
@@ -1504,6 +1536,21 @@ class AccReport extends Model
                     ref_type = 'B2B Sales' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
                 on (A.voucher_id = B.cp_voucher_id) 
 
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, 
+                    A.narration, A.ref_date, B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code ,A.payment_date from 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1'  and 
+                    ref_type = 'sales_upload' and ledger_type != 'Main Entry' and company_id = '$company_id') A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'sales_upload' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
+                on (A.voucher_id = B.cp_voucher_id) 
+
                 ) AA 
                 where $where_condition (AA.acc_id = '$acc_id' or AA.cp_acc_id = '$acc_id') 
                 order by AA.ref_date, AA.id ) A";
@@ -1647,6 +1694,21 @@ class AccReport extends Model
                 (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
                     ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
                     ref_type = 'B2B Sales' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, 
+                    A.narration, A.ref_date, B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code, A.payment_date from 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1'  and 
+                    ref_type = 'sales_upload' and ledger_type != 'Main Entry' and company_id = '$company_id') A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'sales_upload' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
                 on (A.voucher_id = B.cp_voucher_id) 
 
                 ) AA 
@@ -1796,6 +1858,21 @@ class AccReport extends Model
                 (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
                     ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
                     ref_type = 'B2B Sales' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when B.cp_acc_id = '$acc_id' then case when A.type='Debit' then 'Credit' else 'Debit' end else A.type end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, 
+                    A.narration, A.ref_date, B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code ,A.payment_date from 
+                (select * from acc_ledger_entries where status = '$status' and is_active = '1'  and 
+                    ref_type = 'sales_upload' and ledger_type != 'Main Entry' and company_id = '$company_id') A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = '$status' and is_active = '1' and 
+                    ref_type = 'sales_upload' and ledger_type = 'Main Entry' and company_id = '$company_id') B 
                 on (A.voucher_id = B.cp_voucher_id) 
 
                 ) AA 

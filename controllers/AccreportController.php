@@ -161,7 +161,7 @@ class AccreportController extends Controller
         
         if(count($vouchertype)==0) {
             $data['vouchertype']=[];
-            $vouchertype = array('purchase','journal_voucher','payment_receipt','go_debit_details','other_debit_credit','promotion');
+            $vouchertype = array('purchase','journal_voucher','payment_receipt','go_debit_details','other_debit_credit','promotion','sales_upload');
         } else {
             $data['vouchertype']=$vouchertype;
         }

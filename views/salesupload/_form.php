@@ -210,7 +210,7 @@ $mycomponent = Yii::$app->mycomponent;
                         <?php echo $item_details[$i]['particular']; ?>
                     </td>
                     <td class="sticky-cell" style="border: none!important;">
-                        <select id="acc_id_<?php echo $k;?>_<?php echo $i;?>" class="form-control acc_id" name="acc_id_<?php echo $k;?>[]" onChange="get_acc_details(this)">
+                        <select id="acc_id_<?php echo $k;?>_<?php echo $i;?>" class="form-control acc_id select2" name="acc_id_<?php echo $k;?>[]" onChange="get_acc_details(this)">
                             <option value="">Select</option>
                             <?php for($j=0; $j<count($acc_master); $j++) { 
                                     if($acc_master[$j]['type']==$item_details[$i]['acc_type']) { 

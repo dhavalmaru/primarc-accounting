@@ -90,6 +90,8 @@ $session = Yii::$app->session;
 								</table>
 							</div>
 						</div> -->
+
+						<!-- <form id="form_set_sales_file" class="form-horizontal" action="<?php //echo Url::base(); ?>index.php?r=salesupload%2Fset_sales_file" method="post" enctype="multipart/form-data" onkeypress="return event.keyCode != 13;">  -->
 						<div class="tab-pane fade in active" id="tab2primary">
 							<div class="bs-example grn-index" data-example-id="bordered-table"> 
 								<table id="example1" class="table datatable table-bordered display" cellspacing="0" width="100%">
@@ -98,13 +100,14 @@ $session = Yii::$app->session;
 											<th width="58" align="center">Sr. No.</th> 
 											<th>Date Of Upload</th> 
 											<th>File Name</th>
-											<th>View</th> 
+											<th>Action</th> 
 											<th>Download Original File</th> 
 											<th>Download Error Highlighted File</th>
 											<th>Download Error Rejected File</th>
 											<th>Freeze File</th>
 											<th>Uploaded By</th> 
 											<th>Check HSN</th>
+											<th>Upload Status</th>
 										</tr>  
 									</thead>
 									<tbody> 
@@ -114,7 +117,20 @@ $session = Yii::$app->session;
 											<td><?php if($approved[$i]['date_of_upload']!=null && $approved[$i]['date_of_upload']!='') echo date('d/m/Y',strtotime($approved[$i]['date_of_upload'])); ?></td> 
 											<td><?php echo $approved[$i]['file_name']; ?></td> 
 											<td>
-												<a href="<?php echo Url::base() .'index.php?r=salesupload%2Fedit&id='.$approved[$i]['id']; ?>" >View </a> 
+												<?php 
+												$bl_uploaded = false; if(isset($approved[$i]['upload_status'])) { if($approved[$i]['upload_status']=='uploaded') $bl_uploaded = true; }
+												$bl_freeze = false; if(isset($approved[$i]['freeze_file'])) { if($approved[$i]['freeze_file']=='1') $bl_freeze = true; }
+												$bl_edit = false; if(isset($approved[$i]['ref_id'])) { if($approved[$i]['ref_id']!='') $bl_edit = true; }
+												$is_paid = false; if(isset($approved[$i]['is_paid'])) { if($approved[$i]['is_paid']=='1') $is_paid = true; }
+												if($bl_uploaded==true && $bl_freeze==false) {
+												if($bl_edit==true) {
+												?>
+												<a href="<?php echo Url::base() .'index.php?r=salesupload%2Fview&id='.$approved[$i]['id']; ?>">View</a>
+												<?php if($is_paid==false) { ?>
+												<a href="<?php echo Url::base() .'index.php?r=salesupload%2Fedit&id='.$approved[$i]['id']; ?>">Edit</a>
+												<?php }} else { ?>
+												<a href="<?php echo Url::base() .'index.php?r=salesupload%2Fpost&id='.$approved[$i]['id']; ?>">Post</a>
+												<?php }} ?>
 											</td> 
 											<td class="text-center">
 												<?php if($approved[$i]['original_file']!= '') { ?>
@@ -137,15 +153,26 @@ $session = Yii::$app->session;
 												</a>
 												<?php } ?>
 											</td> 
-											<td><button type="button" class="btn btn-default btn-sm">Freeze</button></td> 
+											<td>
+												<?php if($bl_uploaded==true && $bl_freeze==false) { ?>
+												<button type="button" class="btn btn-default btn-sm" id="btn_freeze_<?php echo $approved[$i]['id']; ?>" onclick="freeze_file(this);">Freeze</button>
+												<?php } ?>
+											</td>
 											<td><?php echo $approved[$i]['creator']; ?></td> 
-											<td><button type="button" class="btn btn-default btn-sm">Check HSN</button></td> 
+											<td>
+												<?php if($bl_uploaded==true && $bl_freeze==false) { ?>
+												<button type="button" class="btn btn-default btn-sm" id="btn_check_<?php echo $approved[$i]['id']; ?>" onclick="check_hsn(this);">Check HSN</button>
+												<?php } ?>
+											</td>
+											<td><?php echo $approved[$i]['upload_status']; ?></td>
 										</tr> 
 										<?php } ?>
 									</tbody> 
 								</table>
 							</div>
 						</div>
+						<!-- </form> -->
+
 						<!-- <div class="tab-pane fade" id="tab3primary">
 							<div class="bs-example grn-index table-container containner" data-example-id="bordered-table"  >  
 								<table id="example2" class="table datatable table-bordered display" cellspacing="0" width="100%">
@@ -201,6 +228,16 @@ $session = Yii::$app->session;
 <?php 
     $this->registerJsFile(
         '@web/js/datatable.js',
+        ['depends' => [\yii\web\JqueryAsset::className()]]
+    );
+?>
+<?php 
+    $this->registerJsFile(
+        '@web/js/jquery-ui-1.11.2/jquery-ui.min.js',
+        ['depends' => [\yii\web\JqueryAsset::className()]]
+    );
+    $this->registerJsFile(
+        '@web/js/sales_upload.js',
         ['depends' => [\yii\web\JqueryAsset::className()]]
     );
 ?>

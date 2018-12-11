@@ -8,9 +8,9 @@ use yii\helpers\Url;
 /* @var $model app\models\Grn */
 
 
-$this->title = 'Sales Upload: ' . $data[0]['file_id'];
+$this->title = 'Sales Upload: ' . $file_details[0]['id'];
 $this->params['breadcrumbs'][] = ['label' => 'Sales Upload', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $data[0]['file_id'], 'url' => ['update', 'id' => $data[0]['file_id']]];
+$this->params['breadcrumbs'][] = ['label' => $file_details[0]['id'], 'url' => ['update', 'id' => $file_details[0]['id']]];
 $this->params['breadcrumbs'][] = 'Ledger';
 $mycomponent = Yii::$app->mycomponent;
 ?>
@@ -76,8 +76,8 @@ $mycomponent = Yii::$app->mycomponent;
         <h3 class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Primarc Pecan Retail Pvt. Ltd.</h3>
         <h5 class="text-center">Mumbai</h5>
         <h5 class="text-center">Sales Upload</h5>
-        <div class="pull-left">File Id: <?php echo $data[0]['file_id']; ?></div>
-        <div class="pull-right">Posting Date: <?php if(isset($data[0]['date_of_upload'])) echo (($data[0]['date_of_upload']!=null && $data[0]['date_of_upload']!='')?date('d/m/Y',strtotime($data[0]['date_of_upload'])):date('d/m/Y')); else echo date('d/m/Y'); ?></div>
+        <div class="pull-left">File Id: <?php echo $file_details[0]['id']; ?></div>
+        <div class="pull-right">Posting Date: <?php if(isset($file_details[0]['date_of_upload'])) echo (($file_details[0]['date_of_upload']!=null && $file_details[0]['date_of_upload']!='')?date('d/m/Y',strtotime($file_details[0]['date_of_upload'])):date('d/m/Y')); else echo date('d/m/Y'); ?></div>
         
 
     <?php 
@@ -131,11 +131,11 @@ $mycomponent = Yii::$app->mycomponent;
                 $total_credit_amt = 0;
                 $sr_no=1;
 
-                if($acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
-                    $rows = $rows . '<tr class="bold-text text-right">
-                                        <td colspan="6" style="text-align:left;">Deduction Entry</td>
-                                    </tr>';
-                }
+                // if($acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
+                //     $rows = $rows . '<tr class="bold-text text-right">
+                //                         <td colspan="6" style="text-align:left;">Deduction Entry</td>
+                //                     </tr>';
+                // }
             }
 
             $blFlag = false;

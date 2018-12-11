@@ -509,7 +509,8 @@ class PendingGrn extends Model
                         B.is_active = '1' and B.grn_id = '$id' and B.invoice_no is not null and 
                         C.is_active = '1') A 
                 left join 
-                (select distinct sku_internal_code, margin_understanding from product_master where is_active = '1' and company_id = '$company_id') B 
+                (select distinct sku_internal_code, margin_understanding from product_master 
+                    where is_active = '1' and is_latest = '1' and is_preferred = '1' and company_id = '$company_id') B 
                 on (A.psku = B.sku_internal_code)) A) AA 
                 left join 
                 (select id, tax_zone_code, tax_zone_name, parent_id, tax_rate, 
@@ -641,7 +642,8 @@ class PendingGrn extends Model
                     where A.grn_id = '$id' and B.grn_id = '$id' and A.is_active = '1' and A.company_id = '$company_id' and B.is_active = '1' and 
                             D.is_active = '1' and F.is_active = '1' and B.invoice_no is not null) A 
                     left join 
-                    (select distinct sku_internal_code, margin_understanding from product_master where is_active = '1' and company_id = '$company_id') B 
+                    (select distinct sku_internal_code, margin_understanding from product_master 
+                        where is_active = '1' and is_latest = '1' and is_preferred = '1' and company_id = '$company_id') B 
                     on (A.psku = B.sku_internal_code)) J) K) L 
                     where L." . $col_qty . " > 0 
                     order by L.invoice_no, L.vat_percen) AA 
@@ -688,7 +690,8 @@ class PendingGrn extends Model
                     where A.grn_id = '$id' and B.grn_id = '$id' and A.is_active = '1' and A.company_id = '$company_id' and B.is_active = '1' and 
                             D.is_active = '1' and F.is_active = '1' and B.invoice_no is not null) A 
                     left join 
-                    (select distinct sku_internal_code, margin_understanding from product_master where is_active = '1' and company_id = '$company_id') B 
+                    (select distinct sku_internal_code, margin_understanding from product_master 
+                        where is_active = '1' and is_latest = '1' and is_preferred = '1' and company_id = '$company_id') B 
                     on (A.psku = B.sku_internal_code)) AA 
                     left join 
                     (select id, tax_zone_code, tax_zone_name, parent_id, tax_rate, 
@@ -2303,7 +2306,8 @@ class PendingGrn extends Model
                 where A.grn_id = '$grn_id' and B.grn_id = '$grn_id' and B.psku = '$psku' and A.is_active = '1' and A.company_id = '$company_id' and 
                         B.is_active = '1' and D.is_active = '1' and F.is_active = '1') A 
                 left join 
-                (select distinct sku_internal_code, margin_understanding from product_master where is_active = '1' and company_id = '$company_id') B 
+                (select distinct sku_internal_code, margin_understanding from product_master 
+                    where is_active = '1' and is_latest = '1' and is_preferred = '1' and company_id = '$company_id') B 
                 on (A.psku = B.sku_internal_code)) A) AA 
                 
                 left join 

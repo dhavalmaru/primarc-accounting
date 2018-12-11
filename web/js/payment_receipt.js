@@ -77,7 +77,7 @@ $(document).ready(function() {
                 alert(thrownError);
             }
         });
-        getLedger();
+        // getLedger();
     });
 
     //$(document.body).on("change","#search_code",function(){

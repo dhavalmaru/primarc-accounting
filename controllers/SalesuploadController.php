@@ -49,13 +49,14 @@ class SalesuploadController extends Controller
         $salesupload->upload_sales();
     }
 
-    public function actionTestgstformat() {
+    public function actionTest() {
         $salesupload = new SalesUpload();
         // echo $salesupload->check_gst_no_format('06AACCT5910H1ZI', 'Haryana');
         // if($salesupload->check_no('0.00')==false){
         //     echo 'rejected';
         // }
-        $salesupload->upload_sales();
+        // $salesupload->upload_sales();
+        $salesupload->test();
     }
 
     public function actionCreate(){
@@ -68,7 +69,7 @@ class SalesuploadController extends Controller
               
                 $approver_list = $salesupload->getApprover($action);
 
-                $salesupload->setLog('Salesupload', '', 'Insert', '', 'Insert Sales Details', 'acc_sales_upload', '');
+                $salesupload->setLog('Salesupload', '', 'Insert', '', 'Insert Sales Upload Details', 'acc_sales_upload', '');
                 return $this->render('sales_upload_details', ['action' => $action, 
                                                                  'approver_list' => $approver_list]);
             } else {
@@ -107,7 +108,7 @@ class SalesuploadController extends Controller
         $access = $salesupload->getAccess();
         if(count($access)>0) {
             if($access[0]['r_view']==1) {
-                $salesupload->setLog(' Salesupload', '', 'View', '', 'View Sales Details', 'acc_sales_upload', $id);
+                $salesupload->setLog(' Salesupload', '', 'View', '', 'View Sales Upload Details', 'acc_sales_upload', $id);
                 return $this->actionRedirect('view', $id);
             } else {
                 return $this->render('/message', [
@@ -132,7 +133,32 @@ class SalesuploadController extends Controller
         $data = $salesupload->getFileDetails($id);
         if(count($access)>0) {
             if($access[0]['r_edit']==1 && ($access[0]['session_id']==$data[0]['created_by'] || $access[0]['session_id']==$data[0]['updated_by'])) {
-                $salesupload->setLog('Salesupload', '', 'Edit', '', 'Edit Sales Details', 'acc_sales_upload', $id);
+                $salesupload->setLog('Salesupload', '', 'Edit', '', 'Edit Sales Upload Details', 'acc_sales_upload', $id);
+                return $this->actionRedirect('edit', $id);
+            } else {
+                return $this->render('/message', [
+                    'title'  => \Yii::t('user', 'Access Denied'),
+                    'module' => $this->module,
+                    'msg' => '<h4>You donot have access to this page.</h4>'
+                ]);
+            }
+        } else {
+            $this->layout = 'other';
+            return $this->render('/message', [
+                'title'  => \Yii::t('user', 'Session Expired'),
+                'module' => $this->module,
+                'msg' => 'Session Expired. Please <a href="'.Url::base().'index.php">Login</a> again.'
+            ]);
+        }
+    }
+
+    public function actionPost($id) {
+        $salesupload = new SalesUpload();
+        $access = $salesupload->getAccess();
+        $data = $salesupload->getFileDetails($id);
+        if(count($access)>0) {
+            if($access[0]['r_edit']==1 && ($access[0]['session_id']==$data[0]['created_by'] || $access[0]['session_id']==$data[0]['updated_by'])) {
+                $salesupload->setLog('Salesupload', '', 'Post', '', 'Post Sales Upload Details', 'acc_sales_upload', $id);
                 return $this->actionRedirect('edit', $id);
             } else {
                 return $this->render('/message', [
@@ -275,7 +301,7 @@ class SalesuploadController extends Controller
         $data = $salesupload->getDetails($id, "");
         if(count($access)>0) {
             if($access[0]['r_approval']==1 && $access[0]['session_id']!=$data[0]['updated_by']) {
-                $salesupload->setLog('Salesupload', '', 'Authorise', '', 'Authorise Sales Details', 'acc_sales_upload', $id);
+                $salesupload->setLog('Salesupload', '', 'Authorise', '', 'Authorise Sales Upload Details', 'acc_sales_upload', $id);
                 return $this->actionRedirect('authorise', $id);
             } else {
                 return $this->render('/message', [
@@ -325,7 +351,7 @@ class SalesuploadController extends Controller
 
             $columnNameArray=['file_id','particular','acc_id','ledger_name','ledger_code','voucher_id','ledger_type',
                                 'tax_percent','invoice_no','amount','status','is_active',
-                                'updated_by','updated_date','date_of_upload','company_id'];
+                                'updated_by','updated_date','date_of_upload','company_id', 'marketplace_id'];
             // below line insert all your record and return number of rows inserted
             $tableName = "acc_sales_entries";
             $insertCount = Yii::$app->db->createCommand()
@@ -340,7 +366,7 @@ class SalesuploadController extends Controller
         }
 
         if(count($ledgerArray)>0){
-            $sql = "delete from acc_ledger_entries where ref_id = '$file_id' and ref_type='Sales Upload'";
+            $sql = "delete from acc_ledger_entries where ref_id = '$file_id' and ref_type='sales_upload'";
             Yii::$app->db->createCommand($sql)->execute();
 
             $columnNameArray=['ref_id','ref_type','entry_type','invoice_no','acc_id','ledger_name','ledger_code',
@@ -366,14 +392,27 @@ class SalesuploadController extends Controller
         $model = new SalesUpload();
 
         $acc_ledger_entries = $model->getSalesAccLedgerEntries($id);
-        $data = $salesupload->get_details($id);
+        $data = $model->get_details($id);
+        $file_details = $model->getFileDetails($id);
 
-        return $this->render('ledger', ['data' => $data, 'acc_ledger_entries' => $acc_ledger_entries]);
+        return $this->render('ledger', ['data' => $data, 'acc_ledger_entries' => $acc_ledger_entries, 'file_details' => $file_details]);
     }
 
     public function actionChecktaxtypeavailablity() {
         $salesupload = new SalesUpload();
         $result = $salesupload->checkTaxTypeAvailablity();
+        echo $result;
+    }
+
+    public function actionFreezefile(){
+        $model = new SalesUpload();
+        $result = $model->freeze_file();
+        echo $result;
+    }
+
+    public function actionCheckhsn(){
+        $model = new SalesUpload();
+        $result = $model->check_hsn();
         echo $result;
     }
 }

@@ -26,10 +26,18 @@ class GoodsoutwardController extends Controller
         $mycomponent = Yii::$app->mycomponent;
         $start = $request->post('start');
 
+        $access = $model->getAccess();
+        $r_edit = 0;
+        if(isset($access[0])) { 
+            if($access[0]['r_insert']=='1' || $access[0]['r_edit']=='1') { 
+                $r_edit = 1;
+            } 
+        }
+
         for($i=0; $i<count($grn); $i++) { 
             $row = array(
                         $start+1,
-                        '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" >Post </a>',
+                        (($r_edit == 1)?'<a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" >Post </a>':''),
                         ''.$grn[$i]['gi_go_id'].'',
                         ''.$grn[$i]['gi_go_ref_no'].'',
                         ''.$grn[$i]['warehouse_name'].'',
@@ -60,11 +68,20 @@ class GoodsoutwardController extends Controller
         $mycomponent = Yii::$app->mycomponent;
         $start = $request->post('start');    
         //$params['start'].", ".$params['length']
+
+        $access = $model->getAccess();
+        $r_edit = 0;
+        if(isset($access[0])) { 
+            if($access[0]['r_insert']=='1' || $access[0]['r_edit']=='1') { 
+                $r_edit = 1;
+            } 
+        }
+
         for($i=0; $i<count($grn); $i++) { 
            $row = array(
                         $start+1,
-                        '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>
-                        <a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>',
+                        '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>'.
+                        (($r_edit == 1)?'<a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>':''),
                         ''.$grn[$i]['gi_go_id'].'',
                         ''.$grn[$i]['gi_go_ref_no'].'',
                         ''.$grn[$i]['warehouse_name'].'',
@@ -96,15 +113,23 @@ class GoodsoutwardController extends Controller
         $mycomponent = Yii::$app->mycomponent;
         $start = $request->post('start');
 
+        $access = $model->getAccess();
+        $r_edit = 0;
+        if(isset($access[0])) { 
+            if($access[0]['r_insert']=='1' || $access[0]['r_edit']=='1') { 
+                $r_edit = 1;
+            } 
+        }
+
         for($i=0; $i<count($grn); $i++) {
             $link = '';
             if($grn[$i]['go_status']=='GRN Not Posted') {
                 $link = '';
             } else if($grn[$i]['go_status']=='GRN Posted & GO Balance') {
-                $link = '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" >Post </a>';
+                $link = (($r_edit == 1)?'<a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" >Post </a>':'');
             } else if($grn[$i]['go_status']=='GO Posted') {
-                $link = '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>
-                        <a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>';
+                $link = '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>'.
+                        (($r_edit == 1)?'<a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>':'');
             }
 
             $row = array(
@@ -1614,7 +1639,7 @@ class GoodsoutwardController extends Controller
         echo json_encode($data);
     }
 
-   /* public function actionSave(){   
+    /* public function actionSave(){   
         $model = new GoodsOutward();
         $transaction_id = $model->save();
         // $this->redirect(array('goodsoutward/ledger', 'transaction_id'=>$transaction_id));
@@ -1913,9 +1938,7 @@ class GoodsoutwardController extends Controller
         return $this->render('email_response', ['data' => $data]);
     }
 
-
-    public function actionGetgoodoutwards()
-    {                   
+    public function actionGetgoodoutwards(){
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
         $model = new GoodsOutward();
@@ -2298,10 +2321,5 @@ class GoodsoutwardController extends Controller
                 </tr>';
 
         echo $tableamount;
-        
-    }          
-
-   
     }
-
-
+}

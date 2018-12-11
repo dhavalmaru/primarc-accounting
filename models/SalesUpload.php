@@ -5,6 +5,8 @@ namespace app\models;
 use Yii;
 use yii\base\Model;
 use yii\web\UploadedFile;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class SalesUpload extends Model
 {
@@ -35,9 +37,18 @@ class SalesUpload extends Model
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-        $sql = "select A.*, B.username as creator, C.username as approver 
-                from acc_sales_files A left join user B on (A.created_by = B.id) left join user C on (A.approved_by = C.id) 
-                where A.is_active = '1'" . $cond . " and A.company_id = '$company_id' 
+        $sql = "select A.*, B.ref_id, C.is_paid from 
+                (select A.*, B.username as creator, C.username as approver 
+                from acc_sales_files A left join user B on (A.created_by = B.id) 
+                left join user C on (A.approved_by = C.id) 
+                where A.is_active = '1'" . $cond . " and A.company_id = '$company_id') A 
+                left join 
+                (select distinct ref_id from acc_ledger_entries) B 
+                on (A.id = B.ref_id) 
+                left join 
+                (select distinct ref_id, is_paid from acc_ledger_entries 
+                    where ref_type = 'sales_upload' and is_active = '1' and status = 'Approved' and is_paid = '1') C 
+                on (A.id = C.ref_id) 
                 order by UNIX_TIMESTAMP(A.updated_date) desc, A.id desc";
 
         $command = Yii::$app->db->createCommand($sql);
@@ -99,26 +110,30 @@ class SalesUpload extends Model
     }
 
     public function test() {
-        $sql = "select * from acc_sales_files";
-        $command = Yii::$app->db->createCommand($sql);
-        $reader = $command->query();
-        $data2 = $reader->readAll();
-        \moonland\phpexcel\Excel::widget([
-            'models' => $data2,
-            'mode' => 'export', //default value as 'export'
-            'columns' => ['id', 'date_of_upload', 'file_name', 'original_file', 'error_highlighted_file', 'error_rejected_file', 'freeze_file', 'approver_id', 'is_active', 'status', 'upload_status', 'created_by', 'updated_by', 'created_date', 'updated_date', 'approved_by', 'approved_date', 'approver_comments', 'company_id'], //without header working, because the header will be get label from attribute label. 
-            'headers' => ['id' => 'id', 'date_of_upload' => 'date_of_upload', 'file_name' => 'file_name', 'original_file' => 'original_file', 'error_highlighted_file' => 'error_highlighted_file', 'error_rejected_file' => 'error_rejected_file', 'freeze_file' => 'freeze_file', 'approver_id' => 'approver_id', 'is_active' => 'is_active', 'status' => 'status', 'upload_status' => 'upload_status', 'created_by' => 'created_by', 'updated_by' => 'updated_by', 'created_date' => 'created_date', 'updated_date' => 'updated_date', 'approved_by' => 'approved_by', 'approved_date' => 'approved_date', 'approver_comments' => 'approver_comments', 'company_id' => 'company_id'], 
-        ]);
+        $id = '1';
+        $filename='sales_rejected_file_'.$id.'.xls';
+        $upload_path = './uploads';
+        if(!is_dir($upload_path)) {
+            mkdir($upload_path, 0777, TRUE);
+        }
+        $upload_path = './uploads/sales';
+        if(!is_dir($upload_path)) {
+            mkdir($upload_path, 0777, TRUE);
+        }
+        $upload_path = './uploads/sales/'.$id;
+        if(!is_dir($upload_path)) {
+            mkdir($upload_path, 0777, TRUE);
+        }
 
-        $objPHPExcel = \moonland\phpexcel\Excel::new();
-        $objPHPExcel->setActiveSheetIndex(0);
-        $objPHPExcel->getActiveSheet()->setCellValue('A1', "Batch Id");
-        $filename='Production_Data_Report.xls';
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="'.$filename.'"');
-        header('Cache-Control: max-age=0');
-        $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-        $objWriter->save('php://output');
+        $file_name = $upload_path . '/' . $filename;
+        $file_path = 'uploads/sales/' . $id . '/' . $filename;
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Hello World !');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($file_name);
     }
 
     public function upload(){
@@ -134,7 +149,8 @@ class SalesUpload extends Model
                         'freeze_file' => '0',
                         'company_id' => $company_id,
                         'status' => 'approved',
-                        'is_active' => '1'
+                        'is_active' => '1',
+                        'upload_status' => 'pending'
                         );
 
         if(count($array)>0){
@@ -192,7 +208,7 @@ class SalesUpload extends Model
         $curusr = $session['session_id'];
         $now = date('Y-m-d H:i:s');
 
-        $sql = "select * from acc_sales_files where is_active = '1' and upload_status = 'pending'";
+        $sql = "select * from acc_sales_files where is_active = '1' and (upload_status = 'pending' or upload_status is null)";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $data = $reader->readAll();
@@ -202,6 +218,65 @@ class SalesUpload extends Model
             $fileName = $data[$i]['original_file'];
             $objPHPExcel = \moonland\phpexcel\Excel::import($fileName);
             $reject_file = false;
+            $highlight_file = false;
+
+            $r_row = 1;
+            $reject_spreadsheet = new Spreadsheet();
+            $reject_sheet = $reject_spreadsheet->getActiveSheet();
+            $reject_sheet->setCellValue('A'.$r_row, 'Market place');
+            $reject_sheet->setCellValue('B'.$r_row, 'Ship from GSTin');
+            $reject_sheet->setCellValue('C'.$r_row, 'Ship from State');
+            $reject_sheet->setCellValue('D'.$r_row, 'Ship to GSTin');
+            $reject_sheet->setCellValue('E'.$r_row, 'Amazon state');
+            $reject_sheet->setCellValue('F'.$r_row, 'Pin code');
+            $reject_sheet->setCellValue('G'.$r_row, 'Invoice no');
+            $reject_sheet->setCellValue('H'.$r_row, 'Invoice date');
+            $reject_sheet->setCellValue('I'.$r_row, 'Customer name');
+            $reject_sheet->setCellValue('J'.$r_row, 'SKU');
+            $reject_sheet->setCellValue('K'.$r_row, 'Item description');
+            $reject_sheet->setCellValue('L'.$r_row, 'HSN Code');
+            $reject_sheet->setCellValue('M'.$r_row, 'Quantity');
+            $reject_sheet->setCellValue('N'.$r_row, 'Rate');
+            $reject_sheet->setCellValue('O'.$r_row, 'Sales incl GST');
+            $reject_sheet->setCellValue('P'.$r_row, 'Sales excl GST');
+            $reject_sheet->setCellValue('Q'.$r_row, 'Total GST');
+            $reject_sheet->setCellValue('R'.$r_row, 'IGST Rate');
+            $reject_sheet->setCellValue('S'.$r_row, 'IGST Amount');
+            $reject_sheet->setCellValue('T'.$r_row, 'CGST Rate');
+            $reject_sheet->setCellValue('U'.$r_row, 'CGST Amount');
+            $reject_sheet->setCellValue('V'.$r_row, 'SGST Rate');
+            $reject_sheet->setCellValue('W'.$r_row, 'SGST Amount');
+            $reject_sheet->setCellValue('X'.$r_row, 'Flag');
+            $reject_sheet->setCellValue('Y'.$r_row, 'Remarks');
+
+            $h_row = 1;
+            $highlight_spreadsheet = new Spreadsheet();
+            $highlight_sheet = $highlight_spreadsheet->getActiveSheet();
+            $highlight_sheet->setCellValue('A'.$h_row, 'Market place');
+            $highlight_sheet->setCellValue('B'.$h_row, 'Ship from GSTin');
+            $highlight_sheet->setCellValue('C'.$h_row, 'Ship from State');
+            $highlight_sheet->setCellValue('D'.$h_row, 'Ship to GSTin');
+            $highlight_sheet->setCellValue('E'.$h_row, 'Amazon state');
+            $highlight_sheet->setCellValue('F'.$h_row, 'Pin code');
+            $highlight_sheet->setCellValue('G'.$h_row, 'Invoice no');
+            $highlight_sheet->setCellValue('H'.$h_row, 'Invoice date');
+            $highlight_sheet->setCellValue('I'.$h_row, 'Customer name');
+            $highlight_sheet->setCellValue('J'.$h_row, 'SKU');
+            $highlight_sheet->setCellValue('K'.$h_row, 'Item description');
+            $highlight_sheet->setCellValue('L'.$h_row, 'HSN Code');
+            $highlight_sheet->setCellValue('M'.$h_row, 'Quantity');
+            $highlight_sheet->setCellValue('N'.$h_row, 'Rate');
+            $highlight_sheet->setCellValue('O'.$h_row, 'Sales incl GST');
+            $highlight_sheet->setCellValue('P'.$h_row, 'Sales excl GST');
+            $highlight_sheet->setCellValue('Q'.$h_row, 'Total GST');
+            $highlight_sheet->setCellValue('R'.$h_row, 'IGST Rate');
+            $highlight_sheet->setCellValue('S'.$h_row, 'IGST Amount');
+            $highlight_sheet->setCellValue('T'.$h_row, 'CGST Rate');
+            $highlight_sheet->setCellValue('U'.$h_row, 'CGST Amount');
+            $highlight_sheet->setCellValue('V'.$h_row, 'SGST Rate');
+            $highlight_sheet->setCellValue('W'.$h_row, 'SGST Amount');
+            $highlight_sheet->setCellValue('X'.$h_row, 'Flag');
+            $highlight_sheet->setCellValue('Y'.$h_row, 'Remarks');
 
             for($j=0; $j<count($objPHPExcel); $j++) {
                 $bl_reject = false;
@@ -236,6 +311,58 @@ class SalesUpload extends Model
                 $sgst_rate[$j] = $objPHPExcel[$j]['SGST Rate'];
                 $sgst_amount[$j] = $objPHPExcel[$j]['SGST Amount'];
                 $flag[$j] = $objPHPExcel[$j]['Flag'];
+
+                $r_row += 1;
+                $reject_sheet->setCellValue('A'.$r_row, $objPHPExcel[$j]['Market place']);
+                $reject_sheet->setCellValue('B'.$r_row, $objPHPExcel[$j]['Ship from GSTin']);
+                $reject_sheet->setCellValue('C'.$r_row, $objPHPExcel[$j]['Ship from State']);
+                $reject_sheet->setCellValue('D'.$r_row, $objPHPExcel[$j]['Ship to GSTin']);
+                $reject_sheet->setCellValue('E'.$r_row, $objPHPExcel[$j]['Amazon state']);
+                $reject_sheet->setCellValue('F'.$r_row, $objPHPExcel[$j]['Pin code']);
+                $reject_sheet->setCellValue('G'.$r_row, $objPHPExcel[$j]['Invoice no']);
+                $reject_sheet->setCellValue('H'.$r_row, $objPHPExcel[$j]['Invoice date']);
+                $reject_sheet->setCellValue('I'.$r_row, $objPHPExcel[$j]['Customer name']);
+                $reject_sheet->setCellValue('J'.$r_row, $objPHPExcel[$j]['SKU']);
+                $reject_sheet->setCellValue('K'.$r_row, $objPHPExcel[$j]['Item description']);
+                $reject_sheet->setCellValue('L'.$r_row, $objPHPExcel[$j]['HSN Code']);
+                $reject_sheet->setCellValue('M'.$r_row, $objPHPExcel[$j]['Quantity']);
+                $reject_sheet->setCellValue('N'.$r_row, $objPHPExcel[$j]['Rate']);
+                $reject_sheet->setCellValue('O'.$r_row, $objPHPExcel[$j]['Sales incl GST']);
+                $reject_sheet->setCellValue('P'.$r_row, $objPHPExcel[$j]['Sales excl GST']);
+                $reject_sheet->setCellValue('Q'.$r_row, $objPHPExcel[$j]['Total GST']);
+                $reject_sheet->setCellValue('R'.$r_row, $objPHPExcel[$j]['IGST Rate']);
+                $reject_sheet->setCellValue('S'.$r_row, $objPHPExcel[$j]['IGST Amount']);
+                $reject_sheet->setCellValue('T'.$r_row, $objPHPExcel[$j]['CGST Rate']);
+                $reject_sheet->setCellValue('U'.$r_row, $objPHPExcel[$j]['CGST Amount']);
+                $reject_sheet->setCellValue('V'.$r_row, $objPHPExcel[$j]['SGST Rate']);
+                $reject_sheet->setCellValue('W'.$r_row, $objPHPExcel[$j]['SGST Amount']);
+                $reject_sheet->setCellValue('X'.$r_row, $objPHPExcel[$j]['Flag']);
+
+                $h_row += 1;
+                $highlight_sheet->setCellValue('A'.$h_row, $objPHPExcel[$j]['Market place']);
+                $highlight_sheet->setCellValue('B'.$h_row, $objPHPExcel[$j]['Ship from GSTin']);
+                $highlight_sheet->setCellValue('C'.$h_row, $objPHPExcel[$j]['Ship from State']);
+                $highlight_sheet->setCellValue('D'.$h_row, $objPHPExcel[$j]['Ship to GSTin']);
+                $highlight_sheet->setCellValue('E'.$h_row, $objPHPExcel[$j]['Amazon state']);
+                $highlight_sheet->setCellValue('F'.$h_row, $objPHPExcel[$j]['Pin code']);
+                $highlight_sheet->setCellValue('G'.$h_row, $objPHPExcel[$j]['Invoice no']);
+                $highlight_sheet->setCellValue('H'.$h_row, $objPHPExcel[$j]['Invoice date']);
+                $highlight_sheet->setCellValue('I'.$h_row, $objPHPExcel[$j]['Customer name']);
+                $highlight_sheet->setCellValue('J'.$h_row, $objPHPExcel[$j]['SKU']);
+                $highlight_sheet->setCellValue('K'.$h_row, $objPHPExcel[$j]['Item description']);
+                $highlight_sheet->setCellValue('L'.$h_row, $objPHPExcel[$j]['HSN Code']);
+                $highlight_sheet->setCellValue('M'.$h_row, $objPHPExcel[$j]['Quantity']);
+                $highlight_sheet->setCellValue('N'.$h_row, $objPHPExcel[$j]['Rate']);
+                $highlight_sheet->setCellValue('O'.$h_row, $objPHPExcel[$j]['Sales incl GST']);
+                $highlight_sheet->setCellValue('P'.$h_row, $objPHPExcel[$j]['Sales excl GST']);
+                $highlight_sheet->setCellValue('Q'.$h_row, $objPHPExcel[$j]['Total GST']);
+                $highlight_sheet->setCellValue('R'.$h_row, $objPHPExcel[$j]['IGST Rate']);
+                $highlight_sheet->setCellValue('S'.$h_row, $objPHPExcel[$j]['IGST Amount']);
+                $highlight_sheet->setCellValue('T'.$h_row, $objPHPExcel[$j]['CGST Rate']);
+                $highlight_sheet->setCellValue('U'.$h_row, $objPHPExcel[$j]['CGST Amount']);
+                $highlight_sheet->setCellValue('V'.$h_row, $objPHPExcel[$j]['SGST Rate']);
+                $highlight_sheet->setCellValue('W'.$h_row, $objPHPExcel[$j]['SGST Amount']);
+                $highlight_sheet->setCellValue('X'.$h_row, $objPHPExcel[$j]['Flag']);
 
                 $sql = "select * from internal_warehouse_master where is_active = '1' and company_id = '$company_id' 
                         and gst_id = '".$ship_from_gstin[$j]."'";
@@ -293,7 +420,6 @@ class SalesUpload extends Model
                     $highlight_remarks[$j] = $this->check_gst_no_format($ship_to_gstin[$j], $ship_to_state[$j]);
                     if($highlight_remarks[$j]!=''){
                         $bl_highlight = true;
-                        $remarks[$j] = $remarks[$j] . $highlight_remarks[$j];
                     }
                 }
 
@@ -309,10 +435,10 @@ class SalesUpload extends Model
                     }
                 }
 
-                if($hsn_code[$j] == ''){
+                if($hsn_code[$j] == '' || $hsn_code[$j]==null){
                     $bl_highlight = true;
                     $highlight_remarks[$j] = $highlight_remarks[$j] . "HSN Code is empty. ";
-                } else if($new_hsn_code[$j] == ''){
+                } else if($new_hsn_code[$j] == '' || $new_hsn_code[$j]==null){
                     $bl_highlight = true;
                     $highlight_remarks[$j] = $highlight_remarks[$j] . "HSN Code not found in Product Master. ";
                 } else if($new_hsn_code[$j] != $hsn_code[$j]){
@@ -320,49 +446,71 @@ class SalesUpload extends Model
                     $highlight_remarks[$j] = $highlight_remarks[$j] . "HSN Code is different. ";
                 }
 
-                if($this->check_no($rate[$j])==false){
-                    $bl_reject = true;
-                    $remarks[$j] = $remarks[$j] . "Rate is not number. ";
+                if($rate[$j]!=''){
+                    if($this->check_no($rate[$j])==false){
+                        $bl_reject = true;
+                        $remarks[$j] = $remarks[$j] . "Rate is not number. ";
+                    }
                 }
-                if($this->check_no($quantity[$j])==false){
-                    $bl_reject = true;
-                    $remarks[$j] = $remarks[$j] . "Quantity is not number. ";
+                if($quantity[$j]!=''){
+                    if($this->check_no($quantity[$j])==false){
+                        $bl_reject = true;
+                        $remarks[$j] = $remarks[$j] . "Quantity is not number. ";
+                    }
                 }
-                if($this->check_no($sales_incl_gst[$j])==false){
-                    $bl_reject = true;
-                    $remarks[$j] = $remarks[$j] . "Sales Incl GST is not number. ";
+                if($sales_incl_gst[$j]!=''){
+                    if($this->check_no($sales_incl_gst[$j])==false){
+                        $bl_reject = true;
+                        $remarks[$j] = $remarks[$j] . "Sales Incl GST is not number. ";
+                    }
                 }
-                if($this->check_no($sales_excl_gst[$j])==false){
-                    $bl_reject = true;
-                    $remarks[$j] = $remarks[$j] . "Sales Excl GST is not number. ";
+                if($sales_excl_gst[$j]!=''){
+                    if($this->check_no($sales_excl_gst[$j])==false){
+                        $bl_reject = true;
+                        $remarks[$j] = $remarks[$j] . "Sales Excl GST is not number. ";
+                    }
                 }
-                if($this->check_no($total_gst[$j])==false){
-                    $bl_reject = true;
-                    $remarks[$j] = $remarks[$j] . "Total GST is not number. ";
+                if($total_gst[$j]!=''){
+                    if($this->check_no($total_gst[$j])==false){
+                        $bl_reject = true;
+                        $remarks[$j] = $remarks[$j] . "Total GST is not number. ";
+                    }
                 }
-                if($this->check_no($igst_rate[$j])==false){
-                    $bl_reject = true;
-                    $remarks[$j] = $remarks[$j] . "IGST Rate is not number. ";
+                if($igst_rate[$j]!=''){
+                    if($this->check_no($igst_rate[$j])==false){
+                        $bl_reject = true;
+                        $remarks[$j] = $remarks[$j] . "IGST Rate is not number. ";
+                    }
                 }
-                if($this->check_no($igst_amount[$j])==false){
-                    $bl_reject = true;
-                    $remarks[$j] = $remarks[$j] . "IGST Amount is not number. ";
+                if($igst_amount[$j]!=''){
+                    if($this->check_no($igst_amount[$j])==false){
+                        $bl_reject = true;
+                        $remarks[$j] = $remarks[$j] . "IGST Amount is not number. ";
+                    }
                 }
-                if($this->check_no($cgst_rate[$j])==false){
-                    $bl_reject = true;
-                    $remarks[$j] = $remarks[$j] . "CGST Rate is not number. ";
+                if($cgst_rate[$j]!=''){
+                    if($this->check_no($cgst_rate[$j])==false){
+                        $bl_reject = true;
+                        $remarks[$j] = $remarks[$j] . "CGST Rate is not number. ";
+                    }
                 }
-                if($this->check_no($cgst_amount[$j])==false){
-                    $bl_reject = true;
-                    $remarks[$j] = $remarks[$j] . "CGST Amount is not number. ";
+                if($cgst_amount[$j]!=''){
+                    if($this->check_no($cgst_amount[$j])==false){
+                        $bl_reject = true;
+                        $remarks[$j] = $remarks[$j] . "CGST Amount is not number. ";
+                    }
                 }
-                if($this->check_no($sgst_rate[$j])==false){
-                    $bl_reject = true;
-                    $remarks[$j] = $remarks[$j] . "SGST Rate is not number. ";
+                if($sgst_rate[$j]!=''){
+                    if($this->check_no($sgst_rate[$j])==false){
+                        $bl_reject = true;
+                        $remarks[$j] = $remarks[$j] . "SGST Rate is not number. ";
+                    }
                 }
-                if($this->check_no($sgst_amount[$j])==false){
-                    $bl_reject = true;
-                    $remarks[$j] = $remarks[$j] . "SGST Amount is not number. ";
+                if($sgst_amount[$j]!=''){
+                    if($this->check_no($sgst_amount[$j])==false){
+                        $bl_reject = true;
+                        $remarks[$j] = $remarks[$j] . "SGST Amount is not number. ";
+                    }
                 }
 
                 if($flag[$j]!='0' && $flag[$j]!='1'){
@@ -371,12 +519,17 @@ class SalesUpload extends Model
                 }
 
                 if($bl_reject==true) {
-                    echo 'rejected';
-                    echo '<br/>';
-                    echo $remarks[$j];
-                    echo '<br/>';
+                    // echo 'rejected';
+                    // echo '<br/>';
+                    // echo $remarks[$j];
+                    // echo '<br/>';
+                    $reject_sheet->setCellValue('Y'.$r_row, $remarks[$j]);
                     $reject_file = true;
-                    continue;
+                }
+                if($bl_highlight==true) {
+                    // echo $highlight_remarks[$j].'<br/>';
+                    $highlight_sheet->setCellValue('Y'.$h_row, $highlight_remarks[$j]);
+                    $highlight_file = true;
                 }
             }
 
@@ -429,11 +582,64 @@ class SalesUpload extends Model
                                 ->insert("acc_sales_file_items", $array)
                                 ->execute();
 
-                    echo json_encode($array);
-                    echo '<br/><br/>';
+                    // echo json_encode($array);
+                    // echo '<br/><br/>';
                 }
 
                 $sql = "update acc_sales_files set upload_status = 'uploaded' where id = '$ref_file_id'";
+                $command = Yii::$app->db->createCommand($sql);
+                $count = $command->execute();
+            } else {
+                $filename='sales_rejected_file_'.$ref_file_id.'.xlsx';
+                $upload_path = './uploads';
+                if(!is_dir($upload_path)) {
+                    mkdir($upload_path, 0777, TRUE);
+                }
+                $upload_path = './uploads/sales';
+                if(!is_dir($upload_path)) {
+                    mkdir($upload_path, 0777, TRUE);
+                }
+                $upload_path = './uploads/sales/'.$ref_file_id;
+                if(!is_dir($upload_path)) {
+                    mkdir($upload_path, 0777, TRUE);
+                }
+
+                $file_name = $upload_path . '/' . $filename;
+                $file_path = 'uploads/sales/' . $ref_file_id . '/' . $filename;
+
+                $writer = new Xlsx($reject_spreadsheet);
+                $writer->save($file_name);
+
+                $sql = "update acc_sales_files set error_rejected_file = '$file_path', upload_status = 'rejected', 
+                        updated_by = '$curusr', updated_date = '$now' 
+                        where id = '$ref_file_id'";
+                $command = Yii::$app->db->createCommand($sql);
+                $count = $command->execute();
+            }
+
+            if($highlight_file==true){
+                $filename='sales_highlighted_file_'.$ref_file_id.'.xlsx';
+                $upload_path = './uploads';
+                if(!is_dir($upload_path)) {
+                    mkdir($upload_path, 0777, TRUE);
+                }
+                $upload_path = './uploads/sales';
+                if(!is_dir($upload_path)) {
+                    mkdir($upload_path, 0777, TRUE);
+                }
+                $upload_path = './uploads/sales/'.$ref_file_id;
+                if(!is_dir($upload_path)) {
+                    mkdir($upload_path, 0777, TRUE);
+                }
+
+                $file_name = $upload_path . '/' . $filename;
+                $file_path = 'uploads/sales/' . $ref_file_id . '/' . $filename;
+
+                $writer = new Xlsx($highlight_spreadsheet);
+                $writer->save($file_name);
+
+                $sql = "update acc_sales_files set error_highlighted_file = '$file_path' 
+                        where id = '$ref_file_id'";
                 $command = Yii::$app->db->createCommand($sql);
                 $count = $command->execute();
             }
@@ -516,278 +722,356 @@ class SalesUpload extends Model
         $marketplace = $this->getFileMarketplaces($id);
         $invoice = $this->getFileInvoices($id);
 
-        for($k=0; $k<count($invoice); $k++) {
-            $invoice_no = $invoice[$k]['invoice_no'];
-            $invoice_marketplace = $marketplace;
-            $item_details = array();
-            $a = 0;
-
-            // $sql = "select * from 
-            //         (select marketplace_id, invoice_no, invoice_date, ship_from_state, ship_to_state, 
-            //             cgst_rate, sgst_rate, igst_rate, 
-            //             sum(sales_excl_gst) as sales_excl_gst, sum(total_gst) as total_gst, 
-            //             sum(sales_incl_gst) as sales_incl_gst, sum(cgst_amount) as cgst_amount, 
-            //             sum(sgst_amount) as sgst_amount, sum(igst_amount) as igst_amount 
-            //         from acc_sales_file_items where ref_file_id = '$id' and invoice_no = '$invoice_no' 
-            //         group by marketplace_id, invoice_no, invoice_date, ship_from_state, ship_to_state, 
-            //             cgst_rate, sgst_rate, igst_rate) A 
-            //         order by invoice_no, cgst_rate, sgst_rate, igst_rate, marketplace_id";
-            
-            $sql = "select * from acc_sales_file_items where ref_file_id = '$id' and invoice_no = '$invoice_no' 
-                    order by invoice_no, cgst_rate, sgst_rate, igst_rate, marketplace_id";
-            $command = Yii::$app->db->createCommand($sql);
-            $reader = $command->query();
-            $result = $reader->readAll();
-            for($i=0; $i<count($result); $i++) {
-                if($result[$i]['ship_to_state']==null || $result[$i]['ship_to_state']=='') {
-                    $trans_type = 'B2C';
-                } else {
-                    $trans_type = 'B2B';
-                }
-                if(strtoupper(trim($result[$i]['ship_from_state']))==strtoupper(trim($result[$i]['ship_to_state']))) {
-                    $tax_type = 'Local';
-                } else {
-                    $tax_type = 'Inter State';
-                }
-
-                $marketplace_id = $result[$i]['marketplace_id'];
-                $market_place = $result[$i]['market_place'];
-                $invoice_no = $result[$i]['invoice_no'];
-                $invoice_date = $result[$i]['invoice_date'];
-                $sales_excl_gst = $result[$i]['sales_excl_gst'];
-                $total_gst = $result[$i]['total_gst'];
-                $sales_incl_gst = $result[$i]['sales_incl_gst'];
-                $cgst_rate = $result[$i]['cgst_rate'];
-                $cgst_amount = $result[$i]['cgst_amount'];
-                $sgst_rate = $result[$i]['sgst_rate'];
-                $sgst_amount = $result[$i]['sgst_amount'];
-                $igst_rate = $result[$i]['igst_rate'];
-                $igst_amount = $result[$i]['igst_amount'];
-                $state_name = $result[$i]['ship_to_state'];
-
-                $vat_percen = 0;
-                if($tax_type == 'Local') {
-                    if(is_numeric($cgst_rate)){
-                        $vat_percen = floatval($cgst_rate)*2;
-                    } else if(is_numeric($sgst_rate)){
-                        $vat_percen = floatval($sgst_rate)*2;
-                    }
-                } else {
-                    if(is_numeric($igst_rate)){
-                        $vat_percen = floatval($igst_rate);
-                    }
-                }
-
-                $acc_id = '';
-                $ledger_name = '';
-                $ledger_code = '';
-                $tax_code = 'Sales-'.$state_name.'-'.$tax_type.'-'.$trans_type.'-'.$vat_percen;
-                $result2 = $this->getAccountDetails('','',$tax_code);
-                if(count($result2)>0) {
-                    $acc_id = $result2[0]['id'];
-                    $ledger_name = $result2[0]['legal_name'];
-                    $ledger_code = $result2[0]['code'];
-                }
-                $bl_flag = false;
-                for($j=0; $j<count($item_details); $j++) {
-                    if($item_details[$j]['acc_id']==$acc_id) {
-                        $bl_flag = true;
-
-                        $item_details[$j][$marketplace_id]+=$sales_excl_gst;
-                    }
-                }
-                if($bl_flag == false) {
-                    $item_details[$a]['particular'] = 'Taxable Amount';
-                    $item_details[$a]['acc_type'] = 'Goods Sales';
-                    $item_details[$a]['acc_id'] = $acc_id;
-                    $item_details[$a]['ledger_name'] = $ledger_name;
-                    $item_details[$a]['ledger_code'] = $ledger_code;
-                    $item_details[$a]['tax_percent'] = $vat_percen;
-                    for($j=0; $j<count($invoice_marketplace); $j++) {
-                        if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
-                            $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = $sales_excl_gst;
-                            $invoice_marketplace[$j]['sales_excl_gst'] += $sales_excl_gst;
-                            $invoice_marketplace[$j]['sales_incl_gst'] += $sales_excl_gst;
-                        } else {
-                            $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = 0;
-                        }
-                    }
-                    $a += 1;
-                } else {
-                    for($j=0; $j<count($invoice_marketplace); $j++) {
-                        if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
-                            $invoice_marketplace[$j]['sales_excl_gst'] += $sales_excl_gst;
-                            $invoice_marketplace[$j]['sales_incl_gst'] += $sales_excl_gst;
-                        }
-                    }
-                }
-
-                if($tax_type == 'Local') {
-                    $acc_id = '';
-                    $ledger_name = '';
-                    $ledger_code = '';
-                    $tax_code = 'Output-'.$state_name.'-CGST-'.$cgst_rate;
-                    $result2 = $this->getAccountDetails('','',$tax_code);
-                    if(count($result2)>0) {
-                        $acc_id = $result2[0]['id'];
-                        $ledger_name = $result2[0]['legal_name'];
-                        $ledger_code = $result2[0]['code'];
-                    }
-                    $bl_flag = false;
-                    for($j=0; $j<count($item_details); $j++) {
-                        if($item_details[$j]['acc_id']==$acc_id) {
-                            $bl_flag = true;
-
-                            $item_details[$j][$marketplace_id]+=$cgst_amount;
-                        }
-                    }
-                    if($bl_flag == false) {
-                        $item_details[$a]['particular'] = 'CGST';
-                        $item_details[$a]['acc_type'] = 'CGST';
-                        $item_details[$a]['acc_id'] = $acc_id;
-                        $item_details[$a]['ledger_name'] = $ledger_name;
-                        $item_details[$a]['ledger_code'] = $ledger_code;
-                        $item_details[$a]['tax_percent'] = $cgst_rate;
-                        for($j=0; $j<count($invoice_marketplace); $j++) {
-                            if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
-                                $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = $cgst_amount;
-                                $invoice_marketplace[$j]['total_gst'] += $cgst_amount;
-                                $invoice_marketplace[$j]['sales_incl_gst'] += $cgst_amount;
-                            } else {
-                                $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = 0;
-                            }
-                        }
-                        $a += 1;
-                    } else {
-                        for($j=0; $j<count($invoice_marketplace); $j++) {
-                            if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
-                                $invoice_marketplace[$j]['total_gst'] += $cgst_amount;
-                                $invoice_marketplace[$j]['sales_incl_gst'] += $cgst_amount;
-                            }
-                        }
-                    }
-
-                    $acc_id = '';
-                    $ledger_name = '';
-                    $ledger_code = '';
-                    $tax_code = 'Output-'.$state_name.'-SGST-'.$sgst_rate;
-                    $result2 = $this->getAccountDetails('','',$tax_code);
-                    if(count($result2)>0) {
-                        $acc_id = $result2[0]['id'];
-                        $ledger_name = $result2[0]['legal_name'];
-                        $ledger_code = $result2[0]['code'];
-                    }
-                    $bl_flag = false;
-                    for($j=0; $j<count($item_details); $j++) {
-                        if($item_details[$j]['acc_id']==$acc_id) {
-                            $bl_flag = true;
-
-                            $item_details[$j][$marketplace_id]+=$sgst_amount;
-                        }
-                    }
-                    if($bl_flag == false) {
-                        $item_details[$a]['particular'] = 'SGST';
-                        $item_details[$a]['acc_type'] = 'SGST';
-                        $item_details[$a]['acc_id'] = $acc_id;
-                        $item_details[$a]['ledger_name'] = $ledger_name;
-                        $item_details[$a]['ledger_code'] = $ledger_code;
-                        $item_details[$a]['tax_percent'] = $sgst_rate;
-                        for($j=0; $j<count($invoice_marketplace); $j++) {
-                            if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
-                                $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = $sgst_amount;
-                                $invoice_marketplace[$j]['total_gst'] += $sgst_amount;
-                                $invoice_marketplace[$j]['sales_incl_gst'] += $sgst_amount;
-                            } else {
-                                $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = 0;
-                            }
-                        }
-                        $a += 1;
-                    } else {
-                        for($j=0; $j<count($invoice_marketplace); $j++) {
-                            if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
-                                $invoice_marketplace[$j]['total_gst'] += $sgst_amount;
-                                $invoice_marketplace[$j]['sales_incl_gst'] += $sgst_amount;
-                            }
-                        }
-                    }
-                } else {
-                    $acc_id = '';
-                    $ledger_name = '';
-                    $ledger_code = '';
-                    $tax_code = 'Output-'.$state_name.'-IGST-'.$igst_rate;
-                    $result2 = $this->getAccountDetails('','',$tax_code);
-                    if(count($result2)>0) {
-                        $acc_id = $result2[0]['id'];
-                        $ledger_name = $result2[0]['legal_name'];
-                        $ledger_code = $result2[0]['code'];
-                    }
-                    $bl_flag = false;
-                    for($j=0; $j<count($item_details); $j++) {
-                        if($item_details[$j]['acc_id']==$acc_id) {
-                            $bl_flag = true;
-
-                            $item_details[$j][$marketplace_id]+=$igst_amount;
-                        }
-                    }
-                    if($bl_flag == false) {
-                        $item_details[$a]['particular'] = 'IGST';
-                        $item_details[$a]['acc_type'] = 'IGST';
-                        $item_details[$a]['acc_id'] = $acc_id;
-                        $item_details[$a]['ledger_name'] = $ledger_name;
-                        $item_details[$a]['ledger_code'] = $ledger_code;
-                        $item_details[$a]['tax_percent'] = $igst_rate;
-                        for($j=0; $j<count($invoice_marketplace); $j++) {
-                            if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
-                                $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = $igst_amount;
-                                $invoice_marketplace[$j]['total_gst'] += $igst_amount;
-                                $invoice_marketplace[$j]['sales_incl_gst'] += $igst_amount;
-                            } else {
-                                $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = 0;
-                            }
-                        }
-                        $a += 1;
-                    } else {
-                        for($j=0; $j<count($invoice_marketplace); $j++) {
-                            if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
-                                $invoice_marketplace[$j]['total_gst'] += $igst_amount;
-                                $invoice_marketplace[$j]['sales_incl_gst'] += $igst_amount;
-                            }
-                        }
-                    }
-                }
-                
-            }
-
-            for($j=0; $j<count($invoice_marketplace); $j++) {
-                if($invoice_marketplace[$j]['sales_incl_gst']>0){
-                    $series = 1;
-                    $sql = "select * from acc_series_master where type = 'Voucher' and company_id = '$company_id'";
-                    $command = Yii::$app->db->createCommand($sql);
-                    $reader = $command->query();
-                    $data = $reader->readAll();
-                    if (count($data)>0){
-                        $series = intval($data[0]['series']) + 1;
-
-                        $sql = "update acc_series_master set series = '$series' where type = 'Voucher' and company_id = '$company_id'";
-                        $command = Yii::$app->db->createCommand($sql);
-                        $count = $command->execute();
-                    } else {
-                        $series = 1;
-
-                        $sql = "insert into acc_series_master (type, series, company_id) values ('Voucher', '".$series."', '".$company_id."')";
-                        $command = Yii::$app->db->createCommand($sql);
-                        $count = $command->execute();
-                    }
-
-                    $invoice_marketplace[$j]['voucher_id'] = $series;
-                }
-            }
-
-            $final_data[$k]['invoice_no'] = $invoice[$k]['invoice_no'];
-            $final_data[$k]['marketplace'] = $invoice_marketplace;
-            $final_data[$k]['item_details'] = $item_details;
+        $bl_posted = false;
+        $sql = "select * from acc_sales_entries where file_id = '$id'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $result = $reader->readAll();
+        if(count($result)>0){
+            $bl_posted = true;
         }
 
+        if($bl_posted==false) {
+            for($k=0; $k<count($invoice); $k++) {
+                $invoice_no = $invoice[$k]['invoice_no'];
+                $invoice_marketplace = $marketplace;
+                $item_details = array();
+                $a = 0;
+
+                // $sql = "select * from 
+                //         (select marketplace_id, invoice_no, invoice_date, ship_from_state, ship_to_state, 
+                //             cgst_rate, sgst_rate, igst_rate, 
+                //             sum(sales_excl_gst) as sales_excl_gst, sum(total_gst) as total_gst, 
+                //             sum(sales_incl_gst) as sales_incl_gst, sum(cgst_amount) as cgst_amount, 
+                //             sum(sgst_amount) as sgst_amount, sum(igst_amount) as igst_amount 
+                //         from acc_sales_file_items where ref_file_id = '$id' and invoice_no = '$invoice_no' 
+                //         group by marketplace_id, invoice_no, invoice_date, ship_from_state, ship_to_state, 
+                //             cgst_rate, sgst_rate, igst_rate) A 
+                //         order by invoice_no, cgst_rate, sgst_rate, igst_rate, marketplace_id";
+                
+                $sql = "select * from acc_sales_file_items where ref_file_id = '$id' and invoice_no = '$invoice_no' 
+                        order by invoice_no, cgst_rate, sgst_rate, igst_rate, marketplace_id";
+                $command = Yii::$app->db->createCommand($sql);
+                $reader = $command->query();
+                $result = $reader->readAll();
+                for($i=0; $i<count($result); $i++) {
+                    if($result[$i]['ship_to_state']==null || $result[$i]['ship_to_state']=='') {
+                        $trans_type = 'B2C';
+                    } else {
+                        $trans_type = 'B2B';
+                    }
+                    if(strtoupper(trim($result[$i]['ship_from_state']))==strtoupper(trim($result[$i]['ship_to_state']))) {
+                        $tax_type = 'Local';
+                    } else {
+                        $tax_type = 'Inter State';
+                    }
+
+                    $marketplace_id = $result[$i]['marketplace_id'];
+                    $market_place = $result[$i]['market_place'];
+                    $invoice_no = $result[$i]['invoice_no'];
+                    $invoice_date = $result[$i]['invoice_date'];
+                    $sales_excl_gst = $result[$i]['sales_excl_gst'];
+                    $total_gst = $result[$i]['total_gst'];
+                    $sales_incl_gst = $result[$i]['sales_incl_gst'];
+                    $cgst_rate = $result[$i]['cgst_rate'];
+                    $cgst_amount = $result[$i]['cgst_amount'];
+                    $sgst_rate = $result[$i]['sgst_rate'];
+                    $sgst_amount = $result[$i]['sgst_amount'];
+                    $igst_rate = $result[$i]['igst_rate'];
+                    $igst_amount = $result[$i]['igst_amount'];
+                    $state_name = $result[$i]['ship_to_state'];
+
+                    $vat_percen = 0;
+                    if($tax_type == 'Local') {
+                        if(is_numeric($cgst_rate)){
+                            $vat_percen = floatval($cgst_rate)*2;
+                        } else if(is_numeric($sgst_rate)){
+                            $vat_percen = floatval($sgst_rate)*2;
+                        }
+                    } else {
+                        if(is_numeric($igst_rate)){
+                            $vat_percen = floatval($igst_rate);
+                        }
+                    }
+
+                    $acc_id = '';
+                    $ledger_name = '';
+                    $ledger_code = '';
+                    $tax_code = 'Sales-'.$state_name.'-'.$tax_type.'-'.$trans_type.'-'.$vat_percen;
+                    $result2 = $this->getAccountDetails('','',$tax_code);
+                    if(count($result2)>0) {
+                        $acc_id = $result2[0]['id'];
+                        $ledger_name = $result2[0]['legal_name'];
+                        $ledger_code = $result2[0]['code'];
+                    }
+                    $bl_flag = false;
+                    for($j=0; $j<count($item_details); $j++) {
+                        if($item_details[$j]['acc_id']==$acc_id) {
+                            $bl_flag = true;
+
+                            $item_details[$j][$marketplace_id]+=$sales_excl_gst;
+                        }
+                    }
+                    if($bl_flag == false) {
+                        $item_details[$a]['particular'] = 'Taxable Amount';
+                        $item_details[$a]['acc_type'] = 'Goods Sales';
+                        $item_details[$a]['acc_id'] = $acc_id;
+                        $item_details[$a]['ledger_name'] = $ledger_name;
+                        $item_details[$a]['ledger_code'] = $ledger_code;
+                        $item_details[$a]['tax_percent'] = $vat_percen;
+                        for($j=0; $j<count($invoice_marketplace); $j++) {
+                            if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
+                                $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = $sales_excl_gst;
+                                $invoice_marketplace[$j]['sales_excl_gst'] += $sales_excl_gst;
+                                $invoice_marketplace[$j]['sales_incl_gst'] += $sales_excl_gst;
+                            } else {
+                                $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = 0;
+                            }
+                        }
+                        $a += 1;
+                    } else {
+                        for($j=0; $j<count($invoice_marketplace); $j++) {
+                            if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
+                                $invoice_marketplace[$j]['sales_excl_gst'] += $sales_excl_gst;
+                                $invoice_marketplace[$j]['sales_incl_gst'] += $sales_excl_gst;
+                            }
+                        }
+                    }
+
+                    if($tax_type == 'Local') {
+                        $acc_id = '';
+                        $ledger_name = '';
+                        $ledger_code = '';
+                        $tax_code = 'Output-'.$state_name.'-CGST-'.$cgst_rate;
+                        $result2 = $this->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0) {
+                            $acc_id = $result2[0]['id'];
+                            $ledger_name = $result2[0]['legal_name'];
+                            $ledger_code = $result2[0]['code'];
+                        }
+                        $bl_flag = false;
+                        for($j=0; $j<count($item_details); $j++) {
+                            if($item_details[$j]['acc_id']==$acc_id) {
+                                $bl_flag = true;
+
+                                $item_details[$j][$marketplace_id]+=$cgst_amount;
+                            }
+                        }
+                        if($bl_flag == false) {
+                            $item_details[$a]['particular'] = 'CGST';
+                            $item_details[$a]['acc_type'] = 'CGST';
+                            $item_details[$a]['acc_id'] = $acc_id;
+                            $item_details[$a]['ledger_name'] = $ledger_name;
+                            $item_details[$a]['ledger_code'] = $ledger_code;
+                            $item_details[$a]['tax_percent'] = $cgst_rate;
+                            for($j=0; $j<count($invoice_marketplace); $j++) {
+                                if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
+                                    $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = $cgst_amount;
+                                    $invoice_marketplace[$j]['total_gst'] += $cgst_amount;
+                                    $invoice_marketplace[$j]['sales_incl_gst'] += $cgst_amount;
+                                } else {
+                                    $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = 0;
+                                }
+                            }
+                            $a += 1;
+                        } else {
+                            for($j=0; $j<count($invoice_marketplace); $j++) {
+                                if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
+                                    $invoice_marketplace[$j]['total_gst'] += $cgst_amount;
+                                    $invoice_marketplace[$j]['sales_incl_gst'] += $cgst_amount;
+                                }
+                            }
+                        }
+
+                        $acc_id = '';
+                        $ledger_name = '';
+                        $ledger_code = '';
+                        $tax_code = 'Output-'.$state_name.'-SGST-'.$sgst_rate;
+                        $result2 = $this->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0) {
+                            $acc_id = $result2[0]['id'];
+                            $ledger_name = $result2[0]['legal_name'];
+                            $ledger_code = $result2[0]['code'];
+                        }
+                        $bl_flag = false;
+                        for($j=0; $j<count($item_details); $j++) {
+                            if($item_details[$j]['acc_id']==$acc_id) {
+                                $bl_flag = true;
+
+                                $item_details[$j][$marketplace_id]+=$sgst_amount;
+                            }
+                        }
+                        if($bl_flag == false) {
+                            $item_details[$a]['particular'] = 'SGST';
+                            $item_details[$a]['acc_type'] = 'SGST';
+                            $item_details[$a]['acc_id'] = $acc_id;
+                            $item_details[$a]['ledger_name'] = $ledger_name;
+                            $item_details[$a]['ledger_code'] = $ledger_code;
+                            $item_details[$a]['tax_percent'] = $sgst_rate;
+                            for($j=0; $j<count($invoice_marketplace); $j++) {
+                                if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
+                                    $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = $sgst_amount;
+                                    $invoice_marketplace[$j]['total_gst'] += $sgst_amount;
+                                    $invoice_marketplace[$j]['sales_incl_gst'] += $sgst_amount;
+                                } else {
+                                    $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = 0;
+                                }
+                            }
+                            $a += 1;
+                        } else {
+                            for($j=0; $j<count($invoice_marketplace); $j++) {
+                                if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
+                                    $invoice_marketplace[$j]['total_gst'] += $sgst_amount;
+                                    $invoice_marketplace[$j]['sales_incl_gst'] += $sgst_amount;
+                                }
+                            }
+                        }
+                    } else {
+                        $acc_id = '';
+                        $ledger_name = '';
+                        $ledger_code = '';
+                        $tax_code = 'Output-'.$state_name.'-IGST-'.$igst_rate;
+                        $result2 = $this->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0) {
+                            $acc_id = $result2[0]['id'];
+                            $ledger_name = $result2[0]['legal_name'];
+                            $ledger_code = $result2[0]['code'];
+                        }
+                        $bl_flag = false;
+                        for($j=0; $j<count($item_details); $j++) {
+                            if($item_details[$j]['acc_id']==$acc_id) {
+                                $bl_flag = true;
+
+                                $item_details[$j][$marketplace_id]+=$igst_amount;
+                            }
+                        }
+                        if($bl_flag == false) {
+                            $item_details[$a]['particular'] = 'IGST';
+                            $item_details[$a]['acc_type'] = 'IGST';
+                            $item_details[$a]['acc_id'] = $acc_id;
+                            $item_details[$a]['ledger_name'] = $ledger_name;
+                            $item_details[$a]['ledger_code'] = $ledger_code;
+                            $item_details[$a]['tax_percent'] = $igst_rate;
+                            for($j=0; $j<count($invoice_marketplace); $j++) {
+                                if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
+                                    $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = $igst_amount;
+                                    $invoice_marketplace[$j]['total_gst'] += $igst_amount;
+                                    $invoice_marketplace[$j]['sales_incl_gst'] += $igst_amount;
+                                } else {
+                                    $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = 0;
+                                }
+                            }
+                            $a += 1;
+                        } else {
+                            for($j=0; $j<count($invoice_marketplace); $j++) {
+                                if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
+                                    $invoice_marketplace[$j]['total_gst'] += $igst_amount;
+                                    $invoice_marketplace[$j]['sales_incl_gst'] += $igst_amount;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                for($j=0; $j<count($invoice_marketplace); $j++) {
+                    if($invoice_marketplace[$j]['sales_incl_gst']>0){
+                        $series = 1;
+                        $sql = "select * from acc_series_master where type = 'Voucher' and company_id = '$company_id'";
+                        $command = Yii::$app->db->createCommand($sql);
+                        $reader = $command->query();
+                        $data = $reader->readAll();
+                        if (count($data)>0){
+                            $series = intval($data[0]['series']) + 1;
+
+                            $sql = "update acc_series_master set series = '$series' where type = 'Voucher' and company_id = '$company_id'";
+                            $command = Yii::$app->db->createCommand($sql);
+                            $count = $command->execute();
+                        } else {
+                            $series = 1;
+
+                            $sql = "insert into acc_series_master (type, series, company_id) values ('Voucher', '".$series."', '".$company_id."')";
+                            $command = Yii::$app->db->createCommand($sql);
+                            $count = $command->execute();
+                        }
+
+                        $invoice_marketplace[$j]['voucher_id'] = $series;
+                    }
+                }
+
+                $final_data[$k]['invoice_no'] = $invoice[$k]['invoice_no'];
+                $final_data[$k]['marketplace'] = $invoice_marketplace;
+                $final_data[$k]['item_details'] = $item_details;
+            }
+        } else {
+            for($k=0; $k<count($invoice); $k++) {
+                $invoice_no = $invoice[$k]['invoice_no'];
+                $invoice_marketplace = $marketplace;
+                $item_details = array();
+                $a = 0;
+
+                $sql = "select * from acc_sales_entries where file_id = '$id' and invoice_no = '$invoice_no' 
+                        order by id";
+                $command = Yii::$app->db->createCommand($sql);
+                $reader = $command->query();
+                $result = $reader->readAll();
+                for($i=0; $i<count($result); $i++) {
+                    $marketplace_id = $result[$i]['marketplace_id'];
+
+                    if($result[$i]['particular']=='Total Amount') {
+                        for($j=0; $j<count($invoice_marketplace); $j++) {
+                            if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
+                                $invoice_marketplace[$j]['sales_excl_gst'] += $result[$i]['amount'];
+                                $invoice_marketplace[$j]['sales_incl_gst'] += $result[$i]['amount'];
+                                $invoice_marketplace[$j]['voucher_id'] = $result[$i]['voucher_id'];
+                            }
+                        }
+                    } else {
+                        $bl_flag = false;
+
+                        for($j=0; $j<count($item_details); $j++) {
+                            if($item_details[$j]['particular']==$result[$i]['particular'] || 
+                                $item_details[$j]['acc_id']==$result[$i]['acc_id'] || 
+                                $item_details[$j]['ledger_name']==$result[$i]['ledger_name'] || 
+                                $item_details[$j]['ledger_code']==$result[$i]['ledger_code']) {
+
+                                $item_details[$j][$marketplace_id] += $result[$i]['amount'];
+                                $bl_flag = true;
+                            }
+                        }
+
+                        if($bl_flag == false){
+                            $item_details[$a]['particular'] = $result[$i]['particular'];
+                            if($result[$i]['particular']=='Taxable Amount'){
+                                $item_details[$a]['acc_type'] = 'Goods Sales';
+                            } else if($result[$i]['particular']=='CGST'){
+                                $item_details[$a]['acc_type'] = 'CGST';
+                            } else if($result[$i]['particular']=='SGST'){
+                                $item_details[$a]['acc_type'] = 'SGST';
+                            } else if($result[$i]['particular']=='IGST'){
+                                $item_details[$a]['acc_type'] = 'IGST';
+                            }
+                            $item_details[$a]['acc_id'] = $result[$i]['acc_id'];
+                            $item_details[$a]['ledger_name'] = $result[$i]['ledger_name'];
+                            $item_details[$a]['ledger_code'] = $result[$i]['ledger_code'];
+                            $item_details[$a]['tax_percent'] = $result[$i]['tax_percent'];
+                            for($j=0; $j<count($invoice_marketplace); $j++) {
+                                if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
+                                    $item_details[$a][$marketplace_id] = $result[$i]['amount'];
+                                } else {
+                                    $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = 0;
+                                }
+                            }
+                            $a += 1;
+                        }
+                    }
+                }
+
+                $final_data[$k]['invoice_no'] = $invoice[$k]['invoice_no'];
+                $final_data[$k]['marketplace'] = $invoice_marketplace;
+                $final_data[$k]['item_details'] = $item_details;
+            }
+        }
+        
         return $final_data;
     }
 
@@ -852,12 +1136,13 @@ class SalesUpload extends Model
                                             'updated_by'=>$session['session_id'],
                                             'updated_date'=>date('Y-m-d h:i:s'),
                                             'date_of_upload'=>$date_of_upload,
-                                            'company_id'=>$company_id
+                                            'company_id'=>$company_id,
+                                            'marketplace_id'=>$marketplace[$j]['acc_id']
                                         ];
 
                         $ledgerArray[$x]=[
                                         'ref_id'=>$file_id,
-                                        'ref_type'=>'Sales Upload',
+                                        'ref_type'=>'sales_upload',
                                         'entry_type'=>$particular[$i],
                                         'invoice_no'=>$invoice_no,
                                         'acc_id'=>($acc_id[$i]!='')?$acc_id[$i]:null,
@@ -896,12 +1181,13 @@ class SalesUpload extends Model
                                         'updated_by'=>$session['session_id'],
                                         'updated_date'=>date('Y-m-d h:i:s'),
                                         'date_of_upload'=>$date_of_upload,
-                                        'company_id'=>$company_id
+                                        'company_id'=>$company_id,
+                                        'marketplace_id'=>$marketplace[$j]['acc_id']
                                     ];
 
                     $ledgerArray[$x]=[
                                         'ref_id'=>$file_id,
-                                        'ref_type'=>'Sales Upload',
+                                        'ref_type'=>'sales_upload',
                                         'entry_type'=>'Total Amount',
                                         'invoice_no'=>$invoice_no,
                                         'acc_id'=>($marketplace[$j]['acc_id']!='')?$marketplace[$j]['acc_id']:null,
@@ -936,10 +1222,8 @@ class SalesUpload extends Model
 
         $sql = "select A.*, B.invoice_date from 
                 (select A.date_of_upload, B.* from acc_sales_files A left join acc_ledger_entries B 
-                on (A.id=B.ref_id and B.ref_type='Sales Upload') 
-                where A.id = '$id' and B.ref_id = '$id' and B.ref_type='Sales Upload' 
-                on (A.gi_go_id = B.ref_id and B.ref_type = 'B2B Sales') 
-                where B.ref_id = '$id') A 
+                on (A.id=B.ref_id and B.ref_type='sales_upload') 
+                where A.id = '$id' and B.ref_id = '$id' and B.ref_type='sales_upload') A 
                 left join 
                 (select distinct ref_file_id, invoice_no, invoice_date from acc_sales_file_items where ref_file_id = '$id') B 
                 on (A.ref_id = B.ref_file_id and A.invoice_no = B.invoice_no) 
@@ -948,6 +1232,53 @@ class SalesUpload extends Model
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
+    }
+
+    public function freeze_file(){
+        $request = Yii::$app->request;
+        $session = Yii::$app->session;
+
+        $curusr = $session['session_id'];
+        $now = date('Y-m-d H:i:s');
+        $id = $request->post('file_id');
+
+        $array = array('freeze_file' => '1',
+                        'updated_by' => $curusr,
+                        'updated_date' => $now
+                        );
+        $tableName = "acc_sales_files";
+        $count = Yii::$app->db->createCommand()
+                            ->update($tableName, $array, "id = '".$id."'")
+                            ->execute();
+        $this->setLog('SalesUpload', '', 'Freeze', '', 'Sales File Freezed.', 'acc_sales_files', $id);
+
+        return true;
+    }
+
+    public function check_hsn(){
+        // $request = Yii::$app->request;
+        $session = Yii::$app->session;
+
+        $curusr = $session['session_id'];
+        $now = date('Y-m-d H:i:s');
+        // $id = $request->post('file_id');
+        $id = '';
+
+        $cond = "";
+        if($id!=''){
+            $cond = " and id = '$id'";
+        }
+
+        $sql = "update acc_sales_file_items A, product_master B set A.hsn_code = B.hsn_code, 
+                A.updated_by = '$curusr', A.updated_date='$now' 
+                where A.ref_file_id in (select distinct id from acc_sales_files where status = 'approved' and 
+                    is_active = '1' and (freeze_file = '0' or freeze_file is null)".$cond.") and 
+                    A.sku = B.sku_internal_code and A.company_id = B.company_id and 
+                    A.is_active = '1' and B.is_active = '1' and B.is_latest = '1'";
+        // return $sql;
+        $command = Yii::$app->db->createCommand($sql);
+        $count = $command->execute();
+        return true;
     }
 
     public function setLog($module_name, $sub_module, $action, $vendor_id, $description, $table_name, $table_id) {

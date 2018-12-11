@@ -2822,24 +2822,12 @@ $.validator.addMethod("check_amazon_state_availablity", function (value, element
 
 
 
-// ----------------- Sale Upload DETAILS FORM VALIDATION -------------------------------------
+// ----------------- Sale Upload File Form Validation -------------------------------------
 $(function() {
-    $("#form_sale_upload_details").validate({
+    $("#sales_upload_form").validate({
         rules: {
-            other_charges_acc_id: {
-                required: function(){
-                    var blFlag = false;
-                    $('.edited_other_charges').each(function() {
-                        if($(this).val()!=""){
-                            if(parseFloat($(this).val())>0){
-                                // console.log("entered"+diffval);
-                                blFlag = true;
-                            }
-                        }
-                    });
-
-                    return blFlag;
-                }
+            sales_file: {
+                required: true
             }
         },
 
@@ -2852,10 +2840,37 @@ $(function() {
             } else {
                 error.insertAfter(element);
             }
+        }
+    });
+})
+
+$('#sales_upload_form').submit(function() {
+    if (!$("#sales_upload_form").valid()) {
+        return false;
+    } else {
+        return true;
+    } 
+});
+
+
+
+
+// ----------------- Sale Upload DETAILS FORM VALIDATION -------------------------------------
+$(function() {
+    $("#form_sale_upload_details").validate({
+        rules: {
+            
         },
 
-        invalidHandler: function(e,validator) {
-            sale_invalid_handler();
+        ignore: ":not(:visible)",
+
+        errorPlacement: function (error, element) {
+            var placement = $(element).data('error');
+            if (placement) {
+                $(placement).append(error);
+            } else {
+                error.insertAfter(element);
+            }
         }
     });
 
@@ -2863,160 +2878,21 @@ $(function() {
 })
 
 function addMultiInputNamingRules_form_sale_upload_details(){
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="invoice_cost_acc_id[]"]', { required: true });
-    // addMultiInputNamingRules('#form_sale_upload_details', 'select[name="invoice_tax_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="invoice_cgst_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="invoice_sgst_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="invoice_igst_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="shortage_psku[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="shortage_invoice_no[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="shortage_cost_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="expiry_psku[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="expiry_invoice_no[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="expiry_cost_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="damaged_psku[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="damaged_invoice_no[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="damaged_cost_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="margindiff_psku[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="margindiff_invoice_no[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="margindiff_cost_acc_id[]"]', { required: true });
-    // addMultiInputNamingRules('#form_sale_upload_details', 'select[name="shortage_tax_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="shortage_cgst_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="shortage_sgst_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="shortage_igst_acc_id[]"]', { required: true });
-    // addMultiInputNamingRules('#form_sale_upload_details', 'select[name="expiry_tax_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="expiry_cgst_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="expiry_sgst_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="expiry_igst_acc_id[]"]', { required: true });
-    // addMultiInputNamingRules('#form_sale_upload_details', 'select[name="damaged_tax_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="damaged_cgst_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="damaged_sgst_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="damaged_igst_acc_id[]"]', { required: true });
-    // addMultiInputNamingRules('#form_sale_upload_details', 'select[name="margindiff_tax_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="margindiff_cgst_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="margindiff_sgst_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="margindiff_igst_acc_id[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'input[name="shortage_qty[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'input[name="expiry_qty[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'input[name="damaged_qty[]"]', { required: true });
-    addMultiInputNamingRules('#form_sale_upload_details', 'input[name="margindiff_qty[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="acc_id[]"]', { required: true });
 }
 
 function removeMultiInputNamingRules_form_sale_upload_details(){
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="invoice_cost_acc_id[]"]');
-    // removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="invoice_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="invoice_cgst_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="invoice_sgst_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="invoice_igst_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="shortage_psku[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="shortage_invoice_no[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="shortage_cost_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="expiry_psku[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="expiry_invoice_no[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="expiry_cost_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="damaged_psku[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="damaged_invoice_no[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="damaged_cost_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="margindiff_psku[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="margindiff_invoice_no[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="margindiff_cost_acc_id[]"]');
-    // removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="shortage_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="shortage_cgst_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="shortage_sgst_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="shortage_igst_acc_id[]"]');
-    // removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="expiry_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="expiry_cgst_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="expiry_sgst_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="expiry_igst_acc_id[]"]');
-    // removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="damaged_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="damaged_cgst_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="damaged_sgst_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="damaged_igst_acc_id[]"]');
-    // removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="margindiff_tax_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="margindiff_cgst_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="margindiff_sgst_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="margindiff_igst_acc_id[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'input[alt="shortage_qty[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'input[alt="expiry_qty[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'input[alt="damaged_qty[]"]');
-    removeMultiInputNamingRules('#form_sale_upload_details', 'input[alt="margindiff_qty[]"]');
+    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="acc_id[]"]');
 }
 
 $('#form_sale_upload_details').submit(function() {
     removeMultiInputNamingRules_form_sale_upload_details();
     addMultiInputNamingRules_form_sale_upload_details();
-    removeMultiInputNamingRules_sale_details();
-    addMultiInputNamingRules_sale_details();
-    // console.log('form submit');
 
     if (!$("#form_sale_upload_details").valid()) {
-        // console.log('error');
-        sale_invalid_handler();
         return false;
     } else {
-        if (check_sale_details()==false) {
-            
-            sale_invalid_handler();
-            return false;
-        } else {
-            //removeMultiInputNamingRules_sale_details();
-            removeMultiInputNamingRules_form_sale_upload_details();
-            return true;
-        }
+        removeMultiInputNamingRules_form_sale_upload_details();
+        return true;
     } 
 });
-
-function addMultiInputNamingRules_sale_upload_details(){
-    // console.log('multinaming rule');
-    removeMultiInputNamingRules_sale_details();
-
-    $('.narration').each(function(){
-        var th= $(this);
-        var name1 = th.attr('id');
-        var splited = name1.split("_");
-        var lastname = 'diff'+'_'+splited[2]+'_'+splited[1]+'_'+splited[2];
-        var diffval = $("#"+lastname).val();
-
-        // console.log(lastname);
-       
-        if(parseFloat(diffval)!==parseFloat(0) && $(this).val()=="")
-        {
-            var name = $(this).attr('name');
-            // console.log('after multinaming rule'+name);
-            addMultiInputNamingRules('#form_sale_upload_details', 'input[name="'+name+'"]', { required: true });
-        }
-    });
-
-    if(parseFloat($("#diff_other_charges_0").val())!==parseFloat(0) && $("#diff_other_charges_0").val()=="")
-    {
-        addMultiInputNamingRules('#form_sale_upload_details', 'input[name="narration_other_charges"]', { required: true });
-    }
-}
-
-function removeMultiInputNamingRules_sale_upload_details(){
-    $('.narration').each(function(){
-        // var th= $(this);
-        // var name1 = th.attr('id');
-        // var splited = name1.split("_");
-        // var lastname = 'diff'+'_'+splited[2]+'_'+splited[1]+'_'+splited[2];
-        // var diffval = $("#"+lastname).val();
-        var name = $(this).attr('name');
-
-        // console.log(name);
-        
-        //removeMultiInputNamingRules('#form_sale_upload_details', 'input[alt="'+name+'"]');
-        removeMultiInputNamingRules('#form_sale_upload_details', 'input[name='+name+']');
-        /*if(parseFloat(diffval)!==parseFloat(0))
-        {
-            var name = $(this).attr('name');
-            console.log('enteredremove'+name);
-            removeMultiInputNamingRules('#form_sale_upload_details', 'input[alt="'+name+'"]');
-        }*/
-        /*if(parseFloat($("#diff_other_charges_0").val())!==parseFloat(0))
-        {
-            removeMultiInputNamingRules('#form_sale_upload_details', 'input[alt="narration_other_charges"]');
-        }*/
-    });
-
-    removeMultiInputNamingRules('#form_sale_upload_details', 'input[name="narration_other_charges"]');
-}

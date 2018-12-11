@@ -178,8 +178,8 @@ $mycomponent = Yii::$app->mycomponent;
 										<td></td>
 										<td></td>
 										<td></td>
-										<td></td>
-										<td style="text-align:right;"><?php echo $mycomponent->format_money($opening_bal,2); ?></td>
+										<td style="text-align:right;"><?php echo (($opening_bal_type == "Dr")?$mycomponent->format_money($opening_bal,2):"0.00"); ?></td>
+			                            <td style="text-align:right;"><?php echo (($opening_bal_type == "Cr")?$mycomponent->format_money($opening_bal,2):"0.00"); ?></td>
 										<td><?php echo $opening_bal_type; ?></td>
 										<td></td>
 										<td></td>
@@ -199,7 +199,11 @@ $mycomponent = Yii::$app->mycomponent;
 				                  	</tr>
 						        
 							        <?php
-								        $balance = $opening_bal;
+								        if($opening_bal_type == "Dr"){
+							        		$balance = $opening_bal*-1;
+							        	} else {
+							        		$balance = $opening_bal;
+							        	}
 
 								        $debit_amt = 0;
 								        $credit_amt = 0;
@@ -311,8 +315,8 @@ $mycomponent = Yii::$app->mycomponent;
 			                            <td>Closing Balance</td>
 			                            <td></td>
 			                            <td></td>
-			                            <td></td>
-			                            <td style="text-align:right;"><?php echo $mycomponent->format_money($balance_val,2); ?></td>
+			                            <td style="text-align:right;"><?php echo (($balance_type == "Dr")?$mycomponent->format_money($balance_val,2):"0.00"); ?></td>
+			                            <td style="text-align:right;"><?php echo (($balance_type == "Cr")?$mycomponent->format_money($balance_val,2):"0.00"); ?></td>
 			                            <td><?php echo $balance_type; ?></td>
 			                            <td></td>
 			                            <td></td>

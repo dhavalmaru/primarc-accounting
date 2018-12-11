@@ -9,6 +9,10 @@ $(document).ready(function(){
     //     window.location.href = BASE_URL + "index.php?r=salesupload%2Findex";
     // }
 
+    $('.select2').select2();
+  
+    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="acc_id[]"]', { required: true });
+
     set_view();
 });
 
@@ -334,6 +338,58 @@ function get_acc_details(elem){
                     $('#ledger_name_'+index1+'_'+index2).val(data[0].legal_name);
                     $('#ledger_code_'+index1+'_'+index2).val(data[0].code);
                 }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        });
+    }
+}
+
+function freeze_file(elem){
+    var elem_id = elem.id;
+
+    if(elem_id.indexOf("_")>0){
+        var index = elem_id.substr(elem_id.lastIndexOf("_")+1);
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+
+        $.ajax({
+            url: BASE_URL+'index.php?r=salesupload%2Ffreezefile',
+            type: 'post',
+            data: {
+                    file_id : index,
+                    _csrf : csrfToken
+                },
+            dataType: 'html',
+            success: function (data) {
+                location.reload();
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        });
+    }
+}
+
+function check_hsn(elem){
+    var elem_id = elem.id;
+
+    if(elem_id.indexOf("_")>0){
+        var index = elem_id.substr(elem_id.lastIndexOf("_")+1);
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+
+        $.ajax({
+            url: BASE_URL+'index.php?r=salesupload%2Fcheckhsn',
+            type: 'post',
+            data: {
+                    file_id : index,
+                    _csrf : csrfToken
+                },
+            dataType: 'html',
+            success: function (data) {
+                location.reload();
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 alert(xhr.status);
