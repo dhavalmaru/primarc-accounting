@@ -136,6 +136,35 @@ class SalesUpload extends Model
         $writer->save($file_name);
     }
 
+    public function actionDownlaod_ledger() {
+        $reject_spreadsheet = new Spreadsheet();
+        $reject_sheet = $reject_spreadsheet->getActiveSheet();
+        $reject_sheet->setCellValue('A1', 'Market place');
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="01simple.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+
+        $writer = new Xlsx($reject_spreadsheet);
+        // $writer->save($file_name);
+
+        $writer->save('php://output');
+
+        // $objWriter = new Xlsx($highlight_spreadsheet);
+        // // $writer->save($file_name);
+
+        // // $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+        // $objWriter->save('php://output');
+        // Yii::app()->end();
+    }
+
     public function upload(){
         $request = Yii::$app->request;
         $session = Yii::$app->session;
