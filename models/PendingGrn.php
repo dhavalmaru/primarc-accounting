@@ -379,6 +379,69 @@ class PendingGrn extends Model
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
+        // $sql = "select AA.*, BB.tax_zone_code, BB.tax_zone_name, BB.cgst_rate, BB.sgst_rate, BB.igst_rate, 
+        //             ifnull((AA.invoice_qty*AA.cost_excl_vat),0) as total_cost, ifnull(AA.invoice_qty*round(AA.cost_excl_vat*AA.vat_percen/100,2),0) as total_tax, 
+        //             ifnull(AA.invoice_qty*round(AA.cost_excl_vat*BB.cgst_rate/100,2),0) as total_cgst, ifnull(AA.invoice_qty*round(AA.cost_excl_vat*BB.sgst_rate/100,2),0) as total_sgst, 
+        //             ifnull(AA.invoice_qty*round(AA.cost_excl_vat*BB.igst_rate/100,2),0) as total_igst, ifnull((AA.invoice_qty*AA.cost_incl_vat_cst),0) as total_amount, 
+        //             ifnull((AA.excess_qty*AA.cost_excl_vat),0) as excess_cost, ifnull((AA.excess_qty*AA.cost_excl_vat*AA.vat_percen)/100,0) as excess_tax, 
+        //             ifnull((AA.excess_qty*AA.cost_excl_vat*BB.cgst_rate)/100,0) as excess_cgst, ifnull((AA.excess_qty*AA.cost_excl_vat*BB.sgst_rate)/100,0) as excess_sgst, 
+        //             ifnull((AA.excess_qty*AA.cost_excl_vat*BB.igst_rate)/100,0) as excess_igst, 
+        //             ifnull((AA.shortage_qty*AA.cost_excl_vat),0) as shortage_cost, ifnull((AA.shortage_qty*AA.cost_excl_vat*AA.vat_percen)/100,0) as shortage_tax, 
+        //             ifnull((AA.shortage_qty*AA.cost_excl_vat*BB.cgst_rate)/100,0) as shortage_cgst, ifnull((AA.shortage_qty*AA.cost_excl_vat*BB.sgst_rate)/100,0) as shortage_sgst, 
+        //             ifnull((AA.shortage_qty*AA.cost_excl_vat*BB.igst_rate)/100,0) as shortage_igst, 
+        //             ifnull((AA.expiry_qty*AA.cost_excl_vat),0) as expiry_cost, ifnull((AA.expiry_qty*AA.cost_excl_vat*AA.vat_percen)/100,0) as expiry_tax, 
+        //             ifnull((AA.expiry_qty*AA.cost_excl_vat*BB.cgst_rate)/100,0) as expiry_cgst, ifnull((AA.expiry_qty*AA.cost_excl_vat*BB.sgst_rate)/100,0) as expiry_sgst, 
+        //             ifnull((AA.expiry_qty*AA.cost_excl_vat*BB.igst_rate)/100,0) as expiry_igst, 
+        //             ifnull((AA.damaged_qty*AA.cost_excl_vat),0) as damaged_cost, ifnull((AA.damaged_qty*AA.cost_excl_vat*AA.vat_percen)/100,0) as damaged_tax, 
+        //             ifnull((AA.damaged_qty*AA.cost_excl_vat*BB.cgst_rate)/100,0) as damaged_cgst, ifnull((AA.damaged_qty*AA.cost_excl_vat*BB.sgst_rate)/100,0) as damaged_sgst, 
+        //             ifnull((AA.damaged_qty*AA.cost_excl_vat*BB.igst_rate)/100,0) as damaged_igst, 
+        //             case when AA.margindiff_cost<=0 then 0 else AA.margindiff_cost end as margindiff_cost, 
+        //             case when AA.margindiff_cost<=0 then 0 else ifnull((AA.margindiff_cost*AA.vat_percen)/100,0) end as margindiff_tax, 
+        //             case when AA.margindiff_cost<=0 then 0 else ifnull((AA.margindiff_cost*BB.cgst_rate)/100,0) end as margindiff_cgst, 
+        //             case when AA.margindiff_cost<=0 then 0 else ifnull((AA.margindiff_cost*BB.sgst_rate)/100,0) end as margindiff_sgst, 
+        //             case when AA.margindiff_cost<=0 then 0 else ifnull((AA.margindiff_cost*BB.igst_rate)/100,0) end as margindiff_igst from 
+        //         (select *, case when ifnull(box_price,0)=0 then 0 
+        //                         when ifnull(invoice_qty,0)=0 then 0 
+        //                         when (ifnull(invoice_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))<=0 then 0 
+        //                         else ifnull(ifnull(((margin_from_po-margin_from_scan)/100*box_price*(ifnull(invoice_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))) / (1+(ifnull(vat_percen,0)/100)),0),0) end as margindiff_cost from 
+        //         (select A.grn_id, A.vendor_id, A.warehouse_id, B.psku, A.vat_cst, B.invoice_no, B.box_price, B.cost_excl_vat, B.vat_percen, 
+        //                 B.cost_incl_vat_cst, B.invoice_qty, B.excess_qty, B.shortage_qty, B.expiry_qty, B.damaged_qty, 
+        //                 D.purchase_order_id, D.mrp as po_mrp, D.cost_price_inc_tax as po_cost_price_inc_tax, E.other_charge, 
+        //                 case when ifnull(B.box_price,0) = 0 then 0 
+        //                     else truncate((ifnull(B.box_price,0)-ifnull(B.cost_incl_vat_cst,0))/ifnull(B.box_price,0)*100,2) end as margin_from_scan, 
+        //                 case when D.purchase_order_id is not null then 
+        //                         case when ifnull(D.mrp,0) = 0 then 0 
+        //                             else truncate((ifnull(D.mrp,0)-ifnull(D.cost_price_inc_tax,0))/ifnull(D.mrp,0)*100,2) end 
+        //                     else null 
+        //                 end as margin_from_po 
+        //         from grn A 
+        //             left join grn_entries B on (A.grn_id = B.grn_id) 
+        //             left join purchase_order C on (A.po_no = C.po_no and A.vendor_id = C.vendor_id) 
+        //             left join purchase_order_items D on (C.purchase_order_id = D.purchase_order_id and B.psku = D.psku) 
+        //             left join goods_inward_outward_invoices E on (A.gi_id = E.gi_go_ref_no and B.invoice_no = E.invoice_no) 
+        //         where A.status = 'approved' and A.is_active = '1' and A.grn_id = '$id' and A.company_id = '$company_id' and 
+        //                 B.is_active = '1' and B.grn_id = '$id' and B.invoice_no is not null and 
+        //                 C.is_active = '1') A) AA 
+        //         left join 
+        //         (select id, tax_zone_code, tax_zone_name, parent_id, tax_rate, 
+        //             max(case when child_tax_type_code = 'CGST' then child_tax_rate else 0 end) as cgst_rate, 
+        //             max(case when child_tax_type_code = 'SGST' then child_tax_rate else 0 end) as sgst_rate, 
+        //             max(case when child_tax_type_code = 'IGST' then child_tax_rate else 0 end) as igst_rate from 
+        //         (select A.id, A.tax_zone_code, A.tax_zone_name, B.id as parent_id, B.tax_type_id as parent_tax_type_id, 
+        //             B.tax_rate, C.child_id, D.tax_type_id as child_tax_type_id, D.tax_rate as child_tax_rate, 
+        //             E.tax_category as child_tax_category, E.tax_type_code as child_tax_type_code, 
+        //             E.tax_type_name as child_tax_type_name 
+        //         from tax_zone_master A 
+        //             left join tax_rate_master B on (A.id = B.tax_zone_id) 
+        //             left join tax_component C on (B.id = C.parent_id) 
+        //             left join tax_rate_master D on (C.child_id = D.id) 
+        //             left join tax_type_master E on (D.tax_type_id = E.id)) C 
+        //         where child_tax_rate != 0
+        //         group by id, tax_zone_code, tax_zone_name, parent_id, tax_rate) BB 
+        //         on (AA.vat_cst = BB.tax_zone_code and round(AA.vat_percen,4)=round(BB.tax_rate,4)) 
+        //         order by BB.tax_zone_code, AA.vat_percen, AA.vat_cst, BB.cgst_rate, BB.sgst_rate, BB.igst_rate";
+
+
         $sql = "select AA.*, BB.tax_zone_code, BB.tax_zone_name, BB.cgst_rate, BB.sgst_rate, BB.igst_rate, 
                     ifnull((AA.invoice_qty*AA.cost_excl_vat),0) as total_cost, ifnull(AA.invoice_qty*round(AA.cost_excl_vat*AA.vat_percen/100,2),0) as total_tax, 
                     ifnull(AA.invoice_qty*round(AA.cost_excl_vat*BB.cgst_rate/100,2),0) as total_cgst, ifnull(AA.invoice_qty*round(AA.cost_excl_vat*BB.sgst_rate/100,2),0) as total_sgst, 
@@ -404,16 +467,39 @@ class PendingGrn extends Model
                                 when ifnull(invoice_qty,0)=0 then 0 
                                 when (ifnull(invoice_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))<=0 then 0 
                                 else ifnull(ifnull(((margin_from_po-margin_from_scan)/100*box_price*(ifnull(invoice_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))) / (1+(ifnull(vat_percen,0)/100)),0),0) end as margindiff_cost from 
+                (select A.*, B.margin_understanding, 
+                        case when B.margin_understanding='GMP' then 
+                                case when ifnull(A.box_price,0) = 0 then 0 
+                                else truncate((ifnull(A.box_price,0)-ifnull(A.cost_excl_vat,0))/ifnull(A.box_price,0)*100,2) 
+                                end 
+                            when B.margin_understanding='NMP' then 
+                                case when ifnull(A.box_price,0) = 0 then 0 
+                                else truncate((ifnull(A.box_price,0)-ifnull(A.cost_incl_vat_cst,0))/ifnull(A.box_price,0)*100,2) 
+                                end 
+                            when B.margin_understanding='NMS' then 
+                                case when ifnull(A.box_price,0) = 0 then 0 
+                                else truncate((ifnull(A.box_price,0)-ifnull(A.cost_excl_vat,0)-ifnull((ifnull(A.box_price,0)-(ifnull(A.box_price,0)/(1+(ifnull(A.vat_percen,0)/100)))),0))/ifnull(A.box_price,0)*100,2) 
+                                end 
+                            else 0 
+                        end as margin_from_scan, 
+                        case when B.margin_understanding='GMP' then 
+                                case when ifnull(A.po_mrp,0) = 0 then 0 
+                                else truncate((ifnull(A.po_mrp,0)-ifnull(A.po_cost_price_exc_tax,0))/ifnull(A.po_mrp,0)*100,2) 
+                                end 
+                            when B.margin_understanding='NMP' then 
+                                case when ifnull(A.po_mrp,0) = 0 then 0 
+                                else truncate((ifnull(A.po_mrp,0)-ifnull(A.po_cost_price_inc_tax,0))/ifnull(A.po_mrp,0)*100,2) 
+                                end 
+                            when B.margin_understanding='NMS' then 
+                                case when ifnull(A.po_mrp,0) = 0 then 0 
+                                else truncate((ifnull(A.po_mrp,0)-ifnull(A.po_cost_price_exc_tax,0)-ifnull((ifnull(A.po_mrp,0)-(ifnull(A.po_mrp,0)/(1+(ifnull(A.po_vat_percen,0)/100)))),0))/ifnull(A.po_mrp,0)*100,2) 
+                                end 
+                            else 0 
+                        end as margin_from_po from 
                 (select A.grn_id, A.vendor_id, A.warehouse_id, B.psku, A.vat_cst, B.invoice_no, B.box_price, B.cost_excl_vat, B.vat_percen, 
                         B.cost_incl_vat_cst, B.invoice_qty, B.excess_qty, B.shortage_qty, B.expiry_qty, B.damaged_qty, 
-                        D.purchase_order_id, D.mrp as po_mrp, D.cost_price_inc_tax as po_cost_price_inc_tax, E.other_charge, 
-                        case when ifnull(B.box_price,0) = 0 then 0 
-                            else truncate((ifnull(B.box_price,0)-ifnull(B.cost_incl_vat_cst,0))/ifnull(B.box_price,0)*100,2) end as margin_from_scan, 
-                        case when D.purchase_order_id is not null then 
-                                case when ifnull(D.mrp,0) = 0 then 0 
-                                    else truncate((ifnull(D.mrp,0)-ifnull(D.cost_price_inc_tax,0))/ifnull(D.mrp,0)*100,2) end 
-                            else null 
-                        end as margin_from_po 
+                        D.purchase_order_id, D.mrp as po_mrp, D.vat_tax_percentage as po_vat_percen, D.cost_price_exc_tax as po_cost_price_exc_tax, 
+                        D.cost_price_inc_tax as po_cost_price_inc_tax, E.other_charge 
                 from grn A 
                     left join grn_entries B on (A.grn_id = B.grn_id) 
                     left join purchase_order C on (A.po_no = C.po_no and A.vendor_id = C.vendor_id) 
@@ -421,7 +507,11 @@ class PendingGrn extends Model
                     left join goods_inward_outward_invoices E on (A.gi_id = E.gi_go_ref_no and B.invoice_no = E.invoice_no) 
                 where A.status = 'approved' and A.is_active = '1' and A.grn_id = '$id' and A.company_id = '$company_id' and 
                         B.is_active = '1' and B.grn_id = '$id' and B.invoice_no is not null and 
-                        C.is_active = '1') A) AA 
+                        C.is_active = '1') A 
+                left join 
+                (select distinct sku_internal_code, margin_understanding from product_master 
+                    where is_active = '1' and is_latest = '1' and is_preferred = '1' and company_id = '$company_id') B 
+                on (A.psku = B.sku_internal_code)) A) AA 
                 left join 
                 (select id, tax_zone_code, tax_zone_name, parent_id, tax_rate, 
                     max(case when child_tax_type_code = 'CGST' then child_tax_rate else 0 end) as cgst_rate, 
@@ -443,58 +533,6 @@ class PendingGrn extends Model
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
-    }
-
-    public function getMargin($psku, $vendor_id){
-        $bl_flag = false;
-        $margin_from_po = 0;
-
-        $session = Yii::$app->session;
-        $company_id = $session['company_id'];
-
-        $sql = "select * from product_master where is_active = '1' and sku_internal_code = '$psku' and 
-                preferred_vendor_id = '$vendor_id' and company_id = '$company_id' and 
-                id = (select max(id) from product_master where is_active = '1' and sku_internal_code = '$psku' and 
-                        preferred_vendor_id = '$vendor_id' and company_id = '$company_id' and 
-                        updated_at = (select max(updated_at) from product_master WHERE is_active = '1' and 
-                        and company_id = '$company_id' and sku_internal_code = '$psku' and preferred_vendor_id = '$vendor_id'))";
-        $command = Yii::$app->db->createCommand($sql);
-        $reader = $command->query();
-        $result = $reader->readAll();
-
-        if(count($result)>0){
-            $bl_flag = true;
-            $product_mrp = floatval($result[0]['product_mrp']);
-            $landed_cost = floatval($result[0]['landed_cost']);
-            if($product_mrp==0){
-                $margin_from_po = 0;
-            } else {
-                $margin_from_po = intval((($product_mrp-$landed_cost)/$product_mrp*100)*100)/100;
-            }
-        }
-
-        if($bl_flag == false){
-            $sql = "select * from product_master where is_active = '1' and sku_internal_code = '$psku' and company_id = '$company_id' and 
-                    id = (select max(id) from product_master where is_active = '1' and sku_internal_code = '$psku' and company_id = '$company_id' and 
-                            updated_at = (select max(updated_at) from product_master WHERE is_active = '1' and 
-                                company_id = '$company_id' and sku_internal_code = '$psku'))";
-            $command = Yii::$app->db->createCommand($sql);
-            $reader = $command->query();
-            $result = $reader->readAll();
-
-            if(count($result)>0){
-                $bl_flag = true;
-                $product_mrp = floatval($result[0]['product_mrp']);
-                $landed_cost = floatval($result[0]['landed_cost']);
-                if($product_mrp==0){
-                    $margin_from_po = 0;
-                } else {
-                    $margin_from_po = intval((($product_mrp-$landed_cost)/$product_mrp*100)*100)/100;
-                }
-            }
-        }
-
-        return $margin_from_po;
     }
 
     public function getGrnAccEntries($id){
@@ -548,6 +586,35 @@ class PendingGrn extends Model
                                     when ifnull(invoice_qty,0)=0 then 0 
                                     when (ifnull(invoice_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))<=0 then 0 
                                     else ifnull(ifnull(((margin_from_po-margin_from_scan)/100*box_price*(ifnull(invoice_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))) / (1+(ifnull(vat_percen,0)/100)),0),0) end as margindiff_cost from 
+                    (select A.*, B.margin_understanding, 
+                            case when B.margin_understanding='GMP' then 
+                                    case when ifnull(A.box_price,0) = 0 then 0 
+                                    else truncate((ifnull(A.box_price,0)-ifnull(A.cost_excl_vat,0))/ifnull(A.box_price,0)*100,2) 
+                                    end 
+                                when B.margin_understanding='NMP' then 
+                                    case when ifnull(A.box_price,0) = 0 then 0 
+                                    else truncate((ifnull(A.box_price,0)-ifnull(A.cost_incl_vat_cst,0))/ifnull(A.box_price,0)*100,2) 
+                                    end 
+                                when B.margin_understanding='NMS' then 
+                                    case when ifnull(A.box_price,0) = 0 then 0 
+                                    else truncate((ifnull(A.box_price,0)-ifnull(A.cost_excl_vat,0)-ifnull((ifnull(A.box_price,0)-(ifnull(A.box_price,0)/(1+(ifnull(A.vat_percen,0)/100)))),0))/ifnull(A.box_price,0)*100,2) 
+                                    end 
+                                else 0 
+                            end as margin_from_scan, 
+                            case when B.margin_understanding='GMP' then 
+                                    case when ifnull(A.po_mrp,0) = 0 then 0 
+                                    else truncate((ifnull(A.po_mrp,0)-ifnull(A.po_cost_price_exc_tax,0))/ifnull(A.po_mrp,0)*100,2) 
+                                    end 
+                                when B.margin_understanding='NMP' then 
+                                    case when ifnull(A.po_mrp,0) = 0 then 0 
+                                    else truncate((ifnull(A.po_mrp,0)-ifnull(A.po_cost_price_inc_tax,0))/ifnull(A.po_mrp,0)*100,2) 
+                                    end 
+                                when B.margin_understanding='NMS' then 
+                                    case when ifnull(A.po_mrp,0) = 0 then 0 
+                                    else truncate((ifnull(A.po_mrp,0)-ifnull(A.po_cost_price_exc_tax,0)-ifnull((ifnull(A.po_mrp,0)-(ifnull(A.po_mrp,0)/(1+(ifnull(A.po_vat_percen,0)/100)))),0))/ifnull(A.po_mrp,0)*100,2) 
+                                    end 
+                                else 0 
+                            end as margin_from_po from 
                     (select A.vendor_id, A.warehouse_id, B.*, D.tax_zone_code, D.tax_zone_name, E.invoice_date, A.gi_date, 
                         date_add(A.gi_date, interval ifnull(B.min_no_of_months_shelf_life_required,0) month) as earliest_expected_date, 
                         null as cost_acc_id, null as cost_ledger_name, null as cost_ledger_code, 
@@ -557,9 +624,8 @@ class PendingGrn extends Model
                         null as igst_acc_id, null as igst_ledger_name, null as igst_ledger_code, 
                         G.purchase_order_id, 
                         case when G.purchase_order_id is not null then G.mrp else null end as po_mrp, 
-                        case when G.purchase_order_id is not null then G.cost_price_exc_tax else null end as po_unit_rate_excl_tax, 
-                        case when G.purchase_order_id is not null then G.unit_tax_amount else null end as po_unit_tax, 
-                        case when G.purchase_order_id is not null then G.cost_price_inc_tax else null end as po_unit_rate_incl_tax, 
+                        case when G.purchase_order_id is not null then G.cost_price_exc_tax else null end as po_cost_price_exc_tax, 
+                        case when G.purchase_order_id is not null then G.cost_price_inc_tax else null end as po_cost_price_inc_tax, 
                         case when ifnull(B.box_price,0) = 0 then 0 
                             else truncate((ifnull(B.box_price,0)-ifnull(B.cost_incl_vat_cst,0))/ifnull(B.box_price,0)*100,2) end as margin_from_scan, 
                         case when G.purchase_order_id is not null then 
@@ -574,7 +640,11 @@ class PendingGrn extends Model
                     left join purchase_order F on (A.po_no = F.po_no and A.vendor_id = F.vendor_id) 
                     left join purchase_order_items G on (F.purchase_order_id = G.purchase_order_id and B.psku = G.psku) 
                     where A.grn_id = '$id' and B.grn_id = '$id' and A.is_active = '1' and A.company_id = '$company_id' and B.is_active = '1' and 
-                            D.is_active = '1' and F.is_active = '1' and B.invoice_no is not null) J) K) L 
+                            D.is_active = '1' and F.is_active = '1' and B.invoice_no is not null) A 
+                    left join 
+                    (select distinct sku_internal_code, margin_understanding from product_master 
+                        where is_active = '1' and is_latest = '1' and is_preferred = '1' and company_id = '$company_id') B 
+                    on (A.psku = B.sku_internal_code)) J) K) L 
                     where L." . $col_qty . " > 0 
                     order by L.invoice_no, L.vat_percen) AA 
                     left join 
@@ -599,6 +669,7 @@ class PendingGrn extends Model
             $result = $reader->readAll();
         } else {
             $sql = "select AA.*, BB.cgst_rate, BB.sgst_rate, BB.igst_rate from 
+                    (select A.*, B.margin_understanding from 
                     (select A.vendor_id, A.warehouse_id, B.*, D.tax_zone_code, D.tax_zone_name, E.invoice_date, A.gi_date, 
                         date_add(A.gi_date, interval ifnull(B.min_no_of_months_shelf_life_required,0) month) as earliest_expected_date, 
                         null as cost_acc_id, null as cost_ledger_name, null as cost_ledger_code, 
@@ -608,9 +679,8 @@ class PendingGrn extends Model
                         null as igst_acc_id, null as igst_ledger_name, null as igst_ledger_code, 
                         G.purchase_order_id, 
                         case when G.purchase_order_id is not null then G.mrp else null end as po_mrp, 
-                        case when G.purchase_order_id is not null then G.cost_price_exc_tax else null end as po_unit_rate_excl_tax, 
-                        case when G.purchase_order_id is not null then G.unit_tax_amount else null end as po_unit_tax, 
-                        case when G.purchase_order_id is not null then G.cost_price_inc_tax else null end as po_unit_rate_incl_tax 
+                        case when G.purchase_order_id is not null then G.cost_price_exc_tax else null end as po_cost_price_exc_tax, 
+                        case when G.purchase_order_id is not null then G.cost_price_inc_tax else null end as po_cost_price_inc_tax 
                     from grn A 
                     left join grn_entries B on (A.grn_id = B.grn_id) 
                     left join tax_zone_master D on (A.vat_cst = D.tax_zone_code) 
@@ -618,7 +688,11 @@ class PendingGrn extends Model
                     left join purchase_order F on (A.po_no = F.po_no and A.vendor_id = F.vendor_id) 
                     left join purchase_order_items G on (F.purchase_order_id = G.purchase_order_id and B.psku = G.psku) 
                     where A.grn_id = '$id' and B.grn_id = '$id' and A.is_active = '1' and A.company_id = '$company_id' and B.is_active = '1' and 
-                            D.is_active = '1' and F.is_active = '1' and B.invoice_no is not null) AA 
+                            D.is_active = '1' and F.is_active = '1' and B.invoice_no is not null) A 
+                    left join 
+                    (select distinct sku_internal_code, margin_understanding from product_master 
+                        where is_active = '1' and is_latest = '1' and is_preferred = '1' and company_id = '$company_id') B 
+                    on (A.psku = B.sku_internal_code)) AA 
                     left join 
                     (select id, tax_zone_code, tax_zone_name, parent_id, tax_rate, 
                         max(case when child_tax_type_code = 'CGST' then child_tax_rate else 0 end) as cgst_rate, 
@@ -737,6 +811,7 @@ class PendingGrn extends Model
                 } else {
                     if($result[$i]['purchase_order_id']!=null && $result[$i]['purchase_order_id']!=''){
                         $box_price = floatval($result[$i]['box_price']);
+                        $cost_excl_vat = floatval($result[$i]['cost_excl_vat']);
                         $cost_incl_vat_cst = floatval($result[$i]['cost_incl_vat_cst']);
                         $proper_qty = floatval($result[$i]['proper_qty']);
                         $invoice_qty = floatval($result[$i]['invoice_qty']);
@@ -748,16 +823,26 @@ class PendingGrn extends Model
                         $sgst_rate = floatval($result[$i]['sgst_rate']);
                         $igst_rate = floatval($result[$i]['igst_rate']);
                         $product_mrp = floatval($result[$i]['po_mrp']);
-                        $cost_price_exc_tax = floatval($result[$i]['po_unit_rate_excl_tax']);
-                        $vat_cst_tax_amount = floatval($result[$i]['po_unit_tax']);
-                        $landed_cost = floatval($result[$i]['po_unit_rate_incl_tax']);
+                        $cost_price_exc_tax = floatval($result[$i]['po_cost_price_exc_tax']);
+                        $landed_cost = floatval($result[$i]['po_cost_price_inc_tax']);
+                        $margin_understanding = $result[$i]['margin_understanding'];
 
                         if($box_price==0){
                             $margin_from_scan = 0;
                         } else {
                             // $margin_from_scan = ($box_price-$cost_incl_vat_cst)/$box_price*100;
                             // $margin_from_scan = intval($margin_from_scan*100)/100;
-                            $margin_from_scan = intval((($box_price-$cost_incl_vat_cst)/$box_price*100)*100)/100;
+                            // $margin_from_scan = intval((($box_price-$cost_incl_vat_cst)/$box_price*100)*100)/100;
+
+                            if($margin_understanding=='GMP'){
+                                $margin_from_scan = intval((($box_price-$cost_excl_vat)/$box_price*100)*100)/100;
+                            } else if($margin_understanding=='NMP'){
+                                $margin_from_scan = intval((($box_price-$cost_incl_vat_cst)/$box_price*100)*100)/100;
+                            } else if($margin_understanding=='NMS'){
+                                $margin_from_scan = intval((($box_price-$cost_excl_vat-($box_price-($box_price/(1+($vat_percen/100)))))/$box_price*100)*100)/100;
+                            } else {
+                                $margin_from_scan = 0;
+                            }
                         }
                         // echo $box_price;
                         // echo '<br/>';
@@ -771,7 +856,17 @@ class PendingGrn extends Model
                         } else {
                             // $margin_from_po = ($product_mrp-$landed_cost)/$product_mrp*100;
                             // $margin_from_po = intval($margin_from_po*100)/100;
-                            $margin_from_po = intval((($product_mrp-$landed_cost)/$product_mrp*100)*100)/100;
+                            // $margin_from_po = intval((($product_mrp-$landed_cost)/$product_mrp*100)*100)/100;
+
+                            if($margin_understanding=='GMP'){
+                                $margin_from_po = intval((($product_mrp-$po_cost_price_exc_tax)/$product_mrp*100)*100)/100;
+                            } else if($margin_understanding=='NMP'){
+                                $margin_from_po = intval((($product_mrp-$po_cost_price_inc_tax)/$product_mrp*100)*100)/100;
+                            } else if($margin_understanding=='NMS'){
+                                $margin_from_po = intval((($product_mrp-$po_cost_price_exc_tax-($product_mrp-($product_mrp/(1+($vat_percen/100)))))/$product_mrp*100)*100)/100;
+                            } else {
+                                $margin_from_po = 0;
+                            }
                         }
 
                         if($box_price==0){
@@ -791,9 +886,8 @@ class PendingGrn extends Model
                         if(round($margindiff_cost,4)>0){
                             $data[$j]=$result[$i];
                             $data[$j]['po_mrp']=$product_mrp;
-                            $data[$j]['po_unit_rate_excl_tax']=$cost_price_exc_tax;
-                            $data[$j]['po_unit_tax']=$vat_cst_tax_amount;
-                            $data[$j]['po_unit_rate_incl_tax']=$landed_cost;
+                            $data[$j]['po_cost_price_exc_tax']=$cost_price_exc_tax;
+                            $data[$j]['po_cost_price_inc_tax']=$landed_cost;
                             $data[$j]['margindiff_qty']=$invoice_qty-$shortage_qty-$expiry_qty-$damaged_qty;
                             $data[$j]['margin_from_scan']=$margin_from_scan;
                             $data[$j]['margin_from_po']=$margin_from_po;
@@ -2165,6 +2259,35 @@ class PendingGrn extends Model
                                  when ifnull(invoice_qty,0)=0 then 0 
                                  when (ifnull(invoice_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))<=0 then 0 
                                  else ifnull(ifnull(((margin_from_po-margin_from_scan)/100*box_price*(ifnull(invoice_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))) / (1+(ifnull(vat_percen,0)/100)),0),0) end as margindiff_cost from 
+                (select A.*, B.margin_understanding, 
+                        case when B.margin_understanding='GMP' then 
+                                case when ifnull(A.box_price,0) = 0 then 0 
+                                else truncate((ifnull(A.box_price,0)-ifnull(A.cost_excl_vat,0))/ifnull(A.box_price,0)*100,2) 
+                                end 
+                            when B.margin_understanding='NMP' then 
+                                case when ifnull(A.box_price,0) = 0 then 0 
+                                else truncate((ifnull(A.box_price,0)-ifnull(A.cost_incl_vat_cst,0))/ifnull(A.box_price,0)*100,2) 
+                                end 
+                            when B.margin_understanding='NMS' then 
+                                case when ifnull(A.box_price,0) = 0 then 0 
+                                else truncate((ifnull(A.box_price,0)-ifnull(A.cost_excl_vat,0)-ifnull((ifnull(A.box_price,0)-(ifnull(A.box_price,0)/(1+(ifnull(A.vat_percen,0)/100)))),0))/ifnull(A.box_price,0)*100,2) 
+                                end 
+                            else 0 
+                        end as margin_from_scan, 
+                        case when B.margin_understanding='GMP' then 
+                                case when ifnull(A.po_mrp,0) = 0 then 0 
+                                else truncate((ifnull(A.po_mrp,0)-ifnull(A.po_cost_price_exc_tax,0))/ifnull(A.po_mrp,0)*100,2) 
+                                end 
+                            when B.margin_understanding='NMP' then 
+                                case when ifnull(A.po_mrp,0) = 0 then 0 
+                                else truncate((ifnull(A.po_mrp,0)-ifnull(A.po_cost_price_inc_tax,0))/ifnull(A.po_mrp,0)*100,2) 
+                                end 
+                            when B.margin_understanding='NMS' then 
+                                case when ifnull(A.po_mrp,0) = 0 then 0 
+                                else truncate((ifnull(A.po_mrp,0)-ifnull(A.po_cost_price_exc_tax,0)-ifnull((ifnull(A.po_mrp,0)-(ifnull(A.po_mrp,0)/(1+(ifnull(A.po_vat_percen,0)/100)))),0))/ifnull(A.po_mrp,0)*100,2) 
+                                end 
+                            else 0 
+                        end as margin_from_po 
                 (select A.vat_cst as tx_zn_cd, B.*, D.tax_zone_code, D.tax_zone_name, E.invoice_date, A.gi_date, 
                     date_add(A.gi_date, interval ifnull(min_no_of_months_shelf_life_required,0) month) as earliest_expected_date, 
                     null as cost_acc_id, null as cost_ledger_name, null as cost_ledger_code, 
@@ -2172,15 +2295,8 @@ class PendingGrn extends Model
                     null as cgst_acc_id, null as cgst_ledger_name, null as cgst_ledger_code, 
                     null as sgst_acc_id, null as sgst_ledger_name, null as sgst_ledger_code, 
                     null as igst_acc_id, null as igst_ledger_name, null as igst_ledger_code, 
-                    F.purchase_order_id, G.mrp as po_mrp, G.quantity as po_quantity, G.cost_price_exc_tax as po_unit_rate_excl_tax, 
-                    G.unit_tax_amount as po_unit_tax, G.cost_price_inc_tax as po_unit_rate_incl_tax, 
-                    case when ifnull(B.box_price,0) = 0 then 0 
-                        else truncate((ifnull(B.box_price,0)-ifnull(B.cost_incl_vat_cst,0))/ifnull(B.box_price,0)*100,2) end as margin_from_scan, 
-                    case when G.purchase_order_id is not null then 
-                            case when ifnull(G.mrp,0) = 0 then 0 
-                                else truncate((ifnull(G.mrp,0)-ifnull(G.cost_price_inc_tax,0))/ifnull(G.mrp,0)*100,2) end 
-                        else null 
-                    end as margin_from_po 
+                    F.purchase_order_id, G.mrp as po_mrp, G.vat_tax_percentage as po_vat_percen, G.quantity as po_quantity, 
+                    G.cost_price_exc_tax as po_cost_price_exc_tax, G.cost_price_inc_tax as po_cost_price_inc_tax 
                 from grn A 
                 left join grn_entries B on (A.grn_id = B.grn_id) 
                 left join tax_zone_master D on (A.vat_cst = D.tax_zone_code) 
@@ -2188,7 +2304,11 @@ class PendingGrn extends Model
                 left join purchase_order F on (A.po_no = F.po_no and A.vendor_id = F.vendor_id) 
                 left join purchase_order_items G on (F.purchase_order_id = G.purchase_order_id and B.psku = G.psku) 
                 where A.grn_id = '$grn_id' and B.grn_id = '$grn_id' and B.psku = '$psku' and A.is_active = '1' and A.company_id = '$company_id' and 
-                        B.is_active = '1' and D.is_active = '1' and F.is_active = '1') A) AA 
+                        B.is_active = '1' and D.is_active = '1' and F.is_active = '1') A 
+                left join 
+                (select distinct sku_internal_code, margin_understanding from product_master 
+                    where is_active = '1' and is_latest = '1' and is_preferred = '1' and company_id = '$company_id') B 
+                on (A.psku = B.sku_internal_code)) A) AA 
                 
                 left join 
 

@@ -156,12 +156,8 @@ function set_acc_type(){
         $("#type_vendor_id").show();
         $("#customer_id").hide();
         $("#type_customer_id").hide();
-<<<<<<< HEAD
         // $("#legal_name").hide();
         $('#legal_name').attr("readonly", true);
-=======
-        $("#legal_name").hide();
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         $("#vendor_code").show();
         $("#code").hide();
         $(".vendor_expenses").hide();
@@ -191,11 +187,7 @@ function set_acc_type(){
         $("#type_vendor_id").hide();
         $("#customer_id").hide();
         $("#type_customer_id").hide();
-<<<<<<< HEAD
         // $('#legal_name').show();
-=======
-        $('#legal_name').show();
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         $('#legal_name').attr("readonly", false);
         $("#vendor_code").hide();
         $("#code").show();
@@ -224,11 +216,7 @@ function set_acc_type(){
         $("#type_vendor_id").hide();
         $("#customer_id").hide();
         $("#type_customer_id").hide();
-<<<<<<< HEAD
         // $('#legal_name').show();
-=======
-        $('#legal_name').show();
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         $('#legal_name').attr("readonly", false);
         $("#vendor_code").hide();
         $("#code").show();
@@ -258,12 +246,8 @@ function set_acc_type(){
         $("#type_vendor_id").hide();
         $("#customer_id").hide();
         $("#type_customer_id").hide();
-<<<<<<< HEAD
         // $("#legal_name").show();
         $('#legal_name').attr("readonly", false);
-=======
-        $("#legal_name").show();
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         $("#vendor_code").hide();
         $("#code").show();
         $(".vendor_goods").hide();
@@ -294,21 +278,13 @@ function set_acc_type(){
         $("#type_customer_id").hide();
         $("#vendor_id").css("display", "none");
         $("#type_vendor_id").hide();
-<<<<<<< HEAD
         // $("#legal_name").show();
         $('#legal_name').attr("readonly", false);
-=======
-        $("#legal_name").show();
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         $("#vendor_code").hide();
         $("#code").show();
         $(".vendor_expenses").hide();
         $(".employee").hide();
         $(".vendor_goods").show();
-<<<<<<< HEAD
-=======
-        $('#legal_name').attr("readonly", false);
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
     
          $("#customer_code").hide();
         // $("#vendor_details").hide();
@@ -332,12 +308,8 @@ function set_acc_type(){
        // $("#vendor_id").hide();
         $("#vendor_id").css("display", "none");
         $("#type_vendor_id").hide();
-<<<<<<< HEAD
         // $("#legal_name").hide();
         $('#legal_name').attr("readonly", true);
-=======
-        $("#legal_name").hide();
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         $("#customer_id").show();
         $("#type_customer_id").show();
         $("#vendor_code").hide();
@@ -368,11 +340,7 @@ function set_acc_type(){
         $("#type_customer_id").hide();
         $("#vendor_id").hide();
         $("#type_vendor_id").hide();
-<<<<<<< HEAD
         // $("#legal_name").show();
-=======
-        $("#legal_name").show();
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         $('#legal_name').attr("readonly", true);
         $("#vendor_code").hide();
         $("#code").show();
@@ -390,7 +358,6 @@ function set_acc_type(){
     } else if($("#type").val()=="Goods Sales"){
         $("#customer_id").hide();
         $("#type_customer_id").hide();
-<<<<<<< HEAD
         $("#vendor_id").hide();
         $("#type_vendor_id").hide();
         // $("#legal_name").show();
@@ -455,12 +422,6 @@ function set_acc_type(){
         $("#type_vendor_id").hide();
         // $('#legal_name').show();
         $('#legal_name').attr("readonly", false);
-=======
-        $("#vendor_id").hide();
-        $("#type_vendor_id").hide();
-        $("#legal_name").show();
-        $('#legal_name').attr("readonly", true);
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         $("#vendor_code").hide();
         $("#code").show();
         $(".vendor_goods").hide();
@@ -468,69 +429,6 @@ function set_acc_type(){
         $(".bank_account").hide();
         $(".employee").hide();
         $("#customer_code").hide();
-<<<<<<< HEAD
-=======
-        $(".state").show();
-        $(".state_type").show();
-        $(".gst_rate").show();
-        $(".bus_type").show();
-        $(".gst_tax").hide();
-        $(".tax_type").hide();
-    } else if($("#type").val()=="GST Tax"){
-        $("#customer_id").hide();
-        $("#type_customer_id").hide();
-        $("#vendor_id").hide();
-        $("#type_vendor_id").hide();
-        $("#legal_name").show();
-        $('#legal_name').attr("readonly", true);
-        $("#vendor_code").hide();
-        $("#code").show();
-        $(".vendor_goods").hide();
-        $(".vendor_expenses").hide();
-        $(".bank_account").hide();
-        $(".employee").hide();
-        $(".state").show();
-        $(".state_type").hide();
-        $(".gst_rate").show();
-        $(".bus_type").hide();
-        $(".gst_tax").show();
-        $(".tax_type").show();
-        $("#customer_code").hide();
-    } else if($("#type").val()=="Branch Type"){
-        $("#customer_id").hide();
-        $("#type_customer_id").hide();
-        $("#vendor_id").hide();
-        $("#type_vendor_id").hide();
-        $("#legal_name").show();
-        $('#legal_name').attr("readonly", true);
-        $("#vendor_code").hide();
-        $("#code").show();
-        $(".vendor_goods").hide();
-        $(".vendor_expenses").hide();
-        $(".bank_account").hide();
-        $(".employee").hide();
-        $("#customer_code").hide();
-        $(".state").show();
-        $(".state_type").hide();
-        $(".gst_rate").hide();
-        $(".bus_type").hide();
-        $(".gst_tax").hide();
-        $(".tax_type").hide();
-    } else {
-        $("#customer_id").hide();
-        $("#type_customer_id").hide();
-        $("#vendor_id").hide();
-        $("#type_vendor_id").hide();
-        $('#legal_name').show();
-        $('#legal_name').attr("readonly", false);
-        $("#vendor_code").hide();
-        $("#code").show();
-        $(".vendor_goods").hide();
-        $(".vendor_expenses").hide();
-        $(".bank_account").hide();
-        $(".employee").hide();
-        $("#customer_code").hide();
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         $(".state").hide();
         $(".state_type").hide();
         $(".gst_rate").hide();
@@ -669,10 +567,7 @@ function get_code() {
             data: {
                     customer_id : $("#customer_id").val(),
                     company_id : $("#company_id").val(),
-<<<<<<< HEAD
                     id : $("#id").val(),
-=======
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                     _csrf : csrfToken
                 },
             dataType: 'json',
@@ -682,10 +577,7 @@ function get_code() {
                     var category_details = data['category_details'];
 
                     if(customer_details.length>0){
-<<<<<<< HEAD
                         $("#legal_name").val(customer_details[0].legal_name);
-=======
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         $("#customer_code").val(customer_details[0].customer_code);
                         $("#pan_no").val(customer_details[0].pan_or_tin_no);
 

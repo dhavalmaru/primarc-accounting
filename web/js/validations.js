@@ -420,8 +420,42 @@ $.validator.addMethod("check_legal_name_availablity_in_acc_master", function (va
 }, 'Legal Name already in use in group master.');
 
 
+$("#payment_upload").validate({
+    rules: {
+        acc_id: {
+            required: true
+        },
+        to_date: {
+            required: true
+        }
+    },
+
+    ignore: false,
+
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
 
 
+$('#payment_upload').submit(function() {
+    removeMultiInputNamingRules('#payment_upload', 'select[alt="acc_id[]"]');
+
+    addMultiInputNamingRules('#payment_upload', 'select[name="acc_id[]"]', { required: true });
+
+    if (!$("#payment_upload").valid()) {
+
+        return false;
+    } else {
+         removeMultiInputNamingRules('#payment_upload', 'select[alt="acc_id[]"]');
+
+    }
+});
 
 // ----------------- ACCOUNT CATEGORY MASTER FORM VALIDATION -------------------------------------
 $("#acc_category_master").validate({
@@ -502,7 +536,24 @@ $('#debit_credit_note').submit(function() {
     }
 });
 
+$("#scraping_upload").validate({
+    rules: {
+        scraping_file: {
+            required: true
+        }
+    },
 
+    ignore: false,
+
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
 
 
 // ----------------- BANK MASTER FORM VALIDATION -------------------------------------
@@ -1114,34 +1165,19 @@ function check_jv_invoice_details(){
         if(parseInt(element_val)!=0 && element_val!="")
         {
             var id = $(this).attr('id');
-<<<<<<< HEAD
             // console.log('id'+id);
             var elem_id = id.substr(id.lastIndexOf('_')+1);
             // console.log('elem_id'+elem_id);
             var total_val = $('#sum_total_'+elem_id).text();
             // console.log('sum_total'+total_val);
-=======
-            console.log('id'+id);
-            var elem_id = id.substr(id.lastIndexOf('_')+1);
-            console.log('elem_id'+elem_id);
-            var total_val = $('#sum_total_'+elem_id).text();
-            console.log('sum_total'+total_val);
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
             if(total_val!=undefined && total_val!="")
             {
                 if(parseInt(element_val)!=parseInt(total_val))
                 {
-<<<<<<< HEAD
                     // console.log('total_val'+total_val);
                     var errors = {};
                     var name = $(this).attr('name');
                     // console.log('name'+elem_id);
-=======
-                    console.log('total_val'+total_val);
-                    var errors = {};
-                    var name = $(this).attr('name');
-                    console.log('name'+elem_id);
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                     errors[name] = "Invoice Amount and Actual Amount Should Be Same";
                     validator.showErrors(errors);
                     valid = false;
@@ -1208,7 +1244,7 @@ $("#payment_receipt").validate({
         },
         amount: {
             required: true,
-			numbersandcommaanddotonly: true
+            numbersandcommaanddotonly: true
         },
         // ref_no: {
         //     required: true
@@ -1582,12 +1618,9 @@ $("#other_debit_credit").validate({
         vendor_id: {
             required: true
         },
-<<<<<<< HEAD
         vendor_warehouse_id: {
             required: true
         },
-=======
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         trans_type: {
             required: true
         },
@@ -1670,7 +1703,39 @@ function check_acc_other_debit_credit_details() {
     return valid;
 }
 
+$("#detailedinvoice_report").validate({
+    rules: {
+    },
 
+    ignore: false,
+    onkeyup: false,
+
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
+
+$('#detailedinvoice_report').submit(function() {
+    removeMultiInputNamingRules('#detailedinvoice_report', 'select[alt="group[]"]');
+    removeMultiInputNamingRules('#detailedinvoice_report', 'select[alt="ledger_name[]"]');
+
+    addMultiInputNamingRules('#detailedinvoice_report', 'select[name="group[]"]', { required: true });
+    addMultiInputNamingRules('#detailedinvoice_report', 'select[name="ledger_name[]"]', { required: true });
+
+    if (!$("#detailedinvoice_report").valid()) {
+
+        return false;
+    } else {
+         removeMultiInputNamingRules('#detailedinvoice_report', 'select[alt="group[]"]');
+         removeMultiInputNamingRules('#detailedinvoice_report', 'select[alt="ledger_name[]"]');
+
+    }
+});
 
 
 
@@ -2021,11 +2086,7 @@ $(function() {
                     $('.edited_other_charges').each(function() {
                         if($(this).val()!=""){
                             if(parseFloat($(this).val())>0){
-<<<<<<< HEAD
                                 // console.log("entered"+diffval);
-=======
-                                console.log("entered"+diffval);
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                                 blFlag = true;
                             }
                         }
@@ -2140,17 +2201,10 @@ $('#form_sale_details').submit(function() {
     addMultiInputNamingRules_form_sale_details();
     removeMultiInputNamingRules_sale_details();
     addMultiInputNamingRules_sale_details();
-<<<<<<< HEAD
     // console.log('form submit');
 
     if (!$("#form_sale_details").valid()) {
         // console.log('error');
-=======
-    console.log('form submit');
-
-    if (!$("#form_sale_details").valid()) {
-        console.log('error');
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         sale_invalid_handler();
         return false;
     } else {
@@ -2167,11 +2221,7 @@ $('#form_sale_details').submit(function() {
 });
 
 function addMultiInputNamingRules_sale_details(){
-<<<<<<< HEAD
     // console.log('multinaming rule');
-=======
-    console.log('multinaming rule');
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
     removeMultiInputNamingRules_sale_details();
 
     $('.narration').each(function(){
@@ -2181,20 +2231,12 @@ function addMultiInputNamingRules_sale_details(){
         var lastname = 'diff'+'_'+splited[2]+'_'+splited[1]+'_'+splited[2];
         var diffval = $("#"+lastname).val();
 
-<<<<<<< HEAD
         // console.log(lastname);
-=======
-        console.log(lastname);
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
        
         if(parseFloat(diffval)!==parseFloat(0) && $(this).val()=="")
         {
             var name = $(this).attr('name');
-<<<<<<< HEAD
             // console.log('after multinaming rule'+name);
-=======
-            console.log('after multinaming rule'+name);
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
             addMultiInputNamingRules('#form_sale_details', 'input[name="'+name+'"]', { required: true });
         }
     });
@@ -2214,11 +2256,7 @@ function removeMultiInputNamingRules_sale_details(){
         // var diffval = $("#"+lastname).val();
         var name = $(this).attr('name');
 
-<<<<<<< HEAD
         // console.log(name);
-=======
-        console.log(name);
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         
         //removeMultiInputNamingRules('#form_sale_details', 'input[alt="'+name+'"]');
         removeMultiInputNamingRules('#form_sale_details', 'input[name='+name+']');
@@ -2792,7 +2830,6 @@ function go_inter_depot_invalid_handler(){
         $('#form_errors_group').hide();
         $('#form_errors').hide();
     }
-<<<<<<< HEAD
 }
 
 
@@ -2942,44 +2979,3 @@ $('#form_sale_upload_details').submit(function() {
         return true;
     } 
 });
-
-
-
-
-// ----------------- INVOICE WISE DETAIL FORM VALIDATION -------------------------------------
-$("#detailedinvoice_report").validate({
-    rules: {
-    },
-
-    ignore: false,
-    onkeyup: false,
-
-    errorPlacement: function (error, element) {
-        var placement = $(element).data('error');
-        if (placement) {
-            $(placement).append(error);
-        } else {
-            error.insertAfter(element);
-        }
-    }
-});
-
-$('#detailedinvoice_report').submit(function() {
-    removeMultiInputNamingRules('#detailedinvoice_report', 'select[alt="group[]"]');
-    removeMultiInputNamingRules('#detailedinvoice_report', 'select[alt="ledger_name[]"]');
-
-    addMultiInputNamingRules('#detailedinvoice_report', 'select[name="group[]"]', { required: true });
-    addMultiInputNamingRules('#detailedinvoice_report', 'select[name="ledger_name[]"]', { required: true });
-
-    if (!$("#detailedinvoice_report").valid()) {
-
-        return false;
-    } else {
-         removeMultiInputNamingRules('#detailedinvoice_report', 'select[alt="group[]"]');
-         removeMultiInputNamingRules('#detailedinvoice_report', 'select[alt="ledger_name[]"]');
-
-    }
-});
-=======
-}
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f

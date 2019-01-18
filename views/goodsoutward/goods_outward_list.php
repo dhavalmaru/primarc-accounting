@@ -40,22 +40,13 @@ $mycomponent = Yii::$app->mycomponent;
 										<tr> 
 											<th width="45" style="text-align: center;">Sr. No.</th> 
 											<th>Action</th> 
-<<<<<<< HEAD
 											<th>GO Id</th> 
 											<th>GO No</th>
-=======
-											<th>Go Id</th> 
-											<th>Go No</th>
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 											<th>Warehouse</th> 
 											<th>Vendor Name</th> 
 											<!-- <th>Idt Warehouse</th>  -->
 											<th>Total Value</th> 
-<<<<<<< HEAD
 											<th>GO Date</th> 
-=======
-											<th>Go Date</th> 
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 											<th>Updated By</th> 
 										</tr>  
 									</thead>
@@ -73,22 +64,13 @@ $mycomponent = Yii::$app->mycomponent;
 										<tr> 
 											<th style="text-align: center;">Sr. No.</th> 
 											<th>Action</th> 
-<<<<<<< HEAD
 											<th>GO Id</th> 
 											<th>GO No</th> 
-=======
-											<th>Go Id</th> 
-											<th>Go No</th> 
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 											<th>Warehouse</th>  
 											<th>Vendor Name</th> 
 											<!-- <th>Idt Warehouse</th>  -->
 											<th>Total Value</th> 
-<<<<<<< HEAD
 											<th>GO Date</th> 
-=======
-											<th>Go Date</th> 
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 											<th>Updated By</th> 
 											<th>Ledger</th> 
 										</tr>  
@@ -107,23 +89,14 @@ $mycomponent = Yii::$app->mycomponent;
 										<tr> 
 											<th width="45" style="text-align: center;">Sr. No.</th> 
 											<th>Action</th> 
-<<<<<<< HEAD
 											<th>GO Id</th> 
 											<th>GO No</th>
 											<th>GRN No</th>
-=======
-											<th>Go Id</th> 
-											<th>Go No</th>
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 											<th>Warehouse</th> 
 											<th>Vendor Name</th> 
 											<!-- <th>Idt Warehouse</th>  -->
 											<th>Total Value</th> 
-<<<<<<< HEAD
 											<th>GO Date</th> 
-=======
-											<th>Go Date</th> 
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 											<th>Updated By</th> 
 											<th>GO Status</th> 
 										</tr>  

@@ -56,8 +56,7 @@ class SalesuploadController extends Controller
         //     echo 'rejected';
         // }
         // $salesupload->upload_sales();
-        // $salesupload->test();
-        $salesupload->actionDownlaod_ledger();
+        $salesupload->test();
     }
 
     public function actionCreate(){

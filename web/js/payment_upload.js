@@ -4,6 +4,11 @@ $(document).ready(function() {
     setPaymentType();
     setPaymentType1();
 
+    $('#example_payment').DataTable({
+        searching: false,
+        ordering: false
+    });
+
     getLedger();
 	$('.select2').select2();
 	//$("#trans_type").on('select2:selecting', function(e) {
@@ -13,7 +18,7 @@ $(document).ready(function() {
     	setPaymentType2();
     });
 
-    $("#acc_id").change(function(){
+    /*$("#acc_id").change(function(){
         var acc_id = $("#acc_id").val();
     	
         var csrfToken = $('meta[name="csrf-token"]').attr("content");
@@ -45,7 +50,7 @@ $(document).ready(function() {
         });
     	
         getLedger();
-    });
+    });*/
 
     $("#bank_id").change(function(){
         

@@ -24,7 +24,9 @@
         "yii2tech/html2pdf": "^1.0",
         "mpdf/mpdf": "^6.1",
         "moonlandsoft/yii2-phpexcel": "*",
-        "phpoffice/phpspreadsheet": "dev-master"
+        "phpoffice/phpspreadsheet": "dev-master",
+        "box/spout": "^2.8@dev",
+        "phpoffice/phpexcel": "dev-master"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

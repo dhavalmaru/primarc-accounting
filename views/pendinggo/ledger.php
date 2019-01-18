@@ -9,11 +9,7 @@ use yii\helpers\Url;
 
 
 $this->title = 'Ledger Go: ' . $grn_details[0]['gi_go_id'];
-<<<<<<< HEAD
 $this->params['breadcrumbs'][] = ['label' => 'GO', 'url' => ['index']];
-=======
-$this->params['breadcrumbs'][] = ['label' => 'Grns', 'url' => ['index']];
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 $this->params['breadcrumbs'][] = ['label' => $grn_details[0]['gi_go_id'], 'url' => ['update', 'id' => $grn_details[0]['gi_go_id']]];
 $this->params['breadcrumbs'][] = 'Ledger';
 $mycomponent = Yii::$app->mycomponent;

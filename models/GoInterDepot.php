@@ -1615,11 +1615,7 @@ class GoInterDepot extends Model
                 left join tax_type_master E on (D.tax_type_id = E.id) ) C
             where child_tax_rate != 0
             group by id, tax_zone_code, tax_zone_name, parent_id, tax_rate) BB
-<<<<<<< HEAD
             on (AA.vat_cst COLLATE utf8_unicode_ci = BB.tax_zone_code and round(AA.vat_percent,4)=round(BB.tax_rate,4))
-=======
-            on (AA.vat_cst = BB.tax_zone_code and round(AA.vat_percent,4)=round(BB.tax_rate,4))
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
             Where AA.gi_go_id='$id' Order By vat_percent ASC;";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
@@ -1672,11 +1668,7 @@ class GoInterDepot extends Model
                                 left join tax_type_master E on (D.tax_type_id = E.id) ) C 
             where child_tax_rate != 0 
             group by id, tax_zone_code, tax_zone_name, parent_id, tax_rate) BB 
-<<<<<<< HEAD
             on (AA.vat_cst COLLATE utf8_unicode_ci = BB.tax_zone_code and round(AA.vat_percent,4)=round(BB.tax_rate,4)) 
-=======
-            on (AA.vat_cst = BB.tax_zone_code and round(AA.vat_percent,4)=round(BB.tax_rate,4)) 
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
             Where AA.gi_go_id=$id  Order By vat_percent ASC;";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();

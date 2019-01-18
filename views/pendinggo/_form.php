@@ -11,7 +11,6 @@ use yii\helpers\Url;
 $mycomponent = Yii::$app->mycomponent;
 ?>
 <style>
-<<<<<<< HEAD
     #form_sale_details .error {color: #dd4b39!important;}
     .table-head { font-weight:100;  
         background: #41ace9; 
@@ -143,139 +142,6 @@ $mycomponent = Yii::$app->mycomponent;
     .diversion table{max-width: 1300px;}
     .table-container {overflow: auto;}
     table {width: 1200px;}
-=======
-#form_sale_details .error {color: #dd4b39!important;}
-.table-head { font-weight:100;  
-    background: #41ace9; 
-    color: #fff;
-    border-bottom: 1px solid #41ace9;
-    background-image: linear-gradient(#54b4eb, #2fa4e7 60%, #1d9ce5);
-   }
-
-   .border-ok { border:1px solid #ddd!important; padding: 0 5px;}
-/*--------------------------*/
-#shortage_sku_details { width: 2500px; }
-#shortage_sku_details tr td input { border: none; outline: none; }
-#shortage_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
-#shortage_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-#shortage_sku_details tr td:nth-child(25) input, #shortage_sku_details tr td:nth-child(54) input { border: 1px solid #ddd!important; outline: none; }
-#shortage_sku_details tr td:nth-child(54) { width: 400px; }
-/*-----------------------*/
-#expiry_sku_details { width: 2500px; }
-#expiry_sku_details tr td input { border: none; outline: none; }
-#expiry_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
-#expiry_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-#expiry_sku_details tr td:nth-child(25) input, #expiry_sku_details tr td:nth-child(54) input { border: 1px solid #ddd!important; outline: none; }
-#expiry_sku_details tr td:nth-child(54) { width: 400px; }
-/*----------------------*/
-#damaged_sku_details { width: 2500px; }
-#damaged_sku_details tr td input { border: none; outline: none; }
-#damaged_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
-#damaged_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-#damaged_sku_details tr td:nth-child(25) input, #damaged_sku_details tr td:nth-child(54) input { border: 1px solid #ddd!important; outline: none; }
-#damaged_sku_details tr td:nth-child(54) { width: 400px; }
-/*----------------------*/
-#margindiff_sku_details { width: 3000px; }
-#margindiff_sku_details tr td input { border: none; outline: none; }
-#margindiff_sku_details .table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td{ border:1px solid #ddd!important; }
-#margindiff_sku_details tr td  select { width: 100%;  border:1px solid #ddd!important;  outline: none;}
-#margindiff_sku_details tr td:nth-child(47) input, #margindiff_sku_details tr td:nth-child(54) input { border: 1px solid #ddd!important; outline: none; }
-#margindiff_sku_details tr td:nth-child(54) { width: 400px; }
-/*----------------------*/
-#ledger_details .modal-body .table   {  }
-
-.bold-text { font-weight:600; letter-spacing:.5px; background:#f9f9f9;   }
-.btn-margin { margin-top:20px;}
-.row-container { position:relative;    padding:10px 0; margin-bottom:15px;  }
-label { font-weight:normal;     font-size: 12px; }
-.actual_value {   padding:0px 3px;   color:#fff; font-weight:400; text-align:right;}
-.table   tr th  { font-weight:normal;}
-.table > thead > tr:nth-child(2) {     background:none!important;  }
-.modal-dialog .table  tr  td { min-width:60px;}
-.table-bordered > thead > tr > th, .table-bordered > thead > tr > td { border-bottom-width:1px;  }
-.modal-body { padding:10px; }
-input { outline:none; background:none; width:100%; }
-.edit-text { border:1px solid #ddd; padding:1px 5px;}
-#update_grn tr td:last-child {   padding:4px 5px; min-width:150px; }
-table tr td:first-child  {   text-align:center;     }
-table tr th:nth-child(1) { padding:4px 3px!important; width:55px;    }
-table tr td:nth-child(2) {    }
- .total-amount { width:100%; padding:0; }
-table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
- 
-.btn-danger {
-    background-color: #dd4b39;
-    border-color: #d73925;
-    color: #fff;
-}
-
-.modal-lg { width:100%;}
-.modal-dialog { margin:10px;}
-.modal-content { border-radius:0;}
-.modal-body  { padding:0;}
-.modal-body-inside { /*max-width:1310px;*/ overflow-y:hidden!important; margin:20px auto; }
-.modal-header { background:#f1f1f1;}
-.modal-footer { background:#f1f1f1;}
-/*.modal-body .table {  width:3200px; }*/
-.close { outline:none;}
-
-
-
-#update_grn th, td { white-space: nowrap; }
-    div.dataTables_wrapper {
-        width:100%;
-        margin: 0 auto;
-    }
-
-.dataTables_scrollBody{ height:auto!important; }
-#update_grn   th {   background-image: linear-gradient(#54b4eb, #2fa4e7 60%, #1d9ce5)!important; color:#fff;}  
-.table-container { /* overflow-x:scroll;*/  width:100%; margin:20px 0;}
- table.dataTable tbody tr { background:#fff!important;}
-  table.dataTable.display tbody tr.odd > .sorting_1, table.dataTable.order-column.stripe tbody tr.odd > .sorting_1 {
-    background-color: #fff!important;
-}
-#update_grn>thead>tr>th, #update_grn>tbody>tr>th, #update_grn>tfoot>tr>th, #update_grn>thead>tr>td, #update_grn>tbody>tr>td, #update_grn>tfoot>tr>td {
-    border-bottom: 1px solid #ddd!important;
-     border-right: 1px solid #ddd!important;
-}
-#update_grn thead tr th{ height:0; padding:0;   /*line-height:30px!important;*/  border:none!important;   }
- #update_grn   tr th {
- height:auto!important; padding:0px 10px!important; /*line-height:30px;*/ border:none!important;  
-}
- #update_grn  tr td {
- height:auto!important; padding:3px 10px!important;
-}
-
-@media only screen and (min-width:250px) and (max-width:767px) {
-	.col-xs-5 {   padding:5px 10px; } 
-	.col-xs-7 {  padding:5px 10px; } 
-	.row-container { padding:0;}
-	label {margin-top:5px; margin-bottom:2px;}
-	.table-container { max-width:700px; overflow-x:scroll;}
-	.table-container table{ width:1200px;   } 
-	 .navbar-collapse.in { overflow:hidden!important;}
-	
-
-	}
-@media only screen and (min-width:250px) and (max-width:1350px) {	 
- .modal-body {   padding: 0 15px;}
-}
-	@media 
-  only screen and (min-width: 768px),
-  not all and (min-width: 768px),
-  not print and (min-height: 768px),
-  (color),
-  (min-height: 768px) and (max-height: 1000px),
-  handheld and (orientation: landscape)
-{
-	/*.table-container { width:100%; overflow-x:scroll;}*/
-	.table-container table{   } 
-}
-.diversion {margin-left: 10px;}
-.diversion table{max-width: 1300px;}
-.table-container {overflow: auto;}
-table {width: 1200px;}
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 </style>
 <div class="grn-form">
   <div class=" col-md-12">  
@@ -292,11 +158,7 @@ table {width: 1200px;}
     			<div class="col-md-2 col-sm-2 col-xs-6">
                     <label class=" control-label">Posting Date </label> 
                     <div class=" "> 
-<<<<<<< HEAD
     					<input style="background-color: #fff;" type="text" class="form-control datepicker" name="gi_date" id="gi_date" value="<?php if(isset($grn_details)) { if($grn_details[0]['invoice_created_date']!=null && $grn_details[0]['invoice_created_date']!='') echo date('d/m/Y',strtotime($grn_details[0]['invoice_created_date'])); else echo (($grn_details[0]['gi_date']!=null && $grn_details[0]['gi_date']!='')?date('d/m/Y',strtotime($grn_details[0]['gi_date'])):date('d/m/Y')); } else echo date('d/m/Y'); ?>" readonly />
-=======
-    					<input style="background-color: #fff;" type="text" class="form-control datepicker" name="gi_date" id="gi_date" value="<?php if(isset($grn_details)) { if($grn_details[0]['gi_go_date_time']!=null && $grn_details[0]['gi_go_date_time']!='') echo date('d/m/Y',strtotime($grn_details[0]['gi_go_date_time'])); else echo (($grn_details[0]['gi_date']!=null && $grn_details[0]['gi_date']!='')?date('d/m/Y',strtotime($grn_details[0]['gi_date'])):date('d/m/Y')); } else echo date('d/m/Y'); ?>" readonly />
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         <input type="hidden" class="form-control" name="no_of_invoices" id="no_of_invoices" value="<?= count($invoice_details) ?>" />
                     </div>
     			</div>
@@ -351,11 +213,7 @@ table {width: 1200px;}
                     <label class="control-label">Intra / Inter</label>
     			 
                     <div class=" "> 
-<<<<<<< HEAD
     					 <input type="text" class="form-control" id="vat_cst" value="<?= $grn_details[0]['tax_zone_code'] ?>" readonly />
-=======
-    					 <input type="text" class="form-control" name="vat_cst" id="vat_cst"   value="<?= $grn_details[0]['tax_zone_code'] ?>" readonly />
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                     </div>
                </div>
             </div>

@@ -46,19 +46,12 @@ class OtherdebitcreditController extends Controller
                 $acc_details = $model->getAccountDetails();
                 $vendor = $model->getVendors();
                 $warehouse_gst = $model->getWarehouseDetails();
-<<<<<<< HEAD
                 $vendor_gst = $model->getVendorGSTNos();
 
                 $model->setLog('OtherDebitCredit', '', 'Insert', '', 'Insert Other Debit Credit Details', 'acc_other_debit_credit_details', '');
                 return $this->render('otherdebitcredit_details', ['action' => $action, 'acc_details' => $acc_details, 
                                                                 'vendor' => $vendor, 'warehouse_gst' => $warehouse_gst, 
                                                                 'vendor_gst' => $vendor_gst]);
-=======
-
-                $model->setLog('OtherDebitCredit', '', 'Insert', '', 'Insert Other Debit Credit Details', 'acc_other_debit_credit_details', '');
-                return $this->render('otherdebitcredit_details', ['action' => $action, 'acc_details' => $acc_details, 
-                                                                'vendor' => $vendor, 'warehouse_gst' => $warehouse_gst]);
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
             } else {
                 return $this->render('/message', [
                     'title'  => \Yii::t('user', 'Access Denied'),
@@ -82,23 +75,17 @@ class OtherdebitcreditController extends Controller
         $vendor = $model->getVendors();
         $acc_details = $model->getAccountDetails();
         $warehouse_gst = $model->getWarehouseDetails();
-<<<<<<< HEAD
         $vendor_id = '';
         if(count($data)>0){
             $vendor_id = $data[0]['vendor_id'];
         }
         $vendor_gst = $model->getVendorGSTNos($vendor_id);
-=======
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         $other_debit_credit_entries = $model->gerOtherDebitCreditEntries($id);
         // $approver_list = $model->getApprover($action);
 
         return $this->render('otherdebitcredit_details', ['action' => $action, 'data' => $data, 'acc_details' => $acc_details, 
                                                         'vendor' => $vendor, 'warehouse_gst' => $warehouse_gst, 
-<<<<<<< HEAD
                                                         'vendor_gst' => $vendor_gst, 
-=======
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                                                         'other_debit_credit_entries' => $other_debit_credit_entries]);
     }
 
@@ -171,13 +158,9 @@ class OtherdebitcreditController extends Controller
         
         $this->layout = false;
         return $this->render('tax_invoice', ['debit_note' => $data['debit_note'], 'vendor_details' => $data['vendor_details'], 
-<<<<<<< HEAD
                                             'invoice_details' => $data['invoice_details'], 'inv_tax_details' => $data['inv_tax_details'], 
                                             'warehouse_details' => $data['warehouse_details'], 
                                             'vendor_warehouse_details' => $data['vendor_warehouse_details']]);
-=======
-                                            'invoice_details' => $data['invoice_details'], 'inv_tax_details' => $data['inv_tax_details']]);
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
     }
 
     public function actionDownloadtaxinvoice($id){
@@ -205,13 +188,9 @@ class OtherdebitcreditController extends Controller
         $file = "";
 
         return $this->render('email', ['debit_note' => $data['debit_note'], 'vendor_details' => $data['vendor_details'], 
-<<<<<<< HEAD
                                         'invoice_details' => $data['invoice_details'], 'inv_tax_details' => $data['inv_tax_details'], 
                                         'warehouse_details' => $data['warehouse_details'], 
                                         'vendor_warehouse_details' => $data['vendor_warehouse_details']]);
-=======
-                                        'invoice_details' => $data['invoice_details'], 'inv_tax_details' => $data['inv_tax_details']]);
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
     }
 
     public function actionViewdebitcreditnote($id){

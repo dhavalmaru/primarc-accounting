@@ -194,7 +194,7 @@ table {width: 1200px;}
                     <label class="control-label">Vat/Cst </label>
     			 
                     <div class=" "> 
-    					 <input type="text" class="form-control" name="vat_cst" id="vat_cst"   value="<?= $grn_details[0]['vat_cst'] ?>" readonly />
+    					 <input type="text" class="form-control" id="vat_cst" value="<?= $grn_details[0]['vat_cst'] ?>" readonly />
                     </div>
                </div>
             </div>
@@ -754,7 +754,7 @@ table {width: 1200px;}
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">Total Deduction</td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">
-                        <select id="totaldeduction_acc_id_0" class="form-control acc_id select2" name="total_deduction_acc_id" onChange="get_acc_details(this)" style="display: none;">
+                        <select id="totaldeduction_acc_id_0" class="form-control acc_id" name="total_deduction_acc_id" onChange="get_acc_details(this)" style="display: none;">
                             <option value="">Select</option>
                             <?php for($i=0; $i<count($acc_master); $i++) { 
                                     if($acc['total_deduction_acc_id']==""){

@@ -7,7 +7,7 @@ use yii\base\Model;
 use yii\web\Session;
 use mPDF;
 
-class Goodsoutward extends Model
+class GoodsOutward extends Model
 {
     public function getAccess(){
         $session = Yii::$app->session;
@@ -55,7 +55,6 @@ class Goodsoutward extends Model
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-<<<<<<< HEAD
         $sql = "select II.* from 
                 (select HH.* from 
                 (select GG.gi_go_id, GG.gi_go_ref_no, GG.warehouse_name, GG.vendor_name, GG.idt_warehouse_name, GG.gi_go_final_commit_date, GG.updated_by, GG.updated_date, GG.username, sum(GG.total_amount) as total_amount from 
@@ -78,12 +77,6 @@ class Goodsoutward extends Model
                 where A.status = 'approved' and A.is_active = '1' and A.company_id = '$company_id' and 
                     B.status = 'approved' and B.is_active = '1' and B.company_id = '$company_id') BB 
                 on (AA.grn_no=BB.gi_id) where BB.grn_id is not null) CC 
-=======
-        $sql = "select * from 
-                (select A.*, B.gi_go_id as b_gi_go_id from 
-                (select A.* from goods_inward_outward A where A.is_active = '1' and A.company_id='$company_id' and 
-                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01')) A 
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                 left join 
                 (select grn_id, psku, qty, ded_type from acc_grn_sku_entries where status='approved' and is_active='1' and company_id='$company_id'and ded_type in ('expiry', 'damaged')) DD 
                 on (CC.grn_id=DD.grn_id and CC.psku=DD.psku)) EE 
@@ -118,7 +111,6 @@ class Goodsoutward extends Model
         $company_id = $session['company_id'];
 
         $sql = "select count(*) as count from 
-<<<<<<< HEAD
                 (select II.* from 
                 (select HH.* from 
                 (select GG.gi_go_id, GG.gi_go_ref_no, GG.warehouse_name, GG.vendor_name, GG.idt_warehouse_name, GG.gi_go_final_commit_date, GG.updated_by, GG.updated_date, GG.username, sum(GG.total_amount) as total_amount from 
@@ -147,11 +139,6 @@ class Goodsoutward extends Model
                 on (CC.grn_id=DD.grn_id and CC.psku=DD.psku)) EE 
                 where EE.invoice_qty>0) FF) GG 
                 group by GG.gi_go_id, GG.gi_go_ref_no, GG.warehouse_name, GG.vendor_name, GG.idt_warehouse_name, GG.gi_go_final_commit_date, GG.updated_by, GG.updated_date, GG.username) HH ".$wheresearch.") II 
-=======
-                (select A.*, B.gi_go_id as b_gi_go_id from 
-                (select A.* from goods_inward_outward A where is_active = '1' and A.company_id='$company_id' and 
-                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01')) A 
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                 left join 
                 (select distinct gi_go_id from acc_go_debit_entries where status = 'approved' and is_active = '1' and company_id = '$company_id') JJ 
                 on (II.gi_go_id=JJ.gi_go_id) 
@@ -332,7 +319,6 @@ class Goodsoutward extends Model
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-<<<<<<< HEAD
         $sql = "select KK.*, LL.is_paid, case when KK.posted_gi_go_id is not null then 'GO Posted' 
                     when KK.grn_id is not null then 'GRN Posted & GO Balance' else 'GRN Not Posted' end as go_status from 
                 (select II.*, JJ.gi_go_id as posted_gi_go_id from 
@@ -349,12 +335,6 @@ class Goodsoutward extends Model
                 where A.is_active = '1' and A.company_id='$company_id' and B.is_active = '1' and B.company_id='$company_id' and 
                     A.inward_outward = 'outward' and date(A.gi_go_final_commit_date) > date('2017-07-01') and 
                     A.type_outward = 'VENDOR' and A.gi_go_status = 'COMPLETE') AA 
-=======
-        $sql = "select C.*, D.is_paid from 
-                (select A.*, B.gi_go_id as b_gi_go_id, B.status as go_debit_status from 
-                (select A.* from goods_inward_outward A where is_active = '1' and A.company_id='$company_id' and 
-                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01')) A 
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                 left join 
                 (select distinct grn_id, gi_id from grn where status = 'approved' and is_active = '1' and 
                     company_id = '$company_id' and (date(gi_date)<date('2018-03-31') or gi_type <> 'VENDOR') 
@@ -401,7 +381,6 @@ class Goodsoutward extends Model
         $company_id = $session['company_id'];
 
         $sql = "select count(*) as count from 
-<<<<<<< HEAD
                 (select KK.*, LL.is_paid from 
                 (select II.* from 
                 (select HH.* from 
@@ -426,11 +405,6 @@ class Goodsoutward extends Model
                 where A.status = 'approved' and A.is_active = '1' and A.company_id = '$company_id' and 
                     B.status = 'approved' and B.is_active = '1' and B.company_id = '$company_id') BB 
                 on (AA.grn_no=BB.gi_id)) CC 
-=======
-                (select A.*, B.gi_go_id as b_gi_go_id, B.status as go_debit_status from 
-                (select A.* from goods_inward_outward A where is_active = '1' and A.company_id='$company_id' and 
-                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01')) A 
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                 left join 
                 (select grn_id, psku, qty, ded_type from acc_grn_sku_entries where status='approved' and is_active='1' and company_id='$company_id'and ded_type in ('expiry', 'damaged')) DD 
                 on (CC.grn_id=DD.grn_id and CC.psku=DD.psku)) EE 
@@ -604,20 +578,20 @@ class Goodsoutward extends Model
 
         if(!isset($voucher_id) || $voucher_id==''){
             $series = 1;
-            $sql = "select * from acc_series_master where type = 'Voucher'";
+            $sql = "select * from acc_series_master where type = 'Voucher' and company_id = '$company_id'";
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $data = $reader->readAll();
             if (count($data)>0){
                 $series = intval($data[0]['series']) + 1;
 
-                $sql = "update acc_series_master set series = '$series' where type = 'Voucher'";
+                $sql = "update acc_series_master set series = '$series' where type = 'Voucher' and company_id = '$company_id'";
                 $command = Yii::$app->db->createCommand($sql);
                 $count = $command->execute();
             } else {
                 $series = 1;
 
-                $sql = "insert into acc_series_master (type, series) values ('Voucher', '".$series."')";
+                $sql = "insert into acc_series_master (type, series, company_id) values ('Voucher', '".$series."', '".$company_id."')";
                 $command = Yii::$app->db->createCommand($sql);
                 $count = $command->execute();
             }
@@ -1227,20 +1201,20 @@ class Goodsoutward extends Model
 
         $code = $year . "/" . $month . "/" . $state_code;
 
-        $sql = "select * from acc_series_master where type = '$code' and company_id = '$company_id'";
+        $sql = "select * from acc_series_master where type = 'debit_note' and company_id = '$company_id'";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $data = $reader->readAll();
         if (count($data)>0){
             $series = intval($data[0]['series']) + 1;
 
-            $sql = "update acc_series_master set series = '$series' where type = '$code' and company_id = '$company_id'";
+            $sql = "update acc_series_master set series = '$series' where type = 'debit_note' and company_id = '$company_id'";
             $command = Yii::$app->db->createCommand($sql);
             $count = $command->execute();
         } else {
             $series = 1;
 
-            $sql = "insert into acc_series_master (type, series, company_id) values ('".$code."', '".$series."', '".$company_id."')";
+            $sql = "insert into acc_series_master (type, series, company_id) values ('debit_note', '".$series."', '".$company_id."')";
             $command = Yii::$app->db->createCommand($sql);
             $count = $command->execute();
         }
@@ -1505,7 +1479,6 @@ class Goodsoutward extends Model
 
         return true;
     }
-<<<<<<< HEAD
 
     public function getGrnAccEntries($id){
         $session = Yii::$app->session;
@@ -1869,6 +1842,3 @@ if($type_outward=='VENDOR'){
                 }
 
 */
-=======
-}
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f

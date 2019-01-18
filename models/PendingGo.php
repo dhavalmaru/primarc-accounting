@@ -85,23 +85,16 @@ class PendingGo extends Model
            $search_value1 =  $request->post('search');
            $search = $search_value1['value'];
             if($search!="") {
-<<<<<<< HEAD
                     $wheresearch = " and (A.gi_go_id like '%$search%' or A.gi_go_ref_no like '%$search%' or 
                         A.warehouse_name like '%$search%' or A.warehouse_name like '%$search%' or 
                         A.customerName like '%$search%' or A.value_at_cost like '%$search%' or 
                         A.gi_go_date_time like '%$search%' or A.gi_go_status like '%$search%' or 
                         A.updated_by  like '%$search%' or invoice_number  like '%$search%' )";
-=======
-                    $wheresearch = " and (A.gi_go_id like '%$search%' or A.gi_go_ref_no like '%$search%' or A.warehouse_name like '%$search%' or A.warehouse_name like '%$search%' or  A.customerName like '%$search%' or A.value_at_cost like '%$search%' or 
-                        A.gi_go_date_time like '%$search%' or
-                         A.gi_go_status like '%$search%' or A.updated_by  like '%$search%' or invoice_number  like '%$search%' )";
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
             } 
         }
 
         $company_id = $session['company_id'];
 
-<<<<<<< HEAD
         $sql = "select A.* from 
                 (select A.*, B.*, C.dcno from 
                 (select A.*, B.username from goods_inward_outward A left join user B on(A.updated_by_id = B.id) 
@@ -118,23 +111,6 @@ class PendingGo extends Model
                 left join 
                 (select distinct gi_go_id from acc_go_entries) B 
                 on (A.gi_go_id = B.gi_go_id) 
-=======
-        $sql = "Select A.* from (Select A.*,B.*,C.dcno from 
-                (select A.*, B.username from goods_inward_outward A left join user B on(A.updated_by_id = B.id) 
-                where  date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id'
-                AND A.type_outward='CUSTOMER' AND A.inward_outward='OUTWARD' AND A.customer_type='B2B' AND A.gi_go_status='COMPLETE' AND 
-                A.company_id='$company_id') A
-                left join 
-                (SELECT prepare_go_id,from_warehouse_name,destination_warehouse_company_name,total_qty,invoice_number from prepare_go Where company_id='1') B on
-                A.pre_go_ref=B.prepare_go_id 
-                left join 
-                (select distinct delivery_challan_no as dcno,prepare_go_id from delivery_challan) C
-                on (A.pre_go_ref = C.prepare_go_id)
-                ) A 
-                left join 
-                (select distinct gi_go_id from acc_go_entries) B
-                on (A.gi_go_id = B.gi_go_id)
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                 Where B.gi_go_id IS  NULL".$wheresearch.$len;
                 
         $command = Yii::$app->db->createCommand($sql);
@@ -224,11 +200,7 @@ class PendingGo extends Model
                 on (A.gi_go_id = B.gi_go_id)
                 left join 
                 (select distinct ref_id, is_paid from acc_ledger_entries 
-<<<<<<< HEAD
                     where ref_type = 'B2B Sales' and is_active = '1' and status = 'Approved' and is_paid = '1') D 
-=======
-                    where ref_type = 'Sales B2B' and is_active = '1' and status = 'Approved' and is_paid = '1') D 
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                 on (A.gi_go_id = D.ref_id)".$wheresearch.$len;
 
         $command = Yii::$app->db->createCommand($sql);
@@ -282,7 +254,6 @@ class PendingGo extends Model
         /*$sql = "select A.*, B.vendor_code, C.gi_date as grn_date from grn A left join vendor_master B on (A.vendor_id = B.id) 
                 left join acc_grn_entries C on (A.grn_id = C.grn_id and C.status = 'approved' and C.is_active='1' and 
                 C.particular = 'Total Amount') where A.grn_id = '$id' and A.status = 'approved' and A.is_active='1' and A.company_id='$company_id'";*/
-<<<<<<< HEAD
         $sql = "Select A.* from (
                 select Case When A.warehouse_state=A.customerState Then 'Same States' Else 'Different States' end as tax_zone_name,
                 Case When A.warehouse_state=A.customerState Then 'INTRA' Else 'INTER' end as tax_zone_code, 
@@ -298,23 +269,6 @@ class PendingGo extends Model
                 where date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id'
                 AND A.type_outward='CUSTOMER' AND A.inward_outward='OUTWARD' AND A.customer_type='B2B' AND 
                 A.gi_go_status='COMPLETE' AND A.company_id='$company_id' AND A.gi_go_id=$id ) A";         
-=======
-       $sql = "Select A.* from (
-                select Case When warehouse_state=customerState Then 'Same States' Else 'Different States' end as tax_zone_name,
-                Case When warehouse_state=customerState Then 'INTRA' Else 'INTER' end as tax_zone_code ,A.*, B.customer_id as vendor_id1,D.dcno
-                from goods_inward_outward A
-                left join 
-                (select distinct delivery_challan_no as dcno,prepare_go_id from delivery_challan) D
-                on (A.pre_go_ref = D.prepare_go_id)
-                left join 
-                (select * from acc_master Where company_id='$company_id') B on trim(A.customerName)=trim(B.legal_name)
-                left join acc_go_entries C on (A.gi_go_id = C.gi_go_id and C.status = 'approved' and C.is_active='1' and 
-                C.particular = 'Total Amount')
-                where  date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id'
-                AND A.type_outward='CUSTOMER' AND A.inward_outward='OUTWARD' AND A.customer_type='B2B' AND A.gi_go_status='COMPLETE' AND 
-                A.company_id='$company_id' AND A.gi_go_id=$id ) A
-                ";         
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
@@ -420,7 +374,6 @@ class PendingGo extends Model
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-<<<<<<< HEAD
         // $sql = "Select AA.*,BB.tax_zone_code, BB.tax_zone_name, BB.cgst_rate, BB.sgst_rate, BB.igst_rate, 
         //     ifnull(round((cost_excl_vat),0) ,2)as total_cost,
         //     ifnull(round(AA.cost_excl_vat*AA.vat_percent/100,2),0) as total_tax, 
@@ -509,47 +462,6 @@ class PendingGo extends Model
                 where child_tax_rate != 0
                 group by id, tax_zone_code, tax_zone_name, parent_id, tax_rate) BB 
                 on (AA.vat_cst COLLATE utf8_unicode_ci = BB.tax_zone_code and round(AA.vat_percent,4)=round(BB.tax_rate,4))";
-=======
-        $sql = "Select AA.*,BB.tax_zone_code, BB.tax_zone_name, BB.cgst_rate, BB.sgst_rate, BB.igst_rate, 
-            ifnull(round((cost_excl_vat),0) ,2)as total_cost,
-            ifnull(round(AA.cost_excl_vat*AA.vat_percent/100,2),0) as total_tax, 
-            ifnull(round(AA.cost_excl_vat*BB.cgst_rate/100,2),0) as total_cgst, 
-            ifnull(round(AA.cost_excl_vat*BB.sgst_rate/100,2),0) as total_sgst, 
-            ifnull(round(AA.cost_excl_vat*BB.igst_rate/100,2),0) as total_igst, 
-            ifnull((AA.value_at_mrp),0) as total_amount from (
-             SELECT  A.*,
-             B.value_at_mrp,B.vat_percent,B.quantity as invoice_qty,
-             ROUND(B.value_at_mrp/(1+(B.vat_percent/100)),2) as cost_excl_vat from 
-            (Select * from 
-            (select A.*,Case When A.warehouse_state=A.customerState Then 'INTRA' Else 'INTER' end as vat_cst ,B.username from goods_inward_outward A left join user B on(A.updated_by_id = B.id) 
-            where  date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id'
-            AND A.type_outward='CUSTOMER' AND A.inward_outward='OUTWARD' AND A.customer_type='B2B' AND A.gi_go_status='COMPLETE' AND 
-            A.company_id='$company_id') A
-            left join 
-            (SELECT prepare_go_id,from_warehouse_name,destination_warehouse_company_name,total_qty,invoice_number from prepare_go Where company_id='1') B on
-            A.pre_go_ref=B.prepare_go_id )A  
-            left join
-            (Select * from  prepare_go_items ) B on A.pre_go_ref=B.prepare_go_id 
-            )AA
-            left join
-            (select id, tax_zone_code, tax_zone_name, parent_id, tax_rate, 
-                                max(case when child_tax_type_code = 'CGST' then child_tax_rate else 0 end) as cgst_rate, 
-                                max(case when child_tax_type_code = 'SGST' then child_tax_rate else 0 end) as sgst_rate, 
-                                max(case when child_tax_type_code = 'IGST' then child_tax_rate else 0 end) as igst_rate from (select A.id, A.tax_zone_code, A.tax_zone_name, B.id as parent_id, B.tax_type_id as parent_tax_type_id, 
-                                B.tax_rate, C.child_id, D.tax_type_id as child_tax_type_id, D.tax_rate as child_tax_rate, 
-                                E.tax_category as child_tax_category, E.tax_type_code as child_tax_type_code, 
-                                E.tax_type_name as child_tax_type_name 
-                            from tax_zone_master A 
-                                left join tax_rate_master B on (A.id = B.tax_zone_id) 
-                                left join tax_component C on (B.id = C.parent_id) 
-                                left join tax_rate_master D on (C.child_id = D.id) 
-                                left join tax_type_master E on (D.tax_type_id = E.id) ) C
-            where child_tax_rate != 0
-            group by id, tax_zone_code, tax_zone_name, parent_id, tax_rate
-            ) BB
-            on (AA.vat_cst COLLATE utf8_unicode_ci = BB.tax_zone_code and round(AA.vat_percent,4)=round(BB.tax_rate,4))
-            Where AA.gi_go_id=$id;";
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -630,314 +542,6 @@ class PendingGo extends Model
         return $reader->readAll();
     }
 
-<<<<<<< HEAD
-=======
-    public function getGrnSkues($id){
-        $session = Yii::$app->session;
-        $company_id = $session['company_id'];
-
-        $sql = "select distinct psku from grn_entries where grn_id = '$id' and is_active = '1' and company_id = '$company_id'";
-        $command = Yii::$app->db->createCommand($sql);
-        $reader = $command->query();
-        return $reader->readAll();
-    }
-
-    public function getGrnInvoices($id){
-        $session = Yii::$app->session;
-        $company_id = $session['company_id'];
-
-        $sql = "select distinct invoice_no from grn_entries where grn_id = '$id' and is_active = '1' and company_id = '$company_id'";
-        $command = Yii::$app->db->createCommand($sql);
-        $reader = $command->query();
-        return $reader->readAll();
-    }
-
-    public function getInvoiceDeductionDetails($id, $col_qty){
-        $session = Yii::$app->session;
-        $company_id = $session['company_id'];
-
-        if($col_qty!='margindiff_qty'){
-            $sql = "select AA.*, BB.cgst_rate, BB.sgst_rate, BB.igst_rate from 
-                    (select * from 
-                    (select K.*, case when K.margindiff_cost<=0 then 0 else K.proper_qty end as margindiff_qty from 
-                    (select J.*, case when ifnull(box_price,0)=0 then 0 
-                                    when ifnull(invoice_qty,0)=0 then 0 
-                                    when (ifnull(invoice_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))<=0 then 0 
-                                    else ifnull(ifnull(((margin_from_po-margin_from_scan)/100*box_price*(ifnull(invoice_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))) / (1+(ifnull(vat_percen,0)/100)),0),0) end as margindiff_cost from 
-                    (select A.vendor_id, A.warehouse_id, B.*, D.tax_zone_code, D.tax_zone_name, E.invoice_date, A.gi_date, 
-                        date_add(A.gi_date, interval ifnull(B.min_no_of_months_shelf_life_required,0) month) as earliest_expected_date, 
-                        null as cost_acc_id, null as cost_ledger_name, null as cost_ledger_code, 
-                        null as tax_acc_id, null as tax_ledger_name, null as tax_ledger_code, 
-                        null as cgst_acc_id, null as cgst_ledger_name, null as cgst_ledger_code, 
-                        null as sgst_acc_id, null as sgst_ledger_name, null as sgst_ledger_code, 
-                        null as igst_acc_id, null as igst_ledger_name, null as igst_ledger_code, 
-                        G.purchase_order_id, 
-                        case when G.purchase_order_id is not null then G.mrp else null end as po_mrp, 
-                        case when G.purchase_order_id is not null then G.cost_price_exc_tax else null end as po_unit_rate_excl_tax, 
-                        case when G.purchase_order_id is not null then G.unit_tax_amount else null end as po_unit_tax, 
-                        case when G.purchase_order_id is not null then G.cost_price_inc_tax else null end as po_unit_rate_incl_tax, 
-                        case when ifnull(B.box_price,0) = 0 then 0 
-                            else truncate((ifnull(B.box_price,0)-ifnull(B.cost_incl_vat_cst,0))/ifnull(B.box_price,0)*100,2) end as margin_from_scan, 
-                        case when G.purchase_order_id is not null then 
-                                case when ifnull(G.mrp,0) = 0 then 0 
-                                    else truncate((ifnull(G.mrp,0)-ifnull(G.cost_price_inc_tax,0))/ifnull(G.mrp,0)*100,2) end 
-                            else null 
-                        end as margin_from_po 
-                    from grn A 
-                    left join grn_entries B on (A.grn_id = B.grn_id) 
-                    left join tax_zone_master D on (A.vat_cst = D.tax_zone_code) 
-                    left join goods_inward_outward_invoices E on (A.gi_id = E.gi_go_ref_no and B.invoice_no = E.invoice_no) 
-                    left join purchase_order F on (A.po_no = F.po_no and A.vendor_id = F.vendor_id) 
-                    left join purchase_order_items G on (F.purchase_order_id = G.purchase_order_id and B.psku = G.psku) 
-                    where A.grn_id = '$id' and B.grn_id = '$id' and A.is_active = '1' and A.company_id = '$company_id' and B.is_active = '1' and 
-                            D.is_active = '1' and F.is_active = '1' and B.invoice_no is not null) J) K) L 
-                    where L." . $col_qty . " > 0 
-                    order by L.invoice_no, L.vat_percen) AA 
-                    left join 
-                    (select id, tax_zone_code, tax_zone_name, parent_id, tax_rate, 
-                        max(case when child_tax_type_code = 'CGST' then child_tax_rate else 0 end) as cgst_rate, 
-                        max(case when child_tax_type_code = 'SGST' then child_tax_rate else 0 end) as sgst_rate, 
-                        max(case when child_tax_type_code = 'IGST' then child_tax_rate else 0 end) as igst_rate from 
-                    (select A.id, A.tax_zone_code, A.tax_zone_name, B.id as parent_id, B.tax_type_id as parent_tax_type_id, 
-                        B.tax_rate, C.child_id, D.tax_type_id as child_tax_type_id, D.tax_rate as child_tax_rate, 
-                        E.tax_category as child_tax_category, E.tax_type_code as child_tax_type_code, 
-                        E.tax_type_name as child_tax_type_name 
-                    from tax_zone_master A 
-                    left join tax_rate_master B on (A.id = B.tax_zone_id) 
-                    left join tax_component C on (B.id = C.parent_id) 
-                    left join tax_rate_master D on (C.child_id = D.id) 
-                    left join tax_type_master E on (D.tax_type_id = E.id)) C 
-                    where child_tax_rate != 0
-                    group by id, tax_zone_code, tax_zone_name, parent_id, tax_rate) BB 
-                    on (AA.tax_zone_code = BB.tax_zone_code and round(AA.vat_percen,4)=round(BB.tax_rate,4))";
-            $command = Yii::$app->db->createCommand($sql);
-            $reader = $command->query();
-            $result = $reader->readAll();
-        } else {
-            $sql = "select AA.*, BB.cgst_rate, BB.sgst_rate, BB.igst_rate from 
-                    (select A.vendor_id, A.warehouse_id, B.*, D.tax_zone_code, D.tax_zone_name, E.invoice_date, A.gi_date, 
-                        date_add(A.gi_date, interval ifnull(B.min_no_of_months_shelf_life_required,0) month) as earliest_expected_date, 
-                        null as cost_acc_id, null as cost_ledger_name, null as cost_ledger_code, 
-                        null as tax_acc_id, null as tax_ledger_name, null as tax_ledger_code, 
-                        null as cgst_acc_id, null as cgst_ledger_name, null as cgst_ledger_code, 
-                        null as sgst_acc_id, null as sgst_ledger_name, null as sgst_ledger_code, 
-                        null as igst_acc_id, null as igst_ledger_name, null as igst_ledger_code, 
-                        G.purchase_order_id, 
-                        case when G.purchase_order_id is not null then G.mrp else null end as po_mrp, 
-                        case when G.purchase_order_id is not null then G.cost_price_exc_tax else null end as po_unit_rate_excl_tax, 
-                        case when G.purchase_order_id is not null then G.unit_tax_amount else null end as po_unit_tax, 
-                        case when G.purchase_order_id is not null then G.cost_price_inc_tax else null end as po_unit_rate_incl_tax 
-                    from grn A 
-                    left join grn_entries B on (A.grn_id = B.grn_id) 
-                    left join tax_zone_master D on (A.vat_cst = D.tax_zone_code) 
-                    left join goods_inward_outward_invoices E on (A.gi_id = E.gi_go_ref_no and B.invoice_no = E.invoice_no) 
-                    left join purchase_order F on (A.po_no = F.po_no and A.vendor_id = F.vendor_id) 
-                    left join purchase_order_items G on (F.purchase_order_id = G.purchase_order_id and B.psku = G.psku) 
-                    where A.grn_id = '$id' and B.grn_id = '$id' and A.is_active = '1' and A.company_id = '$company_id' and B.is_active = '1' and 
-                            D.is_active = '1' and F.is_active = '1' and B.invoice_no is not null) AA 
-                    left join 
-                    (select id, tax_zone_code, tax_zone_name, parent_id, tax_rate, 
-                        max(case when child_tax_type_code = 'CGST' then child_tax_rate else 0 end) as cgst_rate, 
-                        max(case when child_tax_type_code = 'SGST' then child_tax_rate else 0 end) as sgst_rate, 
-                        max(case when child_tax_type_code = 'IGST' then child_tax_rate else 0 end) as igst_rate from 
-                    (select A.id, A.tax_zone_code, A.tax_zone_name, B.id as parent_id, B.tax_type_id as parent_tax_type_id, 
-                        B.tax_rate, C.child_id, D.tax_type_id as child_tax_type_id, D.tax_rate as child_tax_rate, 
-                        E.tax_category as child_tax_category, E.tax_type_code as child_tax_type_code, 
-                        E.tax_type_name as child_tax_type_name 
-                    from tax_zone_master A 
-                    left join tax_rate_master B on (A.id = B.tax_zone_id) 
-                    left join tax_component C on (B.id = C.parent_id) 
-                    left join tax_rate_master D on (C.child_id = D.id) 
-                    left join tax_type_master E on (D.tax_type_id = E.id)) C 
-                    where child_tax_rate != 0
-                    group by id, tax_zone_code, tax_zone_name, parent_id, tax_rate) BB 
-                    on (AA.tax_zone_code = BB.tax_zone_code and round(AA.vat_percen,4)=round(BB.tax_rate,4))";
-            $command = Yii::$app->db->createCommand($sql);
-            $reader = $command->query();
-            $result = $reader->readAll();
-        }
-
-        $data = array();
-        $j = 0;
-
-        if(count($result)>0){
-            for($i=0; $i<count($result); $i++){
-                $warehouse_code = $result[$i]['warehouse_id'];
-                $state_name = '';
-                $result2 = $this->getState($warehouse_code);
-                if(count($result2)>0){
-                    $state_name = $result2[0]['state_name'];
-                }
-
-                if($result[$i]['igst_rate']==0){
-                    $vat_percen = $result[$i]['vat_percen'];
-                    if(is_numeric($vat_percen)){
-                        $vat_percen = floatval($vat_percen);
-                    }
-                    $tax_code = 'Purchase-'.$state_name.'-Local-'.$vat_percen;
-                    // echo $tax_code;
-                    // echo '<br/>';
-                    $result2 = $this->getAccountDetails('','',$tax_code);
-                    if(count($result2)>0){
-                        // echo json_encode($result2);
-                        // echo '<br/>';
-                        $result[$i]['cost_acc_id'] = $result2[0]['id'];
-                        $result[$i]['cost_ledger_name'] = $result2[0]['legal_name'];
-                        $result[$i]['cost_ledger_code'] = $result2[0]['code'];
-                    }
-
-                    $cgst_rate = $result[$i]['cgst_rate'];
-                    if(is_numeric($cgst_rate)){
-                        $cgst_rate = floatval($cgst_rate);
-                    }
-                    $tax_code = 'Input-'.$state_name.'-CGST-'.$cgst_rate;
-                    // echo $tax_code;
-                    // echo '<br/>';
-                    $result2 = $this->getAccountDetails('','',$tax_code);
-                    if(count($result2)>0){
-                        // echo json_encode($result2);
-                        // echo '<br/>';
-                        $result[$i]['cgst_acc_id'] = $result2[0]['id'];
-                        $result[$i]['cgst_ledger_name'] = $result2[0]['legal_name'];
-                        $result[$i]['cgst_ledger_code'] = $result2[0]['code'];
-                    }
-
-                    $sgst_rate = $result[$i]['sgst_rate'];
-                    if(is_numeric($sgst_rate)){
-                        $sgst_rate = floatval($sgst_rate);
-                    }
-                    $tax_code = 'Input-'.$state_name.'-SGST-'.$sgst_rate;
-                    // echo $tax_code;
-                    // echo '<br/>';
-                    $result2 = $this->getAccountDetails('','',$tax_code);
-                    if(count($result2)>0){
-                        // echo json_encode($result2);
-                        // echo '<br/>';
-                        $result[$i]['sgst_acc_id'] = $result2[0]['id'];
-                        $result[$i]['sgst_ledger_name'] = $result2[0]['legal_name'];
-                        $result[$i]['sgst_ledger_code'] = $result2[0]['code'];
-                    }
-                } else {
-                    $vat_percen = $result[$i]['vat_percen'];
-                    if(is_numeric($vat_percen)){
-                        $vat_percen = floatval($vat_percen);
-                    }
-                    $tax_code = 'Purchase-'.$state_name.'-Inter State-'.$vat_percen;
-                    // echo $tax_code;
-                    // echo '<br/>';
-                    $result2 = $this->getAccountDetails('','',$tax_code);
-                    if(count($result2)>0){
-                        $result[$i]['cost_acc_id'] = $result2[0]['id'];
-                        $result[$i]['cost_ledger_name'] = $result2[0]['legal_name'];
-                        $result[$i]['cost_ledger_code'] = $result2[0]['code'];
-                    }
-
-                    $igst_rate = $result[$i]['igst_rate'];
-                    if(is_numeric($igst_rate)){
-                        $igst_rate = floatval($igst_rate);
-                    }
-                    $tax_code = 'Input-'.$state_name.'-IGST-'.$igst_rate;
-                    // echo $tax_code;
-                    // echo '<br/>';
-                    $result2 = $this->getAccountDetails('','',$tax_code);
-                    if(count($result2)>0){
-                        $result[$i]['igst_acc_id'] = $result2[0]['id'];
-                        $result[$i]['igst_ledger_name'] = $result2[0]['legal_name'];
-                        $result[$i]['igst_ledger_code'] = $result2[0]['code'];
-                    }
-                }
-
-                if($col_qty!='margindiff_qty'){
-                    $data[$j]=$result[$i];
-                    $j = $j + 1;
-                } else {
-                    if($result[$i]['purchase_order_id']!=null && $result[$i]['purchase_order_id']!=''){
-                        $box_price = floatval($result[$i]['box_price']);
-                        $cost_incl_vat_cst = floatval($result[$i]['cost_incl_vat_cst']);
-                        $proper_qty = floatval($result[$i]['proper_qty']);
-                        $invoice_qty = floatval($result[$i]['invoice_qty']);
-                        $shortage_qty = floatval($result[$i]['shortage_qty']);
-                        $expiry_qty = floatval($result[$i]['expiry_qty']);
-                        $damaged_qty = floatval($result[$i]['damaged_qty']);
-                        $vat_percen = floatval($result[$i]['vat_percen']);
-                        $cgst_rate = floatval($result[$i]['cgst_rate']);
-                        $sgst_rate = floatval($result[$i]['sgst_rate']);
-                        $igst_rate = floatval($result[$i]['igst_rate']);
-                        $product_mrp = floatval($result[$i]['po_mrp']);
-                        $cost_price_exc_tax = floatval($result[$i]['po_unit_rate_excl_tax']);
-                        $vat_cst_tax_amount = floatval($result[$i]['po_unit_tax']);
-                        $landed_cost = floatval($result[$i]['po_unit_rate_incl_tax']);
-
-                        if($box_price==0){
-                            $margin_from_scan = 0;
-                        } else {
-                            // $margin_from_scan = ($box_price-$cost_incl_vat_cst)/$box_price*100;
-                            // $margin_from_scan = intval($margin_from_scan*100)/100;
-                            $margin_from_scan = intval((($box_price-$cost_incl_vat_cst)/$box_price*100)*100)/100;
-                        }
-                        // echo $box_price;
-                        // echo '<br/>';
-                        // echo $cost_incl_vat_cst;
-                        // echo '<br/>';
-                        // echo $margin_from_scan;
-                        // echo '<br/>';
-
-                        if($product_mrp==0){
-                            $margin_from_po = 0;
-                        } else {
-                            // $margin_from_po = ($product_mrp-$landed_cost)/$product_mrp*100;
-                            // $margin_from_po = intval($margin_from_po*100)/100;
-                            $margin_from_po = intval((($product_mrp-$landed_cost)/$product_mrp*100)*100)/100;
-                        }
-
-                        if($box_price==0){
-                            $margindiff_cost = 0;
-                        } else if($invoice_qty==0){
-                            $margindiff_cost = 0;
-                        } else if(($invoice_qty-$shortage_qty-$expiry_qty-$damaged_qty)<=0){
-                            $margindiff_cost = 0;
-                        // } else if($margin_from_po==0){
-                        //     $margindiff_cost = 0;
-                        // } else if($margin_from_scan==0){
-                        //     $margindiff_cost = 0;
-                        } else {
-                            $margindiff_cost = round((($margin_from_po-$margin_from_scan)/100*$box_price*($invoice_qty-$shortage_qty-$expiry_qty-$damaged_qty)) / (1+($vat_percen/100)),2);
-                        }
-
-                        if(round($margindiff_cost,4)>0){
-                            $data[$j]=$result[$i];
-                            $data[$j]['po_mrp']=$product_mrp;
-                            $data[$j]['po_unit_rate_excl_tax']=$cost_price_exc_tax;
-                            $data[$j]['po_unit_tax']=$vat_cst_tax_amount;
-                            $data[$j]['po_unit_rate_incl_tax']=$landed_cost;
-                            $data[$j]['margindiff_qty']=$invoice_qty-$shortage_qty-$expiry_qty-$damaged_qty;
-                            $data[$j]['margin_from_scan']=$margin_from_scan;
-                            $data[$j]['margin_from_po']=$margin_from_po;
-                            $data[$j]['margindiff_cost']=$margindiff_cost;
-
-                            $margindiff_cgst=round(($margindiff_cost*$cgst_rate)/100,2);
-                            $margindiff_sgst=round(($margindiff_cost*$sgst_rate)/100,2);
-                            $margindiff_igst=round(($margindiff_cost*$igst_rate)/100,2);
-
-                            $data[$j]['margindiff_cgst']=$margindiff_cgst;
-                            $data[$j]['margindiff_sgst']=$margindiff_sgst;
-                            $data[$j]['margindiff_igst']=$margindiff_igst;
-                            $data[$j]['margindiff_tax']=$margindiff_cgst+$margindiff_sgst+$margindiff_igst;
-
-                            $j = $j + 1;
-                        }
-                    }
-                }
-                
-            }
-        }
-
-        // echo json_encode($data);
-        
-        return $data;
-    }
-
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
     public function getGrnAccSku($id){
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
@@ -948,26 +552,6 @@ class PendingGo extends Model
         return $reader->readAll();
     }
 
-<<<<<<< HEAD
-=======
-    public function getGrnAccSkuEntries($id, $ded_type){
-        $session = Yii::$app->session;
-        $company_id = $session['company_id'];
-
-        $sql = "select A.grn_id, B.*, B.qty as ".$ded_type."_qty, D.tax_zone_code, D.tax_zone_name, E.invoice_date 
-                from grn A 
-                left join acc_grn_sku_entries B on (A.grn_id = B.grn_id) 
-                left join tax_zone_master D on (A.vat_cst = D.tax_zone_code) 
-                left join goods_inward_outward_invoices E on (A.gi_id = E.gi_go_ref_no and B.invoice_no = E.invoice_no) 
-                where A.grn_id = '$id' and B.grn_id = '$id' and A.is_active = '1' and A.company_id = '$company_id' and B.is_active = '1' and 
-                    D.is_active = '1' and B.invoice_no is not null and B.ded_type = '$ded_type' and B.qty > 0 
-                order by B.invoice_no, B.vat_percen";
-        $command = Yii::$app->db->createCommand($sql);
-        $reader = $command->query();
-        return $reader->readAll();
-    }
-
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
     public function getGrnAccLedgerEntries($id){
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
@@ -1904,72 +1488,6 @@ class PendingGo extends Model
         }
     }
 
-<<<<<<< HEAD
-=======
-    public function getSkuDetails(){
-        $request = Yii::$app->request;
-        $mycomponent = Yii::$app->mycomponent;
-
-        $psku = $request->post('psku');
-        $grn_id = $request->post('grn_id');
-
-        $session = Yii::$app->session;
-        $company_id = $session['company_id'];
-
-        $sql = "select AA.*, BB.tax_rate, BB.cgst_rate, BB.sgst_rate, BB.igst_rate from 
-                (select A.*, case when ifnull(box_price,0)=0 then 0 
-                                 when ifnull(invoice_qty,0)=0 then 0 
-                                 when (ifnull(invoice_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))<=0 then 0 
-                                 else ifnull(ifnull(((margin_from_po-margin_from_scan)/100*box_price*(ifnull(invoice_qty,0)-ifnull(shortage_qty,0)-ifnull(expiry_qty,0)-ifnull(damaged_qty,0))) / (1+(ifnull(vat_percen,0)/100)),0),0) end as margindiff_cost from 
-                (select A.vat_cst as tx_zn_cd, B.*, D.tax_zone_code, D.tax_zone_name, E.invoice_date, A.gi_date, 
-                    date_add(A.gi_date, interval ifnull(min_no_of_months_shelf_life_required,0) month) as earliest_expected_date, 
-                    null as cost_acc_id, null as cost_ledger_name, null as cost_ledger_code, 
-                    null as tax_acc_id, null as tax_ledger_name, null as tax_ledger_code, 
-                    null as cgst_acc_id, null as cgst_ledger_name, null as cgst_ledger_code, 
-                    null as sgst_acc_id, null as sgst_ledger_name, null as sgst_ledger_code, 
-                    null as igst_acc_id, null as igst_ledger_name, null as igst_ledger_code, 
-                    F.purchase_order_id, G.mrp as po_mrp, G.quantity as po_quantity, G.cost_price_exc_tax as po_unit_rate_excl_tax, 
-                    G.unit_tax_amount as po_unit_tax, G.cost_price_inc_tax as po_unit_rate_incl_tax, 
-                    case when ifnull(B.box_price,0) = 0 then 0 
-                        else truncate((ifnull(B.box_price,0)-ifnull(B.cost_incl_vat_cst,0))/ifnull(B.box_price,0)*100,2) end as margin_from_scan, 
-                    case when G.purchase_order_id is not null then 
-                            case when ifnull(G.mrp,0) = 0 then 0 
-                                else truncate((ifnull(G.mrp,0)-ifnull(G.cost_price_inc_tax,0))/ifnull(G.mrp,0)*100,2) end 
-                        else null 
-                    end as margin_from_po 
-                from grn A 
-                left join grn_entries B on (A.grn_id = B.grn_id) 
-                left join tax_zone_master D on (A.vat_cst = D.tax_zone_code) 
-                left join goods_inward_outward_invoices E on (A.gi_id = E.gi_go_ref_no and B.invoice_no = E.invoice_no) 
-                left join purchase_order F on (A.po_no = F.po_no and A.vendor_id = F.vendor_id) 
-                left join purchase_order_items G on (F.purchase_order_id = G.purchase_order_id and B.psku = G.psku) 
-                where A.grn_id = '$grn_id' and B.grn_id = '$grn_id' and B.psku = '$psku' and A.is_active = '1' and A.company_id = '$company_id' and 
-                        B.is_active = '1' and D.is_active = '1' and F.is_active = '1') A) AA 
-                
-                left join 
-
-                (select id, tax_zone_code, tax_zone_name, parent_id, tax_rate, 
-                    max(case when child_tax_type_code = 'CGST' then child_tax_rate else 0 end) as cgst_rate, 
-                    max(case when child_tax_type_code = 'SGST' then child_tax_rate else 0 end) as sgst_rate, 
-                    max(case when child_tax_type_code = 'IGST' then child_tax_rate else 0 end) as igst_rate from 
-                (select A.id, A.tax_zone_code, A.tax_zone_name, B.id as parent_id, B.tax_type_id as parent_tax_type_id, 
-                    B.tax_rate, C.child_id, D.tax_type_id as child_tax_type_id, D.tax_rate as child_tax_rate, 
-                    E.tax_category as child_tax_category, E.tax_type_code as child_tax_type_code, 
-                    E.tax_type_name as child_tax_type_name 
-                from tax_zone_master A 
-                left join tax_rate_master B on (A.id = B.tax_zone_id) 
-                left join tax_component C on (B.id = C.parent_id) 
-                left join tax_rate_master D on (C.child_id = D.id) 
-                left join tax_type_master E on (D.tax_type_id = E.id)) C 
-                where child_tax_rate != 0
-                group by id, tax_zone_code, tax_zone_name, parent_id, tax_rate) BB 
-                on (AA.tax_zone_code = BB.tax_zone_code and round(AA.vat_percen,4)=round(BB.tax_rate,4))";
-        $command = Yii::$app->db->createCommand($sql);
-        $reader = $command->query();
-        return $reader->readAll();
-    }
-
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
     public function getDebitNoteDetails($invoice_id){
         $session = Yii::$app->session;
         $company_id = $session['company_id'];

@@ -26,7 +26,6 @@ class GointerdepotController extends Controller
         $mycomponent = Yii::$app->mycomponent;
         $start = $request->post('start');
 
-<<<<<<< HEAD
         $access = $model->getAccess();
         $r_edit = 0;
         if(isset($access[0])) { 
@@ -39,12 +38,6 @@ class GointerdepotController extends Controller
             $row = array(
                         $start+1,
                         (($r_edit == 1)?'<a href="'.Url::base() .'index.php?r=gointerdepot%2Fedit&id='.$grn[$i]['gi_go_id'].'" >Post </a>':''),
-=======
-        for($i=0; $i<count($grn); $i++) { 
-            $row = array(
-                        $start+1,
-                        '<a href="'.Url::base() .'index.php?r=gointerdepot%2Fedit&id='.$grn[$i]['gi_go_id'].'" >Post </a>',
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         ''.$grn[$i]['gi_go_id'].'',
                         ''.$grn[$i]['gi_go_ref_no'].'',
                         ''.$grn[$i]['warehouse_name'].'',
@@ -75,7 +68,6 @@ class GointerdepotController extends Controller
         $mycomponent = Yii::$app->mycomponent;
         $start = $request->post('start');    
         //$params['start'].", ".$params['length']
-<<<<<<< HEAD
         
         $access = $model->getAccess();
         $r_edit = 0;
@@ -90,13 +82,6 @@ class GointerdepotController extends Controller
                         $start+1,
                         '<a href="'.Url::base() .'index.php?r=gointerdepot%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>'.
                         (($r_edit == 1)?'<a href="'.Url::base() .'index.php?r=gointerdepot%2Fedit&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>':''),
-=======
-        for($i=0; $i<count($grn); $i++) { 
-           $row = array(
-                        $start+1,
-                        '<a href="'.Url::base() .'index.php?r=gointerdepot%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>
-                        <a href="'.Url::base() .'index.php?r=gointerdepot%2Fedit&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>',
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         ''.$grn[$i]['gi_go_id'].'',
                         ''.$grn[$i]['gi_go_ref_no'].'',
                         ''.$grn[$i]['warehouse_name'].'',
@@ -128,7 +113,6 @@ class GointerdepotController extends Controller
         $mycomponent = Yii::$app->mycomponent;
         $start = $request->post('start');
 
-<<<<<<< HEAD
         $access = $model->getAccess();
         $r_edit = 0;
         if(isset($access[0])) { 
@@ -142,13 +126,6 @@ class GointerdepotController extends Controller
                         $start+1,
                         '<a href="'.Url::base() .'index.php?r=gointerdepot%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>'.
                         (($r_edit == 1)?'<a href="'.Url::base() .'index.php?r=gointerdepot%2Fedit&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>':''),
-=======
-        for($i=0; $i<count($grn); $i++) { 
-            $row = array(
-                        $start+1,
-                        '<a href="'.Url::base() .'index.php?r=gointerdepot%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>
-                        <a href="'.Url::base() .'index.php?r=gointerdepot%2Fedit&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>',
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         ''.$grn[$i]['gi_go_id'].'',
                         ''.$grn[$i]['gi_go_ref_no'].'',
                         ''.$grn[$i]['warehouse_name'].'',

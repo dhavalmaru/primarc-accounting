@@ -288,7 +288,7 @@ $("#state").select2();
 			        	var obj = JSON.parse(data);
 			        	option+="<option value='ALL'>ALL</option>";
 			            $.each(obj, function(i, val){
-						    // console.log(val.legal_name);
+						    console.log(val.legal_name);
 						    option+="<option value='"+val.id+"'>"+val.legal_name+"</option>";
 						});	
 

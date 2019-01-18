@@ -180,7 +180,6 @@ function set_trans_type(){
         $('#warehouse_gst_div').hide();
     }
 }
-<<<<<<< HEAD
 
 function get_gst_id(){
     $('#vendor_gst_id').val($('#vendor_warehouse_id option:selected').text());
@@ -232,5 +231,3 @@ function get_vendor_warehouse_gst_id(){
         }
     });
 }
-=======
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f

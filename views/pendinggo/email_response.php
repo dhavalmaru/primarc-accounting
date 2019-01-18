@@ -16,11 +16,7 @@ use yii\db\Query;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Email Debit Note: ' . $data['id'];
-<<<<<<< HEAD
 $this->params['breadcrumbs'][] = ['label' => 'GO', 'url' => ['index']];
-=======
-$this->params['breadcrumbs'][] = ['label' => 'Grns', 'url' => ['index']];
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 $this->params['breadcrumbs'][] = ['label' => $data['grn_id'], 'url' => ['update', 'id' => $data['grn_id']]];
 $this->params['breadcrumbs'][] = ['label' => 'Email', 'url' => ['emaildebitnote', 'invoice_id' => $data['invoice_id']]];;
 $mycomponent = Yii::$app->mycomponent;

@@ -11,10 +11,7 @@ use yii\helpers\Url;
 // use moonlandsoft\phpexcel\Excel;
 use phpoffice\phpexcel\Excel;
 use app\models\PaymentReceipt;
-<<<<<<< HEAD
 use app\models\GroupMaster;
-=======
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 
 class AccreportController extends Controller
 {   
@@ -163,20 +160,10 @@ class AccreportController extends Controller
             $account = implode(",",$account);
         }
         
-<<<<<<< HEAD
         if(count($vouchertype)==0) {
             $data['vouchertype']=[];
             $vouchertype = array('purchase','journal_voucher','payment_receipt','go_debit_details','other_debit_credit','promotion','sales_upload');
         } else {
-=======
-        if(count($vouchertype)==0)
-        {
-            $data['vouchertype']=[];
-            $vouchertype = array('purchase','journal_voucher','payment_receipt','go_debit_details','other_debit_credit','promotion');
-        }
-        else
-        {
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
             $data['vouchertype']=$vouchertype;
         }
         if(count($state)>0){
@@ -199,7 +186,6 @@ class AccreportController extends Controller
         } else {
             $to_date=$mycomponent->formatdate($to_date);
         }
-<<<<<<< HEAD
 
         $column_names= [];
         $acc_details= [];
@@ -458,535 +444,6 @@ class AccreportController extends Controller
         $data['table'] = $table;  
 
         for($i=0;$i<count($account);$i++) {
-=======
-        
-        if($view=='state')
-        {
-            $acc_details= $report->getstatewisebifercation($account, $vouchertype, $from_date, $to_date, $date_type, $state);
-
-            $innertab = '';
-            $voucher = 0;
-            $temp = 0;
-
-            $column_names= $report->state_wise_column($account, $vouchertype,$from_date, $to_date,$date_type,$state);
-            $colname = '';
-
-            foreach ($column_names as $res)
-            { 
-               $stat_val = explode('-', $res['ledger_name']);
-               if (is_numeric($res['percentage'])) 
-               {
-                   $per_val = $res['percentage']/2;
-                   $colname.='<th class="text-center">'.' Purchase '.$stat_val[1].'Exc Tax GST - '.$res['percentage'].'%'.'</th>';
-                   $colname.='<th class="text-center">'.$stat_val[1].' IGST Tax'.$res['percentage'].'%';
-                   $colname.='<th class="text-center">'.$stat_val[1].' CGST Tax'.$per_val.'%';
-                   $colname.='<th class="text-center">'.$stat_val[1].' SGST Tax'.$per_val.'%';
-                   $colname.='<th class="text-center">'.'Purchase '.$stat_val[1].' Total Tax '.'</th>';
-                   $colname.='<th class="text-center">'.'Purchase '.$stat_val[1].' Total Purchase Amount Inc Tax</th>';
-               }
-            }
-
-            $blFlag = false;
-
-            for ($i=0; $i <count($acc_details) ; $i++) { 
-                
-                $voucher_id = $acc_details[$i]['voucher_id'];
-                $voucher;
-                $stat_val1 = explode('-', $acc_details[$i]['ledger_name']); 
-                if($voucher_id!=$voucher)
-                    {   
-                        
-                        if($voucher!=0 && $blFlag == true)
-                        {   
-                            for($j=$temp+1;$j<count($column_names);$j++)
-                            {
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                            }
-                            $innertab.="</tr>";
-                            $blFlag = false;
-                        }
-
-                        $temp=0;
-                        $blFlag = true;
-                        $innertab.='<tr>
-                        <td>'.($acc_details[$i]['invoice_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['invoice_date'])):'').'</td>
-                        <td>'.($acc_details[$i]['grn_approved_date_time']!=""?date('Y-m-d',strtotime($acc_details[$i]['grn_approved_date_time'])):'').'</td>
-                        <td>'.($acc_details[$i]['gi_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['gi_date'])):'').'</td>
-                        <td>'.($acc_details[$i]['updated_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['updated_date'])):'').'</td>
-                        <td>'.$acc_details[$i]['cp_ledger_name'].'</td>
-                        <td>'.$acc_details[$i]['ref_type'].'</td>
-                        <td>'.$acc_details[$i]['voucher_id'].'</td>
-                        <td>'.($acc_details[$i]['ref_type']=='journal_voucher'?'':$acc_details[$i]['ref_id']).'</td>
-                        <td>'.$acc_details[$i]['gi_go_ref_no'].'</td>
-                        <td>'.($acc_details[$i]['ref_type']=='Debit Note'?$acc_details[$i]['debit_note_ref']:$acc_details[$i]['invoice_no']).'</td>
-                        <td>'.$acc_details[$i]['total_deduction'].'</td>';
-
-                       $tax = '';
-                         
-                        for($j=0;$j<count($column_names);$j++)
-                        {
-                           $stat_val2 = explode('-', $column_names[$j]['ledger_name']);
-
-                          if(((int)$acc_details[$i]['percentage']==(int)$column_names[$j]['percentage'] ) && trim($stat_val1[1])==trim($stat_val2[1]))
-                            {
-
-                               if($acc_details[$i]['entry_type']=='IGST')
-                               {
-                                    $innertab.='<td>'.$acc_details[$i]['purchase'].'</td>';
-                                    $innertab.='<td>'.$acc_details[$i]['total_tax_amount'].'</td>';
-                                    $innertab.='<td> </td>';
-                                    $innertab.='<td> </td>';
-                                    $innertab.='<td>'.$acc_details[$i]['total_tax_amount'].'</td>';
-                                    $innertab.='<td>'.$acc_details[$i]['cost_inc_tax'].'</td>';
-                                    $temp = $j;
-                                    break; 
-                               }
-                               else
-                               {
-
-                                    $tax = $acc_details[$i]['total_tax_amount']/2;
-                                    $innertab.='<td>'.$acc_details[$i]['purchase'].'</td>';
-                                    $innertab.='<td> </td>';
-                                    $innertab.='<td>'.$tax.'</td>';
-                                    $innertab.='<td>'.$tax.'</td>';
-                                    $innertab.='<td>'.$acc_details[$i]['total_tax_amount'].'</td>';
-                                    $innertab.='<td>'.$acc_details[$i]['cost_inc_tax'].'</td>';
-                                    $temp = $j;
-                                    break;  
-                               }
-                               
-                            }
-                            else{
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                            }
-                        
-                        }
-                    }
-                    else
-                    { 
-                      for($j=$temp+1;$j<count($column_names);$j++)
-                        {
-                          $stat_val2 = explode('-', $column_names[$j]['ledger_name']);
-                          if(((int)$acc_details[$i]['percentage']==(int)$column_names[$j]['percentage']) && trim($stat_val1[1])==trim($stat_val2[1]))
-                            {
-                               if($acc_details[$i]['entry_type']=='IGST')
-                                       {
-                                            $innertab.='<td>'.$acc_details[$i]['purchase'].'</td>';
-                                            $innertab.='<td>'.$acc_details[$i]['total_tax_amount'].'</td>';
-                                            $innertab.='<td> </td>';
-                                            $innertab.='<td> </td>';
-                                            $innertab.='<td>'.$acc_details[$i]['total_tax_amount'].'</td>';
-                                            $innertab.='<td>'.$acc_details[$i]['cost_inc_tax'].'</td>';
-                                            $temp = $j;
-                                            break;
-                                       }
-                                       else
-                                       {
-                                            $tax = $acc_details[$i]['total_tax_amount']/2;
-                                            $innertab.='<td>'.$acc_details[$i]['purchase'].'</td>';
-                                            $innertab.='<td> </td>';
-                                            $innertab.='<td>'.$tax.'</td>';
-                                            $innertab.='<td>'.$tax.'</td>';
-                                            $innertab.='<td>'.$acc_details[$i]['total_tax_amount'].'</td>';
-                                            $innertab.='<td>'.$acc_details[$i]['cost_inc_tax'].'</td>';
-                                            $temp = $j;
-                                            break;  
-                                       }
-                            }
-                            else{
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                            }
-                        }
-                    }
-                  $voucher  = $acc_details[$i]['voucher_id'];
-            }
-
-            if($temp<count($column_names)-1 && $blFlag == true){
-                for($j=$temp+1;$j<count($column_names);$j++)
-                {
-                    $innertab.='<td> </td>';
-                    $innertab.='<td> </td>';
-                    $innertab.='<td> </td>';
-                    $innertab.='<td> </td>';
-                    $innertab.='<td> </td>';
-                    $innertab.='<td> </td>';
-                }
-                $innertab.="</tr>";
-                $blFlag = false;
-            }
-            
-            $table ='<thead>
-                            <tr><th class="text-center">Invoice Date</th>
-                                <th class="text-center">Grn Approved Date</th>
-                                <th class="text-center"> GI Date</th>
-                                <th class="text-center"> Posting Date </th>
-                                <th class="text-center"> Vendor Name</th>
-                                <th class="text-center"> Voucher Type </th>
-                                <th class="text-center"> Voucher No </th>
-                                <th class="text-center"> Grn No  </th>
-                                <th class="text-center"> Go No </th>
-                                <th class="text-center"> Invoice No/ Debit Note No </th>
-                                <th class="text-center"> Sum Total</th>'.$colname.'</tr>
-                    </thead>'.$innertab;
-        }
-        
-        if($view=='tax')
-        {
-            $acc_details= $report->gettaxwisebifercation($account, $vouchertype,$from_date, $to_date,$date_type,$state);
-
-            $innertab = '';
-            $voucher = 0;
-            $temp = 0;
-            $sum_total = 0;
-
-            $column_names= $report->tax_wise_column($account, $vouchertype,$from_date, $to_date,$date_type,$state);
-            $colname = '';
-            $tabrow = '';
-
-            // echo json_encode($column_names);
-            // echo '<br/>';
-
-            foreach ($column_names as $res)
-            {
-               $colname.='<th class="text-center">'.'Purchase Value Exc Tax - '.$res['percentage'].'%'.'</th>';
-               $colname.='<th class="text-center">'.'Tax -'.$res['percentage'].'% Total Amount'.'</th>';
-               $colname.='<th class="text-center">'.'Total Purchase inc Tax - '.$res['percentage'].'</th>';
-            }
-
-            // echo json_encode($acc_details);
-            for ($i=0; $i <count($acc_details) ; $i++) { 
-
-                $voucher_id = $acc_details[$i]['voucher_id'];
-
-                    if($voucher_id!=$voucher)
-                    {   
-                        if($voucher!=0)
-                        {   
-                            for($j=$temp+1;$j<count($column_names);$j++)
-                            {
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                            }
-
-                            $tabrow.='<tr>
-                                        <td>'.($acc_details[$i-1]['invoice_date']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['invoice_date'])):'').'</td>
-                                        <td>'.($acc_details[$i-1]['grn_approved_date_time']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['grn_approved_date_time'])):'').'</td>
-                                        <td>'.($acc_details[$i-1]['gi_date']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['gi_date'])):'').'</td>
-                                        <td>'.($acc_details[$i-1]['updated_date']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['updated_date'])):'').'</td>
-                                        <td>'.$acc_details[$i-1]['cp_ledger_name'].'</td>
-                                        <td>'.$acc_details[$i-1]['ref_type'].'</td>
-                                        <td>'.$acc_details[$i-1]['voucher_id'].'</td>
-                                        <td>'.($acc_details[$i-1]['ref_type']=='journal_voucher'?'':$acc_details[$i-1]['ref_id']).'</td>
-                                        <td>'.$acc_details[$i-1]['gi_go_ref_no'].'</td>
-                                        <td>'.($acc_details[$i-1]['ref_type']=='Debit Note'?$acc_details[$i-1]['debit_note_ref']:$acc_details[$i-1]['invoice_no']).'</td>
-                                        <td>'.$sum_total.'</td>'.$innertab.'
-                                    </tr>';
-                        }
-
-                        $temp=0;
-                        $sum_total=0;
-                        // $innertab.='<tr>
-                        // <td>'.($acc_details[$i]['invoice_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['invoice_date'])):'').'</td>
-                        // <td>'.($acc_details[$i]['grn_approved_date_time']!=""?date('Y-m-d',strtotime($acc_details[$i]['grn_approved_date_time'])):'').'</td>
-                        // <td>'.($acc_details[$i]['gi_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['gi_date'])):'').'</td>
-                        // <td>'.($acc_details[$i]['updated_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['updated_date'])):'').'</td>
-                        // <td>'.$acc_details[$i]['cp_ledger_name'].'</td>
-                        // <td>'.$acc_details[$i]['ref_type'].'</td>
-                        // <td>'.$acc_details[$i]['voucher_id'].'</td>
-                        // <td>'.($acc_details[$i]['ref_type']=='journal_voucher'?'':$acc_details[$i]['ref_id']).'</td>
-                        // <td>'.$acc_details[$i]['gi_go_ref_no'].'</td>
-                        // <td>'.($acc_details[$i]['ref_type']=='Debit Note'?$acc_details[$i]['debit_note_ref']:$acc_details[$i]['invoice_no']).'</td>
-                        // <td>'.$acc_details[$i]['total_deduction'].'</td>';
-
-                        $innertab = '';
-
-                        for($j=0;$j<count($column_names);$j++)
-                        {
-                            if($acc_details[$i]['percentage']==$column_names[$j]['percentage'])
-                            {
-                                $sum_total = $sum_total + $acc_details[$i]['cost_inc_tax'];
-
-                                $innertab.='<td>'.$acc_details[$i]['purchase'].'</td>';
-                                $innertab.='<td>'.$acc_details[$i]['total_tax_amount'].'</td>';
-                                $innertab.='<td>'.$acc_details[$i]['cost_inc_tax'].'</td>';
-                                $temp = $j;
-                                break;   
-                            }
-                            else {
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                            }
-                        }
-                    }
-                    else
-                    {   
-                        for($j=$temp+1;$j<count($column_names);$j++)
-                        {
-                            if($acc_details[$i]['percentage']==$column_names[$j]['percentage'])
-                            {
-                                $sum_total = $sum_total + $acc_details[$i]['cost_inc_tax'];
-
-                                $innertab.='<td>'.$acc_details[$i]['purchase'].'</td>';
-                                $innertab.='<td>'.$acc_details[$i]['total_tax_amount'].'</td>';
-                                $innertab.='<td>'.$acc_details[$i]['cost_inc_tax'].'</td>';
-                                $temp = $j;
-                                break;
-                            }
-                            else{
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                                $innertab.='<td> </td>';
-                            }
-                        }
-                    }
-                    
-                    $voucher  = $acc_details[$i]['voucher_id'];
-            }
-
-            if($temp<count($column_names)-1){
-                for($j=$temp+1;$j<count($column_names);$j++)
-                {
-                    $innertab.='<td> </td>';
-                    $innertab.='<td> </td>';
-                    $innertab.='<td> </td>';
-                }
-            }
-
-            if($i>0 && count($acc_details)>0){
-                $tabrow.='<tr>
-                        <td>'.($acc_details[$i-1]['invoice_date']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['invoice_date'])):'').'</td>
-                        <td>'.($acc_details[$i-1]['grn_approved_date_time']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['grn_approved_date_time'])):'').'</td>
-                        <td>'.($acc_details[$i-1]['gi_date']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['gi_date'])):'').'</td>
-                        <td>'.($acc_details[$i-1]['updated_date']!=""?date('Y-m-d',strtotime($acc_details[$i-1]['updated_date'])):'').'</td>
-                        <td>'.$acc_details[$i-1]['cp_ledger_name'].'</td>
-                        <td>'.$acc_details[$i-1]['ref_type'].'</td>
-                        <td>'.$acc_details[$i-1]['voucher_id'].'</td>
-                        <td>'.($acc_details[$i-1]['ref_type']=='journal_voucher'?'':$acc_details[$i-1]['ref_id']).'</td>
-                        <td>'.$acc_details[$i-1]['gi_go_ref_no'].'</td>
-                        <td>'.($acc_details[$i-1]['ref_type']=='Debit Note'?$acc_details[$i-1]['debit_note_ref']:$acc_details[$i-1]['invoice_no']).'</td>
-                        <td>'.$sum_total.'</td>'.$innertab.'
-                    </tr>';
-            }
-            
-            
-            $table = '<thead>
-                            <tr><th class="text-center">Invoice Date</th>
-                                <th class="text-center">Grn Approved Date</th>
-                                <th class="text-center"> GI Date</th>
-                                <th class="text-center"> Posting Date </th>
-                                <th class="text-center"> Vendor Name</th>
-                                <th class="text-center"> Voucher Type </th>
-                                <th class="text-center"> Voucher No </th>
-                                <th class="text-center"> Grn No  </th>
-                                <th class="text-center"> Go No </th>
-                                <th class="text-center"> Invoice No/ Debit Note No </th>
-                                <th class="text-center"> Sum Total</th>'.$colname.'</tr>
-                    </thead><tbody>'.$tabrow.'</tbody>';
-
-            // echo '<html><body><table>'.$table.'</table></body></table>';
-        }
-        
-        if($view=='default')
-        {
-            $acc_details= $report->getDetailledger($account, $vouchertype,$from_date, $to_date,$date_type,$state);
-            $innertab = '';
-            $voucher = 0;
-            $temp = 0;
-
-            /*foreach ($result as $acc_details)
-            {
-                $acc_details['invoice_date'];
-                $innertab.='<tr>
-                <td>'.($acc_details['invoice_date']!=""?date('Y-m-d',strtotime($acc_details['invoice_date'])):'').'</td>
-                <td>'.($acc_details['grn_approved_date_time']!=""?date('Y-m-d',strtotime($acc_details['grn_approved_date_time'])):'').'</td>
-                <td>'.($acc_details['gi_date']!=""?date('Y-m-d',strtotime($acc_details['gi_date'])):'').'</td>
-                <td>'.($acc_details['updated_date']!=""?date('Y-m-d',strtotime($acc_details['updated_date'])):'').'</td>
-                <td>'.$acc_details['cp_ledger_name'].'</td>
-                <td>'.$acc_details['ref_type'].'</td>
-                <td>'.$acc_details['voucher_id'].'</td>
-                <td>'.($acc_details['ref_type']=='journal_voucher'?'':$acc_details['ref_id']).'</td>
-                <td>'.$acc_details['gi_go_ref_no'].'</td>
-                <td>'.($acc_details['ref_type']=='Debit Note'?$acc_details['debit_note_ref']:$acc_details['invoice_no']).'</td>
-                <td>'.$acc_details['total_deduction'].'</td>
-                <td>'.$acc_details['total_without_tax'].'</td>
-                <td>'.$acc_details['tax_amount'].'</td>
-                <td>'.$acc_details['total_deduction'].'</td>';
-            }*/
-            $colname = '';
-            if(in_array('journal_voucher',$vouchertype) || in_array('other_debit_credit',$vouchertype))
-            {
-                $column_names= $report->column_names($account, $vouchertype, $from_date, $to_date, $date_type, $state);
-                foreach ($column_names as $res)
-                {
-                   $colname.='<th class="text-center">'.$res['ledger_name'].'</th>';
-                } 
-            }
-            else
-            {
-                $column_names= [];
-            }
-
-            // echo json_encode($acc_details);
-            // echo '<br/><br/>';
-            // echo json_encode($column_names);
-
-            $blFlag = false;
-
-            for ($i=0; $i <count($acc_details) ; $i++) { 
-                
-                if($acc_details[$i]['ref_type']=='journal_voucher' || $acc_details[$i]['ref_type']=='Other Debit Note')
-                {
-                    $voucher_id = $acc_details[$i]['voucher_id'];
-               
-                    if($voucher_id!=$voucher)
-                    {
-                        if($voucher!=0 && $blFlag == true)
-                        {   
-                            for($j=$temp+1;$j<count($column_names);$j++)
-                            {
-                                $innertab.='<td> </td>';
-                            }
-                            $innertab.="</tr>";
-                            $blFlag = false;
-
-                            // echo $innertab;
-                            // echo '<br/>';
-                            // echo '<br/>';
-                        }
-
-                        $temp=0;
-                        $blFlag = true;
-                        $innertab.='<tr>
-                        <td>'.($acc_details[$i]['invoice_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['invoice_date'])):'').'</td>
-                        <td>'.($acc_details[$i]['grn_approved_date_time']!=""?date('Y-m-d',strtotime($acc_details[$i]['grn_approved_date_time'])):'').'</td>
-                        <td>'.($acc_details[$i]['gi_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['gi_date'])):'').'</td>
-                        <td>'.($acc_details[$i]['updated_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['updated_date'])):'').'</td>
-                        <td>'.$acc_details[$i]['cp_ledger_name'].'</td>' . 
-                        (($acc_details[$i]['ref_type']=='journal_voucher')?'<td>Journal Voucher</td>':'<td>Other Debit Note</td>').
-                        '<td>'.$acc_details[$i]['voucher_id'].'</td>
-                        <td>'.($acc_details[$i]['ref_type']=='purchase'?$acc_details[$i]['ref_id']:'').'</td>
-                        <td>'.$acc_details[$i]['gi_go_ref_no'].'</td>
-                        <td>'.($acc_details[$i]['ref_type']=='Debit Note'?$acc_details[$i]['debit_note_ref']:$acc_details[$i]['invoice_no']).'</td>
-                        <td>'.$acc_details[$i]['total_deduction'].'</td>
-                        <td>'.$acc_details[$i]['total_without_tax'].'</td>
-                        <td>'.$acc_details[$i]['tax_amount'].'</td>
-                        <td>'.$acc_details[$i]['total_deduction'].'</td>';
-
-                        for($j=0;$j<count($column_names);$j++)
-                        {
-                            if($acc_details[$i]['ledger_name']==$column_names[$j]['ledger_name'])
-                            {
-                               $innertab.='<td>'.$acc_details[$i]['amount1'].'</td>';
-                               $temp = $j;
-                               break;
-                            }
-                            else{
-                                $innertab.='<td> </td>';
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for($j=$temp+1;$j<count($column_names);$j++)
-                        {
-                            if($acc_details[$i]['ledger_name']==$column_names[$j]['ledger_name'])
-                            {
-                                $innertab.='<td>'.$acc_details[$i]['amount1'].'</td>';
-                                $temp = $j;
-                                break;
-                            }
-                            else{
-                                $innertab.='<td> </td>';
-                            }
-                        }
-                    }
-                    $voucher  = $acc_details[$i]['voucher_id'];
-                }
-                else
-                {
-                    if($blFlag == true){
-                        for($j=$temp+1;$j<count($column_names);$j++)
-                        {
-                            $innertab.='<td> </td>';
-                        }
-                        $innertab.="</tr>";
-                        $temp = 0;
-                        $blFlag = false;
-                    }
-
-                    $innertab.='<tr>
-                        <td>'.($acc_details[$i]['invoice_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['invoice_date'])):'').'</td>
-                        <td>'.($acc_details[$i]['grn_approved_date_time']!=""?date('Y-m-d',strtotime($acc_details[$i]['grn_approved_date_time'])):'').'</td>
-                        <td>'.($acc_details[$i]['gi_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['gi_date'])):'').'</td>
-                        <td>'.($acc_details[$i]['updated_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['updated_date'])):'').'</td>
-                        <td>'.$acc_details[$i]['cp_ledger_name'].'</td>
-                        <td>'.$acc_details[$i]['ref_type'].'</td>
-                        <td>'.$acc_details[$i]['voucher_id'].'</td>
-                        <td>'.($acc_details[$i]['ref_type']=='purchase' || $acc_details[$i]['ref_type']=='Debit Note'?$acc_details[$i]['ref_id']:'').'</td>
-                        <td>'.$acc_details[$i]['gi_go_ref_no'].'</td>
-                        <td>'.($acc_details[$i]['ref_type']=='Debit Note'?$acc_details[$i]['debit_note_ref']:$acc_details[$i]['invoice_no']).'</td>
-                        <td>'.$acc_details[$i]['total_deduction'].'</td>
-                        <td>'.$acc_details[$i]['total_without_tax'].'</td>
-                        <td>'.$acc_details[$i]['tax_amount'].'</td>
-                        <td>'.$acc_details[$i]['total_deduction'].'</td>';
-                        for($j=0;$j<count($column_names);$j++)
-                        {
-                            $innertab.='<td> </td>';
-                        }
-                        $innertab.='</tr>';
-                }
-            }
-
-            if($blFlag == true){
-                for($j=$temp+1;$j<count($column_names);$j++)
-                {
-                    $innertab.='<td> </td>';
-                }
-                $innertab.="</tr>";
-                $temp = 0;
-                $blFlag = false;
-            }
-
-            $table ='<thead>
-                            <tr><th class="text-center">Invoice Date</th>
-                                <th class="text-center">Grn Approved Date</th>
-                                <th class="text-center"> GI Date</th>
-                                <th class="text-center"> Posting Date </th>
-                                <th class="text-center"> Vendor Name</th>
-                                <th class="text-center"> Voucher Type </th>
-                                <th class="text-center"> Voucher No </th>
-                                <th class="text-center"> Grn No  </th>
-                                <th class="text-center"> Go No </th>
-                                <th class="text-center"> Invoice No/ Debit Note No </th>
-                                <th class="text-center"> Sum Total</th>
-                                <th class="text-center"> Value Exc Tax </th>
-                                <th class="text-center"> Total Tax Amount </th>
-                                <th class="text-center"> Total Inc Tax </th>'.$colname.'</tr>
-                    </thead>'.$innertab;  
-        }
-    
-        $data['table'] = $table;  
-
-        for($i=0;$i<count($account);$i++)
-        {
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
           $report->setLog('LedgerReport', '', 'Generate', '', 'Generate Ledger Report', 'acc_ledger_entries', $account[$i]);
         }
 
@@ -1892,9 +1349,9 @@ class AccreportController extends Controller
 
         echo $asperbank;
     }
-<<<<<<< HEAD
 
-    public function actionGetinvoice_detail() {
+    public function actionGetinvoice_detail()
+    {   
         $report = new Paymentreceipt();
         $model = new GroupMaster();
         $request = Yii::$app->request;
@@ -2083,7 +1540,8 @@ class AccreportController extends Controller
         }
     }
 
-    public function actionInvoice_wise() {
+     public function actionInvoice_wise()
+    {
         $model = new GroupMaster();
         $access = $model->getAccess();
         $request = Yii::$app->request;
@@ -2148,7 +1606,8 @@ class AccreportController extends Controller
         }
     }
 
-    public function actionGetledger_name() {
+    public function actionGetledger_name()
+    {
         $model = new GroupMaster();
         $access = $model->getAccess();
         $request = Yii::$app->request;
@@ -2171,6 +1630,4 @@ class AccreportController extends Controller
             echo json_encode($ledername);
         }
     }
-=======
->>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 }
