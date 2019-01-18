@@ -32,9 +32,25 @@
 <div class="debit_note">
     <div class="header-section">
         <h1><b> Primarc Pecan Retail (P) Ltd</b></h1>
-        <p>210A, 214, Building No 2-B, <br>  Mittal Industrial Estate Premises <br> 
+        <!-- <p>210A, 214, Building No 2-B, <br>  Mittal Industrial Estate Premises <br> 
         Co-Operative Society Limited, Marol Naka <br>
-        Andheri (East), Mumbai - 400059 <br> Maharashtra  </p>
+        Andheri (East), Mumbai - 400059 <br> Maharashtra  </p> -->
+        <p>
+            <?php if(isset($warehouse_details[0]['address_line_1'])) {
+                if($warehouse_details[0]['address_line_1']!='') echo $warehouse_details[0]['address_line_1'].'<br>';} ?>
+            <?php if(isset($warehouse_details[0]['address_line_2'])) {
+                if($warehouse_details[0]['address_line_2']!='') echo $warehouse_details[0]['address_line_2'].'<br>';} ?>
+            <?php if(isset($warehouse_details[0]['address_line_3'])) {
+                if($warehouse_details[0]['address_line_3']!='') echo $warehouse_details[0]['address_line_3'].'<br>';} ?>
+            <?php if(isset($warehouse_details[0]['city_name'])) {
+                if($warehouse_details[0]['city_name']!='') echo $warehouse_details[0]['city_name'];} ?>
+            <?php if(isset($warehouse_details[0]['city_name']) && isset($warehouse_details[0]['pincode'])) {
+                if($warehouse_details[0]['city_name']!='' && $warehouse_details[0]['pincode']!='') echo '-';} ?>
+            <?php if(isset($warehouse_details[0]['pincode'])) {
+                if($warehouse_details[0]['pincode']!='') echo $warehouse_details[0]['pincode'];} ?>
+            <?php if(isset($warehouse_details[0]['state_name'])) {
+                if($warehouse_details[0]['state_name']!='') echo ' ' . $warehouse_details[0]['state_name'];} ?>
+        </p>
     </div>
 
     <table width="100%" border="0" cellspacing="0" class="table" style="border-collapse:collapse;  ">
@@ -75,7 +91,7 @@
             <td width="14%" style="border:none; vertical-align:top;">
                 <p>
                     <b> 
-                        Bhiwandi
+                        <?php if(isset($warehouse_details[0]['warehouse_name'])) echo $warehouse_details[0]['warehouse_name']; ?>
                     </b>
                 </p>
             </td>
@@ -83,13 +99,13 @@
         <tr style="border:none;">
             <td width="17%" style="border:none;"><p> Party's GSTIN</p></td>
             <td width="3%" style="border:none;">:</td>
-            <td width="40%" style="border:none;"><p><b> <?php if(isset($vendor_details[0]['gst_id'])) echo $debit_note[0]['gst_id']; ?> </b></p></td>
+            <td width="40%" style="border:none;"><p><b> <?php if(isset($vendor_warehouse_details[0]['gst_id'])) echo $vendor_warehouse_details[0]['gst_id']; else if(isset($debit_note[0]['vendor_gst_id'])) echo $debit_note[0]['vendor_gst_id']; ?> </b></p></td>
             <td width="22%" style="border:none;"><p>Warehouse GSTIN</p></td>
             <td width="4%" style="border:none;">:</td>
             <td width="14%" style="border:none;">
                 <p>
                     <b> 
-                        27AACCT5910H1ZE
+                        <?php if(isset($warehouse_details[0]['gst_id'])) echo $warehouse_details[0]['gst_id']; ?>
                     </b>
                 </p>
             </td>

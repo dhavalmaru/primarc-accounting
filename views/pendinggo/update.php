@@ -11,8 +11,13 @@ use yii\web\View;
 /* @var $this yii\web\View */
 /* @var $model app\models\Grn */
 
+<<<<<<< HEAD
+$this->title = 'Update Go: ' . $grn_details[0]['gi_go_id'];
+$this->params['breadcrumbs'][] = ['label' => 'GO', 'url' => ['index']];
+=======
 $this->title = 'Update Go: ' . '';//$grn_details[0]['grn_id'];
 $this->params['breadcrumbs'][] = ['label' => 'Grns', 'url' => ['index']];
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 //$this->params['breadcrumbs'][] = ['label' => $grn_details[0]['grn_id'], 'url' => ['update', 'id' => $grn_details[0]['grn_id']]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>

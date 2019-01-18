@@ -43,7 +43,7 @@
                             <label class="control-label">Date Of Transaction</label>
                             <div class=" ">
                                 <div class=" "> 
-                                    <input class="form-control datepicker" type="text" id="date_of_transaction" name="date_of_transaction" value="<?php if(isset($data[0]['date_of_transaction'])) { $data[0]['gi_go_date_time'] = $data[0]['date_of_transaction'];} if(isset($data[0]['gi_go_date_time'])) echo (($data[0]['gi_go_date_time']!=null && $data[0]['gi_go_date_time']!='')?date('d/m/Y',strtotime($data[0]['gi_go_date_time'])):date('d/m/Y')); else echo date('d/m/Y'); ?>" readonly /> 
+                                    <input class="form-control datepicker" type="text" id="date_of_transaction" name="date_of_transaction" value="<?php if(isset($data[0]['date_of_transaction'])) { $data[0]['gi_go_final_commit_date'] = $data[0]['date_of_transaction'];} if(isset($data[0]['gi_go_final_commit_date'])) echo (($data[0]['gi_go_final_commit_date']!=null && $data[0]['gi_go_final_commit_date']!='')?date('d/m/Y',strtotime($data[0]['gi_go_final_commit_date'])):date('d/m/Y')); else echo date('d/m/Y'); ?>" readonly /> 
                                 </div>
                             </div>
                         </div>

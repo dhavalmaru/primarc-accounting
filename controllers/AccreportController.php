@@ -11,6 +11,10 @@ use yii\helpers\Url;
 // use moonlandsoft\phpexcel\Excel;
 use phpoffice\phpexcel\Excel;
 use app\models\PaymentReceipt;
+<<<<<<< HEAD
+use app\models\GroupMaster;
+=======
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 
 class AccreportController extends Controller
 {   
@@ -159,6 +163,12 @@ class AccreportController extends Controller
             $account = implode(",",$account);
         }
         
+<<<<<<< HEAD
+        if(count($vouchertype)==0) {
+            $data['vouchertype']=[];
+            $vouchertype = array('purchase','journal_voucher','payment_receipt','go_debit_details','other_debit_credit','promotion','sales_upload');
+        } else {
+=======
         if(count($vouchertype)==0)
         {
             $data['vouchertype']=[];
@@ -166,6 +176,7 @@ class AccreportController extends Controller
         }
         else
         {
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
             $data['vouchertype']=$vouchertype;
         }
         if(count($state)>0){
@@ -188,6 +199,266 @@ class AccreportController extends Controller
         } else {
             $to_date=$mycomponent->formatdate($to_date);
         }
+<<<<<<< HEAD
+
+        $column_names= [];
+        $acc_details= [];
+        $colname = '';
+        
+        if($view=='state') {
+            $state_wise_columns= $report->state_wise_column($account, $vouchertype, $from_date, $to_date, $date_type, $state);
+            $i = 0;
+
+            foreach ($state_wise_columns as $res) {
+                if($res['acc_type']=='ZZPurchase') {
+                    $colname.='<th class="text-center">Purchase '.$res['state'].' Excl Tax '.$res['percentage'].'%</th>
+                                <th class="text-center">Input-'.$res['state'].'-CGST-'.($res['percentage']/2).'%</th>
+                                <th class="text-center">Input-'.$res['state'].'-SGST-'.($res['percentage']/2).'%</th>
+                                <th class="text-center">Input-'.$res['state'].'-IGST-'.$res['percentage'].'%</th>
+                                <th class="text-center">Purchase '.$res['state'].' Incl Tax '.$res['percentage'].'%</th>';
+
+                    $column_names[$i]['ledger_name']='Purchase '.$res['state'].' Excl Tax '.$res['percentage'].'%';
+                    $column_names[$i+1]['ledger_name']='Input-'.$res['state'].'-CGST-'.($res['percentage']/2).'%';
+                    $column_names[$i+2]['ledger_name']='Input-'.$res['state'].'-SGST-'.($res['percentage']/2).'%';
+                    $column_names[$i+3]['ledger_name']='Input-'.$res['state'].'-IGST-'.$res['percentage'].'%';
+                    $column_names[$i+4]['ledger_name']='Purchase '.$res['state'].' Incl Tax '.$res['percentage'].'%';
+
+                    $i = $i + 5;
+                } else {
+                    $colname.='<th class="text-center">'.$res['state'].'</th>';
+                    $column_names[$i]['ledger_name']=$res['state'];
+                    $i = $i + 1;
+                }
+            }
+        }
+        
+        if($view=='tax') {
+            $tax_wise_columns= $report->tax_wise_column($account, $vouchertype, $from_date, $to_date, $date_type, $state);
+            $i = 0;
+
+            foreach ($tax_wise_columns as $res) {
+                if($res['acc_type']=='ZZPurchase') {
+                    $colname.='<th class="text-center">Purchase Value Excl Tax '.$res['percentage'].'%</th>
+                                <th class="text-center">Tax '.$res['percentage'].'% Total Amount</th>
+                                <th class="text-center">Total Purchase Incl Tax '.$res['percentage'].'%</th>';
+
+                    $column_names[$i]['ledger_name']='Purchase Value Excl Tax '.$res['percentage'].'%';
+                    $column_names[$i+1]['ledger_name']='Tax '.$res['percentage'].'% Total Amount';
+                    $column_names[$i+2]['ledger_name']='Total Purchase Incl Tax '.$res['percentage'].'%';
+
+                    $i = $i + 3;
+                } else {
+                    $colname.='<th class="text-center">'.$res['ledger_name'].'</th>';
+                    $column_names[$i]['ledger_name']=$res['ledger_name'];
+                    $i = $i + 1;
+                }
+            }
+        }
+        
+        if($view=='default') {
+            $column_names= $report->column_names($account, $vouchertype, $from_date, $to_date, $date_type, $state);
+
+            foreach ($column_names as $res) {
+               $colname.='<th class="text-center">'.$res['ledger_name'].'</th>';
+            }
+        }
+
+        $acc_details= $report->getDetailledger($account, $vouchertype, $from_date, $to_date, $date_type, $state);
+
+        // echo json_encode($acc_details);
+        // echo '<br/><br/>';
+        // echo json_encode($column_names);
+        // echo '<br/><br/>';
+
+        $blFlag = false;
+        $report_data = [];
+        $row_cnt = -1;
+        $innertab = '';
+        $prv_voucher_id = 0;
+        $prv_invoice_no = 0;
+
+        for ($i=0; $i <count($acc_details); $i++) {
+            $voucher_id = $acc_details[$i]['voucher_id'];
+            $invoice_no = $acc_details[$i]['invoice_no'];
+            
+            if($voucher_id!=$prv_voucher_id || $invoice_no!=$prv_invoice_no) {
+                $prv_voucher_id = $voucher_id;
+                $prv_invoice_no = $invoice_no;
+                $row_cnt = $row_cnt + 1;
+                $report_data[$row_cnt]['invoice_date'] = ($acc_details[$i]['invoice_date']!="" && $acc_details[$i]['invoice_date']!="0000-00-00 00:00:00")?date('Y-m-d',strtotime($acc_details[$i]['invoice_date'])):'';
+                $report_data[$row_cnt]['grn_approved_date'] = $acc_details[$i]['grn_approved_date_time']!=""?date('Y-m-d',strtotime($acc_details[$i]['grn_approved_date_time'])):'';
+                $report_data[$row_cnt]['gi_date'] = $acc_details[$i]['gi_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['gi_date'])):'';
+                $report_data[$row_cnt]['posting_date'] = $acc_details[$i]['updated_date']!=""?date('Y-m-d',strtotime($acc_details[$i]['updated_date'])):'';
+                $report_data[$row_cnt]['vendor_name'] = $acc_details[$i]['cp_ledger_name'];
+                $report_data[$row_cnt]['voucher_type'] = '';
+                $report_data[$row_cnt]['voucher_no'] = $acc_details[$i]['voucher_id'];
+                $report_data[$row_cnt]['grn_no'] = '';
+                $report_data[$row_cnt]['go_no'] = '';
+                
+                if($acc_details[$i]['ref_type']=='go_debit_details'){
+                    $report_data[$row_cnt]['go_no'] = $acc_details[$i]['gi_go_ref_no'];
+                } else {
+                    $report_data[$row_cnt]['grn_no'] = $acc_details[$i]['gi_go_ref_no'];
+                }
+                
+                $report_data[$row_cnt]['invoice_no'] = $acc_details[$i]['ref_type']=='Debit Note'?$acc_details[$i]['debit_note_ref']:$acc_details[$i]['invoice_no'];
+
+                if($acc_details[$i]['ref_type']=='purchase'){
+                    if($acc_details[$i]['entry_type']=='Taxable Amount' || $acc_details[$i]['entry_type']=='CGST' || $acc_details[$i]['entry_type']=='SGST' || $acc_details[$i]['entry_type']=='IGST' || $acc_details[$i]['entry_type']=='Other Charges'){
+                        $report_data[$row_cnt]['voucher_type'] = 'Purchase';
+                        $report_data[$row_cnt]['invoice_no'] = $acc_details[$i]['invoice_no'];
+                    } else {
+                        $report_data[$row_cnt]['voucher_type'] = 'Debit Note';
+                        $report_data[$row_cnt]['invoice_no'] = $acc_details[$i]['invoice_no'];
+                    }
+                } else if($acc_details[$i]['ref_type']=='journal_voucher'){
+                    $report_data[$row_cnt]['voucher_type'] = 'Journal Voucher';
+                } else if($acc_details[$i]['ref_type']=='payment_receipt'){
+                    $report_data[$row_cnt]['voucher_type'] = 'Payment Receipt';
+                } else if($acc_details[$i]['ref_type']=='go_debit_details'){
+                    $report_data[$row_cnt]['voucher_type'] = 'GO RTV';
+                } else if($acc_details[$i]['ref_type']=='other_debit_credit'){
+                    $report_data[$row_cnt]['voucher_type'] = 'Other Debit Note';
+                } else if($acc_details[$i]['ref_type']=='promotion'){
+                    $report_data[$row_cnt]['voucher_type'] = 'Promotion';
+                }
+
+                $report_data[$row_cnt]['sum_total'] = 0;
+                $report_data[$row_cnt]['value_exc_tax'] = 0;
+                $report_data[$row_cnt]['total_tax_amt'] = 0;
+                $report_data[$row_cnt]['total_inc_tax'] = 0;
+                for($j=0;$j<count($column_names);$j++) {
+                    $report_data[$row_cnt][$column_names[$j]['ledger_name']] = 0;
+                }
+            }
+
+            $report_data[$row_cnt]['sum_total'] = $report_data[$row_cnt]['sum_total']+$acc_details[$i]['amount1'];
+            $report_data[$row_cnt]['total_inc_tax'] = $report_data[$row_cnt]['total_inc_tax']+$acc_details[$i]['amount1'];
+
+            if($view=='default') {
+                if($acc_details[$i]['acc_type']=='Goods Purchase'){
+                    $report_data[$row_cnt]['value_exc_tax'] = $report_data[$row_cnt]['value_exc_tax']+$acc_details[$i]['amount1'];
+                } else if($acc_details[$i]['acc_type']=='CGST' || $acc_details[$i]['acc_type']=='SGST' || $acc_details[$i]['acc_type']=='IGST'){
+                    $report_data[$row_cnt]['total_tax_amt'] = $report_data[$row_cnt]['total_tax_amt']+$acc_details[$i]['amount1'];
+                } else {
+                    for($j=0;$j<count($column_names);$j++) {
+                        if(strtoupper(trim($column_names[$j]['ledger_name']))==strtoupper(trim($acc_details[$i]['ledger_name']))){
+                            $report_data[$row_cnt][$column_names[$j]['ledger_name']] = $report_data[$row_cnt][$column_names[$j]['ledger_name']]+$acc_details[$i]['amount1'];
+                        }
+                    }
+                }
+            } else if($view=='state') {
+                $ledger_name = $acc_details[$i]['ledger_name'];
+
+                if($acc_details[$i]['acc_type']=='Goods Purchase' || $acc_details[$i]['acc_type']=='CGST' || $acc_details[$i]['acc_type']=='SGST' || $acc_details[$i]['acc_type']=='IGST') {
+                    $state_name = substr($ledger_name, strpos($ledger_name, '-')+1);
+                    $state_name = substr($state_name, 0, strpos($state_name, '-'));
+                    $tax_type = substr($ledger_name, strpos($ledger_name, '-')+1);
+                    $tax_type = substr($tax_type, strpos($tax_type, '-')+1);
+                    $tax_type = substr($tax_type, 0, strpos($tax_type, '-'));
+                    $percentage = substr($ledger_name, strrpos($ledger_name, '-')+1);
+                    $percentage = str_replace('%', '', $percentage);
+
+                    if($acc_details[$i]['acc_type']=='CGST' || $acc_details[$i]['acc_type']=='SGST'){
+                        $report_data[$row_cnt]['Purchase '.$state_name.' Incl Tax '.($percentage*2).'%'] = $report_data[$row_cnt]['Purchase '.$state_name.' Incl Tax '.($percentage*2).'%']+$acc_details[$i]['amount1'];
+                    } else {
+                        $report_data[$row_cnt]['Purchase '.$state_name.' Incl Tax '.$percentage.'%'] = $report_data[$row_cnt]['Purchase '.$state_name.' Incl Tax '.$percentage.'%']+$acc_details[$i]['amount1'];
+                    }
+
+                    if($acc_details[$i]['acc_type']=='Goods Purchase'){
+                        $ledger_name = 'Purchase '.$state_name.' Excl Tax '.$percentage.'%';
+                        $report_data[$row_cnt]['value_exc_tax'] = $report_data[$row_cnt]['value_exc_tax']+$acc_details[$i]['amount1'];
+                    } else {
+                        $ledger_name = 'Input-'.$state_name.'-'.$tax_type.'-'.$percentage.'%';
+                        $report_data[$row_cnt]['total_tax_amt'] = $report_data[$row_cnt]['total_tax_amt']+$acc_details[$i]['amount1'];
+                    }
+                }
+                for($j=0;$j<count($column_names);$j++) {
+                    if(strtoupper(trim($column_names[$j]['ledger_name']))==strtoupper(trim($ledger_name))){
+                        $report_data[$row_cnt][$column_names[$j]['ledger_name']] = $report_data[$row_cnt][$column_names[$j]['ledger_name']]+$acc_details[$i]['amount1'];
+                    }
+                }
+            } else if($view=='tax') {
+                $ledger_name = $acc_details[$i]['ledger_name'];
+
+                if($acc_details[$i]['acc_type']=='Goods Purchase' || $acc_details[$i]['acc_type']=='CGST' || $acc_details[$i]['acc_type']=='SGST' || $acc_details[$i]['acc_type']=='IGST') {
+                    $state_name = substr($ledger_name, strpos($ledger_name, '-')+1);
+                    $state_name = substr($state_name, 0, strpos($state_name, '-'));
+                    $tax_type = substr($ledger_name, strpos($ledger_name, '-')+1);
+                    $tax_type = substr($tax_type, strpos($tax_type, '-')+1);
+                    $tax_type = substr($tax_type, 0, strpos($tax_type, '-'));
+                    $percentage = substr($ledger_name, strrpos($ledger_name, '-')+1);
+                    $percentage = str_replace('%', '', $percentage);
+
+                    if($acc_details[$i]['acc_type']=='CGST' || $acc_details[$i]['acc_type']=='SGST'){
+                        $percentage = $percentage * 2;
+                    }
+
+                    $report_data[$row_cnt]['Total Purchase Incl Tax '.$percentage.'%'] = $report_data[$row_cnt]['Total Purchase Incl Tax '.$percentage.'%']+$acc_details[$i]['amount1'];
+
+                    if($acc_details[$i]['acc_type']=='Goods Purchase'){
+                        $ledger_name = 'Purchase Value Excl Tax '.$percentage.'%';
+                        $report_data[$row_cnt]['value_exc_tax'] = $report_data[$row_cnt]['value_exc_tax']+$acc_details[$i]['amount1'];
+                    } else {
+                        $ledger_name = 'Tax '.$percentage.'% Total Amount';
+                        $report_data[$row_cnt]['total_tax_amt'] = $report_data[$row_cnt]['total_tax_amt']+$acc_details[$i]['amount1'];
+                    }
+                }
+                for($j=0;$j<count($column_names);$j++) {
+                    if(strtoupper(trim($column_names[$j]['ledger_name']))==strtoupper(trim($ledger_name))){
+                        $report_data[$row_cnt][$column_names[$j]['ledger_name']] = $report_data[$row_cnt][$column_names[$j]['ledger_name']]+$acc_details[$i]['amount1'];
+                    }
+                }
+            }
+        }
+
+        for ($i=0; $i <count($report_data); $i++) {
+            $innertab.='<tr>
+                    <td>'.$report_data[$i]['invoice_date'].'</td>
+                    <td>'.$report_data[$i]['grn_approved_date'].'</td>
+                    <td>'.$report_data[$i]['gi_date'].'</td>
+                    <td>'.$report_data[$i]['posting_date'].'</td>
+                    <td>'.$report_data[$i]['vendor_name'].'</td>
+                    <td>'.$report_data[$i]['voucher_type'].'</td>
+                    <td>'.$report_data[$i]['voucher_no'].'</td>
+                    <td>'.$report_data[$i]['grn_no'].'</td>
+                    <td>'.$report_data[$i]['go_no'].'</td>
+                    <td>'.$report_data[$i]['invoice_no'].'</td>
+                    <td>'.$report_data[$i]['sum_total'].'</td>';
+            if($view=='default') {
+                $innertab.='<td>'.$report_data[$i]['value_exc_tax'].'</td>
+                            <td>'.$report_data[$i]['total_tax_amt'].'</td>
+                            <td>'.$report_data[$i]['total_inc_tax'].'</td>';
+            }
+            for($j=0;$j<count($column_names);$j++) {
+                $innertab.='<td>'.$report_data[$i][$column_names[$j]['ledger_name']].'</td>';
+            }
+            $innertab.='</tr>';
+        }
+        
+        $table ='<thead>
+                        <tr><th class="text-center"> Invoice Date</th>
+                            <th class="text-center"> Grn Approved Date</th>
+                            <th class="text-center"> GI Date</th>
+                            <th class="text-center"> Posting Date </th>
+                            <th class="text-center"> Vendor Name</th>
+                            <th class="text-center"> Voucher Type </th>
+                            <th class="text-center"> Voucher No </th>
+                            <th class="text-center"> Grn No  </th>
+                            <th class="text-center"> Go No </th>
+                            <th class="text-center"> Invoice No/ Debit Note No </th>
+                            <th class="text-center"> Sum Total</th>';
+        if($view=='default') {
+            $table.='<th class="text-center"> Value Exc Tax </th>
+                        <th class="text-center"> Total Tax Amount </th>
+                        <th class="text-center"> Total Inc Tax </th>';
+        }
+        $table.=$colname.'</tr></thead><tbody>'.$innertab.'</tbody>';
+    
+        $data['table'] = $table;  
+
+        for($i=0;$i<count($account);$i++) {
+=======
         
         if($view=='state')
         {
@@ -715,6 +986,7 @@ class AccreportController extends Controller
 
         for($i=0;$i<count($account);$i++)
         {
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
           $report->setLog('LedgerReport', '', 'Generate', '', 'Generate Ledger Report', 'acc_ledger_entries', $account[$i]);
         }
 
@@ -1185,7 +1457,7 @@ class AccreportController extends Controller
         // echo json_encode($data);
 
         $report->setLog('LedgerSummaryReport', '', 'Generate', '', 'Generate Ledger Report', 'acc_ledger_entries', $account);
-        return $this->render('summery_ledger_report.php', ['acc_details' => $acc_details, 'opening_bal' => $opening_bal, 
+        return $this->render('summery_ledger_report', ['acc_details' => $acc_details, 'opening_bal' => $opening_bal, 
                                                 'data' => $data, 'account' => $account, 
                                                 'from_date' => $from_date, 'to_date' => $to_date, 'narration' => $narration]);
     }
@@ -1620,4 +1892,285 @@ class AccreportController extends Controller
 
         echo $asperbank;
     }
+<<<<<<< HEAD
+
+    public function actionGetinvoice_detail() {
+        $report = new Paymentreceipt();
+        $model = new GroupMaster();
+        $request = Yii::$app->request;
+        $mycomponent = Yii::$app->mycomponent;
+        $view = $request->post('view');
+        $from_date = $request->post('from_date');
+        $to_date = $request->post('to_date');
+        $ledger_name = $request->post('ledger_name');
+        $group = $request->post('group');
+
+        if($from_date==''){
+            $from_date=NULL;
+        } else {
+            $from_date=$mycomponent->formatdate($from_date);
+        }
+
+        if($to_date==''){
+            $to_date=NULL;
+        } else {
+            $to_date=$mycomponent->formatdate($to_date);
+        }
+        /*echo "<pre>";
+        print_r($ledger_name);
+        echo "</pre>";*/
+        $leader_result = array();
+
+        if(in_array('ALL',$group) && in_array('ALL',$ledger_name))
+        {
+            $leader_id = array();
+            $leader_detail = $model->getLedgerDetail();
+
+            for ($i=0; $i <count($leader_detail) ; $i++) {
+                $leader_result[] = $leader_detail[$i]['id'];
+            }
+            $acc_id = implode($leader_result,",");
+        }
+        else
+        {
+            if(in_array('ALL',$ledger_name))
+            {
+                 unset( $ledger_name[array_search( 'ALL', $ledger_name )] );
+            }
+            $acc_id = implode($ledger_name,",");
+        }
+
+        $type = $request->post('type');
+        $j=0;
+        if($view=='Summary')
+        {
+           $acc_details=$report->getInvoicewiseLedger($acc_id,$from_date,$to_date,$type);
+           $start = $request->post('start'); 
+           $invoice_detail = array();
+
+            //$params['start'].", ".$params['length']
+            for($i=0; $i<count($acc_details); $i++) { 
+
+                $j = $j+1;
+
+                if($acc_details[$i]['openingtype']=='Credit')
+                    $otype = 'Cr';
+                else
+                    $otype = 'Dr';
+
+                if($acc_details[$i]['type']=='Debit')
+                    $type = 'Cr';
+                else
+                    $type = 'Dr';
+
+                $invoice_date = '';
+                if($acc_details[$i]['ref_date']!='' || $acc_details[$i]['ref_date']!=null)
+                {
+                    $invoice_date = date('d-F-Y',strtotime($acc_details[$i]['ref_date']));
+                }
+
+                $due_date = '';
+                if($acc_details[$i]['due_date']!='' || $acc_details[$i]['due_date']!=null)
+                {
+                    $due_date = date('d-F-Y',strtotime($acc_details[$i]['due_date']));
+                }
+
+               $row = array(
+                            ''.$acc_details[$i]['invoice_no'].'',
+                            ''.$invoice_date.'',
+                            ''.$acc_details[$i]['opening_amount'].' '.$otype,
+                            ''.$mycomponent->format_money($acc_details[$i]['bal_amount'], 2).' '.$type.'',
+                            ''.$due_date.'',
+                            ''.$acc_details[$i]['overdueby'].'',
+                            ) ;
+               $invoice_detail[] = $row;
+               $start = $start+1;
+            }
+            $json_data = array(
+                    "draw"            => intval($request->post('draw')),   
+                    "recordsTotal"    => count($acc_details),  
+                    "recordsFiltered" => count($acc_details),
+                    "data"            => $invoice_detail
+                    );
+
+            echo json_encode($json_data);
+        }
+        else
+        {
+         
+           $acc_details=$report->getInvoicewiseLedger($acc_id,$from_date,$to_date,$type);
+           $start = $request->post('start'); 
+           $invoice_detail = array(); 
+           $prev_invo = '';  
+            //$params['start'].", ".$params['length']
+           $count = 0;
+            for($i=0; $i<count($acc_details); $i++) { 
+                if($acc_details[$i]['openingtype']=='Credit')
+                    $otype = 'Cr';
+                else
+                    $otype = 'Dr';
+
+                if($acc_details[$i]['type']=='Debit')
+                    $type = 'Cr';
+                else
+                    $type = 'Dr';
+
+                $j = $j+1;
+                if($prev_invo!=$acc_details[$i]['invoice_no'])
+                {
+                    $invoice_date = '';
+                    if($acc_details[$i]['ref_date']!='' || $acc_details[$i]['ref_date']!=null)
+                    {
+                        $invoice_date = date('d-F-Y',strtotime($acc_details[$i]['ref_date']));
+                    }
+
+                    $due_date = '';
+                    if($acc_details[$i]['due_date']!='' || $acc_details[$i]['due_date']!=null)
+                    {
+                        $due_date = date('d-F-Y',strtotime($acc_details[$i]['due_date']));
+                    }
+
+                   $prev_invo = $acc_details[$i]['invoice_no'];
+                   $count=$count+1;
+                   $row = array(
+                                ''.$invoice_date.'',
+                                ''.$acc_details[$i]['invoice_no'].'',
+                                'Opening Balance',
+                                '',
+                                '',
+                                '',
+                                '',
+                                '',
+                                ''.$acc_details[$i]['opening_amount'].' '.$otype,
+                                '',
+                                '',
+                                ''
+                            ) ;
+                        $invoice_detail[] = $row;
+                        $debit_note = '';
+                        if($acc_details[$i]['ref_type']=='other_debit_credit')
+                        {
+                            $acc_details[$i]['ref_type'] = 'Debit Note';
+                            $debit_note = $acc_details[$i]['invoice_no'];
+                        }
+
+                        $row = array(
+                                ''.$invoice_date.'',
+                                '',
+                                ''.ucfirst($acc_details[$i]['ref_type']).'',
+                                ''.$acc_details[$i]['gi_id'].'',
+                                ''.$acc_details[$i]['gi_go_ref_no'].'',
+                                ''.$debit_note.'',
+                                ''.$acc_details[$i]['ref_id'].'',
+                                ''.$acc_details[$i]['amount'].''.$type,
+                                ''.$acc_details[$i]['opening_amount'].' '.$otype,
+                                ''.$mycomponent->format_money($acc_details[$i]['bal_amount'], 2).' '.$type.'',
+                                ''.$due_date.'',
+                                ''.$acc_details[$i]['overdueby'].'',
+                            ) ;
+                        $invoice_detail[] = $row;
+                }
+
+            }
+            $json_data = array(
+                    "draw"            => intval($request->post('draw')),   
+                    "recordsTotal"    => count($acc_details),  
+                    "recordsFiltered" => count($acc_details),
+                    "data"            => $invoice_detail
+                    );
+
+            echo json_encode($json_data);
+        }
+    }
+
+    public function actionInvoice_wise() {
+        $model = new GroupMaster();
+        $access = $model->getAccess();
+        $request = Yii::$app->request;
+        $mycomponent = Yii::$app->mycomponent;
+        $submit = $request->post('submit');
+        
+        if(count($access)>0) {
+            if($access[0]['r_view']==1) {
+            if($submit=='submit'){
+                $group = $request->post('group');                
+                $view = $request->post('view');
+                $from_date = $request->post('from_date');
+                $to_date = $request->post('to_date');
+                $type = $request->post('type');
+                $group_ids = implode($group, ",");
+                $leder_id = $request->post('ledger_name');
+                $array = '';
+                for ($i=0; $i <count($group) ; $i++) { 
+                    $array = $array . "'" . $group[$i]."', ".
+                    $array = $array . $model->getGroupDetails_ids($group[$i]);
+                }
+                /*$group_ids =  rtrim($array,',');*/
+                $group_ids = substr($array, 0, -1);
+                /*echo "<pre>";
+                print_r($group);
+                echo "</pre>";*/
+                $ledername = $model->getLedgerDetail();
+                $ledger_name = $ledername;
+                $data['ledger_name']=$ledger_name;
+                $select = '';
+                if(in_array('ALL',$group))
+                { 
+                    $select='selected';
+                }
+                $explode_id = implode(",",$group);
+                $list1 = $model->getGroupDetails_invoice(0,$submit,$explode_id);
+                $list = '<select class="form-control group" id="account" name="group[]" multiple="multiple" data-error="#accounterror" ><option value="ALL" '.$select.'>ALL</option>'.$list1.'</select>';
+            }
+            else
+            {
+                $group = '';                
+                $view = '';
+                $from_date = '';
+                $to_date = '';
+                $type = '';
+                $ledger_name=[];
+                $leder_id=[];
+                
+                $list1 = $model->getGroupDetails_invoice(0);
+                $list = '<select class="form-control group" id="account" name="group[]" multiple="multiple" data-error="#accounterror"><option value="ALL">ALL</option>'.$list1.'</select>';
+            }
+
+            $model->setLog('GroupMaster', '', 'View', '', 'View Group Master Details', 'group_master', '');
+                return $this->render('invoice_wise', ['select' => $list,'from_date'=>$from_date,'to_date'=>$to_date,'view'=>$view,'type'=>$type,'ledger_name'=>$ledger_name,'leder_id'=>$leder_id,'group'=>$group]);
+            } else {
+                return $this->render('/message', [
+                    'title'  => \Yii::t('user', 'Access Denied'),
+                    'module' => $this->module,
+                    'msg' => '<h4>You donot have access to this page.</h4>'
+                ]);
+            }
+        }
+    }
+
+    public function actionGetledger_name() {
+        $model = new GroupMaster();
+        $access = $model->getAccess();
+        $request = Yii::$app->request;
+        $mycomponent = Yii::$app->mycomponent;
+        $group = $request->post('group');
+        if(in_array('ALL',$group))
+        {
+            $ledername = $model->getLedgerDetail();
+            echo json_encode($ledername);
+        }
+        else
+        {
+            $array = '';
+            for ($i=0; $i <count($group) ; $i++) { 
+                $array = $array . "'" . $group[$i]."', ".
+                $array = $array . $model->getGroupDetails_ids($group[$i]);
+            }
+            $group_ids = substr($array, 0, -1);
+            $ledername = $model->getLedgerDetail($group_ids);
+            echo json_encode($ledername);
+        }
+    }
+=======
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 }

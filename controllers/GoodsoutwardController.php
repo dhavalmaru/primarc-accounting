@@ -26,16 +26,28 @@ class GoodsoutwardController extends Controller
         $mycomponent = Yii::$app->mycomponent;
         $start = $request->post('start');
 
+        $access = $model->getAccess();
+        $r_edit = 0;
+        if(isset($access[0])) { 
+            if($access[0]['r_insert']=='1' || $access[0]['r_edit']=='1') { 
+                $r_edit = 1;
+            } 
+        }
+
         for($i=0; $i<count($grn); $i++) { 
             $row = array(
                         $start+1,
-                        '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" >Post </a>',
+                        (($r_edit == 1)?'<a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" >Post </a>':''),
                         ''.$grn[$i]['gi_go_id'].'',
                         ''.$grn[$i]['gi_go_ref_no'].'',
                         ''.$grn[$i]['warehouse_name'].'',
                         ''.$grn[$i]['vendor_name'].'',
                         ''.$mycomponent->format_money($grn[$i]['total_amount'], 2).'',
+<<<<<<< HEAD
+                        ''.$grn[$i]['gi_go_final_commit_date'].'',
+=======
                         ''.$grn[$i]['gi_go_date_time'].'',
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         ''.$grn[$i]['updated_by'].''
                         ) ;
            $grn_data[] = $row;
@@ -60,17 +72,30 @@ class GoodsoutwardController extends Controller
         $mycomponent = Yii::$app->mycomponent;
         $start = $request->post('start');    
         //$params['start'].", ".$params['length']
+
+        $access = $model->getAccess();
+        $r_edit = 0;
+        if(isset($access[0])) { 
+            if($access[0]['r_insert']=='1' || $access[0]['r_edit']=='1') { 
+                $r_edit = 1;
+            } 
+        }
+
         for($i=0; $i<count($grn); $i++) { 
            $row = array(
                         $start+1,
-                        '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>
-                        <a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>',
+                        '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>'.
+                        (($r_edit == 1)?'<a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>':''),
                         ''.$grn[$i]['gi_go_id'].'',
                         ''.$grn[$i]['gi_go_ref_no'].'',
                         ''.$grn[$i]['warehouse_name'].'',
                         ''.$grn[$i]['vendor_name'].'',
                         ''.$mycomponent->format_money($grn[$i]['total_amount'], 2).'',
+<<<<<<< HEAD
+                       ''.$grn[$i]['gi_go_final_commit_date'].'',
+=======
                        ''.$grn[$i]['gi_go_date_time'].'',
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         ''.$grn[$i]['username'].'',
                         '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fledger&id='.$grn[$i]['gi_go_id'].'" target="_new"> <span class="fa fa-file-pdf-o"></span> </a>'
                         ) ;
@@ -96,18 +121,42 @@ class GoodsoutwardController extends Controller
         $mycomponent = Yii::$app->mycomponent;
         $start = $request->post('start');
 
-        for($i=0; $i<count($grn); $i++) { 
+        $access = $model->getAccess();
+        $r_edit = 0;
+        if(isset($access[0])) { 
+            if($access[0]['r_insert']=='1' || $access[0]['r_edit']=='1') { 
+                $r_edit = 1;
+            } 
+        }
+
+        for($i=0; $i<count($grn); $i++) {
+            $link = '';
+            if($grn[$i]['go_status']=='GRN Not Posted') {
+                $link = '';
+            } else if($grn[$i]['go_status']=='GRN Posted & GO Balance') {
+                $link = (($r_edit == 1)?'<a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" >Post </a>':'');
+            } else if($grn[$i]['go_status']=='GO Posted') {
+                $link = '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>'.
+                        (($r_edit == 1)?'<a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>':'');
+            }
+
             $row = array(
                         $start+1,
-                        '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>
-                        <a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>',
+                        $link,
                         ''.$grn[$i]['gi_go_id'].'',
                         ''.$grn[$i]['gi_go_ref_no'].'',
+                        ''.$grn[$i]['grn_no'].'',
                         ''.$grn[$i]['warehouse_name'].'',
                         ''.$grn[$i]['vendor_name'].'',
                         ''.$mycomponent->format_money($grn[$i]['total_amount'], 2).'',
+<<<<<<< HEAD
+                        ''.$grn[$i]['gi_go_final_commit_date'].'',
+                        ''.$grn[$i]['updated_by'].'',
+                        ''.$grn[$i]['go_status'].''
+=======
                         ''.$grn[$i]['gi_go_date_time'].'',
                         ''.$grn[$i]['updated_by'].''
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         ) ;
 
            $grn_data[] = $row;
@@ -480,7 +529,11 @@ class GoodsoutwardController extends Controller
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
+<<<<<<< HEAD
+        $tax_per = $model->getTaxPercent();
+=======
         $tax_per =     $model->getTaxPercent();
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         $grn_entries = $model->getGrnAccEntries($id);
         $grn_details = $model->getGrnDetails($id);
 
@@ -490,6 +543,15 @@ class GoodsoutwardController extends Controller
         $gi_go_id = $grn_details[0]['pre_go_ref'];
         $resulsku = $model->getskugoItems($gi_go_id);
 
+<<<<<<< HEAD
+        if($resulsku[0]['skucount']>0) {
+            $skuentries=true;
+        } else {
+            $skuentries=false;  
+        }
+
+        $data = $this->actionGetgrnpostingdetails($id, $skuentries);
+=======
         if($resulsku[0]['skucount']>0)
         {
             $skuentries=true;
@@ -501,6 +563,7 @@ class GoodsoutwardController extends Controller
 
         $data = $this->actionGetgrnpostingdetails($id,$skuentries);
 
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 
         $total_val =  $data['total_val'];
         $total_tax =  $data['total_tax'];
@@ -511,6 +574,38 @@ class GoodsoutwardController extends Controller
         $acc_master = $model->getAccountDetails('', 'approved');
         $tax_zone_code = '';//$grn_details[0]['vat_cst'];
 
+<<<<<<< HEAD
+        if(count($grn_details)>0) {
+            if($grn_details[0]['tax_zone_code']=='INTRA') {
+                $tax_type = 'Local';
+            } else {
+                $tax_type = 'Inter State';
+            }
+
+            $grn_details[0]['warehouse_id'];   
+            if($grn_details[0]['warehouse_id']!="") {
+                if(is_numeric($tax_percent)){
+                    $tax_percent = floatval($tax_percent);
+                }
+
+                $tax_code = 'Purchase-'.$grn_details[0]['to_state'].'-'.$tax_type.'-'.$tax_percent.'%';
+                $result2 = $model->getAccountDetails('','',$tax_code);
+               
+                /*echo "<pre>";
+                print_r($result2);
+                echo "</pre>";*/ 
+
+                if(count($result2)>0){
+                   $ware_array['total_amount_acc_id'] = $result2[0]['id'];
+                   $ware_array['total_amount_ledger_name'] = $result2[0]['legal_name'];
+                   $ware_array['total_amount_ledger_code'] = $result2[0]['code'];
+                } else {
+                    $ware_array['total_amount_acc_id'] = '';
+                    $ware_array['total_amount_ledger_name'] = '';
+                    $ware_array['total_amount_ledger_code'] = '';
+                }
+            }
+=======
 
         if(count($grn_details)>0)
         {
@@ -549,6 +644,7 @@ class GoodsoutwardController extends Controller
                             $ware_array['total_amount_ledger_code'] = '';
                         }
                 }
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         }
 
         if (count($grn_entries) > 0){
@@ -881,6 +977,10 @@ class GoodsoutwardController extends Controller
             $grn_details['isNewRecord']=1;
             $debit_note = array();
         }
+<<<<<<< HEAD
+
+=======
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         $deductions = [];
         
         if (count($grn_details)>0) {
@@ -895,6 +995,717 @@ class GoodsoutwardController extends Controller
         // echo json_encode($invoice_tax);
         // echo json_encode($deductions['margindiff']);
         // echo $deductions['shortage'];
+<<<<<<< HEAD
+    }
+
+    public function actionGetgrnpostingdetails($id,$skuentries=''){
+        $total_val = array();
+        $total_tax = array();
+        $invoice_details = array();
+        $invoice_tax = array();
+
+        $model = new GoodsOutward();
+        $result = $model->getGrnPostingDetails($id,$skuentries);
+        // $result_skuentries = $model->getGrnskuDetails($id,$skuentries);
+        $tax_percent = ""   ;
+
+        if(count($result)>0){
+            // $data['skuwise'] = $result_skuentries;
+            $data['skuwise'] = $result;
+            $tax_percent = $result[0]['vat_percent'];
+            $total_val[0]['total_amount'] = 0;
+            $total_val[0]['total_payable_amount'] = 0;
+            $other_charge = 0;
+            $total_val[0]['other_charges'] = $other_charge;
+            $total_val[0]['total_amount'] = $other_charge;
+
+            $j = 0;
+            $total_tax[$j]['gi_go_id'] = $result[0]['gi_go_id'];
+            $total_tax[$j]['tax_zone_code'] = $result[0]['tax_zone_code'];
+            $total_tax[$j]['tax_zone_name'] = $result[0]['tax_zone_name'];
+            $total_tax[$j]['vat_cst'] = $result[0]['vat_cst'];
+            $total_tax[$j]['vat_percent'] = $result[0]['vat_percent'];
+            $total_tax[$j]['cgst_rate'] = $result[0]['cgst_rate'];
+            $total_tax[$j]['sgst_rate'] = $result[0]['sgst_rate'];
+            $total_tax[$j]['igst_rate'] = $result[0]['igst_rate'];
+            $total_tax[$j]['total_cost'] = 0;
+            $total_tax[$j]['total_tax'] = 0;
+            $total_tax[$j]['total_cgst'] = 0;
+            $total_tax[$j]['total_sgst'] = 0;
+            $total_tax[$j]['total_igst'] = 0;
+            
+            $total_tax[$j]['invoice_cost_acc_id'] = null;
+            $total_tax[$j]['invoice_cost_ledger_name'] = null;
+            $total_tax[$j]['invoice_cost_ledger_code'] = null;
+            $total_tax[$j]['invoice_tax_acc_id'] = null;
+            $total_tax[$j]['invoice_tax_ledger_name'] = null;
+            $total_tax[$j]['invoice_tax_ledger_code'] = null;
+            $total_tax[$j]['invoice_cgst_acc_id'] = null;
+            $total_tax[$j]['invoice_cgst_ledger_name'] = null;
+            $total_tax[$j]['invoice_cgst_ledger_code'] = null;
+            $total_tax[$j]['invoice_sgst_acc_id'] = null;
+            $total_tax[$j]['invoice_sgst_ledger_name'] = null;
+            $total_tax[$j]['invoice_sgst_ledger_code'] = null;
+            $total_tax[$j]['invoice_igst_acc_id'] = null;
+            $total_tax[$j]['invoice_igst_ledger_name'] = null;
+            $total_tax[$j]['invoice_igst_ledger_code'] = null;
+
+            $k = 0;
+            $invoice_details[$k]['invoice_number'] = $result[0]['invoice_number'];
+            $invoice_details[$k]['invoice_total_cost'] = 0;
+            $invoice_details[$k]['invoice_total_tax'] = 0;
+            $invoice_details[$k]['invoice_other_charges'] = $other_charge;
+            $invoice_details[$k]['invoice_total_amount'] = $other_charge;
+            
+            $invoice_details[$k]['invoice_total_payable_amount'] = 0;
+            $invoice_details[$k]['edited_total_cost'] = 0;
+            $invoice_details[$k]['edited_total_tax'] = 0;
+            $invoice_details[$k]['edited_total_amount'] = 0;
+            $invoice_details[$k]['edited_other_charges'] = $other_charge;
+            $invoice_details[$k]['edited_total_amount'] = $other_charge;
+            $invoice_details[$k]['edited_total_payable_amount'] = 0;
+            $invoice_details[$k]['diff_total_cost'] = 0;
+            $invoice_details[$k]['diff_total_tax'] = 0;
+            $invoice_details[$k]['diff_total_amount'] = 0;
+            $invoice_details[$k]['diff_total_payable_amount'] = 0;
+            $invoice_details[$k]['diff_other_charges'] = 0;
+            $invoice_details[$k]['total_amount_voucher_id'] = null;
+            $invoice_details[$k]['total_amount_ledger_type'] = null;
+            $invoice_details[$k]['total_deduction_voucher_id'] = null;
+            $invoice_details[$k]['total_deduction_ledger_type'] = null;
+            $invoice_details[$k]['diff_other_charges'] = 0;
+
+            $l = 0;
+            $invoice_tax[$l]['gi_go_id'] = $result[0]['gi_go_id'];
+            $invoice_tax[$l]['tax_zone_code'] = $result[0]['tax_zone_code'];
+            $invoice_tax[$l]['tax_zone_name'] = $result[0]['tax_zone_name'];
+            $invoice_tax[$l]['invoice_number'] = $result[0]['invoice_number'];
+            $invoice_tax[$l]['vat_cst'] = $result[0]['vat_cst'];
+            $invoice_tax[$l]['vat_percent'] = $result[0]['vat_percent'];
+            $invoice_tax[$j]['cgst_rate'] = $result[0]['cgst_rate'];
+            $invoice_tax[$j]['sgst_rate'] = $result[0]['sgst_rate'];
+            $invoice_tax[$j]['igst_rate'] = $result[0]['igst_rate'];
+            $invoice_tax[$l]['total_cost'] = 0;
+            $invoice_tax[$l]['total_tax'] = 0;
+            $invoice_tax[$l]['total_cgst'] = 0;
+            $invoice_tax[$l]['total_sgst'] = 0;
+            $invoice_tax[$l]['total_igst'] = 0;
+            $invoice_tax[$l]['invoice_cost'] = 0;
+            $invoice_tax[$l]['invoice_tax'] = 0;
+            $invoice_tax[$l]['invoice_cgst'] = 0;
+            $invoice_tax[$l]['invoice_sgst'] = 0;
+            $invoice_tax[$l]['invoice_igst'] = 0;
+            $invoice_tax[$l]['edited_cost'] = 0;
+            $invoice_tax[$l]['edited_tax'] = 0;
+            $invoice_tax[$l]['edited_cgst'] = 0;
+            $invoice_tax[$l]['edited_sgst'] = 0;
+            $invoice_tax[$l]['edited_igst'] = 0;
+            $invoice_tax[$l]['diff_cost'] = 0;
+            $invoice_tax[$l]['diff_tax'] = 0;
+            $invoice_tax[$l]['diff_cgst'] = 0;
+            $invoice_tax[$l]['diff_sgst'] = 0;
+            $invoice_tax[$l]['diff_igst'] = 0;
+            
+            $invoice_tax[$l]['invoice_cost_acc_id'] = null;
+            $invoice_tax[$l]['invoice_cost_ledger_name'] = null;
+            $invoice_tax[$l]['invoice_cost_ledger_code'] = null;
+            $invoice_tax[$l]['invoice_tax_acc_id'] = null;
+            $invoice_tax[$l]['invoice_tax_ledger_name'] = null;
+            $invoice_tax[$l]['invoice_tax_ledger_code'] = null;
+            $invoice_tax[$l]['invoice_cgst_acc_id'] = null;
+            $invoice_tax[$l]['invoice_cgst_ledger_name'] = null;
+            $invoice_tax[$l]['invoice_cgst_ledger_code'] = null;
+            $invoice_tax[$l]['invoice_sgst_acc_id'] = null;
+            $invoice_tax[$l]['invoice_sgst_ledger_name'] = null;
+            $invoice_tax[$l]['invoice_sgst_ledger_code'] = null;
+            $invoice_tax[$l]['invoice_igst_acc_id'] = null;
+            $invoice_tax[$l]['invoice_igst_ledger_name'] = null;
+            $invoice_tax[$l]['invoice_igst_ledger_code'] = null;
+
+            $blFlag = false;
+
+            for($i=0; $i<count($result); $i++){
+                $cost_excl_vat = floatval($result[$i]['cost_excl_vat']);
+                $cost_incl_vat_cst = floatval($result[$i]['value_at_mrp']);
+                $invoice_qty = floatval($result[$i]['invoice_qty']);
+               
+                $vat_percent = floatval($result[$i]['vat_percent']);
+                $cgst_rate = floatval($result[$i]['cgst_rate']);
+                $sgst_rate = floatval($result[$i]['sgst_rate']);
+                $igst_rate = floatval($result[$i]['igst_rate']);
+
+                $tot_cost = $cost_excl_vat;
+                $tot_cgst = $cost_excl_vat*$cgst_rate/100;
+                $tot_sgst = $cost_excl_vat*$sgst_rate/100;
+                $tot_igst = $cost_excl_vat*$igst_rate/100;
+                $tot_tax = $tot_cgst+$tot_sgst+$tot_igst;
+
+                $total_val[0]['total_amount'] = floatval($total_val[0]['total_amount']) + $tot_cost + $tot_tax;
+
+                $blFlag = false;
+                for($a=0;$a<count($total_tax);$a++){
+                    if($result[$i]['gi_go_id']==$total_tax[$a]['gi_go_id'] && $result[$i]['tax_zone_code']==$total_tax[$a]['tax_zone_code'] && 
+                       $result[$i]['tax_zone_name']==$total_tax[$a]['tax_zone_name'] && $result[$i]['vat_cst']==$total_tax[$a]['vat_cst'] && 
+                       $result[$i]['vat_percent']==$total_tax[$a]['vat_percent'] && $result[$i]['cgst_rate']==$total_tax[$a]['cgst_rate'] && 
+                       $result[$i]['sgst_rate']==$total_tax[$a]['sgst_rate'] && $result[$i]['igst_rate']==$total_tax[$a]['igst_rate'] ){
+
+                        $blFlag = true;
+                        $j = $a;
+                    }
+                }
+
+
+                if($blFlag==true){
+                   /* echo 'true';
+                    echo '<br/>';*/
+
+                    $total_tax[$j]['total_cost'] = floatval($total_tax[$j]['total_cost']) + $tot_cost;
+                    $total_tax[$j]['total_tax'] = floatval($total_tax[$j]['total_tax']) + $tot_tax;
+                    $total_tax[$j]['total_cgst'] = floatval($total_tax[$j]['total_cgst']) + $tot_cgst;
+                    $total_tax[$j]['total_sgst'] = floatval($total_tax[$j]['total_sgst']) + $tot_sgst;
+                    $total_tax[$j]['total_igst'] = floatval($total_tax[$j]['total_igst']) + $tot_igst;
+
+                   /* echo 'total_tax';
+                    echo '<br/>';*/
+
+                    $warehouse_code = $result[$i]['warehouse_code'];
+                    $state_name = '';
+                    $result2 = $model->getState($warehouse_code);
+                    if(count($result2)>0){
+                        $state_name = $result2[0]['state_name'];
+                    }
+
+                    if($result[$i]['igst_rate']==0){
+                        $vat_percent = $result[$i]['vat_percent'];
+                        if(is_numeric($vat_percent)){
+                            $vat_percent = floatval($vat_percent);
+                        }
+                        $tax_code = 'Purchase-'.$state_name.'-Local-'.$vat_percent;
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            // echo json_encode($result2);
+                            // echo '<br/>';
+                            $total_tax[$j]['invoice_cost_acc_id'] = $result2[0]['id'];
+                            $total_tax[$j]['invoice_cost_ledger_name'] = $result2[0]['legal_name'];
+                            $total_tax[$j]['invoice_cost_ledger_code'] = $result2[0]['code'];
+                        }
+
+                        $cgst_rate = $result[$i]['cgst_rate'];
+                        if(is_numeric($cgst_rate)){
+                            $cgst_rate = floatval($cgst_rate);
+                        }
+                        $tax_code = 'Input-'.$state_name.'-CGST-'.$cgst_rate;
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            $total_tax[$j]['invoice_cgst_acc_id'] = $result2[0]['id'];
+                            $total_tax[$j]['invoice_cgst_ledger_name'] = $result2[0]['legal_name'];
+                            $total_tax[$j]['invoice_cgst_ledger_code'] = $result2[0]['code'];
+                        }
+
+                        $sgst_rate = $result[$i]['sgst_rate'];
+                        if(is_numeric($sgst_rate)){
+                            $sgst_rate = floatval($sgst_rate);
+                        }
+                        $tax_code = 'Input-'.$state_name.'-SGST-'.$sgst_rate;
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            $total_tax[$j]['invoice_sgst_acc_id'] = $result2[0]['id'];
+                            $total_tax[$j]['invoice_sgst_ledger_name'] = $result2[0]['legal_name'];
+                            $total_tax[$j]['invoice_sgst_ledger_code'] = $result2[0]['code'];
+                        }
+                    } else {
+                        $vat_percent = $result[$i]['vat_percent'];
+                        if(is_numeric($vat_percent)){
+                            $vat_percent = floatval($vat_percent);
+                        }
+                        $tax_code = 'Purchase-'.$state_name.'-Inter State-'.$vat_percent;
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            $total_tax[$j]['invoice_cost_acc_id'] = $result2[0]['id'];
+                            $total_tax[$j]['invoice_cost_ledger_name'] = $result2[0]['legal_name'];
+                            $total_tax[$j]['invoice_cost_ledger_code'] = $result2[0]['code'];
+                        }
+
+                        $igst_rate = $result[$i]['igst_rate'];
+                        if(is_numeric($igst_rate)){
+                            $igst_rate = floatval($igst_rate);
+                        }
+                        $tax_code = 'Input-'.$state_name.'-IGST-'.$result[$i]['igst_rate'];
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            $total_tax[$j]['invoice_igst_acc_id'] = $result2[0]['id'];
+                            $total_tax[$j]['invoice_igst_ledger_name'] = $result2[0]['legal_name'];
+                            $total_tax[$j]['invoice_igst_ledger_code'] = $result2[0]['code'];
+                        }
+                    }
+                } else {
+                    // echo 'false';
+                    // echo '<br/>';
+
+                    $j = count($total_tax);
+                    $total_tax[$j]['gi_go_id'] = $result[$i]['gi_go_id'];
+                    $total_tax[$j]['tax_zone_code'] = $result[$i]['tax_zone_code'];
+                    $total_tax[$j]['tax_zone_name'] = $result[$i]['tax_zone_name'];
+                    $total_tax[$j]['vat_cst'] = $result[$i]['vat_cst'];
+                    $total_tax[$j]['vat_percent'] = $result[$i]['vat_percent'];
+                    $total_tax[$j]['cgst_rate'] = $result[$i]['cgst_rate'];
+                    $total_tax[$j]['sgst_rate'] = $result[$i]['sgst_rate'];
+                    $total_tax[$j]['igst_rate'] = $result[$i]['igst_rate'];
+                    $total_tax[$j]['total_cost'] = $tot_cost;
+                    $total_tax[$j]['total_tax'] = $tot_tax;
+                    $total_tax[$j]['total_cgst'] = $tot_cgst;
+                    $total_tax[$j]['total_sgst'] = $tot_sgst;
+                    $total_tax[$j]['total_igst'] = $tot_igst;
+                    
+                    $total_tax[$j]['invoice_cost_acc_id'] = null;
+                    $total_tax[$j]['invoice_cost_ledger_name'] = null;
+                    $total_tax[$j]['invoice_cost_ledger_code'] = null;
+                    $total_tax[$j]['invoice_tax_acc_id'] = null;
+                    $total_tax[$j]['invoice_tax_ledger_name'] = null;
+                    $total_tax[$j]['invoice_tax_ledger_code'] = null;
+                    $total_tax[$j]['invoice_cgst_acc_id'] = null;
+                    $total_tax[$j]['invoice_cgst_ledger_name'] = null;
+                    $total_tax[$j]['invoice_cgst_ledger_code'] = null;
+                    $total_tax[$j]['invoice_sgst_acc_id'] = null;
+                    $total_tax[$j]['invoice_sgst_ledger_name'] = null;
+                    $total_tax[$j]['invoice_sgst_ledger_code'] = null;
+                    $total_tax[$j]['invoice_igst_acc_id'] = null;
+                    $total_tax[$j]['invoice_igst_ledger_name'] = null;
+                    $total_tax[$j]['invoice_igst_ledger_code'] = null;
+
+                    // echo 'total_tax';
+                    // echo '<br/>';
+
+                    $warehouse_code = $result[$i]['warehouse_code'];
+                    $state_name = '';
+                    $result2 = $model->getState($warehouse_code);
+                    if(count($result2)>0){
+                        $state_name = $result2[0]['state_name'];
+                    }
+
+                    if($result[$i]['igst_rate']==0){
+                        $vat_percent = $result[$i]['vat_percent'];
+                        if(is_numeric($vat_percent)){
+                            $vat_percent = floatval($vat_percent);
+                        }
+                        $tax_code = 'Purchase-'.$state_name.'-Local-'.$vat_percent;
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            // echo json_encode($result2);
+                            // echo '<br/>';
+                            $total_tax[$j]['invoice_cost_acc_id'] = $result2[0]['id'];
+                            $total_tax[$j]['invoice_cost_ledger_name'] = $result2[0]['legal_name'];
+                            $total_tax[$j]['invoice_cost_ledger_code'] = $result2[0]['code'];
+                        }
+
+                        $cgst_rate = $result[$i]['cgst_rate'];
+                        if(is_numeric($cgst_rate)){
+                            $cgst_rate = floatval($cgst_rate);
+                        }
+                        $tax_code = 'Input-'.$state_name.'-CGST-'.$cgst_rate;
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            $total_tax[$j]['invoice_cgst_acc_id'] = $result2[0]['id'];
+                            $total_tax[$j]['invoice_cgst_ledger_name'] = $result2[0]['legal_name'];
+                            $total_tax[$j]['invoice_cgst_ledger_code'] = $result2[0]['code'];
+                        }
+
+                        $sgst_rate = $result[$i]['sgst_rate'];
+                        if(is_numeric($sgst_rate)){
+                            $sgst_rate = floatval($sgst_rate);
+                        }
+                        $tax_code = 'Input-'.$state_name.'-SGST-'.$sgst_rate;
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            $total_tax[$j]['invoice_sgst_acc_id'] = $result2[0]['id'];
+                            $total_tax[$j]['invoice_sgst_ledger_name'] = $result2[0]['legal_name'];
+                            $total_tax[$j]['invoice_sgst_ledger_code'] = $result2[0]['code'];
+                        }
+                    } else {
+                        $vat_percent = $result[$i]['vat_percent'];
+                        if(is_numeric($vat_percent)){
+                            $vat_percent = floatval($vat_percent);
+                        }
+                        $tax_code = 'Purchase-'.$state_name.'-Inter State-'.$vat_percent;
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            $total_tax[$j]['invoice_cost_acc_id'] = $result2[0]['id'];
+                            $total_tax[$j]['invoice_cost_ledger_name'] = $result2[0]['legal_name'];
+                            $total_tax[$j]['invoice_cost_ledger_code'] = $result2[0]['code'];
+                        }
+
+                        $igst_rate = $result[$i]['igst_rate'];
+                        if(is_numeric($igst_rate)){
+                            $igst_rate = floatval($igst_rate);
+                        }
+                        $tax_code = 'Input-'.$state_name.'-IGST-'.$result[$i]['igst_rate'];
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            $total_tax[$j]['invoice_igst_acc_id'] = $result2[0]['id'];
+                            $total_tax[$j]['invoice_igst_ledger_name'] = $result2[0]['legal_name'];
+                            $total_tax[$j]['invoice_igst_ledger_code'] = $result2[0]['code'];
+                        }
+                    }
+                }
+                
+                $blFlag = false;
+                for($a=0;$a<count($invoice_details);$a++){
+                    if($result[$i]['invoice_number']==$invoice_details[$a]['invoice_number'] ){
+
+                        $blFlag = true;
+                        $k = $a;
+                    }
+                }
+                if($blFlag==true){
+                    $invoice_details[$k]['invoice_total_cost'] = floatval($invoice_details[$k]['invoice_total_cost']) + $tot_cost;
+                    $invoice_details[$k]['invoice_total_tax'] = floatval($invoice_details[$k]['invoice_total_tax']) + $tot_tax;
+                    $invoice_details[$k]['invoice_total_amount'] = floatval($invoice_details[$k]['invoice_total_amount']) + $tot_cost + $tot_tax;
+
+                    $invoice_details[$k]['invoice_total_payable_amount'] = $invoice_details[$k]['invoice_total_amount'];
+
+                    $invoice_details[$k]['edited_total_cost'] = floatval($invoice_details[$k]['edited_total_cost']) + $tot_cost;
+                    $invoice_details[$k]['edited_total_tax'] = floatval($invoice_details[$k]['edited_total_tax']) + $tot_tax;
+                    $invoice_details[$k]['edited_total_amount'] = floatval($invoice_details[$k]['edited_total_amount']) + $tot_cost + $tot_tax;
+                    $invoice_details[$k]['edited_total_payable_amount'] =$invoice_details[$k]['edited_total_amount'];
+                    $invoice_details[$k]['diff_total_cost'] = 0;
+                    $invoice_details[$k]['diff_total_tax'] = 0;
+                    $invoice_details[$k]['diff_total_amount'] = 0;
+                    $invoice_details[$k]['diff_total_payable_amount'] = 0;
+                    $invoice_details[$k]['total_amount_voucher_id'] = null;
+                    $invoice_details[$k]['total_amount_ledger_type'] = null;
+                    $invoice_details[$k]['total_deduction_voucher_id'] = null;
+                    $invoice_details[$k]['total_deduction_ledger_type'] = null;
+                } else {
+                    $k = count($invoice_details);
+                    $invoice_details[$k]['invoice_number'] = $result[$i]['invoice_number'];
+                    $invoice_details[$k]['invoice_total_cost'] = $tot_cost;
+                    $invoice_details[$k]['invoice_total_tax'] = $tot_tax;
+                    $invoice_details[$k]['invoice_other_charges'] = $other_charge;
+                    $invoice_details[$k]['invoice_total_amount'] = $tot_cost + $tot_tax + $other_charge;
+                    $invoice_details[$k]['invoice_total_payable_amount'] = $invoice_details[$k]['invoice_total_amount'] ;
+                    $invoice_details[$k]['edited_total_cost'] = $tot_cost;
+                    $invoice_details[$k]['edited_total_tax'] = $tot_tax;
+                    $invoice_details[$k]['edited_total_amount'] = $tot_cost + $tot_tax + $other_charge;
+                    $invoice_details[$k]['edited_total_payable_amount'] = $invoice_details[$k]['edited_total_amount'];
+                    $invoice_details[$k]['diff_total_cost'] = 0;
+                    $invoice_details[$k]['diff_total_tax'] = 0;
+                    $invoice_details[$k]['diff_total_amount'] = 0;
+                    $invoice_details[$k]['diff_total_payable_amount'] = 0;
+                    $invoice_details[$k]['diff_other_charges'] = $other_charge;
+                    $invoice_details[$k]['total_amount_voucher_id'] = null;
+                    $invoice_details[$k]['total_amount_ledger_type'] = null;
+                    $invoice_details[$k]['total_deduction_voucher_id'] = null;
+                    $invoice_details[$k]['total_deduction_ledger_type'] = null;
+                    
+                    $total_val[0]['other_charges'] = $total_val[0]['other_charges'] + $other_charge;
+                    $total_val[0]['total_amount'] = $total_val[0]['total_amount'] + 0;
+                }
+
+                $blFlag = false;
+                for($a=0;$a<count($invoice_tax);$a++){
+                    if($result[$i]['gi_go_id']==$invoice_tax[$a]['gi_go_id'] && $result[$i]['tax_zone_code']==$invoice_tax[$a]['tax_zone_code'] && 
+                       $result[$i]['tax_zone_name']==$invoice_tax[$a]['tax_zone_name'] && $result[$i]['vat_cst']==$invoice_tax[$a]['vat_cst'] && 
+                       $result[$i]['vat_percent']==$invoice_tax[$a]['vat_percent'] && $result[$i]['cgst_rate']==$invoice_tax[$a]['cgst_rate'] && 
+                       $result[$i]['sgst_rate']==$invoice_tax[$a]['sgst_rate'] && $result[$i]['igst_rate']==$invoice_tax[$a]['igst_rate']  && 
+                       $result[$i]['invoice_number']==$invoice_tax[$a]['invoice_number'] ){
+
+                        $blFlag = true;
+                        $l = $a;
+                    }
+                }
+                if($blFlag==true){
+                    $invoice_tax[$l]['total_cost'] = floatval($invoice_tax[$l]['total_cost']) + $tot_cost;
+                    $invoice_tax[$l]['total_tax'] = floatval($invoice_tax[$l]['total_tax']) + $tot_tax;
+                    $invoice_tax[$l]['total_cgst'] = floatval($invoice_tax[$l]['total_cgst']) + $tot_cgst;
+                    $invoice_tax[$l]['total_sgst'] = floatval($invoice_tax[$l]['total_sgst']) + $tot_sgst;
+                    $invoice_tax[$l]['total_igst'] = floatval($invoice_tax[$l]['total_igst']) + $tot_igst;
+                    $invoice_tax[$l]['invoice_cost'] = floatval($invoice_tax[$l]['invoice_cost']) + $tot_cost;
+                    $invoice_tax[$l]['invoice_tax'] = floatval($invoice_tax[$l]['invoice_tax']) + $tot_tax;
+                    $invoice_tax[$l]['invoice_cgst'] = floatval($invoice_tax[$l]['invoice_cgst']) + $tot_cgst;
+                    $invoice_tax[$l]['invoice_sgst'] = floatval($invoice_tax[$l]['invoice_sgst']) + $tot_sgst;
+                    $invoice_tax[$l]['invoice_igst'] = floatval($invoice_tax[$l]['invoice_igst']) + $tot_igst;
+                    $invoice_tax[$l]['edited_cost'] = floatval($invoice_tax[$l]['edited_cost']) + $tot_cost;
+                    $invoice_tax[$l]['edited_tax'] = floatval($invoice_tax[$l]['edited_tax']) + $tot_tax;
+                    $invoice_tax[$l]['edited_cgst'] = floatval($invoice_tax[$l]['edited_cgst']) + $tot_cgst;
+                    $invoice_tax[$l]['edited_sgst'] = floatval($invoice_tax[$l]['edited_sgst']) + $tot_sgst;
+                    $invoice_tax[$l]['edited_igst'] = floatval($invoice_tax[$l]['edited_igst']) + $tot_igst;
+                    $invoice_tax[$l]['diff_cost'] = 0;
+                    $invoice_tax[$l]['diff_tax'] = 0;
+                    $invoice_tax[$l]['diff_cgst'] = 0;
+                    $invoice_tax[$l]['diff_sgst'] = 0;
+                    $invoice_tax[$l]['diff_igst'] = 0;
+                    
+                    // echo 'invoice_tax';
+                    // echo '<br/>';
+
+                    $warehouse_code = $result[$i]['warehouse_code'];
+                    $state_name = '';
+                    $result2 = $model->getState($warehouse_code);
+                    if(count($result2)>0){
+                        $state_name = $result2[0]['state_name'];
+                    }
+
+                    if($result[$i]['igst_rate']==0){
+                        $vat_percent = $result[$i]['vat_percent'];
+                        if(is_numeric($vat_percent)){
+                            $vat_percent = floatval($vat_percent);
+                        }
+                        $tax_code = 'Purchase-'.$state_name.'-Local-'.$vat_percent;
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            // echo json_encode($result2);
+                            // echo '<br/>';
+                            $invoice_tax[$l]['invoice_cost_acc_id'] = $result2[0]['id'];
+                            $invoice_tax[$l]['invoice_cost_ledger_name'] = $result2[0]['legal_name'];
+                            $invoice_tax[$l]['invoice_cost_ledger_code'] = $result2[0]['code'];
+                        }
+
+                        $cgst_rate = $result[$i]['cgst_rate'];
+                        if(is_numeric($cgst_rate)){
+                            $cgst_rate = floatval($cgst_rate);
+                        }
+                        $tax_code = 'Input-'.$state_name.'-CGST-'.$cgst_rate;
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            // echo json_encode($result2);
+                            // echo '<br/>';
+                            $invoice_tax[$l]['invoice_cgst_acc_id'] = $result2[0]['id'];
+                            $invoice_tax[$l]['invoice_cgst_ledger_name'] = $result2[0]['legal_name'];
+                            $invoice_tax[$l]['invoice_cgst_ledger_code'] = $result2[0]['code'];
+                        }
+
+                        $sgst_rate = $result[$i]['sgst_rate'];
+                        if(is_numeric($sgst_rate)){
+                            $sgst_rate = floatval($sgst_rate);
+                        }
+                        $tax_code = 'Input-'.$state_name.'-SGST-'.$sgst_rate;
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            // echo json_encode($result2);
+                            // echo '<br/>';
+                            $invoice_tax[$l]['invoice_sgst_acc_id'] = $result2[0]['id'];
+                            $invoice_tax[$l]['invoice_sgst_ledger_name'] = $result2[0]['legal_name'];
+                            $invoice_tax[$l]['invoice_sgst_ledger_code'] = $result2[0]['code'];
+                        }
+                    } else {
+                        $vat_percent = $result[$i]['vat_percent'];
+                        if(is_numeric($vat_percent)){
+                            $vat_percent = floatval($vat_percent);
+                        }
+                        $tax_code = 'Purchase-'.$state_name.'-Inter State-'.$vat_percent;
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            $invoice_tax[$l]['invoice_cost_acc_id'] = $result2[0]['id'];
+                            $invoice_tax[$l]['invoice_cost_ledger_name'] = $result2[0]['legal_name'];
+                            $invoice_tax[$l]['invoice_cost_ledger_code'] = $result2[0]['code'];
+                        }
+
+                        $igst_rate = $result[$i]['igst_rate'];
+                        if(is_numeric($igst_rate)){
+                            $igst_rate = floatval($igst_rate);
+                        }
+                        $tax_code = 'Input-'.$state_name.'-IGST-'.$igst_rate;
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            $invoice_tax[$l]['invoice_igst_acc_id'] = $result2[0]['id'];
+                            $invoice_tax[$l]['invoice_igst_ledger_name'] = $result2[0]['legal_name'];
+                            $invoice_tax[$l]['invoice_igst_ledger_code'] = $result2[0]['code'];
+                        }
+                    }
+                } else {
+                    $l = count($invoice_tax);
+                    $invoice_tax[$l]['gi_go_id'] = $result[$i]['gi_go_id'];
+                    $invoice_tax[$l]['tax_zone_code'] = $result[$i]['tax_zone_code'];
+                    $invoice_tax[$l]['tax_zone_name'] = $result[$i]['tax_zone_name'];
+                    $invoice_tax[$l]['invoice_number'] = $result[$i]['invoice_number'];
+                    $invoice_tax[$l]['vat_cst'] = $result[$i]['vat_cst'];
+                    $invoice_tax[$l]['vat_percent'] = $result[$i]['vat_percent'];
+                    $invoice_tax[$l]['cgst_rate'] = $result[$i]['cgst_rate'];
+                    $invoice_tax[$l]['sgst_rate'] = $result[$i]['sgst_rate'];
+                    $invoice_tax[$l]['igst_rate'] = $result[$i]['igst_rate'];
+                    $invoice_tax[$l]['total_cost'] = $tot_cost;
+                    $invoice_tax[$l]['total_tax'] = $tot_tax;
+                    $invoice_tax[$l]['total_cgst'] = $tot_cgst;
+                    $invoice_tax[$l]['total_sgst'] = $tot_sgst;
+                    $invoice_tax[$l]['total_igst'] = $tot_igst;
+                    $invoice_tax[$l]['invoice_cost'] = $tot_cost;
+                    $invoice_tax[$l]['invoice_tax'] = $tot_tax;
+                    $invoice_tax[$l]['invoice_cgst'] = $tot_cgst;
+                    $invoice_tax[$l]['invoice_sgst'] = $tot_sgst;
+                    $invoice_tax[$l]['invoice_igst'] = $tot_igst;
+                    $invoice_tax[$l]['edited_cost'] = $tot_cost;
+                    $invoice_tax[$l]['edited_tax'] = $tot_tax;
+                    $invoice_tax[$l]['edited_cgst'] = $tot_cgst;
+                    $invoice_tax[$l]['edited_sgst'] = $tot_sgst;
+                    $invoice_tax[$l]['edited_igst'] = $tot_igst;
+                    $invoice_tax[$l]['diff_cost'] = 0;
+                    $invoice_tax[$l]['diff_tax'] = 0;
+                    $invoice_tax[$l]['diff_cgst'] = 0;
+                    $invoice_tax[$l]['diff_sgst'] = 0;
+                    $invoice_tax[$l]['diff_igst'] = 0;
+                    
+                    $invoice_tax[$l]['invoice_cost_acc_id'] = null;
+                    $invoice_tax[$l]['invoice_cost_ledger_name'] = null;
+                    $invoice_tax[$l]['invoice_cost_ledger_code'] = null;
+                    $invoice_tax[$l]['invoice_tax_acc_id'] = null;
+                    $invoice_tax[$l]['invoice_tax_ledger_name'] = null;
+                    $invoice_tax[$l]['invoice_tax_ledger_code'] = null;
+                    $invoice_tax[$l]['invoice_cgst_acc_id'] = null;
+                    $invoice_tax[$l]['invoice_cgst_ledger_name'] = null;
+                    $invoice_tax[$l]['invoice_cgst_ledger_code'] = null;
+                    $invoice_tax[$l]['invoice_sgst_acc_id'] = null;
+                    $invoice_tax[$l]['invoice_sgst_ledger_name'] = null;
+                    $invoice_tax[$l]['invoice_sgst_ledger_code'] = null;
+                    $invoice_tax[$l]['invoice_igst_acc_id'] = null;
+                    $invoice_tax[$l]['invoice_igst_ledger_name'] = null;
+                    $invoice_tax[$l]['invoice_igst_ledger_code'] = null;
+
+                    // echo 'invoice_tax';
+                    // echo '<br/>';
+
+                    $warehouse_code = $result[$i]['warehouse_code'];
+                    $state_name = '';
+                    $result2 = $model->getState($warehouse_code);
+                    if(count($result2)>0){
+                        $state_name = $result2[0]['state_name'];
+                    }
+
+                    if($result[$i]['igst_rate']==0){
+                        $vat_percent = $result[$i]['vat_percent'];
+                        if(is_numeric($vat_percent)){
+                            $vat_percent = floatval($vat_percent);
+                        }
+                        $tax_code = 'Purchase-'.$state_name.'-Local-'.$vat_percent;
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            // echo json_encode($result2);
+                            // echo '<br/>';
+                            $invoice_tax[$l]['invoice_cost_acc_id'] = $result2[0]['id'];
+                            $invoice_tax[$l]['invoice_cost_ledger_name'] = $result2[0]['legal_name'];
+                            $invoice_tax[$l]['invoice_cost_ledger_code'] = $result2[0]['code'];
+                        }
+
+                        $cgst_rate = $result[$i]['cgst_rate'];
+                        if(is_numeric($cgst_rate)){
+                            $cgst_rate = floatval($cgst_rate);
+                        }
+                        $tax_code = 'Input-'.$state_name.'-CGST-'.$cgst_rate;
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            // echo json_encode($result2);
+                            // echo '<br/>';
+                            $invoice_tax[$l]['invoice_cgst_acc_id'] = $result2[0]['id'];
+                            $invoice_tax[$l]['invoice_cgst_ledger_name'] = $result2[0]['legal_name'];
+                            $invoice_tax[$l]['invoice_cgst_ledger_code'] = $result2[0]['code'];
+                        }
+
+                        $sgst_rate = $result[$i]['sgst_rate'];
+                        if(is_numeric($sgst_rate)){
+                            $sgst_rate = floatval($sgst_rate);
+                        }
+                        $tax_code = 'Input-'.$state_name.'-SGST-'.$sgst_rate;
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            // echo json_encode($result2);
+                            // echo '<br/>';
+                            $invoice_tax[$l]['invoice_sgst_acc_id'] = $result2[0]['id'];
+                            $invoice_tax[$l]['invoice_sgst_ledger_name'] = $result2[0]['legal_name'];
+                            $invoice_tax[$l]['invoice_sgst_ledger_code'] = $result2[0]['code'];
+                        }
+                    } else {
+                        $vat_percent = $result[$i]['vat_percent'];
+                        if(is_numeric($vat_percent)){
+                            $vat_percent = floatval($vat_percent);
+                        }
+                        $tax_code = 'Purchase-'.$state_name.'-Inter State-'.$vat_percent;
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            $invoice_tax[$l]['invoice_cost_acc_id'] = $result2[0]['id'];
+                            $invoice_tax[$l]['invoice_cost_ledger_name'] = $result2[0]['legal_name'];
+                            $invoice_tax[$l]['invoice_cost_ledger_code'] = $result2[0]['code'];
+                        }
+
+                        $igst_rate = $result[$i]['igst_rate'];
+                        if(is_numeric($igst_rate)){
+                            $igst_rate = floatval($igst_rate);
+                        }
+                        $tax_code = 'Input-'.$state_name.'-IGST-'.$igst_rate;
+                        // echo $tax_code;
+                        // echo '<br/>';
+                        $result2 = $model->getAccountDetails('','',$tax_code);
+                        if(count($result2)>0){
+                            $invoice_tax[$l]['invoice_igst_acc_id'] = $result2[0]['id'];
+                            $invoice_tax[$l]['invoice_igst_ledger_name'] = $result2[0]['legal_name'];
+                            $invoice_tax[$l]['invoice_igst_ledger_code'] = $result2[0]['code'];
+                        }
+                    }
+                }
+            }
+
+            $total_val[0]['total_payable_amount'] = floatval($total_val[0]['total_amount']);
+        }
+
+        // echo json_encode($result);
+        // echo '<br/><br/>';
+        // echo json_encode($total_val);
+        // echo '<br/><br/>';
+        // echo json_encode($total_tax);
+        // echo '<br/><br/>';
+        // echo json_encode($invoice_details);
+        // echo '<br/><br/>';
+        // echo json_encode($invoice_tax);
+
+        $data['total_val'] = $total_val;
+        $data['total_tax'] = $total_tax;
+        $data['tax_percent'] = $tax_percent;
+        $data['invoice_details'] = $invoice_details;
+        $data['invoice_tax'] = $invoice_tax;
+        // $data['result_skuentries'] = $result_skuentries;
+        return $data;
+    }
+
+    public function get_skuEntires() {
+        $model = new GoodsOutward();
+        $request = Yii::$app->request;
+=======
     }
 
     public function actionGetgrnpostingdetails($id,$skuentries=''){
@@ -1606,6 +2417,7 @@ class GoodsoutwardController extends Controller
         $model = new GoodsOutward();
         $request = Yii::$app->request;
 
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
     }
     
     public function actionGetaccdetails(){
@@ -1616,7 +2428,11 @@ class GoodsoutwardController extends Controller
         echo json_encode($data);
     }
 
+<<<<<<< HEAD
+    /* public function actionSave(){   
+=======
    /* public function actionSave(){   
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         $model = new GoodsOutward();
         $transaction_id = $model->save();
         // $this->redirect(array('goodsoutward/ledger', 'transaction_id'=>$transaction_id));
@@ -1683,6 +2499,7 @@ class GoodsoutwardController extends Controller
 
 
         $this->redirect(array('goodsoutward/ledger', 'id'=>$gi_id));
+<<<<<<< HEAD
     }
 
     public function actionLedger($id){
@@ -1812,6 +2629,137 @@ class GoodsoutwardController extends Controller
         echo json_encode($table_arr);
     }
 
+=======
+    }
+
+    public function actionLedger($id){
+        $model = new GoodsOutward();
+
+        $acc_ledger_entries = $model->getGrnAccLedgerEntries($id);
+        $grn_details = $model->getGrnDetails($id);
+
+        return $this->render('ledger', ['grn_details' => $grn_details, 'acc_ledger_entries' => $acc_ledger_entries]);
+    }
+
+    public function actionGetledger(){
+        $model = new GoodsOutward();
+        $mycomponent = Yii::$app->mycomponent;
+
+        $data = $model->getGoParticulars();
+        $acc_ledger_entries = $data['ledgerArray'];
+
+        $rows = ""; $new_invoice_no = ""; $invoice_no = ""; $debit_amt=0; $credit_amt=0; $sr_no=1;
+        $total_debit_amt=0; $total_credit_amt=0; 
+        $table_arr = array(); $table_cnt = 0;
+        $bl_deduction = false;
+        $row_deduction = '';
+
+        for($i=0; $i<count($acc_ledger_entries); $i++) {
+            if ($bl_deduction==true){
+                $rows = $rows . $row_deduction;
+                $bl_deduction = false;
+            }
+            $rows = $rows . '<tr>
+                                <td>' . ($sr_no++) . '</td>
+                                <td>' . $acc_ledger_entries[$i]["voucher_id"] . '</td>
+                                <td>' . $acc_ledger_entries[$i]["ledger_name"] . '</td>
+                                <td>' . $acc_ledger_entries[$i]["ledger_code"] . '</td>';
+
+            if($acc_ledger_entries[$i]["type"]=="Debit") {
+                $debit_amt = $debit_amt + $acc_ledger_entries[$i]["amount"];
+                $total_debit_amt = $total_debit_amt + $acc_ledger_entries[$i]["amount"];
+                $rows = $rows . '<td class="text-right">'.$mycomponent->format_money($acc_ledger_entries[$i]["amount"],2).'</td>';
+            } else {
+                $rows = $rows . '<td></td>';
+            }
+
+            if($acc_ledger_entries[$i]["type"]=="Credit") {
+                $credit_amt = $credit_amt + $acc_ledger_entries[$i]["amount"];
+                $total_credit_amt = $total_credit_amt + $acc_ledger_entries[$i]["amount"];
+                $rows = $rows . '<td class="text-right">'.$mycomponent->format_money($acc_ledger_entries[$i]["amount"],2).'</td>';
+            } else {
+                $rows = $rows . '<td></td>';
+            }
+
+            $rows = $rows . '</tr>';
+
+            if($acc_ledger_entries[$i]["entry_type"]=="Total Amount" || $acc_ledger_entries[$i]["entry_type"]=="Total Deduction"){
+                if($acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
+                    $particular = "Total Purchase Amount";
+                } else {
+                    $particular = "Total Deduction Amount";
+
+                    $debit_amt = $debit_amt - ($total_debit_amt*2);
+                    $credit_amt = $credit_amt - ($total_credit_amt*2);
+                }
+
+                $rows = $rows . '<tr class="bold-text text-right">
+                                    <td colspan="4" style="text-align:right;">'.$particular.'</td>
+                                    <td class="bold-text text-right">'.$mycomponent->format_money($total_debit_amt,2).'</td>
+                                    <td class="bold-text text-right">'.$mycomponent->format_money($total_credit_amt,2).'</td>';
+                $rows = $rows . '<tr><td colspan="6"></td></tr>';
+
+                $total_debit_amt = 0;
+                $total_credit_amt = 0;
+                $sr_no=1;
+
+                if($acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
+                    // $rows = $rows . '<tr class="bold-text text-right">
+                    //                     <td colspan="6" style="text-align:left;">Deduction Entry</td>
+                    //                 </tr>';
+                    $row_deduction = '<tr class="bold-text text-right">
+                                        <td colspan="6" style="text-align:left;">Deduction Entry</td>
+                                    </tr>';
+
+                    $bl_deduction = true;
+                }
+            }
+
+            $blFlag = false;
+            if(($i+1)==count($acc_ledger_entries)){
+                $blFlag = true;
+            } else if($acc_ledger_entries[$i]["invoice_no"]!=$acc_ledger_entries[$i+1]["invoice_no"]){
+                $blFlag = true;
+            }
+
+            if($blFlag == true){
+                $rows = '<tr class="bold-text text-right">
+                            <td colspan="6" style="text-align:left;">Purchase Entry</td>
+                        </tr>' . $rows;
+
+                $debit_amt = round($debit_amt,2);
+                $credit_amt = round($credit_amt,2);
+
+                $table = '<div class="diversion"><h4 class=" ">Invoice No: ' . $acc_ledger_entries[$i]["invoice_no"] . '</h4>
+                        <table class="table table-bordered">
+                            <tr class="table-head">
+                                <th>Sr. No.</th>
+                                <th>Voucher No</th>
+                                <th>Ledger Name</th>
+                                <th>Ledger Code</th>
+                                <th>Debit</th>
+                                <th>Credit</th>
+                            </tr>
+                            ' . $rows . '
+                            <tr class="bold-text text-right">
+                                <td colspan="4" style="text-align:right;">Total Amount</td>
+                                <td>' . $mycomponent->format_money($debit_amt,2) . '</td>
+                                <td>' . $mycomponent->format_money($credit_amt,2) . '</td>
+                            </tr>
+                        </table></div>';
+
+                // echo $table;
+                $table_arr[$table_cnt] = $table;
+                $table_cnt = $table_cnt + 1;
+
+                $rows=""; $debit_amt=0; $credit_amt=0; $sr_no=1;
+            }
+        }
+
+        echo json_encode($table_arr);
+    }
+
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
     /*public function actionLedger($transaction_id){
         $model = new GoodsOutward();
         $ledger = $model->getLedger($transaction_id);
@@ -1915,9 +2863,13 @@ class GoodsoutwardController extends Controller
         return $this->render('email_response', ['data' => $data]);
     }
 
+<<<<<<< HEAD
+    public function actionGetgoodoutwards(){
+=======
 
     public function actionGetgoodoutwards()
     {                   
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
         $model = new GoodsOutward();
@@ -2300,6 +3252,10 @@ class GoodsoutwardController extends Controller
                 </tr>';
 
         echo $tableamount;
+<<<<<<< HEAD
+    }
+}
+=======
         
     }          
 
@@ -2307,3 +3263,4 @@ class GoodsoutwardController extends Controller
     }
 
 
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f

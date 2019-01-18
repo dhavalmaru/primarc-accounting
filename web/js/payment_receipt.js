@@ -5,6 +5,100 @@ $(document).ready(function() {
     setPaymentType1();
 
     getLedger();
+	$('.select2').select2();
+	//$("#trans_type").on('select2:selecting', function(e) {
+	$("#trans_type").change (function() {
+    	var csrfToken = $('meta[name="csrf-token"]').attr("content");
+        setPaymentType1();
+    	setPaymentType2();
+    });
+
+    $("#acc_id").change(function(){
+        var acc_id = $("#acc_id").val();
+    	
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+    	
+    		$.ajax({
+            url: BASE_URL+'index.php?r=paymentreceipt%2Fgetaccdetails',
+            type: 'post',
+            data: {
+                    acc_id : acc_id,
+                    _csrf : csrfToken
+                 },
+            dataType: 'json',
+            async: false,
+            success: function (data) {
+                if(data != null){
+                    if(data.length>0){
+                        $("#acc_code").val(data[0].code);
+                        $("#legal_name").val(data[0].legal_name);
+                    }
+                } else {
+                    $("#acc_code").val("");
+                    $("#legal_name").val("");
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        });
+    	
+        getLedger();
+    });
+
+    $("#bank_id").change(function(){
+        
+        var bank_id = $("#bank_id").val();
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+
+        $.ajax({
+            url: BASE_URL+'index.php?r=paymentreceipt%2Fgetaccbankdetails',
+            type: 'post',
+            data: {
+                    bank_id : bank_id,
+                    _csrf : csrfToken
+                 },
+            dataType: 'json',
+            async: false,
+            success: function (data) {
+                if(data != null){
+                    if(data.length>0){
+                        $("#acc_code1").val(data[0].code);
+                        $("#bank_name").val(data[0].bank_name);
+                    }
+                } else {
+                    $("#acc_code1").val("");
+                    $("#bank_name").val("");
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        });
+        // getLedger();
+    });
+
+    //$(document.body).on("change","#search_code",function(){
+
+    $("#payment_type").change(function(){
+        setPaymentType();
+    });
+
+    $("#check_all").change(function(){
+        var blChecked = false;
+        if($(this).prop('checked')==true) {
+            blChecked = true;
+        }
+
+        $(".check").each(function( index ) {
+            $(this).prop('checked', blChecked);
+        });
+
+        getLedgerTotal();
+    });
+
     set_view();
 	$('.select2').select2();
 	//$("#trans_type").on('select2:selecting', function(e) {
@@ -174,6 +268,10 @@ function setPaymentType2() {
         method: 'post',
         data: {trans_type: trans_type , _csrf : csrfToken},
         dataType: 'html',
+<<<<<<< HEAD
+        async: false,
+=======
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         success: function(response){
             $('#acc_id').html(response);
             // $('#account_id').find('option').not(':first').remove();
@@ -182,6 +280,8 @@ function setPaymentType2() {
             // });
         }
     });
+<<<<<<< HEAD
+=======
 
     // }
     // else
@@ -202,6 +302,7 @@ function setPaymentType2() {
     //       }
     //    });
     //  }
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 }
 
 function getLedger(){
@@ -211,6 +312,7 @@ function getLedger(){
     $.ajax({
         url: BASE_URL+'index.php?r=paymentreceipt%2Fgetledger',
         type: 'post',
+        async: false,
         data: {
                 acc_id : $("#acc_id").val(),
                 id : $("#id").val(),
@@ -231,44 +333,120 @@ function getLedger(){
 }
 
 function getLedgerTotal(){
-    var total_debit_amt = 0;
-    var total_credit_amt = 0;
-    var paying_debit_amt = 0;
-    var paying_credit_amt = 0;
-    var net_debit_amt = 0;
-    var net_credit_amt = 0;
+    $(".check").each(function( index ) {
+        var id = $(this).attr("id");
+        var index = id.substring(id.indexOf("_")+1);
+        // console.log(index);
+
+        var amount = get_number($("#total_amount_"+index).val());
+        var paid_amount = get_number($("#total_paid_amount_"+index).val());
+
+        if($(this).prop('checked')==true) {
+            $("#amount_to_pay_"+index).val(Math.round((amount-paid_amount)*100)/100);
+            $("#chk_val_"+index).val("1");
+        } else {
+            $("#amount_to_pay_"+index).val('0.00');
+            $("#chk_val_"+index).val("0");
+        }
+    });
+
+    getTotal();
+}
+
+function setAmount(elem){
+    var id = elem.id;
+    var index = id.substring(id.indexOf("_")+1);
+
+    var amount = get_number($("#total_amount_"+index).val());
+    var paid_amount = get_number($("#total_paid_amount_"+index).val());
+
+    if($("#"+id).prop('checked')==true) {
+        $("#amount_to_pay_"+index).val(Math.round((amount-paid_amount)*100)/100);
+        $("#chk_val_"+index).val("1");
+    } else {
+        $("#amount_to_pay_"+index).val('0.00');
+        $("#chk_val_"+index).val("0");
+    }
+
+    getTotal();
+}
+
+function getTotal(){
+    var total_transaction = '';
+    var total_amount_total = 0;
+    var total_paid_transaction = '';
+    var total_paid_amount_total = 0;
+    var paying_transaction = '';
+    var paying_amount_total = 0;
+    var bal_transaction = '';
+    var bal_amount_total = 0;
 
     $(".check").each(function( index ) {
         var id = $(this).attr("id");
         var index = id.substring(id.indexOf("_")+1);
         // console.log(index);
 
-        var debit = get_number($("#debit_amt_"+index).val(),2);
-        var credit = get_number($("#credit_amt_"+index).val(),2);
+        var transaction = $("#transaction_"+index).val();
+        var amount = get_number($("#total_amount_"+index).val());
+        var total_paid_amount = get_number($("#total_paid_amount_"+index).val());
+        var amount_to_pay = get_number($("#amount_to_pay_"+index).val());
+        var bal_amount = Math.round((amount-total_paid_amount-amount_to_pay)*100)/100;
+        $("#bal_amount_"+index).val(format_money(bal_amount,2));
 
-        total_debit_amt = total_debit_amt + debit;
-        total_credit_amt = total_credit_amt + credit;
+        // if(transaction.toUpperCase().trim()=="DEBIT"){
+        //     total_amount_total = total_amount_total-amount;
+        //     total_paid_amount_total = total_paid_amount_total-total_paid_amount;
+        //     paying_amount_total = paying_amount_total-amount_to_pay;
+        //     bal_amount_total = bal_amount_total-bal_amount;
+        // } else {
+        //     total_amount_total = total_amount_total+amount;
+        //     total_paid_amount_total = total_paid_amount_total+total_paid_amount;
+        //     paying_amount_total = paying_amount_total+amount_to_pay;
+        //     bal_amount_total = bal_amount_total+bal_amount;
+        // }
 
-        if($(this).prop('checked')==true) {
-            paying_debit_amt = paying_debit_amt + debit;
-            paying_credit_amt = paying_credit_amt + credit;
-            $("#chk_val_"+index).val("1");
-        } else {
-            $("#chk_val_"+index).val("0");
-        }
+        total_amount_total = total_amount_total+amount;
+        total_paid_amount_total = total_paid_amount_total+total_paid_amount;
+        paying_amount_total = paying_amount_total+amount_to_pay;
+        bal_amount_total = bal_amount_total+bal_amount;
     });
 
-    net_debit_amt = total_debit_amt - paying_debit_amt;
-    net_credit_amt = total_credit_amt - paying_credit_amt;
-
-    if((paying_credit_amt-paying_debit_amt)>=0){
-        payable_credit_amt = paying_credit_amt-paying_debit_amt;
-        payable_debit_amt = 0;
+    if(total_amount_total<0){
+        // total_amount_total = total_amount_total*-1;
+        total_transaction = 'Debit';
     } else {
-        payable_debit_amt = (paying_credit_amt-paying_debit_amt)*-1;
-        payable_credit_amt = 0;
+        total_transaction = 'Credit';
+    }
+    if(total_paid_amount_total<0){
+        // total_paid_amount_total = total_paid_amount_total*-1;
+        total_paid_transaction = 'Debit';
+    } else {
+        total_paid_transaction = 'Credit';
+    }
+    if(paying_amount_total<0){
+        // paying_amount_total = paying_amount_total*-1;
+        paying_transaction = 'Debit';
+    } else {
+        paying_transaction = 'Credit';
+    }
+    if(bal_amount_total<0){
+        // bal_amount_total = bal_amount_total*-1;
+        bal_transaction = 'Debit';
+    } else {
+        bal_transaction = 'Credit';
     }
 
+<<<<<<< HEAD
+    $('#total_transaction').val(total_transaction);
+    $('#total_amount_total').val(format_money(total_amount_total,2));
+    $('#total_paid_transaction').val(total_paid_transaction);
+    $('#total_paid_amount_total').val(format_money(total_paid_amount_total,2));
+    $('#paying_transaction').val(paying_transaction);
+    $('#paying_amount_total').val(format_money(paying_amount_total,2));
+    $('#bal_transaction').val(bal_transaction);
+    $('#bal_amount_total').val(format_money(bal_amount_total,2));
+}
+=======
     $("#total_debit_amt").val(format_money(total_debit_amt,2));
     $("#total_credit_amt").val(format_money(total_credit_amt,2));
     $("#paying_debit_amt").val(format_money(paying_debit_amt,2));
@@ -311,3 +489,4 @@ function getLedgerTotal(){
     // getLedger();
 // });
 
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f

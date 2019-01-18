@@ -180,3 +180,57 @@ function set_trans_type(){
         $('#warehouse_gst_div').hide();
     }
 }
+<<<<<<< HEAD
+
+function get_gst_id(){
+    $('#vendor_gst_id').val($('#vendor_warehouse_id option:selected').text());
+
+    var vendor_warehouse_id = $('#vendor_warehouse_id').val();
+    var csrfToken = $('meta[name="csrf-token"]').attr("content");
+
+    $.ajax({
+        url: BASE_URL+'index.php?r=otherdebitcredit%2Fgetvendorgstid',
+        type: 'post',
+        data: {
+                vendor_warehouse_id : vendor_warehouse_id,
+                _csrf : csrfToken
+             },
+        dataType: 'html',
+        success: function (data) {
+            if(data != null){
+                $('#vendor_gst_id').val(data);
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status);
+            alert(thrownError);
+        }
+    });
+}
+
+function get_vendor_warehouse_gst_id(){
+    var vendor_id = $('#vendor_id').val();
+    var csrfToken = $('meta[name="csrf-token"]').attr("content");
+
+    $('#vendor_warehouse_id').html('');
+    $.ajax({
+        url: BASE_URL+'index.php?r=otherdebitcredit%2Fgetvendorgstnos',
+        type: 'post',
+        data: {
+                vendor_id : vendor_id,
+                _csrf : csrfToken
+             },
+        dataType: 'html',
+        success: function (data) {
+            if(data != null){
+                $('#vendor_warehouse_id').html(data);
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status);
+            alert(thrownError);
+        }
+    });
+}
+=======
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f

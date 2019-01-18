@@ -37,10 +37,26 @@ class PendinggoController extends Controller
         $mycomponent = Yii::$app->mycomponent;
         $start = $request->post('start');    
         //$params['start'].", ".$params['length']
+<<<<<<< HEAD
+
+        $access = $grn_cnt->getAccess();
+        $r_edit = 0;
+        if(isset($access[0])) { 
+            if($access[0]['r_insert']=='1' || $access[0]['r_edit']=='1') { 
+                $r_edit = 1;
+            } 
+        }
+
+        for($i=0; $i<count($grn); $i++) { 
+            $row = array(
+                        $start+1,
+                        (($r_edit == 1)?'<a href="'.Url::base() .'index.php?r=pendinggo%2Fupdate&id='.$grn[$i]['gi_go_id'].'" >Post </a>':''),
+=======
         for($i=0; $i<count($grn); $i++) { 
            $row = array(
                         $start+1,
                         '<a href="'.Url::base() .'index.php?r=pendinggo%2Fupdate&id='.$grn[$i]['gi_go_id'].'" >Post </a>',
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         /*''.$grn[$i]['gi_go_id'].'',*/
                         ''.$grn[$i]['gi_go_ref_no'].'',
                         ''.$grn[$i]['po_number'].'',
@@ -51,7 +67,11 @@ class PendinggoController extends Controller
                         ''.$grn[$i]['customerState'].'',
                         ''.$grn[$i]['customerName'].'',
                         ''.$grn[$i]['no_good_units'].'',
+<<<<<<< HEAD
+                        // ''.$mycomponent->format_money($grn[$i]['value_at_cost'], 2).'',
+=======
                         ''.$mycomponent->format_money($grn[$i]['value_at_cost'], 2).'',
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         ''.$grn[$i]['gi_go_date_time'].'',
                         ''.$grn[$i]['gi_go_status'].'',
                         ''.$grn[$i]['updated_by'].'',
@@ -79,6 +99,22 @@ class PendinggoController extends Controller
         $mycomponent = Yii::$app->mycomponent;
         $start = $request->post('start');    
         //$params['start'].", ".$params['length']
+<<<<<<< HEAD
+
+        $access = $grn_cnt->getAccess();
+        $r_edit = 0;
+        if(isset($access[0])) { 
+            if($access[0]['r_insert']=='1' || $access[0]['r_edit']=='1') { 
+                $r_edit = 1;
+            } 
+        }
+        
+        for($i=0; $i<count($grn); $i++) { 
+           $row = array(
+                        $start+1,
+                        '<a href="'.Url::base() .'index.php?r=pendinggo%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>'.
+                        (($r_edit == 1)?'<a href="'.Url::base() .'index.php?r=pendinggo%2Fupdate&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>':''),
+=======
         /*
             <a href="'.Url::base() .'index.php?r=pendinggo%2Fupdate&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>
         */
@@ -87,6 +123,7 @@ class PendinggoController extends Controller
                         $start+1,
                         '<a href="'.Url::base() .'index.php?r=pendinggo%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>
                         <a href="'.Url::base() .'index.php?r=pendinggo%2Fupdate&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>',
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         /*''.$grn[$i]['gi_go_id'].'',*/
                         ''.$grn[$i]['gi_go_id'].'',
                         ''.$grn[$i]['po_number'].'',
@@ -94,7 +131,11 @@ class PendinggoController extends Controller
                         ''.$grn[$i]['warehouse_state'].'',
                         ''.$grn[$i]['customerState'].'',
                         ''.$grn[$i]['customerName'].'',
+<<<<<<< HEAD
+                        // ''.$mycomponent->format_money($grn[$i]['value_at_cost'], 2).'',
+=======
                         ''.$mycomponent->format_money($grn[$i]['value_at_cost'], 2).'',
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         ''.$grn[$i]['gi_go_date_time'].'',
                         ''.$grn[$i]['gi_go_status'].'',
                         ''.$grn[$i]['updated_by'].'',
@@ -123,10 +164,26 @@ class PendinggoController extends Controller
         $mycomponent = Yii::$app->mycomponent;
         $start = $request->post('start');    
         //$params['start'].", ".$params['length']
+<<<<<<< HEAD
+
+        $access = $grn_cnt->getAccess();
+        $r_edit = 0;
+        if(isset($access[0])) { 
+            if($access[0]['r_insert']=='1' || $access[0]['r_edit']=='1') { 
+                $r_edit = 1;
+            } 
+        }
+        
+        for($i=0; $i<count($grn); $i++) { 
+           $row = array(
+                        $start+1,
+                        (($r_edit == 1)?'<a href="'.Url::base() .'index.php?r=pendinggo%2Fupdate&id='.$grn[$i]['gi_go_id'].'" >Post </a>':''),
+=======
         for($i=0; $i<count($grn); $i++) { 
            $row = array(
                         $start+1,
                         '<a href="'.Url::base() .'index.php?r=pendinggo%2Fupdate&id='.$grn[$i]['gi_go_id'].'" >Post </a>',
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         /*''.$grn[$i]['gi_go_id'].'',*/
                         ''.$grn[$i]['gi_go_id'].'',
                         ''.$grn[$i]['po_number'].'',
@@ -134,7 +191,11 @@ class PendinggoController extends Controller
                         ''.$grn[$i]['warehouse_state'].'',
                         ''.$grn[$i]['customerState'].'',
                         ''.$grn[$i]['customerName'].'',
+<<<<<<< HEAD
+                        // ''.$mycomponent->format_money($grn[$i]['value_at_cost'], 2).'',
+=======
                         ''.$mycomponent->format_money($grn[$i]['value_at_cost'], 2).'',
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         ''.$grn[$i]['gi_go_date_time'].'',
                         ''.$grn[$i]['gi_go_status'].'',
                         ''.$grn[$i]['updated_by'].'',
@@ -440,7 +501,11 @@ class PendinggoController extends Controller
             for($i=0; $i<count($result); $i++){
                 
                 $cost_excl_vat = floatval($result[$i]['cost_excl_vat']);
+<<<<<<< HEAD
+                $cost_incl_vat_cst = floatval($result[$i]['value_incl_vat']);
+=======
                 $cost_incl_vat_cst = floatval($result[$i]['value_at_mrp']);
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                 $invoice_qty = floatval($result[$i]['invoice_qty']);
                
                 $vat_percent = floatval($result[$i]['vat_percent']);
@@ -494,7 +559,11 @@ class PendinggoController extends Controller
                         if(is_numeric($vat_percent)){
                             $vat_percent = floatval($vat_percent);
                         }
+<<<<<<< HEAD
+                        $tax_code = 'Sales-'.$state_name.'-Local-B2B-'.$vat_percent;
+=======
                         $tax_code = 'Sales-'.$state_name.'-Local-'.$vat_percent;
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -538,7 +607,11 @@ class PendinggoController extends Controller
                         if(is_numeric($vat_percent)){
                             $vat_percent = floatval($vat_percent);
                         }
+<<<<<<< HEAD
+                        $tax_code = 'Sales-'.$state_name.'-Inter State-B2B-'.$vat_percent;
+=======
                         $tax_code = 'Sales-'.$state_name.'-Inter State-'.$vat_percent;
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -612,7 +685,11 @@ class PendinggoController extends Controller
                         if(is_numeric($vat_percent)){
                             $vat_percent = floatval($vat_percent);
                         }
+<<<<<<< HEAD
+                        $tax_code = 'Sales-'.$state_name.'-Local-B2B-'.$vat_percent;
+=======
                         $tax_code = 'Sales-'.$state_name.'-Local-'.$vat_percent;
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -656,7 +733,11 @@ class PendinggoController extends Controller
                         if(is_numeric($vat_percent)){
                             $vat_percent = floatval($vat_percent);
                         }
+<<<<<<< HEAD
+                        $tax_code = 'Sales-'.$state_name.'-Inter State-B2B-'.$vat_percent;
+=======
                         $tax_code = 'Sales-'.$state_name.'-Inter State-'.$vat_percent;
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -784,7 +865,11 @@ class PendinggoController extends Controller
                         if(is_numeric($vat_percent)){
                             $vat_percent = floatval($vat_percent);
                         }
+<<<<<<< HEAD
+                        $tax_code = 'Sales-'.$state_name.'-Local-B2B-'.$vat_percent;
+=======
                         $tax_code = 'Sales-'.$state_name.'-Local-'.$vat_percent;
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -832,7 +917,11 @@ class PendinggoController extends Controller
                         if(is_numeric($vat_percent)){
                             $vat_percent = floatval($vat_percent);
                         }
+<<<<<<< HEAD
+                        $tax_code = 'Sales-'.$state_name.'-Inter State-B2B-'.$vat_percent;
+=======
                         $tax_code = 'Sales-'.$state_name.'-Inter State-'.$vat_percent;
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -919,7 +1008,11 @@ class PendinggoController extends Controller
                         if(is_numeric($vat_percent)){
                             $vat_percent = floatval($vat_percent);
                         }
+<<<<<<< HEAD
+                        $tax_code = 'Sales-'.$state_name.'-Local-B2B-'.$vat_percent;
+=======
                         $tax_code = 'Sales-'.$state_name.'-Local-'.$vat_percent;
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -967,7 +1060,11 @@ class PendinggoController extends Controller
                         if(is_numeric($vat_percent)){
                             $vat_percent = floatval($vat_percent);
                         }
+<<<<<<< HEAD
+                        $tax_code = 'Sales-'.$state_name.'-Inter State-B2B-'.$vat_percent;
+=======
                         $tax_code = 'Sales-'.$state_name.'-Inter State-'.$vat_percent;
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         // echo $tax_code;
                         // echo '<br/>';
                         $result2 = $model->getAccountDetails('','',$tax_code);
@@ -1665,6 +1762,8 @@ class PendinggoController extends Controller
         }
     }
 
+<<<<<<< HEAD
+=======
     public function actionGetinvoicedeductiondetailstest(){
 
         // $this->actionGetinvoicedeductiondetails('5909', 'shortage', 'INTRA');
@@ -2634,6 +2733,7 @@ class PendinggoController extends Controller
         echo json_encode($data);
     }
 
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
     public function actionGetaccdetails(){
         $acc_master = new AccountMaster();
         $request = Yii::$app->request;
@@ -2656,7 +2756,11 @@ class PendinggoController extends Controller
                 <td>'.$grn[$i]["vendor_name"].'</td> 
                 <td>'.$grn[$i]["scanned_qty"].'</td> 
                 <td>'.$grn[$i]["payable_val_after_tax"].'</td> 
+<<<<<<< HEAD
+                <td>'.$grn[$i]["invoice_created_date"].'</td> 
+=======
                 <td>'.$grn[$i]["gi_date"].'</td> 
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                 <td>'.$grn[$i]["status"].'</td> 
                 <td><a href="' . Url::base() .'index.php?r=pendinggrn%2Fupdate&id='.$grn[$i]['grn_id'].'"> Post </a></td> 
             </tr>';

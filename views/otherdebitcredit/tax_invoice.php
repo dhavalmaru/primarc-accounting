@@ -41,6 +41,37 @@
         <tr valign="top"  style=" ">
             <td colspan="3"   style="border-left:none; border-bottom:none; ">
                 <p>
+<<<<<<< HEAD
+				<?php if(isset($warehouse_details[0]['company_name'])) {
+                    if($warehouse_details[0]['company_name']!='') echo $warehouse_details[0]['company_name'];} ?> 
+                    <!-- (FY <?php //if(isset($debit_note[0]['date_of_transaction'])) 
+                                            //echo $mycomponent->get_financial_year($debit_note[0]['date_of_transaction']); ?>) -->
+                <br/>
+				<!-- 210A, 214, Building No 2-B,
+				Mittal Industrial Estate Premises
+				Co-Operative Society Limited, Marol Naka
+				Andheri (East), Mumbai - 400059
+				Maharashtra -->
+
+                <?php if(isset($warehouse_details[0]['address_line_1'])) {
+                    if($warehouse_details[0]['address_line_1']!='') echo $warehouse_details[0]['address_line_1'];} ?>
+                <?php if(isset($warehouse_details[0]['address_line_2'])) {
+                    if($warehouse_details[0]['address_line_2']!='') echo $warehouse_details[0]['address_line_2'];} ?>
+                <?php if(isset($warehouse_details[0]['address_line_3'])) {
+                    if($warehouse_details[0]['address_line_3']!='') echo $warehouse_details[0]['address_line_3'];} ?>
+                <?php if(isset($warehouse_details[0]['city_name'])) {
+                    if($warehouse_details[0]['city_name']!='') echo $warehouse_details[0]['city_name'];} ?>
+                <?php if(isset($warehouse_details[0]['city_name']) && isset($warehouse_details[0]['pincode'])) {
+                    if($warehouse_details[0]['city_name']!='' && $warehouse_details[0]['pincode']!='') echo '-';} ?>
+                <?php if(isset($warehouse_details[0]['pincode'])) {
+                    if($warehouse_details[0]['pincode']!='') echo $warehouse_details[0]['pincode'];} ?>
+                <?php if(isset($warehouse_details[0]['state_name'])) {
+                    if($warehouse_details[0]['state_name']!='') echo ' ' . $warehouse_details[0]['state_name'];} ?>
+				</p>
+            </td>
+            <td colspan="2" align="center" valign="top" style=""><p><b>Invoice No.</b>
+			<br> <?php if(isset($debit_note[0]['debit_credit_note_ref'])) echo $debit_note[0]['debit_credit_note_ref']; ?> </p></td>
+=======
 				Primarc Pecan Retail (P) Ltd - Mum(FY 17<?php if(isset($debit_note[0]['date_of_transaction'])) 
                                             echo $mycomponent->get_financial_year($debit_note[0]['date_of_transaction']); ?>)
 				210A, 214, Building No 2-B,
@@ -52,18 +83,28 @@
             </td>
             <td colspan="2" align="center" valign="top" style=""><p><b>Invoice No.</b>
 			<br>     <?php if(isset($debit_note[0]['debit_credit_note_ref'])) echo $debit_note[0]['debit_credit_note_ref']; ?></p></td>
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 			<td colspan="1" align="center" valign="top" style="border-right:none;"><p><b>Dated</b>
 			<br>  <?php if(isset($debit_note[0]['date_of_transaction'])) 
                                             echo (($debit_note[0]['date_of_transaction']!=null && $debit_note[0]['date_of_transaction']!='')?
                                             date('d/m/Y',strtotime($debit_note[0]['date_of_transaction'])):''); ?></p></td>
         </tr>
         <tr>
+<<<<<<< HEAD
+            <td width="15%" style="border:none;"><p> GSTIN</p></td>
+            <td width="3%" style="border:none;">:</td>
+            <td width="22%" style="border:none;">
+                <p>
+                    <b> 
+                        <?php if(isset($warehouse_details[0]['gst_id'])) echo $warehouse_details[0]['gst_id']; ?>
+=======
             <td width="22%" style="border:none;"><p> GSTIN</p></td>
             <td width="4%" style="border:none;">:</td>
             <td width="14%" style="border:none;">
                 <p>
                     <b> 
                          27AACCT5910H1ZE
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                     </b>
                 </p>
             </td>
@@ -73,6 +114,29 @@
 			<br> </p></td>
         </tr>
         <tr>
+<<<<<<< HEAD
+			<td width="15%" style="border:none;"><p>State</p></td>
+            <td width="3%" style="border:none;">:</td>
+            <td width="22%" style="border:none;">
+                <p>
+                    <b> 
+                        <?php if(isset($warehouse_details[0]['state_name'])) echo $warehouse_details[0]['state_name']; ?>
+                    </b>
+                </p>
+            </td>
+            <td colspan="2"  align="center" valign="top" style="border-right:none;"><p><b>Supplier's Reference </b>
+			<br> </p></td>
+			<td colspan="1"  align="center" valign="top" style="border-right:none;"><p><b>Other Reference(S)</b>
+			<br> <?php if(isset($debit_note[0]['reference'])) echo $debit_note[0]['reference']; ?> </p></td>
+        </tr>
+		<tr>
+			<td width="15%" style="border:none;"><p>State Code</p></td>
+            <td width="3%" style="border:none;">:</td>
+            <td width="22%" style="border:none;">
+                <p>
+                    <b> 
+                        <?php if(isset($warehouse_details[0]['state_code'])) echo $warehouse_details[0]['state_code']; ?>
+=======
 			<td width="22%" style="border:none;"><p>State</p></td>
             <td width="4%" style="border:none;">:</td>
             <td width="14%" style="border:none;">
@@ -94,11 +158,22 @@
                 <p>
                     <b> 
                      27
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                     </b>
                 </p>
             </td>
             <td colspan="3" style="border:none; border-left:1px solid #999; "></td>
         </tr>
+<<<<<<< HEAD
+        <?php if(isset($warehouse_details[0]['cin_no'])) { if($warehouse_details[0]['cin_no']!='') { ?>
+        <tr>
+			<td width="15%" style="border:none; border-bottom:1px solid #999;"><p>CIN</p></td>
+            <td width="3%" style="border:none;">:</td>
+            <td width="22%" style="border:none;">
+                <p>
+                    <b> 
+                        <?php if(isset($warehouse_details[0]['cin_no'])) echo $warehouse_details[0]['cin_no']; ?>
+=======
         <tr>
 			<td width="22%" style="border:none; border-bottom:1px solid #999;"><p>CIN</p></td>
             <td width="4%" style="border:none;">:</td>
@@ -106,11 +181,16 @@
                 <p>
                     <b> 
                       U52100WB2006PTC111833
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                     </b>
                 </p>
             </td>
             <td colspan="3" style="border:none; border-left:1px solid #999; border-bottom:1px solid #999;"></td>
         </tr>
+<<<<<<< HEAD
+        <?php }} ?>
+=======
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 		<tr>
             <td colspan="6"  style="border-left:none;border-right:none;"><p>Details of Buyer | Billed to:</p></td>
         </tr>
@@ -118,6 +198,10 @@
             <td colspan="3" style="border-left:none; border-bottom:none;">
                 <p>
     			<?php if(isset($vendor_details[0]['account_holder_name'])) echo $vendor_details[0]['account_holder_name']; ?>
+<<<<<<< HEAD
+                <br/>
+=======
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
     			<?php if(isset($vendor_details[0]['office_address_line_1'])) echo $vendor_details[0]['office_address_line_1']; ?> &nbsp;
                 <?php if(isset($vendor_details[0]['office_address_line_2'])) echo $vendor_details[0]['office_address_line_2']; ?> &nbsp;
                 <?php if(isset($vendor_details[0]['office_address_line_3'])) echo $vendor_details[0]['office_address_line_3']; ?> &nbsp;
@@ -130,12 +214,21 @@
 			<br> </p></td>
         </tr>
         <tr>
+<<<<<<< HEAD
+            <td width="15%" style="border:none;"><p> GSTIN</p></td>
+            <td width="3%" style="border:none;">:</td>
+            <td width="22%" style="border:none;">
+                <p>
+                    <b> 
+                        <?php if(isset($vendor_warehouse_details[0]['gst_id'])) echo $vendor_warehouse_details[0]['gst_id']; else if(isset($debit_note[0]['vendor_gst_id'])) echo $debit_note[0]['vendor_gst_id']; ?>
+=======
             <td width="22%" style="border:none;"><p> GSTIN</p></td>
             <td width="4%" style="border:none;">:</td>
             <td width="14%" style="border:none;">
                 <p>
                     <b> 
                          <?php if(isset($vendor_details[0]['gst_id'])) echo $debit_note[0]['gst_id']; ?>
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                     </b>
                 </p>
             </td>
@@ -147,9 +240,15 @@
             </td>
         </tr>
         <tr>
+<<<<<<< HEAD
+			<td width="15%" style="border:none;"><p>State</p></td>
+            <td width="3%" style="border:none;">:</td>
+            <td width="22%" style="border:none;">
+=======
 			<td width="22%" style="border:none;"><p>State</p></td>
             <td width="4%" style="border:none;">:</td>
             <td width="14%" style="border:none;">
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                 <p>
                     <b> 
                       <?php if(isset($vendor_details[0]['state_name'])) echo $vendor_details[0]['state_name']; ?>
@@ -162,9 +261,15 @@
 			<br> </p></td>
         </tr>
 		<tr style="border-bottom:1px solid #999;">
+<<<<<<< HEAD
+			<td width="15%" style="border:none;"><p>State Code</p></td>
+            <td width="3%" style="border:none;">:</td>
+            <td width="22%" style="border:none;">
+=======
 			<td width="22%" style="border:none;"><p>State Code</p></td>
             <td width="4%" style="border:none;">:</td>
             <td width="14%" style="border:none;">
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                 <p>
                     <b> 
                      <?php if(isset($vendor_details[0]['state_code'])) echo $vendor_details[0]['state_code']; ?>
@@ -202,7 +307,11 @@
                         <td><?php echo $invoice_details[$i]['qty']; ?></td>
                         <td><?php echo $invoice_details[$i]['rate']; ?></td>
                         <td><?php echo $invoice_details[$i]['per']; ?></td>
+<<<<<<< HEAD
+                        <td style="text-align:right;"><?php echo $invoice_details[$i]['amount']; ?></td>
+=======
                         <td><?php echo $invoice_details[$i]['amount']; ?></td>
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         </tr>
                         <?php } ?>
                         <?php $i = count($invoice_details)-1; ?>
@@ -212,7 +321,11 @@
                         <td>  </td>
                         <td>  </td>
                         <td>  </td>
+<<<<<<< HEAD
+                        <td style=" border-right:1px solid #999; text-align:right;"><?php echo $invoice_details[$i]['amount']; ?>  </td>
+=======
                         <td style=" border-right:1px solid #999;"><?php echo $invoice_details[$i]['amount']; ?>  </td>
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         </tr>
 					</tbody>
                 </table>  
@@ -274,7 +387,11 @@
                     <tbody>
     					<?php for($i=0; $i<count($inv_tax_details)-1; $i++){ ?>
                         <tr>
+<<<<<<< HEAD
+                            <td  style="text-align:center;" colspan="2"><?php echo $inv_tax_details[count($inv_tax_details)-1]['hsn']; ?></td>
+=======
                             <td  style="text-align:center;" colspan="2">998311</td>
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                             <td align="right"><?php echo $inv_tax_details[$i]['value']; ?></td>
                             <td align="center" valign="middle" style="border-right:1px solid #666;border-bottom:0px solid #666;padding:0;">
     							<table style="width: 100%;border-spacing: 0; height: 17px;">
@@ -307,7 +424,11 @@
     							</table>
     						</td>
                             <td align="right">  
+<<<<<<< HEAD
+                                <?php echo $inv_tax_details[$i]['value'] + $inv_tax_details[$i]['cgst_amt'] + $inv_tax_details[$i]['sgst_amt'] + $inv_tax_details[$i]['igst_amt'] + $inv_tax_details[$i]['roundoff_amt']; ?> 
+=======
                                 <?php echo $inv_tax_details[$i]['value'] + $inv_tax_details[$i]['cgst_amt'] + $inv_tax_details[$i]['sgst_amt'] + $inv_tax_details[$i]['igst_amt']; ?> 
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                             </td>
                         </tr>  
                         <?php } ?>
@@ -359,8 +480,14 @@
                 <td colspan="3" style="border: none;">
                     <br/>
                     <p style="margin:0;text-align:left;line:height:22px;font-size:18px;">
+<<<<<<< HEAD
+                        <!-- <span style="  font-size:16px; font-weight:500; display: block;" >Tax Amount (in words): <br> </span>  -->
+                        <?php //if(isset($inv_tax_details[$i]['total_amt'])) echo $mycomponent->convert_number_to_words(round($inv_tax_details[$i]['total_amt'],2)); ?> 
+                    </p> 
+=======
                         <span style="  font-size:16px; font-weight:500; display: block;" >Tax Amount (in words): <br> </span> 
                         <?php if(isset($inv_tax_details[$i]['total_amt'])) echo $mycomponent->convert_number_to_words(round($inv_tax_details[$i]['total_amt'],2)); ?> </p> 
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                     <br/>
                     <p style="margin:0;text-align:left;line:height:22px;font-size:14px;"><span style="  font-size:16px; font-weight:500; display: block;" >Remarks: <br/><br> </span> </p> <br>
                     <p style="margin:0;text-align:left;line:height:22px;font-size:11px;font-weight:bold;"><span style="  font-size:16px; font-weight:500; display: block;" >Company's PAN: AACCT5910H </span>  </p> 

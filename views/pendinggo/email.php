@@ -10,7 +10,11 @@ use yii\web\JsExpression;
 use yii\db\Query;
 
 $this->title = 'Email Debit Note: ' . $debit_note[0]['id'];
+<<<<<<< HEAD
+$this->params['breadcrumbs'][] = ['label' => 'GO', 'url' => ['index']];
+=======
 $this->params['breadcrumbs'][] = ['label' => 'Grns', 'url' => ['index']];
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 $this->params['breadcrumbs'][] = ['label' => $debit_note[0]['grn_id'], 'url' => ['update', 'id' => $debit_note[0]['grn_id']]];
 $this->params['breadcrumbs'][] = 'Email';
 $mycomponent = Yii::$app->mycomponent;

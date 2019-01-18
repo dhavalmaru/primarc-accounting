@@ -91,6 +91,9 @@ $("#account_master").validate({
         vendor_id: {
             required: true
         },
+        customer_id: {
+            required: true
+        },
         legal_name: {
             required: true,
             check_legal_name_availablity: true,
@@ -1111,19 +1114,34 @@ function check_jv_invoice_details(){
         if(parseInt(element_val)!=0 && element_val!="")
         {
             var id = $(this).attr('id');
+<<<<<<< HEAD
+            // console.log('id'+id);
+            var elem_id = id.substr(id.lastIndexOf('_')+1);
+            // console.log('elem_id'+elem_id);
+            var total_val = $('#sum_total_'+elem_id).text();
+            // console.log('sum_total'+total_val);
+=======
             console.log('id'+id);
             var elem_id = id.substr(id.lastIndexOf('_')+1);
             console.log('elem_id'+elem_id);
             var total_val = $('#sum_total_'+elem_id).text();
             console.log('sum_total'+total_val);
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
             if(total_val!=undefined && total_val!="")
             {
                 if(parseInt(element_val)!=parseInt(total_val))
                 {
+<<<<<<< HEAD
+                    // console.log('total_val'+total_val);
+                    var errors = {};
+                    var name = $(this).attr('name');
+                    // console.log('name'+elem_id);
+=======
                     console.log('total_val'+total_val);
                     var errors = {};
                     var name = $(this).attr('name');
                     console.log('name'+elem_id);
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                     errors[name] = "Invoice Amount and Actual Amount Should Be Same";
                     validator.showErrors(errors);
                     valid = false;
@@ -1238,23 +1256,44 @@ function check_acc_payment_receipt() {
     var valid = true;
 
     if($("#payment_type").val()=="Knock off"){
-        if (parseFloat(get_number($('#paying_debit_amt').val(),2))==0 && parseFloat(get_number($('#paying_credit_amt').val(),2))==0) {
+        // if (parseFloat(get_number($('#paying_debit_amt').val(),2))==0 && parseFloat(get_number($('#paying_credit_amt').val(),2))==0) {
+        //     var errors = {};
+        //     var name = "paying_debit_amt";
+        //     errors[name] = "Please select atleast one payment.";
+        //     validator.showErrors(errors);
+        //     valid = false;
+        // }
+        // if($("#trans_type").val()=="Payment" && parseFloat(get_number($('#payable_credit_amt').val(),2))==0) {
+        //     var errors = {};
+        //     var name = "payable_credit_amt";
+        //     errors[name] = "Payable amount should be credit.";
+        //     validator.showErrors(errors);
+        //     valid = false;
+        // }
+        // if($("#trans_type").val()=="Receipt" && parseFloat(get_number($('#payable_debit_amt').val(),2))==0) {
+        //     var errors = {};
+        //     var name = "payable_debit_amt";
+        //     errors[name] = "Payable amount should be debit.";
+        //     validator.showErrors(errors);
+        //     valid = false;
+        // }
+        if (parseFloat(get_number($('#paying_amount_total').val(),2))==0 || $('#paying_amount_total').val()=='' || $('#paying_amount_total').val()==null) {
             var errors = {};
-            var name = "paying_debit_amt";
+            var name = "paying_amount_total";
             errors[name] = "Please select atleast one payment.";
             validator.showErrors(errors);
             valid = false;
         }
-        if($("#trans_type").val()=="Payment" && parseFloat(get_number($('#payable_credit_amt').val(),2))==0) {
+        if($("#trans_type").val()=="Payment" && $('#paying_transaction').val()=="Debit") {
             var errors = {};
-            var name = "payable_credit_amt";
+            var name = "paying_amount_total";
             errors[name] = "Payable amount should be credit.";
             validator.showErrors(errors);
             valid = false;
         }
-        if($("#trans_type").val()=="Receipt" && parseFloat(get_number($('#payable_debit_amt').val(),2))==0) {
+        if($("#trans_type").val()=="Receipt" && $('#paying_transaction').val()=="Credit") {
             var errors = {};
-            var name = "payable_debit_amt";
+            var name = "paying_amount_total";
             errors[name] = "Payable amount should be debit.";
             validator.showErrors(errors);
             valid = false;
@@ -1543,6 +1582,12 @@ $("#other_debit_credit").validate({
         vendor_id: {
             required: true
         },
+<<<<<<< HEAD
+        vendor_warehouse_id: {
+            required: true
+        },
+=======
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         trans_type: {
             required: true
         },
@@ -1976,7 +2021,11 @@ $(function() {
                     $('.edited_other_charges').each(function() {
                         if($(this).val()!=""){
                             if(parseFloat($(this).val())>0){
+<<<<<<< HEAD
+                                // console.log("entered"+diffval);
+=======
                                 console.log("entered"+diffval);
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                                 blFlag = true;
                             }
                         }
@@ -2091,10 +2140,17 @@ $('#form_sale_details').submit(function() {
     addMultiInputNamingRules_form_sale_details();
     removeMultiInputNamingRules_sale_details();
     addMultiInputNamingRules_sale_details();
+<<<<<<< HEAD
+    // console.log('form submit');
+
+    if (!$("#form_sale_details").valid()) {
+        // console.log('error');
+=======
     console.log('form submit');
 
     if (!$("#form_sale_details").valid()) {
         console.log('error');
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         sale_invalid_handler();
         return false;
     } else {
@@ -2111,7 +2167,11 @@ $('#form_sale_details').submit(function() {
 });
 
 function addMultiInputNamingRules_sale_details(){
+<<<<<<< HEAD
+    // console.log('multinaming rule');
+=======
     console.log('multinaming rule');
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
     removeMultiInputNamingRules_sale_details();
 
     $('.narration').each(function(){
@@ -2121,12 +2181,20 @@ function addMultiInputNamingRules_sale_details(){
         var lastname = 'diff'+'_'+splited[2]+'_'+splited[1]+'_'+splited[2];
         var diffval = $("#"+lastname).val();
 
+<<<<<<< HEAD
+        // console.log(lastname);
+=======
         console.log(lastname);
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
        
         if(parseFloat(diffval)!==parseFloat(0) && $(this).val()=="")
         {
             var name = $(this).attr('name');
+<<<<<<< HEAD
+            // console.log('after multinaming rule'+name);
+=======
             console.log('after multinaming rule'+name);
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
             addMultiInputNamingRules('#form_sale_details', 'input[name="'+name+'"]', { required: true });
         }
     });
@@ -2146,7 +2214,11 @@ function removeMultiInputNamingRules_sale_details(){
         // var diffval = $("#"+lastname).val();
         var name = $(this).attr('name');
 
+<<<<<<< HEAD
+        // console.log(name);
+=======
         console.log(name);
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         
         //removeMultiInputNamingRules('#form_sale_details', 'input[alt="'+name+'"]');
         removeMultiInputNamingRules('#form_sale_details', 'input[name='+name+']');
@@ -2720,4 +2792,194 @@ function go_inter_depot_invalid_handler(){
         $('#form_errors_group').hide();
         $('#form_errors').hide();
     }
+<<<<<<< HEAD
 }
+
+
+
+
+
+// ----------------- TAX MASTER FORM VALIDATION -------------------------------------
+$("#amazon_state_form").validate({
+    rules: {
+        amazon_state: {
+            required: true,
+            check_amazon_state_availablity: true
+        },
+        erp_state: {
+            required: true
+        },
+        // approver_id: {
+        //     required: true
+        // },
+        // remarks: {
+        //     required: true
+        // }
+      
+    },
+
+    ignore: false,
+
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
+
+$('#amazon_state_form').submit(function() {
+    if (!$("#amazon_state_form").valid()) {
+        return false;
+    } else {
+        return true;
+    }
+});
+
+$.validator.addMethod("check_amazon_state_availablity", function (value, element) {
+    var validator = $("#amazon_state_form").validate();
+    var result = 1;
+
+    $.ajax({
+        url: BASE_URL+'index.php?r=amazonstate%2Fcheckamazonstateavailablity',
+        type: 'post',
+        data: $("#amazon_state_form").serialize(),
+        dataType: 'html',
+        global: false,
+        async: false,
+        success: function (data) {
+            result = data;
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status);
+            alert(thrownError);
+        }
+    });
+
+    if (result==1) {
+        return false;
+    } else {
+        return true;
+    }
+}, 'Amazon State already in use.');
+
+
+
+
+// ----------------- Sale Upload File Form Validation -------------------------------------
+$(function() {
+    $("#sales_upload_form").validate({
+        rules: {
+            sales_file: {
+                required: true
+            }
+        },
+
+        ignore: ":not(:visible)",
+
+        errorPlacement: function (error, element) {
+            var placement = $(element).data('error');
+            if (placement) {
+                $(placement).append(error);
+            } else {
+                error.insertAfter(element);
+            }
+        }
+    });
+})
+
+$('#sales_upload_form').submit(function() {
+    if (!$("#sales_upload_form").valid()) {
+        return false;
+    } else {
+        return true;
+    } 
+});
+
+
+
+
+// ----------------- Sale Upload DETAILS FORM VALIDATION -------------------------------------
+$(function() {
+    $("#form_sale_upload_details").validate({
+        rules: {
+            
+        },
+
+        ignore: ":not(:visible)",
+
+        errorPlacement: function (error, element) {
+            var placement = $(element).data('error');
+            if (placement) {
+                $(placement).append(error);
+            } else {
+                error.insertAfter(element);
+            }
+        }
+    });
+
+    addMultiInputNamingRules_form_sale_upload_details();
+})
+
+function addMultiInputNamingRules_form_sale_upload_details(){
+    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="acc_id[]"]', { required: true });
+}
+
+function removeMultiInputNamingRules_form_sale_upload_details(){
+    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="acc_id[]"]');
+}
+
+$('#form_sale_upload_details').submit(function() {
+    removeMultiInputNamingRules_form_sale_upload_details();
+    addMultiInputNamingRules_form_sale_upload_details();
+
+    if (!$("#form_sale_upload_details").valid()) {
+        return false;
+    } else {
+        removeMultiInputNamingRules_form_sale_upload_details();
+        return true;
+    } 
+});
+
+
+
+
+// ----------------- INVOICE WISE DETAIL FORM VALIDATION -------------------------------------
+$("#detailedinvoice_report").validate({
+    rules: {
+    },
+
+    ignore: false,
+    onkeyup: false,
+
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
+
+$('#detailedinvoice_report').submit(function() {
+    removeMultiInputNamingRules('#detailedinvoice_report', 'select[alt="group[]"]');
+    removeMultiInputNamingRules('#detailedinvoice_report', 'select[alt="ledger_name[]"]');
+
+    addMultiInputNamingRules('#detailedinvoice_report', 'select[name="group[]"]', { required: true });
+    addMultiInputNamingRules('#detailedinvoice_report', 'select[name="ledger_name[]"]', { required: true });
+
+    if (!$("#detailedinvoice_report").valid()) {
+
+        return false;
+    } else {
+         removeMultiInputNamingRules('#detailedinvoice_report', 'select[alt="group[]"]');
+         removeMultiInputNamingRules('#detailedinvoice_report', 'select[alt="ledger_name[]"]');
+
+    }
+});
+=======
+}
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f

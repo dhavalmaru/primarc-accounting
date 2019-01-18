@@ -85,14 +85,40 @@ class PendingGo extends Model
            $search_value1 =  $request->post('search');
            $search = $search_value1['value'];
             if($search!="") {
+<<<<<<< HEAD
+                    $wheresearch = " and (A.gi_go_id like '%$search%' or A.gi_go_ref_no like '%$search%' or 
+                        A.warehouse_name like '%$search%' or A.warehouse_name like '%$search%' or 
+                        A.customerName like '%$search%' or A.value_at_cost like '%$search%' or 
+                        A.gi_go_date_time like '%$search%' or A.gi_go_status like '%$search%' or 
+                        A.updated_by  like '%$search%' or invoice_number  like '%$search%' )";
+=======
                     $wheresearch = " and (A.gi_go_id like '%$search%' or A.gi_go_ref_no like '%$search%' or A.warehouse_name like '%$search%' or A.warehouse_name like '%$search%' or  A.customerName like '%$search%' or A.value_at_cost like '%$search%' or 
                         A.gi_go_date_time like '%$search%' or
                          A.gi_go_status like '%$search%' or A.updated_by  like '%$search%' or invoice_number  like '%$search%' )";
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
             } 
         }
 
         $company_id = $session['company_id'];
 
+<<<<<<< HEAD
+        $sql = "select A.* from 
+                (select A.*, B.*, C.dcno from 
+                (select A.*, B.username from goods_inward_outward A left join user B on(A.updated_by_id = B.id) 
+                where date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id' and 
+                    A.type_outward='CUSTOMER' and A.inward_outward='OUTWARD' and A.customer_type='B2B' and 
+                    A.gi_go_status='COMPLETE') A 
+                left join 
+                (select prepare_go_id, from_warehouse_name, destination_warehouse_company_name, total_qty, 
+                    invoice_number from prepare_go Where company_id='1') B 
+                on (A.pre_go_ref=B.prepare_go_id) 
+                left join 
+                (select distinct delivery_challan_no as dcno,prepare_go_id from delivery_challan) C 
+                on (A.pre_go_ref = C.prepare_go_id)) A 
+                left join 
+                (select distinct gi_go_id from acc_go_entries) B 
+                on (A.gi_go_id = B.gi_go_id) 
+=======
         $sql = "Select A.* from (Select A.*,B.*,C.dcno from 
                 (select A.*, B.username from goods_inward_outward A left join user B on(A.updated_by_id = B.id) 
                 where  date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id'
@@ -108,6 +134,7 @@ class PendingGo extends Model
                 left join 
                 (select distinct gi_go_id from acc_go_entries) B
                 on (A.gi_go_id = B.gi_go_id)
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                 Where B.gi_go_id IS  NULL".$wheresearch.$len;
                 
         $command = Yii::$app->db->createCommand($sql);
@@ -197,7 +224,11 @@ class PendingGo extends Model
                 on (A.gi_go_id = B.gi_go_id)
                 left join 
                 (select distinct ref_id, is_paid from acc_ledger_entries 
+<<<<<<< HEAD
+                    where ref_type = 'B2B Sales' and is_active = '1' and status = 'Approved' and is_paid = '1') D 
+=======
                     where ref_type = 'Sales B2B' and is_active = '1' and status = 'Approved' and is_paid = '1') D 
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                 on (A.gi_go_id = D.ref_id)".$wheresearch.$len;
 
         $command = Yii::$app->db->createCommand($sql);
@@ -251,6 +282,23 @@ class PendingGo extends Model
         /*$sql = "select A.*, B.vendor_code, C.gi_date as grn_date from grn A left join vendor_master B on (A.vendor_id = B.id) 
                 left join acc_grn_entries C on (A.grn_id = C.grn_id and C.status = 'approved' and C.is_active='1' and 
                 C.particular = 'Total Amount') where A.grn_id = '$id' and A.status = 'approved' and A.is_active='1' and A.company_id='$company_id'";*/
+<<<<<<< HEAD
+        $sql = "Select A.* from (
+                select Case When A.warehouse_state=A.customerState Then 'Same States' Else 'Different States' end as tax_zone_name,
+                Case When A.warehouse_state=A.customerState Then 'INTRA' Else 'INTER' end as tax_zone_code, 
+                A.*, B.customer_id as vendor_id1, D.dcno, E.invoice_created_date 
+                from goods_inward_outward A left join prepare_go E on (A.pre_go_ref=E.prepare_go_id) 
+                left join 
+                (select distinct delivery_challan_no as dcno,prepare_go_id from delivery_challan) D on (A.pre_go_ref = D.prepare_go_id)
+                left join 
+                (select * from acc_master Where company_id='$company_id') B on trim(A.customerName)=trim(B.legal_name)
+                left join 
+                acc_go_entries C on (A.gi_go_id = C.gi_go_id and C.status = 'approved' and 
+                                    C.is_active='1' and C.particular = 'Total Amount')
+                where date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id'
+                AND A.type_outward='CUSTOMER' AND A.inward_outward='OUTWARD' AND A.customer_type='B2B' AND 
+                A.gi_go_status='COMPLETE' AND A.company_id='$company_id' AND A.gi_go_id=$id ) A";         
+=======
        $sql = "Select A.* from (
                 select Case When warehouse_state=customerState Then 'Same States' Else 'Different States' end as tax_zone_name,
                 Case When warehouse_state=customerState Then 'INTRA' Else 'INTER' end as tax_zone_code ,A.*, B.customer_id as vendor_id1,D.dcno
@@ -266,6 +314,7 @@ class PendingGo extends Model
                 AND A.type_outward='CUSTOMER' AND A.inward_outward='OUTWARD' AND A.customer_type='B2B' AND A.gi_go_status='COMPLETE' AND 
                 A.company_id='$company_id' AND A.gi_go_id=$id ) A
                 ";         
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
@@ -371,6 +420,96 @@ class PendingGo extends Model
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
+<<<<<<< HEAD
+        // $sql = "Select AA.*,BB.tax_zone_code, BB.tax_zone_name, BB.cgst_rate, BB.sgst_rate, BB.igst_rate, 
+        //     ifnull(round((cost_excl_vat),0) ,2)as total_cost,
+        //     ifnull(round(AA.cost_excl_vat*AA.vat_percent/100,2),0) as total_tax, 
+        //     ifnull(round(AA.cost_excl_vat*BB.cgst_rate/100,2),0) as total_cgst, 
+        //     ifnull(round(AA.cost_excl_vat*BB.sgst_rate/100,2),0) as total_sgst, 
+        //     ifnull(round(AA.cost_excl_vat*BB.igst_rate/100,2),0) as total_igst, 
+        //     ifnull((AA.value_incl_vat),0) as total_amount from (
+        //      SELECT  A.*,
+        //      B.value_at_cost as value_incl_vat,B.vat_percent,B.quantity as invoice_qty,
+        //      ROUND(B.value_at_cost/(1+(B.vat_percent/100)),2) as cost_excl_vat from 
+        //     (Select * from 
+        //     (select A.*,Case When A.warehouse_state=A.customerState Then 'INTRA' Else 'INTER' end as vat_cst ,B.username from goods_inward_outward A left join user B on(A.updated_by_id = B.id) 
+        //     where  date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id'
+        //     AND A.type_outward='CUSTOMER' AND A.inward_outward='OUTWARD' AND A.customer_type='B2B' AND A.gi_go_status='COMPLETE' AND 
+        //     A.company_id='$company_id') A
+        //     left join 
+        //     (SELECT prepare_go_id,from_warehouse_name,destination_warehouse_company_name,total_qty,invoice_number,invoice_created_date from prepare_go Where company_id='1') B on
+        //     A.pre_go_ref=B.prepare_go_id )A  
+        //     left join
+        //     (Select * from  prepare_go_items ) B on A.pre_go_ref=B.prepare_go_id 
+        //     )AA
+        //     left join
+        //     (select id, tax_zone_code, tax_zone_name, parent_id, tax_rate, 
+        //                         max(case when child_tax_type_code = 'CGST' then child_tax_rate else 0 end) as cgst_rate, 
+        //                         max(case when child_tax_type_code = 'SGST' then child_tax_rate else 0 end) as sgst_rate, 
+        //                         max(case when child_tax_type_code = 'IGST' then child_tax_rate else 0 end) as igst_rate from (select A.id, A.tax_zone_code, A.tax_zone_name, B.id as parent_id, B.tax_type_id as parent_tax_type_id, 
+        //                         B.tax_rate, C.child_id, D.tax_type_id as child_tax_type_id, D.tax_rate as child_tax_rate, 
+        //                         E.tax_category as child_tax_category, E.tax_type_code as child_tax_type_code, 
+        //                         E.tax_type_name as child_tax_type_name 
+        //                     from tax_zone_master A 
+        //                         left join tax_rate_master B on (A.id = B.tax_zone_id) 
+        //                         left join tax_component C on (B.id = C.parent_id) 
+        //                         left join tax_rate_master D on (C.child_id = D.id) 
+        //                         left join tax_type_master E on (D.tax_type_id = E.id) ) C
+        //     where child_tax_rate != 0
+        //     group by id, tax_zone_code, tax_zone_name, parent_id, tax_rate
+        //     ) BB
+        //     on (AA.vat_cst COLLATE utf8_unicode_ci = BB.tax_zone_code and round(AA.vat_percent,4)=round(BB.tax_rate,4))
+        //     Where AA.gi_go_id=$id;";
+
+        $sql = "select AA.*, BB.tax_zone_code, BB.tax_zone_name, BB.cgst_rate, BB.sgst_rate, BB.igst_rate, 
+                    ifnull(round((cost_excl_vat),2) ,2)as total_cost,
+                    ifnull(round(AA.cost_excl_vat*AA.vat_percent/100,2),0) as total_tax, 
+                    ifnull(round(AA.cost_excl_vat*BB.cgst_rate/100,2),0) as total_cgst, 
+                    ifnull(round(AA.cost_excl_vat*BB.sgst_rate/100,2),0) as total_sgst, 
+                    ifnull(round(AA.cost_excl_vat*BB.igst_rate/100,2),0) as total_igst, 
+                    ifnull((AA.value_incl_vat),0) as total_amount from 
+                (select I.*, (cost_excl_vat+(cost_excl_vat*vat_percent/100)) as value_incl_vat from 
+                (select G.*, H.purchase_additional_discount_percentage, 
+                    (ifnull(G.quantity,0)*(ifnull(G.mrp,0)-((ifnull(G.mrp,0)*ifnull(H.purchase_additional_discount_percentage,0))/100))) as cost_excl_vat from 
+                (select E.*, F.customer_order_Id from 
+                (select C.*, D.mrp, D.vat_percent, D.quantity, D.psku, D.quantity as invoice_qty from 
+                (select A.*, B.prepare_go_id, B.from_warehouse_name, B.destination_warehouse_company_name, B.total_qty, 
+                    B.invoice_number, B.invoice_created_date from 
+                (select A.*, Case When A.warehouse_state=A.customerState Then 'INTRA' Else 'INTER' end as vat_cst, B.username 
+                from goods_inward_outward A left join user B on(A.updated_by_id = B.id) 
+                where A.gi_go_id='$id' and date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id' AND A.type_outward='CUSTOMER' AND 
+                    A.inward_outward='OUTWARD' AND A.customer_type='B2B' AND A.gi_go_status='COMPLETE' AND A.company_id='$company_id') A 
+                left join 
+                (select prepare_go_id, from_warehouse_name, destination_warehouse_company_name, total_qty, invoice_number, invoice_created_date 
+                from prepare_go where company_id='$company_id' and is_active='1') B 
+                on (A.pre_go_ref=B.prepare_go_id)) C 
+                left join 
+                (select * from prepare_go_items where is_active='1') D 
+                on (C.pre_go_ref=D.prepare_go_id)) E 
+                left join 
+                (select * from customer_order where company_id='$company_id' and is_active='1') F 
+                on (E.order_id=F.co_no)) G 
+                left join 
+                (select * from customer_order_items) H 
+                on (G.customer_order_Id=H.customer_order_Id and G.psku=H.psku)) I) AA 
+                left join 
+                (select id, tax_zone_code, tax_zone_name, parent_id, tax_rate, 
+                    max(case when child_tax_type_code = 'CGST' then child_tax_rate else 0 end) as cgst_rate, 
+                    max(case when child_tax_type_code = 'SGST' then child_tax_rate else 0 end) as sgst_rate, 
+                    max(case when child_tax_type_code = 'IGST' then child_tax_rate else 0 end) as igst_rate from 
+                (select A.id, A.tax_zone_code, A.tax_zone_name, B.id as parent_id, B.tax_type_id as parent_tax_type_id, 
+                    B.tax_rate, C.child_id, D.tax_type_id as child_tax_type_id, D.tax_rate as child_tax_rate, 
+                    E.tax_category as child_tax_category, E.tax_type_code as child_tax_type_code, 
+                    E.tax_type_name as child_tax_type_name 
+                from tax_zone_master A 
+                    left join tax_rate_master B on (A.id = B.tax_zone_id) 
+                    left join tax_component C on (B.id = C.parent_id) 
+                    left join tax_rate_master D on (C.child_id = D.id) 
+                    left join tax_type_master E on (D.tax_type_id = E.id) ) C
+                where child_tax_rate != 0
+                group by id, tax_zone_code, tax_zone_name, parent_id, tax_rate) BB 
+                on (AA.vat_cst COLLATE utf8_unicode_ci = BB.tax_zone_code and round(AA.vat_percent,4)=round(BB.tax_rate,4))";
+=======
         $sql = "Select AA.*,BB.tax_zone_code, BB.tax_zone_name, BB.cgst_rate, BB.sgst_rate, BB.igst_rate, 
             ifnull(round((cost_excl_vat),0) ,2)as total_cost,
             ifnull(round(AA.cost_excl_vat*AA.vat_percent/100,2),0) as total_tax, 
@@ -410,6 +549,7 @@ class PendingGo extends Model
             ) BB
             on (AA.vat_cst COLLATE utf8_unicode_ci = BB.tax_zone_code and round(AA.vat_percent,4)=round(BB.tax_rate,4))
             Where AA.gi_go_id=$id;";
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -490,6 +630,8 @@ class PendingGo extends Model
         return $reader->readAll();
     }
 
+<<<<<<< HEAD
+=======
     public function getGrnSkues($id){
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
@@ -795,6 +937,7 @@ class PendingGo extends Model
         return $data;
     }
 
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
     public function getGrnAccSku($id){
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
@@ -805,6 +948,8 @@ class PendingGo extends Model
         return $reader->readAll();
     }
 
+<<<<<<< HEAD
+=======
     public function getGrnAccSkuEntries($id, $ded_type){
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
@@ -822,6 +967,7 @@ class PendingGo extends Model
         return $reader->readAll();
     }
 
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
     public function getGrnAccLedgerEntries($id){
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
@@ -1758,6 +1904,8 @@ class PendingGo extends Model
         }
     }
 
+<<<<<<< HEAD
+=======
     public function getSkuDetails(){
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
@@ -1821,6 +1969,7 @@ class PendingGo extends Model
         return $reader->readAll();
     }
 
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
     public function getDebitNoteDetails($invoice_id){
         $session = Yii::$app->session;
         $company_id = $session['company_id'];

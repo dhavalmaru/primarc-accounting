@@ -54,7 +54,11 @@ function calcDifference(elem){
 function getTotal(){
     // var taxable_amount = get_number($("#taxable_amount").val(),2);
     // var total_tax = get_number($("#total_tax").val(),2);
+<<<<<<< HEAD
+    // console.log('taxes'+taxes);
+=======
     console.log('taxes'+taxes);
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
     var taxable_amount = 0;
     var total_cgst = 0;
     var total_sgst = 0;
@@ -564,7 +568,11 @@ function getDifference(elem){
     }
 
     calcDifference(elem);
+<<<<<<< HEAD
+    // console.log('taxsesbefore enter'+taxes);
+=======
     console.log('taxsesbefore enter'+taxes);
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
     getTotal();
 }
 

@@ -23,6 +23,17 @@ $(document).ready(function(){
 
     // $("#company_name").html("Primarc Pecan Retail Pvt Ltd");
     $("#account_name").html($("#account option:selected").text());
+<<<<<<< HEAD
+    $('.select2').select2();
+
+    $('#narration').change(function(){
+        show_narration();
+    });
+    set_table();
+	$("#date_criteria").change(function(){
+        change_date_criteria();
+    });
+=======
 $('.select2').select2();
 
 $('#narration').change(function(){
@@ -32,6 +43,7 @@ $('#narration').change(function(){
 	$("#date_criteria").change(function(){
     change_date_criteria();
 });
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 });
 
 $('.datepicker').datepicker({changeMonth: true,changeYear: true});

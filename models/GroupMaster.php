@@ -226,4 +226,75 @@ class GroupMaster extends Model
 
         return true;
     }
+<<<<<<< HEAD
+
+    public function getGroupDetails_invoice($parent_id="",$submit="",$group_ids='') {
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $final_tree = '';
+        $sql = "select A.* from acc_group_master A where A.is_active = '1' and A.status = 'approved' and 
+                A.company_id = '$company_id' and A.parent_id = '$parent_id' order by A.id";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        $group = explode(",",$group_ids);
+        if(count($data)>0) {
+            for($i=0; $i<count($data); $i++) {
+                $select = '';
+                $data[$i]['id'];
+
+                if(in_array($data[$i]['id'],$group)) {
+                   $select = 'selected';
+                }
+
+                $final_tree = $final_tree . '<option  id="type_'.$data[$i]['id'].'" value="'.$data[$i]['id'].'" '.$select.'>'.$data[$i]['account_type'].'</option>';
+                $final_tree = $final_tree . $this->getGroupDetails_invoice($data[$i]['id'],'',$group_ids);
+            }
+        }
+        
+        return $final_tree;
+    }
+
+    public function getGroupDetails_ids($parent_id="") {
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+        $final_tree = '';
+        $sql = "select A.* from acc_group_master A where A.is_active = '1' and A.status = 'approved' and 
+                A.company_id = '$company_id' and A.parent_id = '$parent_id' order by A.id";
+         
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $data = $reader->readAll();
+        if(count($data)>0) {
+            for($i=0; $i<count($data); $i++) {
+                $final_tree = $final_tree . "'" . $data[$i]['id'] . "', ";
+                $final_tree = $final_tree . $this->getGroupDetails_ids($data[$i]['id']);
+            }
+        }
+
+        return $final_tree;
+    }
+
+    public function getLedgerDetail($id='') {
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        if($id!='') {
+            $id = rtrim($id,",");
+            $sql = "SELECT id,legal_name from acc_master Where id IN ($id) and company_id = '$company_id' and is_active = '1' and status = 'approved'";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $data = $reader->readAll(); 
+        } else {
+            $sql = "SELECT Distinct id,legal_name from acc_master Where company_id = '$company_id' and is_active = '1' and status = 'approved'";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $data = $reader->readAll(); 
+        }
+
+        return $data;
+    }
+=======
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 }

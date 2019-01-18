@@ -55,7 +55,11 @@ table tr td { border: 1px solid #eee!important; }
 						<label class="control-label">Vendor</label>
 						<div class=" ">
 							<div class=" "> 
+<<<<<<< HEAD
+								<select id="vendor_id" name="vendor_id" class="form-control select2" onchange="get_vendor_warehouse_gst_id();">
+=======
 								<select id="vendor_id" name="vendor_id" class="form-control select2">
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 									<option value="">Select</option>
 									<?php if(isset($vendor)) { for($i=0; $i<count($vendor); $i++) { ?>
 										<option value="<?php echo $vendor[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['vendor_id']==$vendor[$i]['id']) echo "selected"; } ?>><?php echo $vendor[$i]['vendor_name']; ?></option>
@@ -64,6 +68,23 @@ table tr td { border: 1px solid #eee!important; }
 							</div>
 						</div>
 					</div>
+<<<<<<< HEAD
+					<div class="col-md-3 col-sm-3 col-xs-6" style="">
+						<label class="control-label">Vendor GSTIN</label>
+						<div class=" ">
+							<div class=" ">  
+								<select id="vendor_warehouse_id" name="vendor_warehouse_id" class="form-control select2" onchange="get_gst_id();">
+									<option value="">Select</option>
+									<?php if(isset($vendor_gst)) { for($i=0; $i<count($vendor_gst); $i++) { ?>
+										<option value="<?php echo $vendor_gst[$i]['id']; ?>" <?php if(isset($data[0])) { if($data[0]['vendor_warehouse_id']==$vendor_gst[$i]['id']) echo "selected"; } ?>><?php echo $vendor_gst[$i]['warehouse_gst']; ?></option>
+									<?php }} ?>
+								</select>
+								<input type="hidden" id="vendor_gst_id" name="vendor_gst_id" value="<?php if(isset($data)) echo $data[0]['vendor_gst_id']; ?>" />
+							</div>
+						</div>
+					</div>
+=======
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 				</div>
 			</div>
 			<div class="form-group">

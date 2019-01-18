@@ -144,7 +144,11 @@ table {width: 1200px;}
     			<div class="col-md-2 col-sm-2 col-xs-6">
                     <label class=" control-label">Posting Date </label> 
                     <div class=" "> 
+<<<<<<< HEAD
+    					<input style="background-color: #fff;" type="text" class="form-control datepicker" name="gi_date" id="gi_date" value="<?php if(isset($grn_details)) { if($grn_details[0]['gi_go_final_commit_date']!=null && $grn_details[0]['gi_go_final_commit_date']!='') echo date('d/m/Y',strtotime($grn_details[0]['gi_go_final_commit_date'])); else echo (($grn_details[0]['gi_date']!=null && $grn_details[0]['gi_date']!='')?date('d/m/Y',strtotime($grn_details[0]['gi_date'])):date('d/m/Y')); } else echo date('d/m/Y'); ?>" readonly />
+=======
     					<input style="background-color: #fff;" type="text" class="form-control datepicker" name="gi_date" id="gi_date" value="<?php if(isset($grn_details)) { if($grn_details[0]['gi_go_date_time']!=null && $grn_details[0]['gi_go_date_time']!='') echo date('d/m/Y',strtotime($grn_details[0]['gi_go_date_time'])); else echo (($grn_details[0]['gi_date']!=null && $grn_details[0]['gi_date']!='')?date('d/m/Y',strtotime($grn_details[0]['gi_date'])):date('d/m/Y')); } else echo date('d/m/Y'); ?>" readonly />
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                         <input type="hidden" class="form-control" name="no_of_invoices" id="no_of_invoices" value="<?= count($invoice_details) ?>" />
                     </div>
     			</div>
@@ -158,9 +162,14 @@ table {width: 1200px;}
     			<div class="col-md-2 col-sm-2 col-xs-6">
                     <label class="control-label">GO No </label> 
                     <div class=" ">
+<<<<<<< HEAD
+                        <input type="hidden" class="form-control" name="action" id="action" placeholder="Action" value="<?= $action ?>" />
+                        <input type="text" class="form-control" name="gi_go_ref_no" id="gi_id" placeholder="Go No" value="<?= $grn_details[0]['gi_go_ref_no'] ?>" readonly />
+=======
                        
                         <input type="hidden" class="form-control" name="action" id="action" placeholder="Action" value="<?= $action ?>" />
                         <input type="text" class="form-control" id="gi_id" placeholder="Go No" value="<?= $grn_details[0]['gi_go_ref_no'] ?>" readonly />
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
                     </div>
                 </div>
 		        <div class="col-md-2 col-sm-2 col-xs-6">

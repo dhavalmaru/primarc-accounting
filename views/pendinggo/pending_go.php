@@ -15,7 +15,12 @@ $mycomponent = Yii::$app->mycomponent;
 <style type="text/css">
 	.tab-content table tr td { border:1px solid #eee; }
 </style>
+<<<<<<< HEAD
+<!-- <link href="http://localhost/primarc_pecan/web/css/export.css" rel="stylesheet"> -->
+<link href="<?php echo Url::base(); ?>/css/export.css" rel="stylesheet">
+=======
 <link href="http://localhost/primarc_pecan/web/css/export.css" rel="stylesheet">
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 
 <div class="grn-index">
 	<div class=" col-md-12">  
@@ -48,7 +53,11 @@ $mycomponent = Yii::$app->mycomponent;
 											<th>Location (To)</th> 
 											<th>Customer name</th> 
 											<th>Scanned Qty</th> 
+<<<<<<< HEAD
+											<!-- <th>Receivable after tax</th>  -->
+=======
 											<th>Receivable after tax</th> 
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 											<th>GO Date (dd/mm/yyyy)</th> 
 											<th>Status</th> 
 											<th>Updated By</th> 
@@ -120,7 +129,11 @@ $mycomponent = Yii::$app->mycomponent;
 											<th>Location From</th>
 											<th>Location To</th>
 											<th>Customer name</th>
+<<<<<<< HEAD
+											<!-- <th>Receivable after tax</th>  -->
+=======
 											<th>Receivable after tax</th> 
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 											<th>GO Date (dd/mm/yyyy)</th> 
 											<th>Status</th> 
 											<th>Updated By</th> 
@@ -148,7 +161,11 @@ $mycomponent = Yii::$app->mycomponent;
 											<th>Location (From)</th> 
 											<th>Location To</th>
 											<th>Customer name</th>
+<<<<<<< HEAD
+											<!-- <th>Receivable after tax</th>  -->
+=======
 											<th>Receivable after tax</th> 
+>>>>>>> 40251667d20641f61579b49c4e0131e7351baf6f
 											<th>GO Date (dd/mm/yyyy)</th> 
 											<th>Status</th> 
 											<th>Updated By</th> 

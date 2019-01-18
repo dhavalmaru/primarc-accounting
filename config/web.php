@@ -10,7 +10,8 @@ $config = [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'xNWti-kuzjHZcozK0We7OwddZad6bGYl',
-            'baseUrl' => 'http://54.254.244.155/accounts/web/'
+            'baseUrl' => 'http://localhost/primarc_pecan/web/'
+            // 'baseUrl' => 'http://driveecom.com/accounts/web/'
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
