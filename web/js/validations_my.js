@@ -556,38 +556,6 @@ $("#scraping_upload").validate({
 });
 
 
-$( '#scraping_upload' ).submit(function ( e ) {
-    /*alert("hii");*/
-
-    if (!$("#scraping_upload").valid()) {
-         return false;
-    }
-    else
-    {
-        $('#generate').val('Processing......');
-        var data;
-        data = new FormData();
-        data.append( 'file', $( '#scraping_upload' )[0].files[0] );
-        /*$('#generate').attr("disabled" , "disabled");*/
-        $.ajax({
-            url: BASE_URL+'index.php?r=uploadscraping%2Fsaveupload',
-            data: data,
-            processData: false,
-            type: 'POST',
-            success: function ( data ) {
-                if(data=='success')
-                {
-                    $('#generate').val('submit');
-                    $('#generate').removeAttr( "disabled");
-                }
-            }
-        });
-        e.preventDefault();
-    }
-    
-});
-
-
 // ----------------- BANK MASTER FORM VALIDATION -------------------------------------
 $("#bank_master").validate({
     rules: {
@@ -1345,36 +1313,27 @@ function check_acc_payment_receipt() {
         //     validator.showErrors(errors);
         //     valid = false;
         // }
-        if($('#paying_amount_total').length==0){
+        if (parseFloat(get_number($('#paying_amount_total').val(),2))==0 || $('#paying_amount_total').val()=='' || $('#paying_amount_total').val()==null) {
             var errors = {};
-            var name = "acc_id";
-            errors[name] = "No data found.";
+            var name = "paying_amount_total";
+            errors[name] = "Please select atleast one payment.";
             validator.showErrors(errors);
             valid = false;
-        } else {
-            if (parseFloat(get_number($('#paying_amount_total').val(),2))==0 || $('#paying_amount_total').val()=='' || $('#paying_amount_total').val()==null) {
-                var errors = {};
-                var name = "paying_amount_total";
-                errors[name] = "Please select atleast one payment.";
-                validator.showErrors(errors);
-                valid = false;
-            }
-            if($("#trans_type").val()=="Payment" && $('#paying_transaction').val()=="Debit") {
-                var errors = {};
-                var name = "paying_amount_total";
-                errors[name] = "Payable amount should be credit.";
-                validator.showErrors(errors);
-                valid = false;
-            }
-            if($("#trans_type").val()=="Receipt" && $('#paying_transaction').val()=="Credit") {
-                var errors = {};
-                var name = "paying_amount_total";
-                errors[name] = "Payable amount should be debit.";
-                validator.showErrors(errors);
-                valid = false;
-            }
         }
-        
+        if($("#trans_type").val()=="Payment" && $('#paying_transaction').val()=="Debit") {
+            var errors = {};
+            var name = "paying_amount_total";
+            errors[name] = "Payable amount should be credit.";
+            validator.showErrors(errors);
+            valid = false;
+        }
+        if($("#trans_type").val()=="Receipt" && $('#paying_transaction').val()=="Credit") {
+            var errors = {};
+            var name = "paying_amount_total";
+            errors[name] = "Payable amount should be debit.";
+            validator.showErrors(errors);
+            valid = false;
+        }
     } else {
         if(parseFloat(get_number($('#amount').val(),2))==0){
             var errors = {};
@@ -1383,14 +1342,6 @@ function check_acc_payment_receipt() {
             validator.showErrors(errors);
             valid = false;
         }
-    }
-
-    if($("#acc_id").val()!=$("#temp_acc_id").val()){
-        var errors = {};
-        var name = "acc_id";
-        errors[name] = "Please get details of account.";
-        validator.showErrors(errors);
-        valid = false;
     }
 
     return valid;

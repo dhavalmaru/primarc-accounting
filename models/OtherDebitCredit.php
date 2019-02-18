@@ -868,6 +868,20 @@ class OtherDebitCredit extends Model
             $reader = $command->query();
             $vendor_details = $reader->readAll();
 
+            $ledger_details = array();
+            $sql = "SELECT * FROM acc_master WHERE vendor_id = '$vendor_id'";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $ledger_dtl = $reader->readAll();
+            if(count($ledger_dtl)>0) {
+                $acc_id_ledger = $ledger_dtl[0]['id'];
+                
+                $sql = "SELECT * FROM acc_other_debit_credit_entries WHERE account_id!='$acc_id_ledger' and other_debit_credit_id='$id' order by id";
+                $command = Yii::$app->db->createCommand($sql);
+                $reader = $command->query();
+                $ledger_details = $reader->readAll();
+            }
+            
             $mpdf=new mPDF();
             // $mpdf->WriteHTML(Yii::$app->controller->renderPartial('debit_note', ['debit_note' => $debit_note, 'vendor_details' => $vendor_details]));
 
@@ -878,7 +892,8 @@ class OtherDebitCredit extends Model
                                             'vendor_warehouse_details' => $vendor_warehouse_details]));
             } else {
                 $mpdf->WriteHTML(Yii::$app->controller->renderPartial('debit_note', ['debit_note' => $debit_note, 
-                                        'vendor_details' => $vendor_details, 'warehouse_details' => $warehouse_details, 
+                                        'vendor_details' => $vendor_details, 'ledger_details' => $ledger_details, 
+                                        'warehouse_details' => $warehouse_details, 
                                         'vendor_warehouse_details' => $vendor_warehouse_details]));
             }
 
@@ -926,6 +941,7 @@ class OtherDebitCredit extends Model
             $vendor_details = array();
             $invoice_details = array();
             $inv_tax_details = array();
+            $ledger_details = array();
         }
 
         $data['debit_note'] = $debit_note;
@@ -934,6 +950,7 @@ class OtherDebitCredit extends Model
         $data['vendor_details'] = $vendor_details;
         $data['invoice_details'] = $invoice_details;
         $data['inv_tax_details'] = $inv_tax_details;
+        $data['ledger_details'] = $ledger_details;
         
         return $data;
     }

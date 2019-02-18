@@ -256,7 +256,6 @@ $("#get_ledger").click(function(){
     }
 });
 
-
 function setDeductionTotal(ded_type){
     var total_rows = $('#'+ded_type+'_total_rows').val();
     var grand_total = 0;

@@ -32,8 +32,7 @@
                 210, Building #2B, Sanjay Mittal Industrial Estat, <br>  
                 Above Cafe Coffee Day, Andheri-Kurla Road, Marol Naka <br> 
                 Andheri (East), Mumbai - 400059,  Maharashtra <br>
-			GSTIN No.: 27AACCT5910H1ZE <br >State Name : Maharashtra, Code : 27 <br>CIN: U52100WB2006PTC111833
-
+                <b>Phone No. : -</b> +91 22 61431777 <br>   <b>Email Id. : -</b>  info@primarcpecan.com 
             </p>
         </div> 
         <table width="100%" border="0" cellspacing="0" class="table" style="border-collapse:collapse;">
@@ -82,17 +81,14 @@
                 <td colspan="4" height="0" style="border:none; padding:0;">&nbsp;</td>
             </tr>
 
-
-			<tr valign="bottom" >
+            <tr valign="bottom" >
                 <td colspan="4" style="border:none;  "> 
                 <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
                 <tr style="text-align:center;">
-                    <td width="25%"><p> <b>Type </b></p></td>
+                    <td width="25%"><p> <b>Particulars </b></p></td>
                     <td width="25%"><p> <b>Reference No. </b></p></td>
                     <td width="25%"> <p> <b>Reference Date </b></p> </td>
-                    <td width="25%"> <p> <b>PO No. </b></p> </td>
                     <td width="25%"> <p> <b>Amount </b></p></td>
-                    <td width="25%"> <p> <b>Net Amount </b></p></td>
                 </tr>
                 <?php $credit_amt = 0; $debit_amt = 0; $blFlag = false; ?>
                 <?php for($i=0; $i<count($entry_details); $i++) { ?>
@@ -125,37 +121,27 @@
                                 $ref_date = '';
                             }
                         ?>
-                        <?php 
-                        if(strtoupper(trim($entry_details[$i]['ledger_type']))=='PURCHASE') { 
-                            if($debit_amt!=0) {
-                        ?>
+                        <?php if($entry_details[$i]['ledger_type']=='purchase') { ?>
                         <tr style="text-align:right;">
-                            <td style="text-align:left;"><p>Purchase</p></td>
-                            <td style="text-align:left;"><p style="text-align:left;"> <?php echo 'Agst Ref / '.$ref_no; ?> </p></td>
+                            <td style="text-align:left;"><p> Total Amount </p></td>
+                            <td style="text-align:left;"><p style="text-align:left;"> <?php echo $ref_no; ?> </p></td>
                             <td style="text-align:left;"><p> <?php echo $ref_date; ?> </p></td>
-                            <td style="text-align:right;"><p style="text-align:left;"> <?php echo $entry_details[$i]['po_no']; ?> </p></td>
-                            <td style="text-align:right;"><p style="text-align:right;"> <?php echo $mycomponent->format_money($debit_amt,2); ?> </p></td>
                             <td style="text-align:right;"><p style="text-align:right;"> <?php echo $mycomponent->format_money($debit_amt,2); ?> </p></td>
                         </tr>
-                        <?php } if($credit_amt!=0) { ?>
                         <tr style="text-align:right;">
-                            <td style="text-align:left;"><p> Debit Note :<br/> <?php echo $entry_details[$i]['ded_type']; ?> </p></td>
-                            <td style="text-align:left;"><p style="text-align:left;"> <?php echo 'Less : '.$entry_details[$i]['debit_note_ref']; ?> </p></td>
+                            <td style="text-align:left;"><p> Total Deduction </p></td>
+                            <td style="text-align:left;"><p style="text-align:left;"> <?php echo $ref_no; ?> </p></td>
                             <td style="text-align:left;"><p> <?php echo $ref_date; ?> </p></td>
-                            <td style="text-align:right;"><p style="text-align:left;"> <?php echo $entry_details[$i]['po_no']; ?> </p></td>
-                            <td style="text-align:right;"><p style="text-align:right;"> <?php echo $mycomponent->format_money($credit_amt,2); ?> </p></td>
                             <td style="text-align:right;"><p style="text-align:right;"> <?php echo $mycomponent->format_money($credit_amt,2); ?> </p></td>
                         </tr>
-                        <?php }} else { ?>
+                        <?php } ?>
                         <tr style="text-align:right;">
-                            <td style="text-align:left;"><p> <?php echo $entry_details[$i]['ledger_type']; ?> </p></td>
-                            <td style="text-align:left;"><p style="text-align:left;"> <?php echo 'Agst Ref / '.$ref_no; ?> </p></td>
+                            <td style="text-align:left;"><p> <?php echo $particular; ?> </p></td>
+                            <td style="text-align:left;"><p style="text-align:left;"> <?php echo $ref_no; ?> </p></td>
                             <td style="text-align:left;"><p> <?php echo $ref_date; ?> </p></td>
-                            <td style="text-align:right;"><p style="text-align:left;"> <?php echo $entry_details[$i]['po_no']; ?> </p></td>
-                            <td style="text-align:right;"><p style="text-align:right;"> <?php echo $mycomponent->format_money($tot_amount,2); ?> </p></td>
                             <td style="text-align:right;"><p style="text-align:right;"> <?php echo $mycomponent->format_money($tot_amount,2); ?> </p></td>
                         </tr>
-                        <?php } $credit_amt = 0; $debit_amt = 0; $blFlag = false; ?>
+                        <?php $credit_amt = 0; $debit_amt = 0; $blFlag = false; ?>
                     <?php } ?>
                 <?php } ?>
 
@@ -175,67 +161,8 @@
                 </table>
                 </td>
             </tr>
-			
-            <tr valign="bottom" >
-                <td colspan="4" style="border:none;  "> 
-                <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
-                <tr style="text-align:center;">
-                
-                    <td width="100%" colspan="4"><p> <b>Payment Details  </b></p></td>
-                   
-                    
-                   
-                </tr>
-				<tr style="text-align:center;">
-                    <td width="25%"><p> <b>Payment Mode </b></p></td>
-                    <td width="25%"><p> <b>Instrument Details  </b></p></td>
-                    <td width="25%"> <p> <b>Issued From  </b></p> </td>
-                    
-                    <td width="25%"> <p> <b>Amount </b></p></td>
-                </tr>
-           
-                <?php //for($i=0; $i<count($payment_details); $i++) { ?>
-
-                 
-					
-               
-							<tr style="text-align:right;">
-	                            <td style="text-align:left;"><p><?php echo 'Cheque/NEFT'; ?></p></td>
-	                            <td style="text-align:left;"><p><?php echo 'Cheque no / UTR No. '.$payment_details[0]['ref_no'].'<br/>Dt:'.(($payment_details[0]['payment_date']!=null && $payment_details[0]['payment_date']!='')?date('d/m/Y',strtotime($payment_details[0]['payment_date'])):''); ?></p></td>
-								<td style="text-align:left;"><p><?php echo $payment_details[0]['bank_name'].' A/C NO- '.$payment_details[0]['acc_no'].'('.$payment_details[0]['branch'].')'?></p></td>
-								<td style="text-align:right;"><p style="text-align:right;"> <?php echo $mycomponent->format_money($payment_details[0]['amount'],2); ?> </p></td>
-							</tr>
-							
-							<tr style="text-align:right;">
-						                            <td style="text-align:left;"><p> </p></td>
-						                            <td style="text-align:left;"><p> </p></td>
-								<td style="text-align:right;"><p><b> Total </b></p></td>
-
-								<td style="text-align:right;"><p style="text-align:right;"> <?php echo $mycomponent->format_money($payment_details[0]['amount'],2); ?> </p></td>
-							</tr>
-							
-							 <?php //} ?>
-                <!-- <tr style="text-align:right;">
-                    <td style="text-align:left;"><p> <?php //echo $entry_details[$i]['ledger_name']; ?> </p> </td>
-                    <td style="text-align:left;"><p style="text-align:left;"> <?php //echo $entry_details[$i]['invoice_no']; ?> </p></td>
-                    <td style="text-align:left;">
-                        <p> 
-                            <?php //if(isset($entry_details[$i]['invoice_date'])) 
-                            //echo (($entry_details[$i]['invoice_date']!=null && $entry_details[$i]['invoice_date']!='')?
-                            //date('d/m/Y',strtotime($entry_details[$i]['invoice_date'])):''); ?> 
-                        </p>
-                    </td>
-                    <td style="text-align:right;"><p style="text-align:right;"> <?php //echo $mycomponent->format_money($entry_details[$i]['amount'],2); ?> </p></td>
-                </tr> -->
-
-                </table>
-                </td>
-            </tr>
-			
-			
-			
             <tr valign="bottom"  >
-                <td style="border:none;"><p style="margin-bottom:5px;">Kindly Acknowlede the receipt,</p>
+                <td style="border:none;"><p style="margin-bottom:5px;">Kindly Acknowledge the receipt,</p>
                 <p>Thanking You</p></td>
                 <td valign="bottom" colspan="3" style="border:none; text-align:right; ">&nbsp;</td>
             </tr>

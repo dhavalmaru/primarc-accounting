@@ -28,7 +28,7 @@ use phpoffice\phpexcel\Classes\PHPExcel\PHPExcel_Worksheet as PHPExcel_Worksheet
 
 class PaymentreceiptController extends Controller
 {
-    public function actionIndex() {
+    public function actionIndex(){
         $payment_receipt = new PaymentReceipt();
         $access = $payment_receipt->getAccess();
         if(count($access)>0) {
@@ -71,7 +71,7 @@ class PaymentreceiptController extends Controller
 		echo $result;
 	}
 	
-    public function actionGetotheraccdetails1() {
+    public function actionGetotheraccdetails1(){
         $payment_receipt = new PaymentReceipt();
         $request = Yii::$app->request;
         $trans_type = $request->post('trans_type');
@@ -79,7 +79,7 @@ class PaymentreceiptController extends Controller
         echo json_encode($data);
     }
 	
-    public function actionCreate() {
+    public function actionCreate(){
         $payment_receipt = new PaymentReceipt();
         $access = $payment_receipt->getAccess();
         if(count($access)>0) {
@@ -194,13 +194,13 @@ class PaymentreceiptController extends Controller
         }
     }
 
-    public function actionSave() {
+    public function actionSave(){   
         $payment_receipt = new PaymentReceipt();
         $result = $payment_receipt->save();
         $this->redirect(array('paymentreceipt/index'));
     }
 
-    public function actionGetaccdetails() {
+    public function actionGetaccdetails(){
         $payment_receipt = new PaymentReceipt();
         $request = Yii::$app->request;
         $acc_id = $request->post('acc_id');
@@ -208,7 +208,7 @@ class PaymentreceiptController extends Controller
         echo json_encode($data);
     }
 	
-	public function actionGetaccbankdetails() {
+	public function actionGetaccbankdetails(){
         $payment_receipt = new PaymentReceipt();
         $request = Yii::$app->request;
         $bank_id = $request->post('bank_id');
@@ -216,7 +216,7 @@ class PaymentreceiptController extends Controller
         echo json_encode($data);
     }
 	
-    public function actionGetledger() {
+    public function actionGetledger(){   
         $request = Yii::$app->request;
 
         $id = $request->post('id');
@@ -509,16 +509,12 @@ class PaymentreceiptController extends Controller
                                         <input type="text" class="form-control text-right" id="payable_credit_amt" name="payable_credit_amt" value="'.$mycomponent->format_money($payable_credit_amt,2).'" readonly />
                                     </td> 
                                 </tr> -->';
-        } else {
-            $tbody = '<tr class="bold-text">
-                        <td class="text-center" colspan="11">No data found.</td>
-                    </tr>';
         }
 
         echo $tbody;
     }
 
-    public function actionViewpaymentadvice($id) {
+    public function actionViewpaymentadvice($id){
         $payment_receipt = new PaymentReceipt();
         $access = $payment_receipt->getAccess();
         if(count($access)>0) {
@@ -549,7 +545,7 @@ class PaymentreceiptController extends Controller
         }
     }
 
-    public function actionDownload($id) {
+    public function actionDownload($id){
         $payment_receipt = new PaymentReceipt();
         $access = $payment_receipt->getAccess();
         if(count($access)>0) {
@@ -587,7 +583,7 @@ class PaymentreceiptController extends Controller
         }
     }
 
-    public function actionEmailpaymentadvice($id) {
+    public function actionEmailpaymentadvice($id){
         $payment_receipt = new PaymentReceipt();
         $access = $payment_receipt->getAccess();
         if(count($access)>0) {
@@ -618,7 +614,7 @@ class PaymentreceiptController extends Controller
         }
     }
 
-    public function actionEmail() {
+    public function actionEmail(){
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
         $session = Yii::$app->session;
@@ -673,18 +669,8 @@ class PaymentreceiptController extends Controller
         return $this->render('email_response', ['data' => $data]);
     }
 
-    public function actionCreatedpayment($value='') {
-        // $payment_receipt = new PaymentReceipt();
-        // $access = $payment_receipt->getAccess();
-        // if(count($access)>0) {
-        //     if($access[0]['r_insert']==1) {
-        //         $action = 'insert';
-        //         $acc_details = $payment_receipt->getAccountDetails();
-        //         $payment_upload = $payment_receipt->getPayment_upload();
-        //         return $this->render('payment_upload', ['action' => $action,'acc_details' => $acc_details ,'payment_upload'=>$payment_upload]);
-        //     }
-        // }
-
+    public function actionCreatedpayment($value='')
+    {
         $payment_receipt = new PaymentReceipt();
         $access = $payment_receipt->getAccess();
         if(count($access)>0) {
@@ -692,67 +678,54 @@ class PaymentreceiptController extends Controller
                 $action = 'insert';
                 $acc_details = $payment_receipt->getAccountDetails();
                 $payment_upload = $payment_receipt->getPayment_upload();
-
                 return $this->render('payment_upload', ['action' => $action,'acc_details' => $acc_details ,'payment_upload'=>$payment_upload]);
-            } else {
-                return $this->render('/message', [
-                    'title'  => \Yii::t('user', 'Access Denied'),
-                    'module' => $this->module,
-                    'msg' => '<h4>You donot have access to this page.</h4>'
-                ]);
             }
-        } else {
-            $this->layout = 'other';
-            return $this->render('/message', [
-                'title'  => \Yii::t('user', 'Session Expired'),
-                'module' => $this->module,
-                'msg' => 'Session Expired. Please <a href="'.Url::base().'index.php">Login</a> again.'
-            ]);
         }
     }
 
-    public function actionDownloadleadger() {
+    public function actionDownloadleadger()
+    { 
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
         $payment_receipt = new PaymentReceipt();
-        // $id = $request->post('id');
-        $acc_id = $request->post('acc_id');
+        $id = $request->post('id');
+        $acc_id = $request->post('acc_id');//10;
         $to_date = $request->post('to_date');
-        if($to_date!='') {
+        if($to_date==''){
+        } else {
            $to_date=$mycomponent->formatdate($to_date);
         }
 
-        $acc_id_list = '';
-        if(in_array('ALL',$acc_id)) {   
+
+        if(in_array('ALL',$acc_id))
+        {   
             $acc_id = array();
-            $acc_details = $payment_receipt->getAccounts($to_date);
+            $acc_details = $payment_receipt->getAccountDetails();
             for ($i=0; $i <count($acc_details) ; $i++) { 
-                $acc_id[]=$acc_details[$i]['acc_id'];
+                 $acc_id[]=$acc_details[$i]['id'];
             }
+
+            //$acc_id  = implode($array_id,",");
         }
 
-        $acc_id_list  = implode($acc_id, ",");
+        $payment_receipt = new PaymentReceipt();
 
         $mycomponent = Yii::$app->mycomponent;
         $tbody = "";
-        $r_row = 1;
-        $original_file = 'uploads/templates/sample_payment.xlsx';
+        $r_row = 2;
+        $original_file = 'uploads/payment_file/sample_payment.xlsx';
         /*$objPHPExcel = IOFactory::load($original_file);*/
         $objPHPExcel = new \PHPExcel();
         $objPHPExcel = \PHPExcel_IOFactory::load($original_file);
         $objPHPExcel->setActiveSheetIndex(0);
         /*$highestrow = $objPHPExcel->setActiveSheetIndex(0)->getHighestRow(); */
-        $objPHPExcel->getActiveSheet()->setCellValue('B'.$r_row,$to_date);
-        $r_row = 3;
 
-        // for ($j=0; $j<count($acc_id); $j++) {
-        //     $acc_id1 = $acc_id[$j];
 
-        //     $data = $payment_receipt->getLedger($id, $acc_id1, $to_date);
-        //     $data1 = $payment_receipt->getAccountDetails($acc_id1, "");
-
-            $data = $payment_receipt->getLedger('', $acc_id_list, $to_date);
-            if(count($data)>0) {
+        for ($j=0; $j <count($acc_id) ; $j++) {
+            $acc_id1 = $acc_id[$j];
+            $data = $payment_receipt->getLedger($id, $acc_id1,$to_date);
+            $data1 = $payment_receipt->getAccountDetails($acc_id1, "");
+            if(count($data)>0){
                 $total_debit_amt = 0;
                 $total_credit_amt = 0;
                 $paying_debit_amt = 0;
@@ -769,10 +742,10 @@ class PaymentreceiptController extends Controller
                 $bal_amount_total = 0;
                 $col=0;
 
-                for($i=0; $i<count($data); $i++) {
-                    // $ledger_code = '';
-                    // $ledger_name = '';
-                    // $transaction = '';
+                for($i=0; $i<count($data); $i++){
+                    $ledger_code = '';
+                    $ledger_name = '';
+                    $transaction = '';
 
                     $transaction = $data[$i]['type'];
                     $amount = $data[$i]['amount'];
@@ -789,45 +762,36 @@ class PaymentreceiptController extends Controller
                         $bal_amount = $bal_amount*-1;
                     }
 
-                    // $total_amount_total = $total_amount_total+$amount;
-                    // $total_paid_amount_total = $total_paid_amount_total+$total_paid_amount;
-                    // $paying_amount_total = $paying_amount_total+$amount_to_pay;
-                    // $bal_amount_total = $bal_amount_total+$bal_amount;
+                    $total_amount_total = $total_amount_total+$amount;
+                    $total_paid_amount_total = $total_paid_amount_total+$total_paid_amount;
+                    $paying_amount_total = $paying_amount_total+$amount_to_pay;
+                    $bal_amount_total = $bal_amount_total+$bal_amount;
 
-                    // if(strtoupper(trim($transaction))=="DEBIT"){
-                    //     $debit_amt = $amount;
-                    //     $credit_amt = 0;
-                    // } else {
-                    //     $debit_amt = 0;
-                    //     $credit_amt = $amount;
-                    // }
+                    if(strtoupper(trim($transaction))=="DEBIT"){
+                        $debit_amt = $amount;
+                        $credit_amt = 0;
+                    } else {
+                        $debit_amt = 0;
+                        $credit_amt = $amount;
+                    }
 
-                    // if(isset($data[$i]['cp_acc_id'])){
-                    //     if($data[$i]['cp_acc_id']!=$acc_id1){
-                    //         $ledger_code = $data[$i]['cp_ledger_code'];
-                    //         $ledger_name = $data[$i]['cp_ledger_name'];
-                    //     }
-                    // }
-                    // if($ledger_code == ''){
-                    //     $ledger_code = $data[$i]['ledger_code'];
-                    //     // $ledger_name = $data[$i]['new_ledger_name'];
-                    //     $ledger_name = $data[$i]['ref_type'];
-                    // }
+                    if(isset($data[$i]['cp_acc_id'])){
+                        if($data[$i]['cp_acc_id']!=$acc_id1){
+                            $ledger_code = $data[$i]['cp_ledger_code'];
+                            $ledger_name = $data[$i]['cp_ledger_name'];
+                        }
+                    }
+                    if($ledger_code == ''){
+                        $ledger_code = $data[$i]['ledger_code'];
+                        // $ledger_name = $data[$i]['new_ledger_name'];
+                        $ledger_name = $data[$i]['ref_type'];
+                    }
 
                     $ids = $data[$i]['id'].' &&'.$data[$i]['ledger_type'].' &&'.$data[$i]['vendor_id'].' &&';
 
-                    $objPHPExcel->getActiveSheet()->setCellValue('A'.$r_row,($r_row-2));
-                    // $objPHPExcel->getActiveSheet()->setCellValue('B'.$r_row,$data1[0]['legal_name']);
-                    // $objPHPExcel->getActiveSheet()->setCellValue('C'.$r_row,$data1[0]['code']);
-
-                    if($data[$i]['ref_date']=='2018-03-31'){
-                        $objPHPExcel->getActiveSheet()->setCellValue('B'.$r_row,$data[$i]['ledger_name']);
-                        $objPHPExcel->getActiveSheet()->setCellValue('C'.$r_row,$data[$i]['ledger_code']);
-                    } else {
-                        $objPHPExcel->getActiveSheet()->setCellValue('B'.$r_row,$data[$i]['cp_ledger_name']);
-                        $objPHPExcel->getActiveSheet()->setCellValue('C'.$r_row,$data[$i]['cp_ledger_code']);
-                    }
-                    
+                    $objPHPExcel->getActiveSheet()->setCellValue('A'.$r_row,($i+1));
+                    $objPHPExcel->getActiveSheet()->setCellValue('B'.$r_row,$data1[0]['legal_name']);
+                    $objPHPExcel->getActiveSheet()->setCellValue('C'.$r_row,$data1[0]['code']);
                     $objPHPExcel->getActiveSheet()->setCellValue('D'.$r_row,$ids);
                     $objPHPExcel->getActiveSheet()->setCellValue('E'.$r_row,$data[$i]['voucher_id']);
                     $objPHPExcel->getActiveSheet()->setCellValue('F'.$r_row,$data[$i]['ref_type']);
@@ -838,52 +802,61 @@ class PaymentreceiptController extends Controller
                         $gi_date = date("d-m-Y",strtotime($data[$i]['gi_date']));
                     else
                         $gi_date = '';
-                    $objPHPExcel->getActiveSheet()->setCellValue('I'.$r_row,$gi_date);
 
+                    $objPHPExcel->getActiveSheet()->setCellValue('I'.$r_row,$gi_date);
                     if($data[$i]['invoice_date']!='')
                         $invoice_date = date("d-m-Y",strtotime($data[$i]['invoice_date']));
                     else
                         $invoice_date = '';
+
+
                     $objPHPExcel->getActiveSheet()->setCellValue('J'.$r_row,$invoice_date);
 
                     if($data[$i]['due_date']!='')
                         $due_date = date("d-m-Y",strtotime($data[$i]['due_date']));
                     else
                         $due_date = '';
+
+                    
                     $objPHPExcel->getActiveSheet()->setCellValue('K'.$r_row,$due_date);
                     
                     $objPHPExcel->getActiveSheet()->setCellValue('L'.$r_row,$data[$i]['type']);
-                    $objPHPExcel->getActiveSheet()->setCellValue('M'.$r_row,round($amount,2));
-                    $objPHPExcel->getActiveSheet()->setCellValue('N'.$r_row,round($total_paid_amount,2));
-                    $objPHPExcel->getActiveSheet()->setCellValue('O'.$r_row,round($bal_amount,2));
+                    $objPHPExcel->getActiveSheet()->setCellValue('M'.$r_row,$amount);
+                    $objPHPExcel->getActiveSheet()->setCellValue('N'.$r_row,$total_paid_amount);
+                    $objPHPExcel->getActiveSheet()->setCellValue('O'.$r_row,$bal_amount);
+                    $objPHPExcel->getActiveSheet()->getStyle('P'.$r_row.':U'.$r_row)->getProtection()->setLocked(\PHPExcel_Style_Protection::PROTECTION_UNPROTECTED);
                     $r_row = $r_row+1;
                 }
             }
-        // }
-
-        $r_row = $r_row - 1;
-        if($r_row!=2){
-            $objPHPExcel->getActiveSheet()->getStyle('P3:U'.$r_row)->getProtection()->setLocked(\PHPExcel_Style_Protection::PROTECTION_UNPROTECTED);
         }
+
+
         $objPHPExcel->getActiveSheet()->getProtection()->setPassword('dhaval1234');
         $objPHPExcel->getActiveSheet()->getProtection()->setSheet(true);
         
         $bank = $payment_receipt->getBanks();
-        $row_t = 1;
+        $row_t = 1;  
+        
         $objPHPExcel->setActiveSheetIndex(1);
-        for($i=0; $i<count($bank); $i++) { 
-            $objPHPExcel->getActiveSheet()->setCellValue('A'.$row_t,$bank[$i]['legal_name']);
-            $row_t = $row_t+1;
+        for($i=0; $i <count($bank); $i++) { 
+             $objPHPExcel->getActiveSheet()->setCellValue('A'.$row_t,$bank[$i]['legal_name']);
+
+             $row_t = $row_t+1;
         }
 
         $objPHPExcel->setActiveSheetIndex(0);
-        for($j=3; $j<=$r_row; $j++) {
+
+         
+
+        for($j=2;$j<=100;$j++)
+        {
             $objValidation = $objPHPExcel->getActiveSheet(0)->getCell('Q'.$j)->getDataValidation();
             $this->common_excel($objValidation);
             $objValidation->setFormula1('\'Sheet2\'!$A$1:$A$'.($row_t-1));
         }
 
-        for($k=3; $k<=$r_row; $k++) {
+        for($k=2;$k<=100;$k++)
+        {
             $objValidation = $objPHPExcel->getActiveSheet(0)->getCell('T'.$k)->getDataValidation();
             $this->common_excel($objValidation);
             $objValidation->setFormula1('\'Sheet2\'!$B$1:$B$2');
@@ -892,11 +865,11 @@ class PaymentreceiptController extends Controller
         $objPHPExcel->setActiveSheetIndex(2);
         $primarpecan = $objPHPExcel->getActiveSheet(2)->setCellValue('A1','Primarc Pecan');
 
-        /*
-        */
-        /* $objPHPExcel->setActiveSheetIndex(2);
-        $r_row= 1;
-        for ($j=0; $j <count($acc_id) ; $j++) {
+       /*
+       */
+      /* $objPHPExcel->setActiveSheetIndex(2);
+       $r_row= 1;
+       for ($j=0; $j <count($acc_id) ; $j++) {
             $acc_id1 = $acc_id[$j];
             $data = $payment_receipt->getLedger($id, $acc_id1,$to_date);
             $data1 = $payment_receipt->getAccountDetails($acc_id1, "");
@@ -910,7 +883,8 @@ class PaymentreceiptController extends Controller
             }
         }*/
 
-        $objPHPExcel->getSheetByName('Sheet3')->setSheetState(\PHPExcel_Worksheet::SHEETSTATE_VERYHIDDEN);
+       $objPHPExcel->getSheetByName('Sheet3')->setSheetState(\PHPExcel_Worksheet::SHEETSTATE_VERYHIDDEN);
+
 
         header('Content-Type: application/vnd.ms-excel');
         header('Content-Disposition: attachment;filename="download_payment.xlsx"');
@@ -925,7 +899,8 @@ class PaymentreceiptController extends Controller
         $objWriter->save('php://output');   
     }
     
-    public function actionUploadpayment() {
+    public function actionUploadpayment()
+    {
         $payment_receipt = new PaymentReceipt();
         $result = $payment_receipt->uploadPayment();
          if($result==false)
@@ -935,6 +910,7 @@ class PaymentreceiptController extends Controller
         else{
             $this->redirect(array('paymentreceipt/createdpayment'));
         }
+        
     }
 
     public function upload_sales() {
@@ -1383,7 +1359,7 @@ class PaymentreceiptController extends Controller
         }
     }
 
-    public function getBanks($id="" ,$legal_name="") {
+    public function getBanks($id="" ,$legal_name=""){
         $cond = "";
         if($id!=""){
             $cond = " and id = '$id'";
@@ -1407,18 +1383,30 @@ class PaymentreceiptController extends Controller
         return $reader->readAll();
     }
 
-    public function common_excel($objValidation) {
+    public function common_excel($objValidation)
+    {
         $objValidation->setType(\PHPExcel_Cell_DataValidation::TYPE_LIST );
         $objValidation->setErrorStyle(\PHPExcel_Cell_DataValidation::STYLE_INFORMATION );
         $objValidation->setAllowBlank(false);
         $objValidation->setShowInputMessage(true);
         $objValidation->setShowErrorMessage(true);
         $objValidation->setShowDropDown(true);
-        $objValidation->getShowDropDown(true);
+         $objValidation->getShowDropDown(true);
         $objValidation->setErrorTitle('Input error');
         $objValidation->setError('Value is not in list.');
         $objValidation->setPromptTitle('Pick from list');
         $objValidation->setPrompt('Please pick a value from the drop-down list.');/*
         $objValidation->setFormula1('"'.$distname.'"');*/
     }
+
+
+    public function actionCheckno() {
+        $num = '-1234';
+        $pattern = '/^-?(0*[0-9][0-9.,]*)$/';
+        $result = preg_match($pattern, $num);
+
+        // echo ("<script>alert(".$result.");</script>");
+        echo $result;
+    }
+
 }

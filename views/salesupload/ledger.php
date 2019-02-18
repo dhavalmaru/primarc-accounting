@@ -53,7 +53,7 @@ $mycomponent = Yii::$app->mycomponent;
     .close { outline:none;}
     .diversion {   /*box-shadow: 0 0 5px rgba(0,0,0,.1);   padding:3px 10px 10px 10px; */  margin:20px 0;}
     @media only screen and (min-width:250px) and (max-width:420px) { 
-    .diversion  { width:100%; overflow-x:scroll;}
+    .diversion  { width:100%; overflow-x:scroll; }
     .grn-view .table { width:500px; padding:10px;}
     }
 
@@ -113,7 +113,7 @@ $mycomponent = Yii::$app->mycomponent;
 
             if($acc_ledger_entries[$i]["entry_type"]=="Total Amount" || $acc_ledger_entries[$i]["entry_type"]=="Total Deduction"){
                 if($acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
-                    $particular = "Total Sales Amount";
+                    $particular = "Total Amount";
                 } else {
                     $particular = "Total Deduction Amount";
                     
@@ -125,7 +125,7 @@ $mycomponent = Yii::$app->mycomponent;
                                     <td colspan="4" style="text-align:right;">'.$particular.'</td>
                                     <td class="bold-text text-right">'.$mycomponent->format_money($total_debit_amt,2).'</td>
                                     <td class="bold-text text-right">'.$mycomponent->format_money($total_credit_amt,2).'</td>';
-                $rows = $rows . '<tr><td colspan="6"></td></tr>';
+                // $rows = $rows . '<tr><td colspan="6"></td></tr>';
 
                 $total_debit_amt = 0;
                 $total_credit_amt = 0;
@@ -143,11 +143,13 @@ $mycomponent = Yii::$app->mycomponent;
                 $blFlag = true;
             } else if($acc_ledger_entries[$i]["invoice_no"]!=$acc_ledger_entries[$i+1]["invoice_no"]){
                 $blFlag = true;
+            } else if($acc_ledger_entries[$i]["voucher_id"]!=$acc_ledger_entries[$i+1]["voucher_id"]){
+                $blFlag = true;
             }
 
             if($blFlag == true){
                 $rows = '<tr class="bold-text text-right">
-                            <td colspan="6" style="text-align:left;">Sales Entry</td>
+                            <td colspan="6" style="text-align:left;">'.$acc_ledger_entries[$i]["ledger_name"].'</td>
                         </tr>' . $rows;
 
                 $invoice_date = '';
@@ -160,9 +162,7 @@ $mycomponent = Yii::$app->mycomponent;
                 $debit_amt = round($debit_amt,2);
                 $credit_amt = round($credit_amt,2);
 
-                $table = '<div class="diversion">
-                            <div class="pull-left">Invoice No: ' . $acc_ledger_entries[$i]["invoice_no"] . '</div>
-                            <div class="pull-right">Invoice Date: ' . $invoice_date . '</div>
+                $table = '<div class="diversion" style="margin-top:35px !important;">
                             <table class="table table-bordered">
                                 <tr class="table-head">
                                     <th>Sr. No.</th>
@@ -173,11 +173,11 @@ $mycomponent = Yii::$app->mycomponent;
                                     <th>Credit</th>
                                 </tr>
                                 ' . $rows . '
-                                <tr class="bold-text text-right">
+                                <!-- <tr class="bold-text text-right">
                                     <td colspan="4" style="text-align:right;">Total Amount</td>
                                     <td>' . $mycomponent->format_money($debit_amt,2) . '</td>
                                     <td>' . $mycomponent->format_money($credit_amt,2) . '</td>
-                                </tr>
+                                </tr> -->
                             </table>
                         </div>';
 

@@ -56,7 +56,15 @@ class SalesuploadController extends Controller
         //     echo 'rejected';
         // }
         // $salesupload->upload_sales();
-        $salesupload->test();
+        // $salesupload->test();
+
+        $test_val = $salesupload->check_no(-597);
+
+        if($test_val==false){
+            echo 'False';
+        } else {
+            echo 'True';
+        }
     }
 
     public function actionCreate(){
@@ -98,6 +106,7 @@ class SalesuploadController extends Controller
         $marketplaces = $salesupload->getFileMarketplaces($id);
 
         // echo json_encode($data);
+        // echo '<br/>';
 
         return $this->render('update', ['data' => $data, 'acc_master' => $acc_master, 'upload_details' => $upload_details, 
                                 'invoices' => $invoices, 'marketplaces' => $marketplaces, 'action' => $action]);
@@ -221,7 +230,7 @@ class SalesuploadController extends Controller
 
             if($acc_ledger_entries[$i]["entry_type"]=="Total Amount" || $acc_ledger_entries[$i]["entry_type"]=="Total Deduction"){
                 if($acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
-                    $particular = "Total Sales Amount";
+                    $particular = "Total Amount";
                 } else {
                     $particular = "Total Deduction Amount";
 
@@ -233,7 +242,7 @@ class SalesuploadController extends Controller
                                     <td colspan="4" style="text-align:right;">'.$particular.'</td>
                                     <td class="bold-text text-right">'.$mycomponent->format_money($total_debit_amt,2).'</td>
                                     <td class="bold-text text-right">'.$mycomponent->format_money($total_credit_amt,2).'</td>';
-                $rows = $rows . '<tr><td colspan="6"></td></tr>';
+                // $rows = $rows . '<tr><td colspan="6"></td></tr>';
 
                 $total_debit_amt = 0;
                 $total_credit_amt = 0;
@@ -256,17 +265,19 @@ class SalesuploadController extends Controller
                 $blFlag = true;
             } else if($acc_ledger_entries[$i]["invoice_no"]!=$acc_ledger_entries[$i+1]["invoice_no"]){
                 $blFlag = true;
+            } else if($acc_ledger_entries[$i]["voucher_id"]!=$acc_ledger_entries[$i+1]["voucher_id"]){
+                $blFlag = true;
             }
 
             if($blFlag == true){
                 $rows = '<tr class="bold-text text-right">
-                            <td colspan="6" style="text-align:left;">Sales Entry</td>
+                            <td colspan="6" style="text-align:left;">'.$acc_ledger_entries[$i]["ledger_name"].'</td>
                         </tr>' . $rows;
 
                 $debit_amt = round($debit_amt,2);
                 $credit_amt = round($credit_amt,2);
 
-                $table = '<div class="diversion"><h4 class=" ">Invoice No: ' . $acc_ledger_entries[$i]["invoice_no"] . '</h4>
+                $table = '<div class="diversion">
                         <table class="table table-bordered">
                             <tr class="table-head">
                                 <th>Sr. No.</th>
@@ -277,12 +288,12 @@ class SalesuploadController extends Controller
                                 <th>Credit</th>
                             </tr>
                             ' . $rows . '
-                            <tr class="bold-text text-right">
+                            <!-- <tr class="bold-text text-right">
                                 <td colspan="4" style="text-align:right;">Total Amount</td>
                                 <td>' . $mycomponent->format_money($debit_amt,2) . '</td>
                                 <td>' . $mycomponent->format_money($credit_amt,2) . '</td>
-                            </tr>
-                        </table></div>';
+                            </tr> -->
+                        </table></div><br/><br/>';
 
                 // echo $table;
                 $table_arr[$table_cnt] = $table;

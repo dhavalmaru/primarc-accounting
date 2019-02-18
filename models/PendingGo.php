@@ -98,7 +98,7 @@ class PendingGo extends Model
         $sql = "select A.* from 
                 (select A.*, B.*, C.dcno from 
                 (select A.*, B.username from goods_inward_outward A left join user B on(A.updated_by_id = B.id) 
-                where date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id' and 
+                where date(A.gi_go_date_time) > date('2018-03-31') and A.company_id='$company_id' and 
                     A.type_outward='CUSTOMER' and A.inward_outward='OUTWARD' and A.customer_type='B2B' and 
                     A.gi_go_status='COMPLETE') A 
                 left join 
@@ -141,7 +141,7 @@ class PendingGo extends Model
 
         $sql = "Select count(*) as count from (Select A.*,B.* from 
                 (select A.*, B.username from goods_inward_outward A left join user B on(A.updated_by_id = B.id) 
-                where  date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id'
+                where  date(A.gi_go_date_time) > date('2018-03-31') and A.company_id='$company_id'
                 AND A.type_outward='CUSTOMER' AND A.inward_outward='OUTWARD' AND A.customer_type='B2B' AND A.gi_go_status='COMPLETE' AND 
                 A.company_id='$company_id') A
                 left join 
@@ -186,7 +186,7 @@ class PendingGo extends Model
        
         $sql = "Select A.*, D.is_paid,C.prepare_go_id from (Select A.* from 
                 (select A.*, B.username from goods_inward_outward A left join user B on(A.updated_by_id = B.id) 
-                where  date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id'
+                where  date(A.gi_go_date_time) > date('2018-03-31') and A.company_id='$company_id'
                 AND A.type_outward='CUSTOMER' AND A.inward_outward='OUTWARD' AND A.customer_type='B2B' AND A.gi_go_status='COMPLETE' AND 
                 A.company_id='$company_id') A
                 left join 
@@ -228,7 +228,7 @@ class PendingGo extends Model
        
         $sql = "Select count(*) as count from (Select A.*,B.* from 
                 (select A.*, B.username from goods_inward_outward A left join user B on(A.updated_by_id = B.id) 
-                where  date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id'
+                where  date(A.gi_go_date_time) > date('2018-03-31') and A.company_id='$company_id'
                 AND A.type_outward='CUSTOMER' AND A.inward_outward='OUTWARD' AND A.customer_type='B2B' AND A.gi_go_status='COMPLETE' AND 
                 A.company_id='$company_id') A
                 left join 
@@ -266,7 +266,7 @@ class PendingGo extends Model
                 left join 
                 acc_go_entries C on (A.gi_go_id = C.gi_go_id and C.status = 'approved' and 
                                     C.is_active='1' and C.particular = 'Total Amount')
-                where date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id'
+                where date(A.gi_go_date_time) > date('2018-03-31') and A.company_id='$company_id'
                 AND A.type_outward='CUSTOMER' AND A.inward_outward='OUTWARD' AND A.customer_type='B2B' AND 
                 A.gi_go_status='COMPLETE' AND A.company_id='$company_id' AND A.gi_go_id=$id ) A";         
         
@@ -305,7 +305,7 @@ class PendingGo extends Model
 
         $sql = "Select * from (Select A.*,B.* from 
                 (select A.*, B.username from goods_inward_outward A left join user B on(A.updated_by_id = B.id) 
-                where  date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id'
+                where  date(A.gi_go_date_time) > date('2018-03-31') and A.company_id='$company_id'
                 AND A.type_outward='CUSTOMER' AND A.inward_outward='OUTWARD' AND A.customer_type='B2B' AND A.gi_go_status='COMPLETE' AND 
                 A.company_id='$company_id') A
                 left join 
@@ -351,7 +351,7 @@ class PendingGo extends Model
 
         $sql = "Select count(*) as count from (Select A.*,B.* from 
                 (select A.*, B.username from goods_inward_outward A left join user B on(A.updated_by_id = B.id) 
-                where  date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id'
+                where  date(A.gi_go_date_time) > date('2018-03-31') and A.company_id='$company_id'
                 AND A.type_outward='CUSTOMER' AND A.inward_outward='OUTWARD' AND A.customer_type='B2B' AND A.gi_go_status='COMPLETE' AND 
                 A.company_id='$company_id') A
                 left join 
@@ -386,7 +386,7 @@ class PendingGo extends Model
         //      ROUND(B.value_at_cost/(1+(B.vat_percent/100)),2) as cost_excl_vat from 
         //     (Select * from 
         //     (select A.*,Case When A.warehouse_state=A.customerState Then 'INTRA' Else 'INTER' end as vat_cst ,B.username from goods_inward_outward A left join user B on(A.updated_by_id = B.id) 
-        //     where  date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id'
+        //     where  date(A.gi_go_date_time) > date('2018-03-31') and A.company_id='$company_id'
         //     AND A.type_outward='CUSTOMER' AND A.inward_outward='OUTWARD' AND A.customer_type='B2B' AND A.gi_go_status='COMPLETE' AND 
         //     A.company_id='$company_id') A
         //     left join 
@@ -430,7 +430,7 @@ class PendingGo extends Model
                     B.invoice_number, B.invoice_created_date from 
                 (select A.*, Case When A.warehouse_state=A.customerState Then 'INTRA' Else 'INTER' end as vat_cst, B.username 
                 from goods_inward_outward A left join user B on(A.updated_by_id = B.id) 
-                where A.gi_go_id='$id' and date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id' AND A.type_outward='CUSTOMER' AND 
+                where A.gi_go_id='$id' and date(A.gi_go_date_time) > date('2018-03-31') and A.company_id='$company_id' AND A.type_outward='CUSTOMER' AND 
                     A.inward_outward='OUTWARD' AND A.customer_type='B2B' AND A.gi_go_status='COMPLETE' AND A.company_id='$company_id') A 
                 left join 
                 (select prepare_go_id, from_warehouse_name, destination_warehouse_company_name, total_qty, invoice_number, invoice_created_date 
@@ -527,7 +527,7 @@ class PendingGo extends Model
                 select Case When warehouse_state=customerState Then 'Same States' Else 'Different States' end as tax_zone_name,
                 Case When warehouse_state=customerState Then 'INTRA' Else 'INTER' end as tax_zone_code ,A.gi_go_id
                 from goods_inward_outward A 
-                where  date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id'
+                where  date(A.gi_go_date_time) > date('2018-03-31') and A.company_id='$company_id'
                 AND A.type_outward='CUSTOMER' AND A.inward_outward='OUTWARD' AND A.customer_type='B2B' AND A.gi_go_status='COMPLETE' AND 
                 A.company_id='$company_id' AND A.gi_go_id=$id ) A
                 Left Join
@@ -577,7 +577,7 @@ class PendingGo extends Model
                 (Select A.* ,B.* from 
                 (select A.*,Case When warehouse_state=customerState Then 'Same States' Else 'Different States' end as tax_zone_name,
                                 Case When warehouse_state=customerState Then 'INTRA' Else 'INTER' end as tax_zone_code  from goods_inward_outward A  
-                where  date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id'
+                where  date(A.gi_go_date_time) > date('2018-03-31') and A.company_id='$company_id'
                 AND A.type_outward='CUSTOMER' AND A.inward_outward='OUTWARD' AND A.customer_type='B2B' AND A.gi_go_status='COMPLETE' AND 
                 A.company_id='$company_id') A
                 left join 

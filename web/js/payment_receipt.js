@@ -4,7 +4,10 @@ $(document).ready(function() {
     setPaymentType();
     setPaymentType1();
 
-    getLedger();
+    if($("#acc_id").val()!=''){
+        getLedger();
+    }
+    
 	$('.select2').select2();
 	//$("#trans_type").on('select2:selecting', function(e) {
 	$("#trans_type").change (function() {
@@ -44,7 +47,12 @@ $(document).ready(function() {
             }
         });
     	
+        // getLedger();
+    });
+
+    $("#btn_get_details").click(function(){
         getLedger();
+        $("#temp_acc_id").val($("#acc_id").val());
     });
 
     $("#bank_id").change(function(){
@@ -105,13 +113,13 @@ $(document).ready(function() {
 function setPaymentType(){
     if($("#payment_type").val()=="Adhoc"){
         $(".ad_hock").show();
-        $("#knock_off").hide();
+        $(".knock_off").hide();
     } else if($("#payment_type").val()=="Knock off") {
         $(".ad_hock").hide();
-        $("#knock_off").show();
+        $(".knock_off").show();
     } else {
         $(".ad_hock").hide();
-        $("#knock_off").hide();
+        $(".knock_off").hide();
     }
 }
 
@@ -147,16 +155,17 @@ function setPaymentType1() {
         $('#acc_label').html('Bank & Cash account (Receipt)');
         $('#bank_label').html('Bank & Cash account (Paid)');
         $("#payment_type").val('Adhoc');
+        $(".knock_off").hide();
     } else {
         if($("#payment_type").val()=="Adhoc") {
             $(".ad_hock").show();
-            $("#knock_off").hide();
+            $(".knock_off").hide();
         } else if($("#payment_type").val()=="Knock off") {
             $(".ad_hock").hide();
-            $("#knock_off").show();
+            $(".knock_off").show();
         } else {
             $(".ad_hock").hide();
-            $("#knock_off").hide();
+            $(".knock_off").hide();
         }
         $(".bank_acc_code").hide();
         $(".payment_type1").show();
@@ -189,10 +198,12 @@ function getLedger(){
     var result = 1;
     var csrfToken = $('meta[name="csrf-token"]').attr("content");
     
+    $("#ledger_details").html('<tr class="bold-text"><td class="text-center" colspan="11">Loading...</td></tr>');
+
     $.ajax({
         url: BASE_URL+'index.php?r=paymentreceipt%2Fgetledger',
         type: 'post',
-        async: false,
+        // async: false,
         data: {
                 acc_id : $("#acc_id").val(),
                 id : $("#id").val(),

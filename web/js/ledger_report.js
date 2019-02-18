@@ -149,6 +149,67 @@ function set_table(){
         paging: false,
         bInfo: false,
         buttons: [ 'excel', 'csv', 'print'  ]
+        // buttons: [
+        //     // {
+        //     //     extend: 'excel',
+        //     //     title: 'Ledger_Report_3',
+        //     //     // message: $('#company_name').html()+" \n"+$('#account_name').html()+" \n From:"+$('#from').html()+"      To:"+$('#to').html()
+        //     //     // customize: function (excel) {
+        //     //     //     return "Any heading for the csv file can be separated with , and for new line use \n";
+        //     //     // }
+        //     //     // messageTop: "Primarc Pecan Retail Pvt Ltd"
+        //     //     customize: function (excel) {
+        //     //         return $('#company_name').html()+" \n"+$('#account_name').html()+" \n "+$('#from').html()+","+$('#to').html()+" \n"+excel
+        //     //     }
+        //     // },
+        //     {
+        //         extend: 'excel',
+        //         title: 'Ledger_Report_4',
+        //         messageTop: 'Primarc Pecan'
+        //     },
+        //     {
+        //         extend: 'csv',
+        //         title: 'CSV_file_1',
+        //         customize: function (csv) {
+        //             return $('#company_name').html()+" \n"+$('#account_name').html()+" \n "+$('#from').html()+","+$('#to').html()+" \n"+csv
+        //         }
+        //     },
+        //     {
+        //         extend: 'pdf',
+        //         title: 'Pdf_file',
+        //         customize: function ( doc ) {
+        //             doc.content.splice( 0, 0, {
+        //                 text: "custom header\n my header"
+        //             });
+        //         }
+        //     }
+        // ]
+        // buttons: [
+        //     {
+        //         extend: 'excelHtml5',
+
+        //         title: 'Any title for file',
+        //         message: "Any message for header inside the file. I am not able to put message in next row in excel file but you can use \n"
+
+
+        //     },
+        //     {
+        //         extend: 'csvHtml5',
+        //         title: 'Any title for the file',
+        //          customize: function (csv) {
+        //              return "Any heading for the csv file can be separated with , and for new line use \n"+csv;
+        //           }
+        //     },
+        //     {
+        //         extend: 'pdfHtml5',
+        //         title: 'Any title for file',
+        //         customize: function ( doc ) {
+        //                         doc.content.splice( 0, 0, {
+        //                             text: "custom header\n my header"
+        //                         } );
+        //         }
+        //     }
+        // ]
     });
 
     table.buttons().container().appendTo('#example_wrapper .col-md-6:eq(1)');

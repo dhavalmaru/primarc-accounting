@@ -131,7 +131,11 @@ table tr td:last-child input{   border:1px solid #ddd;  padding-left:5px; }
                 $total_credit_amt = 0;
                 $sr_no=1;
 
-                if($acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
+                if(($i+1)==count($acc_ledger_entries)){
+                    //do nothing
+                } else if($acc_ledger_entries[$i]["invoice_no"]!=$acc_ledger_entries[$i+1]["invoice_no"]){
+                    //do nothing
+                } else if($acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
                     $rows = $rows . '<tr class="bold-text text-right">
                                         <td colspan="6" style="text-align:left;">Deduction Entry</td>
                                     </tr>';

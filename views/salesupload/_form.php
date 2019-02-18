@@ -176,14 +176,14 @@ $mycomponent = Yii::$app->mycomponent;
         <div id="update_grn_div" class="table-container sticky-table sticky-headers sticky-ltr-cells">
             <?php 
             for($k=0; $k<count($data); $k++) { 
-                $invoice_no = $data[$k]['invoice_no'];
+                // $invoice_no = $data[$k]['invoice_no'];
                 $marketplace = $data[$k]['marketplace'];
                 $item_details = $data[$k]['item_details'];
             ?>
-            <div>
-                <input type="hidden" id="invoice_no_<?php echo $k;?>" name="invoice_no_<?php echo $k;?>" value="<?php echo $data[$k]['invoice_no']; ?>" />
-                Invoice No: <?php echo $invoice_no; ?>
-            </div>
+            <!-- <div>
+                <input type="hidden" id="invoice_no_<?php //echo $k;?>" name="invoice_no_<?php //echo $k;?>" value="<?php //echo $data[$k]['invoice_no']; ?>" />
+                Invoice No: <?php //echo $invoice_no; ?>
+            </div> -->
             <table id="update_grn" class="table table-bordered">
                 <tr class="table-head">
                     <th class="sticky-cell" style="border: none!important;">Sr. No.</th>

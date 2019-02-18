@@ -45,6 +45,10 @@ $mycomponent = Yii::$app->mycomponent;
 											<th>Vendor Name</th> 
 											<th>Scanned Qty</th> 
 											<th>Payable Val After Tax</th> 
+											<th>Shortage</th> 
+											<th>Expiry</th> 
+											<th>Damaged</th> 
+											<!-- <th>Margin Diff</th>  -->
 											<th>Gi Date</th> 
 											<th>Status</th> 
 											<th>Updated By</th> 
@@ -116,8 +120,11 @@ $mycomponent = Yii::$app->mycomponent;
 											<th>Category</th>  
 											<th>Po No</th> 
 											<th>Invoice No</th>
-											<th>Net Amount</th> 
-											<th>Ded Amount</th> 
+											<th>Invoice Amount</th> 
+											<th>Shortage Amount</th> 
+											<th>Expiry Amount</th> 
+											<th>Damaged Amount</th> 
+											<th>Margin Diff Amount</th> 
 											<th>Updated By</th> 
 											<th>Ledger</th> 
 										</tr>  
@@ -142,6 +149,9 @@ $mycomponent = Yii::$app->mycomponent;
 											<th>Vendor Name</th> 
 											<th>Scanned Qty</th> 
 											<th>Payable Val After Tax</th> 
+											<th>Shortage</th> 
+											<th>Expiry</th> 
+											<th>Damaged</th> 
 											<th>Gi Date</th> 
 											<th>Status</th> 
 											<th>Updated By</th> 

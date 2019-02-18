@@ -97,7 +97,7 @@ class PendingGrn extends Model
         $sql = "select * from 
                 (select A.*, B.grn_id as b_grn_id from 
                 (select A.*, B.username from grn A left join user B on(A.updated_by = B.id) 
-                    where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-07-01') and A.company_id='$company_id') A 
+                    where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2018-03-31') and A.company_id='$company_id') A 
                 left join 
                 (select distinct grn_id from acc_grn_entries) B 
                 on (A.grn_id = B.grn_id)) C 
@@ -132,7 +132,7 @@ class PendingGrn extends Model
         $sql = "select count(*) as count  from 
                 (select A.*, B.grn_id as b_grn_id from 
                 (select A.*, B.username from grn A left join user B on(A.updated_by = B.id) 
-                    where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-07-01') and A.company_id='$company_id') A 
+                    where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2018-03-31') and A.company_id='$company_id') A 
                 left join 
                 (select distinct grn_id from acc_grn_entries) B 
                 on (A.grn_id = B.grn_id)) C 
@@ -175,7 +175,7 @@ class PendingGrn extends Model
         //         (select distinct A.*, B.username, C.is_paid from grn A left join user B on(A.updated_by = B.id) 
         //             left join acc_ledger_entries C on (A.grn_id = C.ref_id and 'purchase' = C.ref_type and 
         //                 '1' = C.is_active and 'Approved' = C.status and '1' = C.is_paid) 
-        //             where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-07-01') and A.company_id='$company_id') A 
+        //             where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2018-03-31') and A.company_id='$company_id') A 
         //         left join 
         //         (select distinct grn_id, status from acc_grn_entries) B 
         //         on (A.grn_id = B.grn_id)) c ".$wheresearch." order by UNIX_TIMESTAMP(updated_date) desc ".$len;
@@ -183,7 +183,7 @@ class PendingGrn extends Model
         $sql = "select C.*, D.is_paid from 
                 (select A.*, B.status as grn_status from 
                 (select distinct A.*, B.username from grn A left join user B on(A.updated_by = B.id) 
-                where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-07-01') and A.company_id='$company_id') A 
+                where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2018-03-31') and A.company_id='$company_id') A 
                 left join 
                 (select distinct grn_id, status from acc_grn_entries) B 
                 on (A.grn_id = B.grn_id)) C 
@@ -221,7 +221,7 @@ class PendingGrn extends Model
         //     (select distinct A.*, B.username, C.is_paid from grn A left join user B on(A.updated_by = B.id) 
         //         left join acc_ledger_entries C on (A.grn_id = C.ref_id and 'purchase' = C.ref_type and 
         //             '1' = C.is_active and 'Approved' = C.status and '1' = C.is_paid) 
-        //         where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-07-01') and A.company_id='$company_id') A 
+        //         where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2018-03-31') and A.company_id='$company_id') A 
         //     left join 
         //     (select distinct grn_id, status from acc_grn_entries) B 
         //     on (A.grn_id = B.grn_id)) c ".$wheresearch." order by UNIX_TIMESTAMP(updated_date) desc ";
@@ -229,7 +229,7 @@ class PendingGrn extends Model
         $sql = "select count(*) as count  from 
                 (select A.*, B.status as grn_status from 
                 (select distinct A.*, B.username from grn A left join user B on(A.updated_by = B.id) 
-                where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2017-07-01') and A.company_id='$company_id') A 
+                where A.is_active = '1' and A.status = 'approved' and date(A.gi_date) > date('2018-03-31') and A.company_id='$company_id') A 
                 left join 
                 (select distinct grn_id, status from acc_grn_entries) B 
                 on (A.grn_id = B.grn_id)) C  ".$wheresearch;

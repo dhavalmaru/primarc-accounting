@@ -55,7 +55,11 @@ class PendinggrnController extends Controller
                         ''.$grn[$i]['location'].'',
                         ''.$grn[$i]['vendor_name'].'',
                         ''.$grn[$i]['scanned_qty'].'',
-                        ''.$mycomponent->format_money($grn[$i]['payable_val_after_tax'], 2).'',
+                        ''.$mycomponent->format_money($grn[$i]['total_value'], 2).'',
+                        ''.$mycomponent->format_money($grn[$i]['total_shortage'], 2).'',
+                        ''.$mycomponent->format_money($grn[$i]['total_expiry'], 2).'',
+                        ''.$mycomponent->format_money($grn[$i]['total_damaged'], 2).'',
+                        //''.$mycomponent->format_money($grn[$i]['total_margindiff'], 2).'',
                         ''.$grn[$i]['gi_date'].'',
                         ''.$grn[$i]['status'].'',
                         ''.$grn[$i]['username'].'',
@@ -104,7 +108,10 @@ class PendinggrnController extends Controller
                         ''.$grn[$i]['po_no'].'',
                         ''.$grn[$i]['inv_nos'].'',
                         ''.$mycomponent->format_money($grn[$i]['net_amt'], 2).'',
-                        ''.$mycomponent->format_money($grn[$i]['ded_amt'], 2).'',
+                        ''.$mycomponent->format_money($grn[$i]['shortage_amt'], 2).'',
+                        ''.$mycomponent->format_money($grn[$i]['expiry_amt'], 2).'',
+                        ''.$mycomponent->format_money($grn[$i]['damaged_amt'], 2).'',
+                        ''.$mycomponent->format_money($grn[$i]['magrin_diff_amt'], 2).'',
                         ''.$grn[$i]['username'].'',
                         '<a href="'.Url::base() .'index.php?r=pendinggrn%2Fledger&id='.$grn[$i]['grn_id'].'" target="_new"> <span class="fa fa-file-pdf-o"></span> </a>',
                         ) ;
@@ -149,7 +156,10 @@ class PendinggrnController extends Controller
                         ''.$grn[$i]['location'].'',
                         ''.$grn[$i]['vendor_name'].'',
                         ''.$grn[$i]['scanned_qty'].'',
-                        ''.$mycomponent->format_money($grn[$i]['payable_val_after_tax'], 2).'',
+                        ''.$mycomponent->format_money($grn[$i]['net_amt'], 2).'',
+                        ''.$mycomponent->format_money($grn[$i]['shortage_amt'], 2).'',
+                        ''.$mycomponent->format_money($grn[$i]['expiry_amt'], 2).'',
+                        ''.$mycomponent->format_money($grn[$i]['damaged_amt'], 2).'',
                         ''.$grn[$i]['gi_date'].'',
                         ''.$grn[$i]['status'].'',
                         ''.$grn[$i]['username'].'',
@@ -189,7 +199,7 @@ class PendinggrnController extends Controller
         return $this->render('debit_note', [
             'invoice_details' => $data['invoice_details'], 'debit_note' => $data['debit_note'], 
             'deduction_details' => $data['deduction_details'], 'vendor_details' => $data['vendor_details'], 
-            'grn_details' => $data['grn_details']
+            'grn_details' => $data['grn_details'], 'summary' => $data['summary'], 'deductions' => $data['deductions']
         ]);
     }
 
@@ -366,11 +376,6 @@ class PendinggrnController extends Controller
             $total_tax[$j]['total_cgst'] = 0;
             $total_tax[$j]['total_sgst'] = 0;
             $total_tax[$j]['total_igst'] = 0;
-            $total_tax[$j]['excess_cost'] = 0;
-            $total_tax[$j]['excess_tax'] = 0;
-            $total_tax[$j]['excess_cgst'] = 0;
-            $total_tax[$j]['excess_sgst'] = 0;
-            $total_tax[$j]['excess_igst'] = 0;
             $total_tax[$j]['shortage_cost'] = 0;
             $total_tax[$j]['shortage_tax'] = 0;
             $total_tax[$j]['shortage_cgst'] = 0;
@@ -413,7 +418,6 @@ class PendinggrnController extends Controller
             $invoice_details[$k]['invoice_total_tax'] = 0;
             $invoice_details[$k]['invoice_other_charges'] = $other_charge;
             $invoice_details[$k]['invoice_total_amount'] = $other_charge;
-            $invoice_details[$k]['invoice_excess_amount'] = 0;
             $invoice_details[$k]['invoice_shortage_amount'] = 0;
             $invoice_details[$k]['invoice_expiry_amount'] = 0;
             $invoice_details[$k]['invoice_damaged_amount'] = 0;
@@ -424,7 +428,6 @@ class PendinggrnController extends Controller
             $invoice_details[$k]['edited_total_tax'] = 0;
             $invoice_details[$k]['edited_other_charges'] = $other_charge;
             $invoice_details[$k]['edited_total_amount'] = $other_charge;
-            $invoice_details[$k]['edited_excess_amount'] = 0;
             $invoice_details[$k]['edited_shortage_amount'] = 0;
             $invoice_details[$k]['edited_expiry_amount'] = 0;
             $invoice_details[$k]['edited_damaged_amount'] = 0;
@@ -434,7 +437,6 @@ class PendinggrnController extends Controller
             $invoice_details[$k]['diff_total_cost'] = 0;
             $invoice_details[$k]['diff_total_tax'] = 0;
             $invoice_details[$k]['diff_total_amount'] = 0;
-            $invoice_details[$k]['diff_excess_amount'] = 0;
             $invoice_details[$k]['diff_shortage_amount'] = 0;
             $invoice_details[$k]['diff_expiry_amount'] = 0;
             $invoice_details[$k]['diff_damaged_amount'] = 0;
@@ -477,11 +479,6 @@ class PendinggrnController extends Controller
             $invoice_tax[$l]['diff_cgst'] = 0;
             $invoice_tax[$l]['diff_sgst'] = 0;
             $invoice_tax[$l]['diff_igst'] = 0;
-            $invoice_tax[$l]['excess_cost'] = 0;
-            $invoice_tax[$l]['excess_tax'] = 0;
-            $invoice_tax[$l]['excess_cgst'] = 0;
-            $invoice_tax[$l]['excess_sgst'] = 0;
-            $invoice_tax[$l]['excess_igst'] = 0;
             $invoice_tax[$l]['shortage_cost'] = 0;
             $invoice_tax[$l]['shortage_tax'] = 0;
             $invoice_tax[$l]['shortage_cgst'] = 0;
@@ -526,7 +523,6 @@ class PendinggrnController extends Controller
                 $cost_incl_vat_cst = floatval($result[$i]['cost_incl_vat_cst']);
                 $invoice_qty = floatval($result[$i]['invoice_qty']);
                 // $proper_qty = floatval($result[$i]['proper_qty']);
-                $excess_qty = floatval($result[$i]['excess_qty']);
                 $shortage_qty = floatval($result[$i]['shortage_qty']);
                 $expiry_qty = floatval($result[$i]['expiry_qty']);
                 $damaged_qty = floatval($result[$i]['damaged_qty']);
@@ -534,18 +530,18 @@ class PendinggrnController extends Controller
                 $cgst_rate = floatval($result[$i]['cgst_rate']);
                 $sgst_rate = floatval($result[$i]['sgst_rate']);
                 $igst_rate = floatval($result[$i]['igst_rate']);
+                $po_mrp = floatval($result[$i]['po_mrp']);
+                $po_vat_percen = floatval($result[$i]['po_vat_percen']);
+                $po_unit_rate_excl_tax = floatval($result[$i]['po_unit_rate_excl_tax']);
+                $po_unit_tax = floatval($result[$i]['po_unit_tax']);
+                $po_unit_rate_incl_tax = floatval($result[$i]['po_unit_rate_incl_tax']);
+                $margin_understanding = $result[$i]['margin_understanding'];
 
                 $tot_cost = $invoice_qty*$cost_excl_vat;
                 $tot_cgst = $invoice_qty*$cost_excl_vat*$cgst_rate/100;
                 $tot_sgst = $invoice_qty*$cost_excl_vat*$sgst_rate/100;
                 $tot_igst = $invoice_qty*$cost_excl_vat*$igst_rate/100;
                 $tot_tax = $tot_cgst+$tot_sgst+$tot_igst;
-
-                $excess_cost = round($excess_qty*$cost_excl_vat,2);
-                $excess_cgst = round($excess_cost*$cgst_rate/100,2);
-                $excess_sgst = round($excess_cost*$sgst_rate/100,2);
-                $excess_igst = round($excess_cost*$igst_rate/100,2);
-                $excess_tax = $excess_cgst+$excess_sgst+$excess_igst;
 
                 $shortage_cost = round($shortage_qty*$cost_excl_vat,2);
                 $shortage_cgst = round($shortage_cost*$cgst_rate/100,2);
@@ -568,16 +564,36 @@ class PendinggrnController extends Controller
                 if($box_price==0){
                     $margin_from_scan = 0;
                 } else {
-                    $margin_from_scan = intval((($box_price-$cost_incl_vat_cst)/$box_price*100)*100)/100;
+                    // $margin_from_scan = intval((($box_price-$cost_incl_vat_cst)/$box_price*100)*100)/100;
+
+                    if($margin_understanding=='GMP'){
+                        $margin_from_scan = intval((($box_price-$cost_excl_vat)/$box_price*100)*100)/100;
+                    } else if($margin_understanding=='NMP'){
+                        $margin_from_scan = intval((($box_price-$cost_incl_vat_cst)/$box_price*100)*100)/100;
+                    } else if($margin_understanding=='NMS'){
+                        $margin_from_scan = intval((($box_price-$cost_excl_vat-($box_price-($box_price/(1+($vat_percen/100)))))/$box_price*100)*100)/100;
+                    } else {
+                        $margin_from_scan = 0;
+                    }
                 }
+
                 if($result[$i]['purchase_order_id']!=null && $result[$i]['purchase_order_id']!=''){
-                    $po_mrp = floatval($result[$i]['po_mrp']);
-                    $po_cost_price_inc_tax = floatval($result[$i]['po_cost_price_inc_tax']);
-                    if($po_cost_price_inc_tax==0){
+                    if($po_mrp==0){
                         $margin_from_po = 0;
                     } else {
-                        $margin_from_po = intval((($po_mrp-$po_cost_price_inc_tax)/$po_mrp*100)*100)/100;
+                        // $margin_from_po = intval((($po_mrp-$po_unit_rate_incl_tax)/$po_mrp*100)*100)/100;
+
+                        if($margin_understanding=='GMP'){
+                            $margin_from_po = intval((($po_mrp-$po_unit_rate_excl_tax)/$po_mrp*100)*100)/100;
+                        } else if($margin_understanding=='NMP'){
+                            $margin_from_po = intval((($po_mrp-$po_unit_rate_incl_tax)/$po_mrp*100)*100)/100;
+                        } else if($margin_understanding=='NMS'){
+                            $margin_from_po = intval((($po_mrp-$po_unit_rate_excl_tax-($po_mrp-($po_mrp/(1+($po_vat_percen/100)))))/$po_mrp*100)*100)/100;
+                        } else {
+                            $margin_from_po = 0;
+                        }
                     }
+
                     if($box_price==0){
                         $margindiff_cost = 0;
                     } else if($invoice_qty==0){
@@ -595,7 +611,7 @@ class PendinggrnController extends Controller
                     $margindiff_cost = 0;
                 }
                 
-                if(round($margindiff_cost,2)<=0){
+                if(round($margindiff_cost,4)<=0){
                     $margindiff_cost=0;
                 }
                 $margindiff_cgst=round(($margindiff_cost*$cgst_rate)/100,2);
@@ -640,11 +656,6 @@ class PendinggrnController extends Controller
                     $total_tax[$j]['total_cgst'] = floatval($total_tax[$j]['total_cgst']) + $tot_cgst;
                     $total_tax[$j]['total_sgst'] = floatval($total_tax[$j]['total_sgst']) + $tot_sgst;
                     $total_tax[$j]['total_igst'] = floatval($total_tax[$j]['total_igst']) + $tot_igst;
-                    $total_tax[$j]['excess_cost'] = floatval($total_tax[$j]['excess_cost']) + $excess_cost;
-                    $total_tax[$j]['excess_tax'] = floatval($total_tax[$j]['excess_tax']) + $excess_tax;
-                    $total_tax[$j]['excess_cgst'] = floatval($total_tax[$j]['excess_cgst']) + $excess_cgst;
-                    $total_tax[$j]['excess_sgst'] = floatval($total_tax[$j]['excess_sgst']) + $excess_sgst;
-                    $total_tax[$j]['excess_igst'] = floatval($total_tax[$j]['excess_igst']) + $excess_igst;
                     $total_tax[$j]['shortage_cost'] = floatval($total_tax[$j]['shortage_cost']) + $shortage_cost;
                     $total_tax[$j]['shortage_tax'] = floatval($total_tax[$j]['shortage_tax']) + $shortage_tax;
                     $total_tax[$j]['shortage_cgst'] = floatval($total_tax[$j]['shortage_cgst']) + $shortage_cgst;
@@ -768,11 +779,6 @@ class PendinggrnController extends Controller
                     $total_tax[$j]['total_cgst'] = $tot_cgst;
                     $total_tax[$j]['total_sgst'] = $tot_sgst;
                     $total_tax[$j]['total_igst'] = $tot_igst;
-                    $total_tax[$j]['excess_cost'] = $excess_cost;
-                    $total_tax[$j]['excess_tax'] = $excess_tax;
-                    $total_tax[$j]['excess_cgst'] = $excess_cgst;
-                    $total_tax[$j]['excess_sgst'] = $excess_sgst;
-                    $total_tax[$j]['excess_igst'] = $excess_igst;
                     $total_tax[$j]['shortage_cost'] = $shortage_cost;
                     $total_tax[$j]['shortage_tax'] = $shortage_tax;
                     $total_tax[$j]['shortage_cgst'] = $shortage_cgst;
@@ -908,7 +914,6 @@ class PendinggrnController extends Controller
                     $invoice_details[$k]['invoice_total_cost'] = floatval($invoice_details[$k]['invoice_total_cost']) + $tot_cost;
                     $invoice_details[$k]['invoice_total_tax'] = floatval($invoice_details[$k]['invoice_total_tax']) + $tot_tax;
                     $invoice_details[$k]['invoice_total_amount'] = floatval($invoice_details[$k]['invoice_total_amount']) + $tot_cost + $tot_tax;
-                    $invoice_details[$k]['invoice_excess_amount'] = floatval($invoice_details[$k]['invoice_excess_amount']) + $excess_cost + $excess_tax;
                     $invoice_details[$k]['invoice_shortage_amount'] = floatval($invoice_details[$k]['invoice_shortage_amount']) + $shortage_cost + $shortage_tax;
                     $invoice_details[$k]['invoice_expiry_amount'] = floatval($invoice_details[$k]['invoice_expiry_amount']) + $expiry_cost + $expiry_tax;
                     $invoice_details[$k]['invoice_damaged_amount'] = floatval($invoice_details[$k]['invoice_damaged_amount']) + $damaged_cost + $damaged_tax;
@@ -918,7 +923,6 @@ class PendinggrnController extends Controller
                     $invoice_details[$k]['edited_total_cost'] = floatval($invoice_details[$k]['edited_total_cost']) + $tot_cost;
                     $invoice_details[$k]['edited_total_tax'] = floatval($invoice_details[$k]['edited_total_tax']) + $tot_tax;
                     $invoice_details[$k]['edited_total_amount'] = floatval($invoice_details[$k]['edited_total_amount']) + $tot_cost + $tot_tax;
-                    $invoice_details[$k]['edited_excess_amount'] = floatval($invoice_details[$k]['edited_excess_amount']) + $excess_cost + $excess_tax;
                     $invoice_details[$k]['edited_shortage_amount'] = floatval($invoice_details[$k]['edited_shortage_amount']) + $shortage_cost + $shortage_tax;
                     $invoice_details[$k]['edited_expiry_amount'] = floatval($invoice_details[$k]['edited_expiry_amount']) + $expiry_cost + $expiry_tax;
                     $invoice_details[$k]['edited_damaged_amount'] = floatval($invoice_details[$k]['edited_damaged_amount']) + $damaged_cost + $damaged_tax;
@@ -928,7 +932,6 @@ class PendinggrnController extends Controller
                     $invoice_details[$k]['diff_total_cost'] = 0;
                     $invoice_details[$k]['diff_total_tax'] = 0;
                     $invoice_details[$k]['diff_total_amount'] = 0;
-                    $invoice_details[$k]['diff_excess_amount'] = 0;
                     $invoice_details[$k]['diff_shortage_amount'] = 0;
                     $invoice_details[$k]['diff_expiry_amount'] = 0;
                     $invoice_details[$k]['diff_damaged_amount'] = 0;
@@ -947,7 +950,6 @@ class PendinggrnController extends Controller
                     $invoice_details[$k]['invoice_total_tax'] = $tot_tax;
                     $invoice_details[$k]['invoice_other_charges'] = $other_charge;
                     $invoice_details[$k]['invoice_total_amount'] = $tot_cost + $tot_tax + $other_charge;
-                    $invoice_details[$k]['invoice_excess_amount'] = $excess_cost + $excess_tax;
                     $invoice_details[$k]['invoice_shortage_amount'] = $shortage_cost + $shortage_tax;
                     $invoice_details[$k]['invoice_expiry_amount'] = $expiry_cost + $expiry_tax;
                     $invoice_details[$k]['invoice_damaged_amount'] = $damaged_cost + $damaged_tax;
@@ -958,7 +960,6 @@ class PendinggrnController extends Controller
                     $invoice_details[$k]['edited_total_tax'] = $tot_tax;
                     $invoice_details[$k]['edited_other_charges'] = $other_charge;
                     $invoice_details[$k]['edited_total_amount'] = $tot_cost + $tot_tax + $other_charge;
-                    $invoice_details[$k]['edited_excess_amount'] = $excess_cost + $excess_tax;
                     $invoice_details[$k]['edited_shortage_amount'] = $shortage_cost + $shortage_tax;
                     $invoice_details[$k]['edited_expiry_amount'] = $expiry_cost + $expiry_tax;
                     $invoice_details[$k]['edited_damaged_amount'] = $damaged_cost + $damaged_tax;
@@ -968,7 +969,6 @@ class PendinggrnController extends Controller
                     $invoice_details[$k]['diff_total_cost'] = 0;
                     $invoice_details[$k]['diff_total_tax'] = 0;
                     $invoice_details[$k]['diff_total_amount'] = 0;
-                    $invoice_details[$k]['diff_excess_amount'] = 0;
                     $invoice_details[$k]['diff_shortage_amount'] = 0;
                     $invoice_details[$k]['diff_expiry_amount'] = 0;
                     $invoice_details[$k]['diff_damaged_amount'] = 0;
@@ -1018,11 +1018,6 @@ class PendinggrnController extends Controller
                     $invoice_tax[$l]['diff_cgst'] = 0;
                     $invoice_tax[$l]['diff_sgst'] = 0;
                     $invoice_tax[$l]['diff_igst'] = 0;
-                    $invoice_tax[$l]['excess_cost'] = floatval($invoice_tax[$l]['excess_cost']) + $excess_cost;
-                    $invoice_tax[$l]['excess_tax'] = floatval($invoice_tax[$l]['excess_tax']) + $excess_tax;
-                    $invoice_tax[$l]['excess_cgst'] = floatval($invoice_tax[$l]['excess_cgst']) + $excess_cgst;
-                    $invoice_tax[$l]['excess_sgst'] = floatval($invoice_tax[$l]['excess_sgst']) + $excess_sgst;
-                    $invoice_tax[$l]['excess_igst'] = floatval($invoice_tax[$l]['excess_igst']) + $excess_igst;
                     $invoice_tax[$l]['shortage_cost'] = floatval($invoice_tax[$l]['shortage_cost']) + $shortage_cost;
                     $invoice_tax[$l]['shortage_tax'] = floatval($invoice_tax[$l]['shortage_tax']) + $shortage_tax;
                     $invoice_tax[$l]['shortage_cgst'] = floatval($invoice_tax[$l]['shortage_cgst']) + $shortage_cgst;
@@ -1163,11 +1158,6 @@ class PendinggrnController extends Controller
                     $invoice_tax[$l]['diff_cgst'] = 0;
                     $invoice_tax[$l]['diff_sgst'] = 0;
                     $invoice_tax[$l]['diff_igst'] = 0;
-                    $invoice_tax[$l]['excess_cost'] = $excess_cost;
-                    $invoice_tax[$l]['excess_tax'] = $excess_tax;
-                    $invoice_tax[$l]['excess_cgst'] = $excess_cgst;
-                    $invoice_tax[$l]['excess_sgst'] = $excess_sgst;
-                    $invoice_tax[$l]['excess_igst'] = $excess_igst;
                     $invoice_tax[$l]['shortage_cost'] = $shortage_cost;
                     $invoice_tax[$l]['shortage_tax'] = $shortage_tax;
                     $invoice_tax[$l]['shortage_cgst'] = $shortage_cgst;
@@ -2228,7 +2218,11 @@ class PendinggrnController extends Controller
                 $total_credit_amt = 0;
                 $sr_no=1;
 
-                if($acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
+                if(($i+1)==count($acc_ledger_entries)){
+                    //do nothing
+                } else if($acc_ledger_entries[$i]["invoice_no"]!=$acc_ledger_entries[$i+1]["invoice_no"]){
+                    //do nothing
+                } else if($acc_ledger_entries[$i]["entry_type"]=="Total Amount"){
                     // $rows = $rows . '<tr class="bold-text text-right">
                     //                     <td colspan="6" style="text-align:left;">Deduction Entry</td>
                     //                 </tr>';
@@ -2381,6 +2375,20 @@ class PendinggrnController extends Controller
             // echo 'hii';
         }
 
+        $sql = "select A.gi_go_invoice_id, A.invoice_no, A.invoice_date, B.grn_id, B.vendor_id, 
+                C.edited_val as total_deduction from goods_inward_outward_invoices A 
+                left join grn B on (A.gi_go_ref_no = B.gi_id) left join acc_grn_entries C 
+                on (B.grn_id = C.grn_id and A.invoice_no = C.invoice_no) 
+                where B.grn_id = '$gi_id' and B.status = 'approved' and B.is_active = '1' and 
+                C.status = 'approved' and C.is_active = '1' and C.particular = 'Total Deduction' and 
+                C.edited_val>0";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $debit_note = $reader->readAll();
+        for($i=0; $i<count($debit_note); $i++) {
+            $data = $model->getDebitNoteDetails($debit_note[$i]['gi_go_invoice_id']);
+        }
+
         $this->redirect(array('pendinggrn/ledger', 'id'=>$gi_id));
     }
 
@@ -2407,7 +2415,7 @@ class PendinggrnController extends Controller
         echo json_encode($result);
     }
 
-    public function actionGetinvoicedeductiondetails($gi_id, $ded_type, $tax_zone_code){   
+    public function actionGetinvoicedeductiondetails($gi_id, $ded_type, $tax_zone_code){ 
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
 
@@ -2605,7 +2613,7 @@ class PendinggrnController extends Controller
                     // $po_tax = $qty*floatval($rows[$i]["po_unit_tax"]);
                     // $po_total = $po_cost_excl_tax + $po_tax;
 
-                    $po_total = floatval($rows[$i]["po_cost_price_inc_tax"]);
+                    $po_total = floatval($rows[$i]["po_unit_rate_incl_tax"]);
                     $diff_cost_excl_tax = round(floatval($rows[$i]["margindiff_cost"]),2);
                 }
                 

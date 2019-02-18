@@ -7,6 +7,10 @@ use yii\base\Model;
 use yii\web\UploadedFile;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use phpoffice\phpexcel\Classes\PHPExcel as PHPExcel;
+use phpoffice\phpexcel\Classes\PHPExcel\PHPExcel_IOFactory as PHPExcel_IOFactory;
+use phpoffice\phpexcel\Classes\PHPExcel\Cell\PHPExcel_Cell_DataValidation as PHPExcel_Cell_DataValidation;
+use phpoffice\phpexcel\Classes\PHPExcel\Style\PHPExcel_Style_Protection as PHPExcel_Worksheet_Protection;
 
 class SalesUpload extends Model
 {
@@ -105,7 +109,7 @@ class SalesUpload extends Model
     }
 
     public function check_no($num) {
-        $pattern = '/^(0*[0-9][0-9.,]*)$/';
+        $pattern = '/^-?(0*[0-9][0-9.,]*)$/';
         return preg_match($pattern, $num);
     }
 
@@ -195,6 +199,8 @@ class SalesUpload extends Model
             $count = Yii::$app->db->createCommand()
                                 ->update($tableName, $array, "id = '".$id."'")
                                 ->execute();
+
+            $this->upload_sales();
         }
 
         return true;
@@ -213,378 +219,960 @@ class SalesUpload extends Model
         $reader = $command->query();
         $data = $reader->readAll();
 
+        // echo json_encode($data);
+        // echo '<br/>';
+
         for($i=0; $i<count($data); $i++) {
             $ref_file_id = $data[$i]['id'];
             $fileName = $data[$i]['original_file'];
-            $objPHPExcel = \moonland\phpexcel\Excel::import($fileName);
+            $objPHPExcel = new \PHPExcel();
+            $objPHPExcel = \PHPExcel_IOFactory::load($fileName);
+            $highestrow = $objPHPExcel->setActiveSheetIndex(0)->getHighestRow();
             $reject_file = false;
             $highlight_file = false;
+            $bl_reject = false;
+            $bl_highlight = false;
 
-            $r_row = 1;
-            $reject_spreadsheet = new Spreadsheet();
-            $reject_sheet = $reject_spreadsheet->getActiveSheet();
-            $reject_sheet->setCellValue('A'.$r_row, 'Market place');
-            $reject_sheet->setCellValue('B'.$r_row, 'Ship from GSTin');
-            $reject_sheet->setCellValue('C'.$r_row, 'Ship from State');
-            $reject_sheet->setCellValue('D'.$r_row, 'Ship to GSTin');
-            $reject_sheet->setCellValue('E'.$r_row, 'Amazon state');
-            $reject_sheet->setCellValue('F'.$r_row, 'Pin code');
-            $reject_sheet->setCellValue('G'.$r_row, 'Invoice no');
-            $reject_sheet->setCellValue('H'.$r_row, 'Invoice date');
-            $reject_sheet->setCellValue('I'.$r_row, 'Customer name');
-            $reject_sheet->setCellValue('J'.$r_row, 'SKU');
-            $reject_sheet->setCellValue('K'.$r_row, 'Item description');
-            $reject_sheet->setCellValue('L'.$r_row, 'HSN Code');
-            $reject_sheet->setCellValue('M'.$r_row, 'Quantity');
-            $reject_sheet->setCellValue('N'.$r_row, 'Rate');
-            $reject_sheet->setCellValue('O'.$r_row, 'Sales incl GST');
-            $reject_sheet->setCellValue('P'.$r_row, 'Sales excl GST');
-            $reject_sheet->setCellValue('Q'.$r_row, 'Total GST');
-            $reject_sheet->setCellValue('R'.$r_row, 'IGST Rate');
-            $reject_sheet->setCellValue('S'.$r_row, 'IGST Amount');
-            $reject_sheet->setCellValue('T'.$r_row, 'CGST Rate');
-            $reject_sheet->setCellValue('U'.$r_row, 'CGST Amount');
-            $reject_sheet->setCellValue('V'.$r_row, 'SGST Rate');
-            $reject_sheet->setCellValue('W'.$r_row, 'SGST Amount');
-            $reject_sheet->setCellValue('X'.$r_row, 'Flag');
-            $reject_sheet->setCellValue('Y'.$r_row, 'Remarks');
+            // $r_row = 1;
+            // /*$reject_spreadsheet = $objPHPExcel->createSheet(1);*/
+            // $objPHPExcel1 = new \PHPExcel();
+            // /*$objPHPExcel1->createSheet();*/
+            // $reject_sheet = $objPHPExcel1->setActiveSheetIndex(0);
+            // $reject_sheet->setCellValue('A'.$r_row, 'Market place');
+            // $reject_sheet->setCellValue('B'.$r_row, 'Ship from GSTin');
+            // $reject_sheet->setCellValue('C'.$r_row, 'Ship from State');
+            // $reject_sheet->setCellValue('D'.$r_row, 'Ship to GSTin');
+            // $reject_sheet->setCellValue('E'.$r_row, 'Amazon state');
+            // $reject_sheet->setCellValue('F'.$r_row, 'Pin code');
+            // $reject_sheet->setCellValue('G'.$r_row, 'Invoice no');
+            // $reject_sheet->setCellValue('H'.$r_row, 'Invoice date');
+            // $reject_sheet->setCellValue('I'.$r_row, 'Customer name');
+            // $reject_sheet->setCellValue('J'.$r_row, 'SKU');
+            // $reject_sheet->setCellValue('K'.$r_row, 'Item description');
+            // $reject_sheet->setCellValue('L'.$r_row, 'HSN Code');
+            // $reject_sheet->setCellValue('M'.$r_row, 'Quantity');
+            // $reject_sheet->setCellValue('N'.$r_row, 'Rate');
+            // $reject_sheet->setCellValue('O'.$r_row, 'Sales incl GST');
+            // $reject_sheet->setCellValue('P'.$r_row, 'Sales excl GST');
+            // $reject_sheet->setCellValue('Q'.$r_row, 'Total GST');
+            // $reject_sheet->setCellValue('R'.$r_row, 'IGST Rate');
+            // $reject_sheet->setCellValue('S'.$r_row, 'IGST Amount');
+            // $reject_sheet->setCellValue('T'.$r_row, 'CGST Rate');
+            // $reject_sheet->setCellValue('U'.$r_row, 'CGST Amount');
+            // $reject_sheet->setCellValue('V'.$r_row, 'SGST Rate');
+            // $reject_sheet->setCellValue('W'.$r_row, 'SGST Amount');
+            // $reject_sheet->setCellValue('X'.$r_row, 'Flag');
+            // $reject_sheet->setCellValue('Y'.$r_row, 'Remarks');
 
-            $h_row = 1;
-            $highlight_spreadsheet = new Spreadsheet();
-            $highlight_sheet = $highlight_spreadsheet->getActiveSheet();
-            $highlight_sheet->setCellValue('A'.$h_row, 'Market place');
-            $highlight_sheet->setCellValue('B'.$h_row, 'Ship from GSTin');
-            $highlight_sheet->setCellValue('C'.$h_row, 'Ship from State');
-            $highlight_sheet->setCellValue('D'.$h_row, 'Ship to GSTin');
-            $highlight_sheet->setCellValue('E'.$h_row, 'Amazon state');
-            $highlight_sheet->setCellValue('F'.$h_row, 'Pin code');
-            $highlight_sheet->setCellValue('G'.$h_row, 'Invoice no');
-            $highlight_sheet->setCellValue('H'.$h_row, 'Invoice date');
-            $highlight_sheet->setCellValue('I'.$h_row, 'Customer name');
-            $highlight_sheet->setCellValue('J'.$h_row, 'SKU');
-            $highlight_sheet->setCellValue('K'.$h_row, 'Item description');
-            $highlight_sheet->setCellValue('L'.$h_row, 'HSN Code');
-            $highlight_sheet->setCellValue('M'.$h_row, 'Quantity');
-            $highlight_sheet->setCellValue('N'.$h_row, 'Rate');
-            $highlight_sheet->setCellValue('O'.$h_row, 'Sales incl GST');
-            $highlight_sheet->setCellValue('P'.$h_row, 'Sales excl GST');
-            $highlight_sheet->setCellValue('Q'.$h_row, 'Total GST');
-            $highlight_sheet->setCellValue('R'.$h_row, 'IGST Rate');
-            $highlight_sheet->setCellValue('S'.$h_row, 'IGST Amount');
-            $highlight_sheet->setCellValue('T'.$h_row, 'CGST Rate');
-            $highlight_sheet->setCellValue('U'.$h_row, 'CGST Amount');
-            $highlight_sheet->setCellValue('V'.$h_row, 'SGST Rate');
-            $highlight_sheet->setCellValue('W'.$h_row, 'SGST Amount');
-            $highlight_sheet->setCellValue('X'.$h_row, 'Flag');
-            $highlight_sheet->setCellValue('Y'.$h_row, 'Remarks');
+            // $h_row = 1;
+            // /*$highlight_spreadsheet = $objPHPExcel->createSheet(2);*/
+            // $objPHPExcel2 = new \PHPExcel();
+            // /*$objPHPExcel2->createSheet();*/
+            // $highlight_sheet = $objPHPExcel2->setActiveSheetIndex(0);
+            // $highlight_sheet->setCellValue('A'.$h_row, 'Market place');
+            // $highlight_sheet->setCellValue('B'.$h_row, 'Ship from GSTin');
+            // $highlight_sheet->setCellValue('C'.$h_row, 'Ship from State');
+            // $highlight_sheet->setCellValue('D'.$h_row, 'Ship to GSTin');
+            // $highlight_sheet->setCellValue('E'.$h_row, 'Amazon state');
+            // $highlight_sheet->setCellValue('F'.$h_row, 'Pin code');
+            // $highlight_sheet->setCellValue('G'.$h_row, 'Invoice no');
+            // $highlight_sheet->setCellValue('H'.$h_row, 'Invoice date');
+            // $highlight_sheet->setCellValue('I'.$h_row, 'Customer name');
+            // $highlight_sheet->setCellValue('J'.$h_row, 'SKU');
+            // $highlight_sheet->setCellValue('K'.$h_row, 'Item description');
+            // $highlight_sheet->setCellValue('L'.$h_row, 'HSN Code');
+            // $highlight_sheet->setCellValue('M'.$h_row, 'Quantity');
+            // $highlight_sheet->setCellValue('N'.$h_row, 'Rate');
+            // $highlight_sheet->setCellValue('O'.$h_row, 'Sales incl GST');
+            // $highlight_sheet->setCellValue('P'.$h_row, 'Sales excl GST');
+            // $highlight_sheet->setCellValue('Q'.$h_row, 'Total GST');
+            // $highlight_sheet->setCellValue('R'.$h_row, 'IGST Rate');
+            // $highlight_sheet->setCellValue('S'.$h_row, 'IGST Amount');
+            // $highlight_sheet->setCellValue('T'.$h_row, 'CGST Rate');
+            // $highlight_sheet->setCellValue('U'.$h_row, 'CGST Amount');
+            // $highlight_sheet->setCellValue('V'.$h_row, 'SGST Rate');
+            // $highlight_sheet->setCellValue('W'.$h_row, 'SGST Amount');
+            // $highlight_sheet->setCellValue('X'.$h_row, 'Flag');
+            // $highlight_sheet->setCellValue('Y'.$h_row, 'Remarks');
 
-            for($j=0; $j<count($objPHPExcel); $j++) {
-                $bl_reject = false;
-                $bl_highlight = false;
-                $bl_pincode = false;
-                $ship_to_state[$j] = '';
-                $remarks[$j] = '';
-                $highlight_remarks[$j] = '';
+            $k = 0;
 
-                $marketplace_id[$j] = '';
-                $market_place[$j] = $objPHPExcel[$j]['Market place'];
-                $ship_from_gstin[$j] = $objPHPExcel[$j]['Ship from GSTin'];
-                $ship_from_state[$j] = $objPHPExcel[$j]['Ship from State'];
-                $ship_to_gstin[$j] = $objPHPExcel[$j]['Ship to GSTin'];
-                $amazon_state[$j] = $objPHPExcel[$j]['Amazon state'];
-                $pin_code[$j] = $objPHPExcel[$j]['Pin code'];
-                $invoice_no[$j] = $objPHPExcel[$j]['Invoice no'];
-                $invoice_date[$j] = $objPHPExcel[$j]['Invoice date'];
-                $customer_name[$j] = $objPHPExcel[$j]['Customer name'];
-                $sku[$j] = $objPHPExcel[$j]['SKU'];
-                $item_desc[$j] = $objPHPExcel[$j]['Item description'];
-                $hsn_code[$j] = $objPHPExcel[$j]['HSN Code'];
-                $quantity[$j] = $objPHPExcel[$j]['Quantity'];
-                $rate[$j] = $objPHPExcel[$j]['Rate'];
-                $sales_incl_gst[$j] = $objPHPExcel[$j]['Sales incl GST'];
-                $sales_excl_gst[$j] = $objPHPExcel[$j]['Sales excl GST'];
-                $total_gst[$j] = $objPHPExcel[$j]['Total GST'];
-                $igst_rate[$j] = $objPHPExcel[$j]['IGST Rate'];
-                $igst_amount[$j] = $objPHPExcel[$j]['IGST Amount'];
-                $cgst_rate[$j] = $objPHPExcel[$j]['CGST Rate'];
-                $cgst_amount[$j] = $objPHPExcel[$j]['CGST Amount'];
-                $sgst_rate[$j] = $objPHPExcel[$j]['SGST Rate'];
-                $sgst_amount[$j] = $objPHPExcel[$j]['SGST Amount'];
-                $flag[$j] = $objPHPExcel[$j]['Flag'];
+            // echo $highestrow;
+            // echo '<br/>';
 
-                $r_row += 1;
-                $reject_sheet->setCellValue('A'.$r_row, $objPHPExcel[$j]['Market place']);
-                $reject_sheet->setCellValue('B'.$r_row, $objPHPExcel[$j]['Ship from GSTin']);
-                $reject_sheet->setCellValue('C'.$r_row, $objPHPExcel[$j]['Ship from State']);
-                $reject_sheet->setCellValue('D'.$r_row, $objPHPExcel[$j]['Ship to GSTin']);
-                $reject_sheet->setCellValue('E'.$r_row, $objPHPExcel[$j]['Amazon state']);
-                $reject_sheet->setCellValue('F'.$r_row, $objPHPExcel[$j]['Pin code']);
-                $reject_sheet->setCellValue('G'.$r_row, $objPHPExcel[$j]['Invoice no']);
-                $reject_sheet->setCellValue('H'.$r_row, $objPHPExcel[$j]['Invoice date']);
-                $reject_sheet->setCellValue('I'.$r_row, $objPHPExcel[$j]['Customer name']);
-                $reject_sheet->setCellValue('J'.$r_row, $objPHPExcel[$j]['SKU']);
-                $reject_sheet->setCellValue('K'.$r_row, $objPHPExcel[$j]['Item description']);
-                $reject_sheet->setCellValue('L'.$r_row, $objPHPExcel[$j]['HSN Code']);
-                $reject_sheet->setCellValue('M'.$r_row, $objPHPExcel[$j]['Quantity']);
-                $reject_sheet->setCellValue('N'.$r_row, $objPHPExcel[$j]['Rate']);
-                $reject_sheet->setCellValue('O'.$r_row, $objPHPExcel[$j]['Sales incl GST']);
-                $reject_sheet->setCellValue('P'.$r_row, $objPHPExcel[$j]['Sales excl GST']);
-                $reject_sheet->setCellValue('Q'.$r_row, $objPHPExcel[$j]['Total GST']);
-                $reject_sheet->setCellValue('R'.$r_row, $objPHPExcel[$j]['IGST Rate']);
-                $reject_sheet->setCellValue('S'.$r_row, $objPHPExcel[$j]['IGST Amount']);
-                $reject_sheet->setCellValue('T'.$r_row, $objPHPExcel[$j]['CGST Rate']);
-                $reject_sheet->setCellValue('U'.$r_row, $objPHPExcel[$j]['CGST Amount']);
-                $reject_sheet->setCellValue('V'.$r_row, $objPHPExcel[$j]['SGST Rate']);
-                $reject_sheet->setCellValue('W'.$r_row, $objPHPExcel[$j]['SGST Amount']);
-                $reject_sheet->setCellValue('X'.$r_row, $objPHPExcel[$j]['Flag']);
+            $sql = "delete from acc_temp_sales_file_items where is_active = '1' and company_id = '$company_id' 
+                    and ref_file_id = '".$ref_file_id."'";
+            Yii::$app->db->createCommand($sql)->query();
 
-                $h_row += 1;
-                $highlight_sheet->setCellValue('A'.$h_row, $objPHPExcel[$j]['Market place']);
-                $highlight_sheet->setCellValue('B'.$h_row, $objPHPExcel[$j]['Ship from GSTin']);
-                $highlight_sheet->setCellValue('C'.$h_row, $objPHPExcel[$j]['Ship from State']);
-                $highlight_sheet->setCellValue('D'.$h_row, $objPHPExcel[$j]['Ship to GSTin']);
-                $highlight_sheet->setCellValue('E'.$h_row, $objPHPExcel[$j]['Amazon state']);
-                $highlight_sheet->setCellValue('F'.$h_row, $objPHPExcel[$j]['Pin code']);
-                $highlight_sheet->setCellValue('G'.$h_row, $objPHPExcel[$j]['Invoice no']);
-                $highlight_sheet->setCellValue('H'.$h_row, $objPHPExcel[$j]['Invoice date']);
-                $highlight_sheet->setCellValue('I'.$h_row, $objPHPExcel[$j]['Customer name']);
-                $highlight_sheet->setCellValue('J'.$h_row, $objPHPExcel[$j]['SKU']);
-                $highlight_sheet->setCellValue('K'.$h_row, $objPHPExcel[$j]['Item description']);
-                $highlight_sheet->setCellValue('L'.$h_row, $objPHPExcel[$j]['HSN Code']);
-                $highlight_sheet->setCellValue('M'.$h_row, $objPHPExcel[$j]['Quantity']);
-                $highlight_sheet->setCellValue('N'.$h_row, $objPHPExcel[$j]['Rate']);
-                $highlight_sheet->setCellValue('O'.$h_row, $objPHPExcel[$j]['Sales incl GST']);
-                $highlight_sheet->setCellValue('P'.$h_row, $objPHPExcel[$j]['Sales excl GST']);
-                $highlight_sheet->setCellValue('Q'.$h_row, $objPHPExcel[$j]['Total GST']);
-                $highlight_sheet->setCellValue('R'.$h_row, $objPHPExcel[$j]['IGST Rate']);
-                $highlight_sheet->setCellValue('S'.$h_row, $objPHPExcel[$j]['IGST Amount']);
-                $highlight_sheet->setCellValue('T'.$h_row, $objPHPExcel[$j]['CGST Rate']);
-                $highlight_sheet->setCellValue('U'.$h_row, $objPHPExcel[$j]['CGST Amount']);
-                $highlight_sheet->setCellValue('V'.$h_row, $objPHPExcel[$j]['SGST Rate']);
-                $highlight_sheet->setCellValue('W'.$h_row, $objPHPExcel[$j]['SGST Amount']);
-                $highlight_sheet->setCellValue('X'.$h_row, $objPHPExcel[$j]['Flag']);
+            for($j=2; $j<=$highestrow; $j++) {
+                $market_place_name = $objPHPExcel->getActiveSheet()->getCell('A'.$j)->getValue();
 
-                $sql = "select * from internal_warehouse_master where is_active = '1' and company_id = '$company_id' 
-                        and gst_id = '".$ship_from_gstin[$j]."'";
-                $command = Yii::$app->db->createCommand($sql);
-                $reader = $command->query();
-                $data2 = $reader->readAll();
-                if(count($data2)==0){
-                    $bl_reject = true;
-                    $remarks[$j] = $remarks[$j] . "Ship from GSTin not found in warehouse master. ";
+                if($market_place_name!=""){
+                    // $array['created_by'] = $curusr;
+                    // $array['created_date'] = $now;
+                    // $count = Yii::$app->db->createCommand()
+                    //             ->insert("acc_temp_sales_file_items", $array)
+                    //             ->execute();
+
+                    // $bl_reject = false;
+                    // $bl_highlight = false;
+                    // $bl_pincode = false;
+                    // $ship_to_state[$k] = '';
+                    // $remarks[$k] = '';
+                    // $highlight_remarks[$k] = '';
+
+                    // $marketplace_id[$k] = '';
+                    // $market_place[$k] = $objPHPExcel->getActiveSheet()->getCell('A'.$j)->getValue();
+                    // $ship_from_gstin[$k] = $objPHPExcel->getActiveSheet()->getCell('B'.$j)->getValue();
+                    // $ship_from_state[$k] = $objPHPExcel->getActiveSheet()->getCell('C'.$j)->getValue();
+                    // $ship_to_gstin[$k] = $objPHPExcel->getActiveSheet()->getCell('D'.$j)->getValue();
+                    // $amazon_state[$k] = $objPHPExcel->getActiveSheet()->getCell('E'.$j)->getValue();
+                    // $pin_code[$k] = $objPHPExcel->getActiveSheet()->getCell('F'.$j)->getValue();
+                    // $invoice_no[$k] = $objPHPExcel->getActiveSheet()->getCell('G'.$j)->getValue();
+                    // $invoice_date[$k] = $objPHPExcel->getActiveSheet()->getCell('H'.$j)->getValue();
+                    // $customer_name[$k] =$objPHPExcel->getActiveSheet()->getCell('I'.$j)->getValue();
+                    // $sku[$k] = $objPHPExcel->getActiveSheet()->getCell('J'.$j)->getValue();
+                    // $item_desc[$k] = $objPHPExcel->getActiveSheet()->getCell('K'.$j)->getValue();
+                    // $hsn_code[$k] = $objPHPExcel->getActiveSheet()->getCell('L'.$j)->getValue();
+                    // $quantity[$k] = $objPHPExcel->getActiveSheet()->getCell('M'.$j)->getValue();
+                    // $rate[$k] = $objPHPExcel->getActiveSheet()->getCell('N'.$j)->getValue();
+                    // $sales_incl_gst[$k] = $objPHPExcel->getActiveSheet()->getCell('O'.$j)->getValue();
+                    // $sales_excl_gst[$k] = $objPHPExcel->getActiveSheet()->getCell('P'.$j)->getValue();
+                    // $total_gst[$k] = $objPHPExcel->getActiveSheet()->getCell('Q'.$j)->getValue();
+                    // $igst_rate[$k] = $objPHPExcel->getActiveSheet()->getCell('R'.$j)->getValue();
+                    // $igst_amount[$k] = $objPHPExcel->getActiveSheet()->getCell('S'.$j)->getValue();
+                    // $cgst_rate[$k] = $objPHPExcel->getActiveSheet()->getCell('T'.$j)->getValue();
+                    // $cgst_amount[$k] = $objPHPExcel->getActiveSheet()->getCell('U'.$j)->getValue();
+                    // $sgst_rate[$k] = $objPHPExcel->getActiveSheet()->getCell('V'.$j)->getValue();
+                    // $sgst_amount[$k] = $objPHPExcel->getActiveSheet()->getCell('W'.$j)->getValue();
+                    // $flag[$k] = $objPHPExcel->getActiveSheet()->getCell('X'.$j)->getValue();
+
+                    // $r_row += 1;
+                    // $reject_sheet->setCellValue('A'.$r_row, $objPHPExcel->getActiveSheet()->getCell('A'.$j)->getValue());
+                    // $reject_sheet->setCellValue('B'.$r_row, $objPHPExcel->getActiveSheet()->getCell('B'.$j)->getValue());
+                    // $reject_sheet->setCellValue('C'.$r_row, $objPHPExcel->getActiveSheet()->getCell('C'.$j)->getValue());
+                    // $reject_sheet->setCellValue('D'.$r_row, $objPHPExcel->getActiveSheet()->getCell('D'.$j)->getValue());
+                    // $reject_sheet->setCellValue('E'.$r_row, $objPHPExcel->getActiveSheet()->getCell('E'.$j)->getValue());
+                    // $reject_sheet->setCellValue('F'.$r_row, $objPHPExcel->getActiveSheet()->getCell('F'.$j)->getValue());
+                    // $reject_sheet->setCellValue('G'.$r_row, $objPHPExcel->getActiveSheet()->getCell('G'.$j)->getValue());
+                    // $reject_sheet->setCellValue('H'.$r_row, $objPHPExcel->getActiveSheet()->getCell('H'.$j)->getValue());
+                    // $reject_sheet->setCellValue('I'.$r_row, $objPHPExcel->getActiveSheet()->getCell('I'.$j)->getValue());
+                    // $reject_sheet->setCellValue('J'.$r_row, $objPHPExcel->getActiveSheet()->getCell('J'.$j)->getValue());
+                    // $reject_sheet->setCellValue('K'.$r_row, $objPHPExcel->getActiveSheet()->getCell('K'.$j)->getValue());
+                    // $reject_sheet->setCellValue('L'.$r_row, $objPHPExcel->getActiveSheet()->getCell('L'.$j)->getValue());
+                    // $reject_sheet->setCellValue('M'.$r_row, $objPHPExcel->getActiveSheet()->getCell('M'.$j)->getValue());
+                    // $reject_sheet->setCellValue('N'.$r_row, $objPHPExcel->getActiveSheet()->getCell('N'.$j)->getValue());
+                    // $reject_sheet->setCellValue('O'.$r_row, $objPHPExcel->getActiveSheet()->getCell('O'.$j)->getValue());
+                    // $reject_sheet->setCellValue('P'.$r_row, $objPHPExcel->getActiveSheet()->getCell('P'.$j)->getValue());
+                    // $reject_sheet->setCellValue('Q'.$r_row, $objPHPExcel->getActiveSheet()->getCell('Q'.$j)->getValue());
+                    // $reject_sheet->setCellValue('R'.$r_row, $objPHPExcel->getActiveSheet()->getCell('R'.$j)->getValue());
+                    // $reject_sheet->setCellValue('S'.$r_row, $objPHPExcel->getActiveSheet()->getCell('S'.$j)->getValue());
+                    // $reject_sheet->setCellValue('T'.$r_row, $objPHPExcel->getActiveSheet()->getCell('T'.$j)->getValue());
+                    // $reject_sheet->setCellValue('U'.$r_row, $objPHPExcel->getActiveSheet()->getCell('U'.$j)->getValue());
+                    // $reject_sheet->setCellValue('V'.$r_row, $objPHPExcel->getActiveSheet()->getCell('V'.$j)->getValue());
+                    // $reject_sheet->setCellValue('W'.$r_row, $objPHPExcel->getActiveSheet()->getCell('W'.$j)->getValue());
+                    // $reject_sheet->setCellValue('X'.$r_row, $objPHPExcel->getActiveSheet()->getCell('X'.$j)->getValue());
+                    
+                    // $h_row += 1;
+                    // $highlight_sheet->setCellValue('A'.$h_row, $objPHPExcel->getActiveSheet()->getCell('A'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('B'.$h_row, $objPHPExcel->getActiveSheet()->getCell('B'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('C'.$h_row, $objPHPExcel->getActiveSheet()->getCell('C'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('D'.$h_row, $objPHPExcel->getActiveSheet()->getCell('D'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('E'.$h_row, $objPHPExcel->getActiveSheet()->getCell('E'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('F'.$h_row, $objPHPExcel->getActiveSheet()->getCell('F'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('G'.$h_row, $objPHPExcel->getActiveSheet()->getCell('G'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('H'.$h_row, $objPHPExcel->getActiveSheet()->getCell('H'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('I'.$h_row, $objPHPExcel->getActiveSheet()->getCell('I'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('J'.$h_row, $objPHPExcel->getActiveSheet()->getCell('J'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('K'.$h_row, $objPHPExcel->getActiveSheet()->getCell('K'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('L'.$h_row, $objPHPExcel->getActiveSheet()->getCell('L'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('M'.$h_row, $objPHPExcel->getActiveSheet()->getCell('M'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('N'.$h_row, $objPHPExcel->getActiveSheet()->getCell('N'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('O'.$h_row, $objPHPExcel->getActiveSheet()->getCell('O'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('P'.$h_row, $objPHPExcel->getActiveSheet()->getCell('P'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('Q'.$h_row, $objPHPExcel->getActiveSheet()->getCell('Q'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('R'.$h_row, $objPHPExcel->getActiveSheet()->getCell('R'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('S'.$h_row, $objPHPExcel->getActiveSheet()->getCell('S'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('T'.$h_row, $objPHPExcel->getActiveSheet()->getCell('T'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('U'.$h_row, $objPHPExcel->getActiveSheet()->getCell('U'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('V'.$h_row, $objPHPExcel->getActiveSheet()->getCell('V'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('W'.$h_row, $objPHPExcel->getActiveSheet()->getCell('W'.$j)->getValue());
+                    // $highlight_sheet->setCellValue('X'.$h_row, $objPHPExcel->getActiveSheet()->getCell('X'.$j)->getValue());
+                    
+                    // $sql = "select * from internal_warehouse_master where is_active = '1' and company_id = '$company_id' 
+                    //         and gst_id = '".$ship_from_gstin[$k]."'";
+                    // $command = Yii::$app->db->createCommand($sql);
+                    // $reader = $command->query();
+                    // $data2 = $reader->readAll();
+                    // if(count($data2)==0){
+                    //     $bl_reject = true;
+                    //     $remarks[$k] = $remarks[$k] . "Ship from GSTin not found in warehouse master. ";
+                    // }
+
+                    // $sql = "select * from acc_master where legal_name = '".$market_place[$k]."' and type = 'Marketplace'";
+                    // $command = Yii::$app->db->createCommand($sql);
+                    // $reader = $command->query();
+                    // $data2 = $reader->readAll();
+                    // if(count($data2)==0){
+                    //     $bl_reject = true;
+                    //     $remarks[$k] = $remarks[$k] . "Marketplace not found. ";
+                    // } else {
+                    //     $marketplace_id[$k] = $data2[0]['id'];
+                    // }
+
+                    // $sql = "select * from pincode_master where pincode = '".$pin_code[$k]."'";
+                    // $command = Yii::$app->db->createCommand($sql);
+                    // $reader = $command->query();
+                    // $data2 = $reader->readAll();
+                    // if(count($data2)>0){
+                    //     $ship_to_state[$k] = $data2[0]['state_name'];
+                    // }
+
+                    // if($ship_to_state[$k]==''){
+                    //     $sql = "select * from acc_amazon_state_master where is_active = '1' and company_id = '$company_id' 
+                    //             and amazon_state = '".$amazon_state[$k]."'";
+                    //     $command = Yii::$app->db->createCommand($sql);
+                    //     $reader = $command->query();
+                    //     $data2 = $reader->readAll();
+                    //     if(count($data2)>0){
+                    //         $ship_to_state[$k] = $data2[0]['erp_state'];
+                    //         if($ship_to_state[$k]!='' && $pin_code[$k]!=''){
+                    //             $this->insert_pincode($ship_to_state[$k], $pin_code[$k]);
+                    //         }
+                    //     }
+                    // }
+
+                    // if($ship_to_state[$k]==''){
+                    //     $bl_reject = true;
+                    //     $remarks[$k] = $remarks[$k] . "Pincode not found. ";
+                    // }
+
+                    // if($ship_to_gstin[$k]==''){
+                    //     $sales_type[$k] = 'B2C';
+                    // } else {
+                    //     $sales_type[$k] = 'B2B';
+
+                    //     $highlight_remarks[$k] = $this->check_gst_no_format($ship_to_gstin[$k], $ship_to_state[$k]);
+                    //     if($highlight_remarks[$k]!=''){
+                    //         $bl_highlight = true;
+                    //     }
+                    // }
+
+                    // $new_hsn_code[$k] = '';
+                    // if($sku[$k]!=''){
+                    //     $sql = "select * from product_master where is_active = '1' and company_id = '$company_id' 
+                    //             and sku_internal_code = '".$sku[$k]."'";
+                    //     $command = Yii::$app->db->createCommand($sql);
+                    //     $reader = $command->query();
+                    //     $data2 = $reader->readAll();
+                    //     if(count($data2)>0){
+                    //         $new_hsn_code[$k] = $data2[0]['hsn_code'];
+                    //     }
+                    // }
+
+                    // if($hsn_code[$k] == '' || $hsn_code[$k]==null){
+                    //     $bl_highlight = true;
+                    //     $highlight_remarks[$k] = $highlight_remarks[$k] . "HSN Code is empty. ";
+                    // } else if($new_hsn_code[$k] == '' || $new_hsn_code[$k]==null){
+                    //     $bl_highlight = true;
+                    //     $highlight_remarks[$k] = $highlight_remarks[$k] . "HSN Code not found in Product Master. ";
+                    // } else if($new_hsn_code[$k] != $hsn_code[$k]){
+                    //     $bl_highlight = true;
+                    //     $highlight_remarks[$k] = $highlight_remarks[$k] . "HSN Code is different. ";
+                    // }
+
+                    // if($rate[$k]!=''){
+                    //     if($this->check_no($rate[$k])==false){
+                    //         $bl_reject = true;
+                    //         $remarks[$k] = $remarks[$k] . "Rate is not number. ";
+                    //     }
+                    // }
+                    // if($quantity[$k]!=''){
+                    //     if($this->check_no($quantity[$k])==false){
+                    //         $bl_reject = true;
+                    //         $remarks[$k] = $remarks[$k] . "Quantity is not number. ";
+                    //     }
+                    // }
+                    // if($sales_incl_gst[$k]!=''){
+                    //     if($this->check_no($sales_incl_gst[$k])==false){
+                    //         $bl_reject = true;
+                    //         $remarks[$k] = $remarks[$k] . "Sales Incl GST is not number. ";
+                    //     }
+                    // }
+                    // if($sales_excl_gst[$k]!=''){
+                    //     if($this->check_no($sales_excl_gst[$k])==false){
+                    //         $bl_reject = true;
+                    //         $remarks[$k] = $remarks[$k] . "Sales Excl GST is not number. ";
+                    //     }
+                    // }
+                    // if($total_gst[$k]!=''){
+                    //     if($this->check_no($total_gst[$k])==false){
+                    //         $bl_reject = true;
+                    //         $remarks[$k] = $remarks[$k] . "Total GST is not number. ";
+                    //     }
+                    // }
+                    // if($igst_rate[$k]!=''){
+                    //     if($this->check_no($igst_rate[$k])==false){
+                    //         $bl_reject = true;
+                    //         $remarks[$k] = $remarks[$k] . "IGST Rate is not number. ";
+                    //     }
+                    // }
+                    // if($igst_amount[$k]!=''){
+                    //     if($this->check_no($igst_amount[$k])==false){
+                    //         $bl_reject = true;
+                    //         $remarks[$k] = $remarks[$k] . "IGST Amount is not number. ";
+                    //     }
+                    // }
+                    // if($cgst_rate[$k]!=''){
+                    //     if($this->check_no($cgst_rate[$k])==false){
+                    //         $bl_reject = true;
+                    //         $remarks[$k] = $remarks[$k] . "CGST Rate is not number. ";
+                    //     }
+                    // }
+                    // if($cgst_amount[$k]!=''){
+                    //     if($this->check_no($cgst_amount[$k])==false){
+                    //         $bl_reject = true;
+                    //         $remarks[$k] = $remarks[$k] . "CGST Amount is not number. ";
+                    //     }
+                    // }
+                    // if($sgst_rate[$k]!=''){
+                    //     if($this->check_no($sgst_rate[$k])==false){
+                    //         $bl_reject = true;
+                    //         $remarks[$k] = $remarks[$k] . "SGST Rate is not number. ";
+                    //     }
+                    // }
+                    // if($sgst_amount[$k]!=''){
+                    //     if($this->check_no($sgst_amount[$k])==false){
+                    //         $bl_reject = true;
+                    //         $remarks[$k] = $remarks[$k] . "SGST Amount is not number. ";
+                    //     }
+                    // }
+
+                    // if($flag[$k]!='0' && $flag[$k]!='1'){
+                    //     $bl_reject = true;
+                    //     $remarks[$k] = $remarks[$k] . "Flag should be 0 or 1. ";
+                    // }
+
+                    // if($bl_reject==true) {
+                    //     // echo 'rejected';
+                    //     // echo '<br/>';
+                    //     // echo $remarks[$k];
+                    //     // echo '<br/>';
+                    //     $reject_sheet->setCellValue('Y'.$r_row, $remarks[$k]);
+                    //     $reject_file = true;
+                    // }
+                    // if($bl_highlight==true) {
+                    //     // echo $highlight_remarks[$k].'<br/>';
+                    //     $highlight_sheet->setCellValue('Y'.$h_row, $highlight_remarks[$k]);
+                    //     $highlight_file = true;
+                    // }
+
+                    $bl_reject = false;
+                    $bl_highlight = false;
+
+                    $ship_to_state = '';
+                    $remarks = '';
+                    $highlight_remarks = '';
+                    $marketplace_id = '';
+
+                    $market_place = $objPHPExcel->getActiveSheet()->getCell('A'.$j)->getValue();
+                    $ship_from_gstin = $objPHPExcel->getActiveSheet()->getCell('B'.$j)->getValue();
+                    $ship_from_state = $objPHPExcel->getActiveSheet()->getCell('C'.$j)->getValue();
+                    $ship_to_gstin = $objPHPExcel->getActiveSheet()->getCell('D'.$j)->getValue();
+                    $amazon_state = $objPHPExcel->getActiveSheet()->getCell('E'.$j)->getValue();
+                    $pin_code = $objPHPExcel->getActiveSheet()->getCell('F'.$j)->getValue();
+                    $invoice_no = $objPHPExcel->getActiveSheet()->getCell('G'.$j)->getValue();
+                    $invoice_date = $objPHPExcel->getActiveSheet()->getCell('H'.$j)->getValue();
+                    $customer_name =$objPHPExcel->getActiveSheet()->getCell('I'.$j)->getValue();
+                    $sku = $objPHPExcel->getActiveSheet()->getCell('J'.$j)->getValue();
+                    $item_desc = $objPHPExcel->getActiveSheet()->getCell('K'.$j)->getValue();
+                    $hsn_code = $objPHPExcel->getActiveSheet()->getCell('L'.$j)->getValue();
+                    $quantity = $objPHPExcel->getActiveSheet()->getCell('M'.$j)->getValue();
+                    $rate = $objPHPExcel->getActiveSheet()->getCell('N'.$j)->getValue();
+                    $sales_incl_gst = $objPHPExcel->getActiveSheet()->getCell('O'.$j)->getValue();
+                    $sales_excl_gst = $objPHPExcel->getActiveSheet()->getCell('P'.$j)->getValue();
+                    $total_gst = $objPHPExcel->getActiveSheet()->getCell('Q'.$j)->getValue();
+                    $igst_rate = $objPHPExcel->getActiveSheet()->getCell('R'.$j)->getValue();
+                    $igst_amount = $objPHPExcel->getActiveSheet()->getCell('S'.$j)->getValue();
+                    $cgst_rate = $objPHPExcel->getActiveSheet()->getCell('T'.$j)->getValue();
+                    $cgst_amount = $objPHPExcel->getActiveSheet()->getCell('U'.$j)->getValue();
+                    $sgst_rate = $objPHPExcel->getActiveSheet()->getCell('V'.$j)->getValue();
+                    $sgst_amount = $objPHPExcel->getActiveSheet()->getCell('W'.$j)->getValue();
+                    $flag = $objPHPExcel->getActiveSheet()->getCell('X'.$j)->getValue();
+
+                    // $sql = "select * from internal_warehouse_master where is_active = '1' and company_id = '$company_id' 
+                    //         and gst_id = '".$ship_from_gstin."'";
+                    // $command = Yii::$app->db->createCommand($sql);
+                    // $reader = $command->query();
+                    // $data2 = $reader->readAll();
+                    // if(count($data2)==0){
+                    //     $bl_reject = true;
+                    //     $remarks = $remarks . "Ship from GSTin not found in warehouse master. ";
+                    // }
+
+                    // $sql = "select * from acc_master where legal_name = '".$market_place."' and type = 'Marketplace'";
+                    // $command = Yii::$app->db->createCommand($sql);
+                    // $reader = $command->query();
+                    // $data2 = $reader->readAll();
+                    // if(count($data2)==0){
+                    //     $bl_reject = true;
+                    //     $remarks = $remarks . "Marketplace not found. ";
+                    // } else {
+                    //     $marketplace_id = $data2[0]['id'];
+                    // }
+
+                    $sql = "select * from pincode_master where pincode = '".$pin_code."'";
+                    $command = Yii::$app->db->createCommand($sql);
+                    $reader = $command->query();
+                    $data2 = $reader->readAll();
+                    if(count($data2)>0){
+                        $ship_to_state = $data2[0]['state_name'];
+                    }
+
+                    if($ship_to_state==''){
+                        $sql = "select * from acc_amazon_state_master where is_active = '1' and company_id = '$company_id' 
+                                and amazon_state = '".$amazon_state."'";
+                        $command = Yii::$app->db->createCommand($sql);
+                        $reader = $command->query();
+                        $data2 = $reader->readAll();
+                        if(count($data2)>0){
+                            $ship_to_state = $data2[0]['erp_state'];
+                            if($ship_to_state!='' && $pin_code!=''){
+                                $this->insert_pincode($ship_to_state, $pin_code);
+                            }
+                        }
+                    }
+
+                    if($ship_to_state==''){
+                        $bl_reject = true;
+                        $remarks = $remarks . "Pincode not found. ";
+                    }
+
+                    if($ship_to_gstin==''){
+                        $sales_type = 'B2C';
+                    } else {
+                        $sales_type = 'B2B';
+
+                        $highlight_remarks = $this->check_gst_no_format($ship_to_gstin, $ship_to_state);
+                        if($highlight_remarks!=''){
+                            $bl_highlight = true;
+                        }
+                    }
+
+                    // $new_hsn_code = '';
+                    // if($sku!=''){
+                    //     $sql = "select * from product_master where is_active = '1' and company_id = '$company_id' 
+                    //             and sku_internal_code = '".$sku."'";
+                    //     $command = Yii::$app->db->createCommand($sql);
+                    //     $reader = $command->query();
+                    //     $data2 = $reader->readAll();
+                    //     if(count($data2)>0){
+                    //         $new_hsn_code = $data2[0]['hsn_code'];
+                    //     }
+                    // }
+
+                    // if($hsn_code == '' || $hsn_code==null){
+                    //     $bl_highlight = true;
+                    //     $highlight_remarks = $highlight_remarks . "HSN Code is empty. ";
+                    // } else if($new_hsn_code == '' || $new_hsn_code==null){
+                    //     $bl_highlight = true;
+                    //     $highlight_remarks = $highlight_remarks . "HSN Code not found in Product Master. ";
+                    // } else if($new_hsn_code != $hsn_code){
+                    //     $bl_highlight = true;
+                    //     $highlight_remarks = $highlight_remarks . "HSN Code is different. ";
+                    // }
+
+                    // if($quantity!=''){
+                    //     if($this->check_no($quantity)==false){
+                    //         $quantity=NULL;
+                    //     }
+                    // }
+                    // if($rate!=''){
+                    //     if($this->check_no($rate)==false){
+                    //         $rate=NULL;
+                    //     }
+                    // }
+                    // if($sales_incl_gst!=''){
+                    //     if($this->check_no($sales_incl_gst)==false){
+                    //         $sales_incl_gst=NULL;
+                    //     }
+                    // }
+                    // if($sales_excl_gst!=''){
+                    //     if($this->check_no($sales_excl_gst)==false){
+                    //         $sales_excl_gst=NULL;
+                    //     }
+                    // }
+                    // if($total_gst!=''){
+                    //     if($this->check_no($total_gst)==false){
+                    //         $total_gst=NULL;
+                    //     }
+                    // }
+                    // if($igst_rate!=''){
+                    //     if($this->check_no($igst_rate)==false){
+                    //         $igst_rate=NULL;
+                    //     }
+                    // }
+                    // if($igst_amount!=''){
+                    //     if($this->check_no($igst_amount)==false){
+                    //         $igst_amount=NULL;
+                    //     }
+                    // }
+                    // if($cgst_rate!=''){
+                    //     if($this->check_no($cgst_rate)==false){
+                    //         $cgst_rate=NULL;
+                    //     }
+                    // }
+                    // if($cgst_amount!=''){
+                    //     if($this->check_no($cgst_amount)==false){
+                    //         $cgst_amount=NULL;
+                    //     }
+                    // }
+                    // if($sgst_rate!=''){
+                    //     if($this->check_no($sgst_rate)==false){
+                    //         $sgst_rate=NULL;
+                    //     }
+                    // }
+                    // if($sgst_amount!=''){
+                    //     if($this->check_no($sgst_amount)==false){
+                    //         $sgst_amount=NULL;
+                    //     }
+                    // }
+                    // if($flag!=''){
+                    //     if($this->check_no($flag)==false){
+                    //         $flag=NULL;
+                    //     }
+                    // }
+
+
+                    if($invoice_date==''){
+                        $invoice_date=NULL;
+                    } else {
+                        $invoice_date = \PHPExcel_Style_NumberFormat::toFormattedString($invoice_date, 'YYYY-MM-DD');
+                    }
+                    
+                    if($quantity!=''){
+                        if($this->check_no($quantity)==false){
+                            $quantity=NULL;
+                            $bl_reject = true;
+                            $remarks = $remarks . "Quantity is not number. ";
+                        }
+                    }
+                    if($rate!=''){
+                        if($this->check_no($rate)==false){
+                            $rate=NULL;
+                            $bl_reject = true;
+                            $remarks = $remarks . "Rate is not number. ";
+                        }
+                    }
+                    if($sales_incl_gst!=''){
+                        if($this->check_no($sales_incl_gst)==false){
+                            $sales_incl_gst=NULL;
+                            $bl_reject = true;
+                            $remarks = $remarks . "Sales Incl GST is not number. ";
+                        }
+                    }
+                    if($sales_excl_gst!=''){
+                        if($this->check_no($sales_excl_gst)==false){
+                            $sales_excl_gst=NULL;
+                            $bl_reject = true;
+                            $remarks = $remarks . "Sales Excl GST is not number. ";
+                        }
+                    }
+                    if($total_gst!=''){
+                        if($this->check_no($total_gst)==false){
+                            $total_gst=NULL;
+                            $bl_reject = true;
+                            $remarks = $remarks . "Total GST is not number. ";
+                        }
+                    }
+                    if($igst_rate!=''){
+                        if($this->check_no($igst_rate)==false){
+                            $igst_rate=NULL;
+                            $bl_reject = true;
+                            $remarks = $remarks . "IGST Rate is not number. ";
+                        }
+                    }
+                    if($igst_amount!=''){
+                        if($this->check_no($igst_amount)==false){
+                            $igst_amount=NULL;
+                            $bl_reject = true;
+                            $remarks = $remarks . "IGST Amount is not number. ";
+                        }
+                    }
+                    if($cgst_rate!=''){
+                        if($this->check_no($cgst_rate)==false){
+                            $cgst_rate=NULL;
+                            $bl_reject = true;
+                            $remarks = $remarks . "CGST Rate is not number. ";
+                        }
+                    }
+                    if($cgst_amount!=''){
+                        if($this->check_no($cgst_amount)==false){
+                            $cgst_amount=NULL;
+                            $bl_reject = true;
+                            $remarks = $remarks . "CGST Amount is not number. ";
+                        }
+                    }
+                    if($sgst_rate!=''){
+                        if($this->check_no($sgst_rate)==false){
+                            $sgst_rate=NULL;
+                            $bl_reject = true;
+                            $remarks = $remarks . "SGST Rate is not number. ";
+                        }
+                    }
+                    if($sgst_amount!=''){
+                        if($this->check_no($sgst_amount)==false){
+                            $sgst_amount=NULL;
+                            $bl_reject = true;
+                            $remarks = $remarks . "SGST Amount is not number. ";
+                        }
+                    }
+
+                    if($flag!='0' && $flag!='1'){
+                        $flag=NULL;
+                        $bl_reject = true;
+                        $remarks = $remarks . "Flag should be 0 or 1. ";
+                    }
+
+                    if($bl_reject==true) {
+                        // echo 'rejected';
+                        // echo '<br/>';
+                        // echo $remarks;
+                        // echo '<br/>';
+                        // $reject_sheet->setCellValue('Y'.$r_row, $remarks);
+                        $reject_file = true;
+                    }
+                    if($bl_highlight==true) {
+                        // echo $highlight_remarks.'<br/>';
+                        // $highlight_sheet->setCellValue('Y'.$h_row, $highlight_remarks);
+                        $highlight_file = true;
+                    }
+
+                    $bulkInsertArray[$k] = array('ref_file_id' => $ref_file_id, 
+                        'market_place' => $market_place, 
+                        'marketplace_id' => $marketplace_id, 
+                        'ship_from_gstin' => $ship_from_gstin, 
+                        'ship_from_state' => $ship_from_state, 
+                        'ship_to_gstin' => $ship_to_gstin, 
+                        'ship_to_state' => $ship_to_state, 
+                        'amazon_state' => $amazon_state, 
+                        'pin_code' => $pin_code, 
+                        'invoice_no' => $invoice_no, 
+                        'invoice_date' => $invoice_date, 
+                        'customer_name' => $customer_name, 
+                        'sku' => $sku, 
+                        'item_desc' => $item_desc, 
+                        'hsn_code' => $hsn_code, 
+                        'quantity' => $mycomponent->format_number($quantity,2), 
+                        'rate' => $mycomponent->format_number($rate,2), 
+                        'sales_incl_gst' => $mycomponent->format_number($sales_incl_gst,2), 
+                        'sales_excl_gst' => $mycomponent->format_number($sales_excl_gst,2), 
+                        'total_gst' => $mycomponent->format_number($total_gst,2), 
+                        'igst_rate' => $mycomponent->format_number($igst_rate,2), 
+                        'igst_amount' => $mycomponent->format_number($igst_amount,2), 
+                        'cgst_rate' => $mycomponent->format_number($cgst_rate,2), 
+                        'cgst_amount' => $mycomponent->format_number($cgst_amount,2), 
+                        'sgst_rate' => $mycomponent->format_number($sgst_rate,2), 
+                        'sgst_amount' => $mycomponent->format_number($sgst_amount,2), 
+                        'flag' => $flag,
+                        'status' => 'pending',
+                        'is_active' => '1',
+                        'created_by'=>$curusr,
+                        'created_date'=>$now,
+                        'updated_by'=>$curusr,
+                        'updated_date'=>$now,
+                        'approver_comments'=>'',
+                        'company_id'=>$company_id,
+                        'reject_remarks'=>$remarks,
+                        'highlight_remarks'=>$highlight_remarks
+                    );
+
+                    $k = $k + 1;
                 }
 
-                $sql = "select * from acc_master where legal_name = '".$market_place[$j]."' and type = 'Marketplace'";
-                $command = Yii::$app->db->createCommand($sql);
-                $reader = $command->query();
-                $data2 = $reader->readAll();
-                if(count($data2)==0){
+                // echo $j;
+                // echo '<br/>';
+
+                // if($j==10000){
+                //     break;
+                // }
+            }
+
+            if(count($bulkInsertArray)>0){
+                $sql = "delete from acc_temp_sales_file_items where ref_file_id = '$ref_file_id'";
+                Yii::$app->db->createCommand($sql)->execute();
+
+                $columnNameArray=['ref_file_id','market_place','marketplace_id','ship_from_gstin','ship_from_state',
+                                    'ship_to_gstin','ship_to_state','amazon_state','pin_code','invoice_no','invoice_date',
+                                    'customer_name','sku','item_desc','hsn_code','quantity','rate',
+                                    'sales_incl_gst','sales_excl_gst','total_gst','igst_rate','igst_amount','cgst_rate',
+                                    'cgst_amount','sgst_rate','sgst_amount','flag','status','is_active',
+                                    'created_by','created_date','updated_by','updated_date','approver_comments',
+                                    'company_id','reject_remarks','highlight_remarks'];
+                $tableName = "acc_temp_sales_file_items";
+                $insertCount = Yii::$app->db->createCommand()->batchInsert($tableName, $columnNameArray, $bulkInsertArray)->execute();
+
+                // echo $insertCount;
+                // echo '<br/>';
+                // echo 'hii';
+
+                $sql = "update acc_temp_sales_file_items A left join internal_warehouse_master B 
+                        on (A.ship_from_gstin=B.gst_id and A.company_id=B.company_id and A.is_active=B.is_active) 
+                        set A.reject_remarks = concat(A.reject_remarks, 'Ship from GSTIN not found in warehouse master. ') 
+                        where A.ref_file_id = '$ref_file_id' and A.is_active = '1' and A.company_id = '$company_id' and B.gst_id is null";
+                $updateCount = Yii::$app->db->createCommand($sql)->execute();
+                if($updateCount>0){
                     $bl_reject = true;
-                    $remarks[$j] = $remarks[$j] . "Marketplace not found. ";
-                } else {
-                    $marketplace_id[$j] = $data2[0]['id'];
                 }
 
-                $sql = "select * from pincode_master where pincode = '".$pin_code[$j]."'";
+                $sql = "update acc_temp_sales_file_items A left join acc_master B 
+                        on (A.market_place=B.legal_name and A.company_id=B.company_id and A.is_active=B.is_active and B.type='Marketplace') 
+                        set A.reject_remarks = concat(A.reject_remarks, 'Marketplace not found. ') 
+                        where A.ref_file_id = '$ref_file_id' and A.is_active = '1' and A.company_id = '$company_id' and B.legal_name is null";
+                $updateCount = Yii::$app->db->createCommand($sql)->execute();
+                if($updateCount>0){
+                    $bl_reject = true;
+                }
+
+                // $sql = "update acc_temp_sales_file_items A left join pincode_master B on (A.pin_code=B.pincode) 
+                //         set A.ship_to_state = B.state_name 
+                //         where A.ref_file_id = '$ref_file_id' and A.is_active = '1' and A.company_id = '$company_id'";
+                // $updateCount = Yii::$app->db->createCommand($sql)->execute();
+
+                // $sql = "select * from acc_temp_sales_file_items where ref_file_id = '$ref_file_id' and is_active = '1' and company_id = '$company_id' 
+                //         and (ship_to_state is null or ship_to_state = '')";
+                // $command = Yii::$app->db->createCommand($sql);
+                // $reader = $command->query();
+                // $data2 = $reader->readAll();
+                // if(count($data2)>0){
+                //     for($j=0; $j<count($data2); $j++){
+                //         $amazon_state = $data2[0]->amazon_state;
+                //         $pin_code = $data2[0]->pin_code;
+
+                //         $sql = "select * from acc_amazon_state_master where is_active = '1' and company_id = '$company_id' 
+                //                 and amazon_state = '$amazon_state'";
+                //         $command = Yii::$app->db->createCommand($sql);
+                //         $reader = $command->query();
+                //         $data3 = $reader->readAll();
+                //         if(count($data3)>0){
+                //             $ship_to_state = $data3[0]['erp_state'];
+                //             if($ship_to_state!='' && $pin_code!=''){
+                //                 $this->insert_pincode($ship_to_state, $pin_code);
+                //             }
+                //         }
+                //     }
+                // }
+
+                // $sql = "update acc_temp_sales_file_items A left join pincode_master B on (A.pin_code=B.pincode) 
+                //         set A.ship_to_state = B.state_name 
+                //         where A.ref_file_id = '$ref_file_id' and A.is_active = '1' and A.company_id = '$company_id'";
+                // $updateCount = Yii::$app->db->createCommand($sql)->execute();
+
+                // $sql = "update acc_temp_sales_file_items A left join pincode_master B on (A.pin_code=B.pincode) 
+                //         set A.reject_remarks = concat(A.reject_remarks, 'Pincode not found. ') 
+                //         where A.ref_file_id = '$ref_file_id' and A.is_active = '1' and A.company_id = '$company_id' and B.pincode is null";
+                // $updateCount = Yii::$app->db->createCommand($sql)->execute();
+                // if($updateCount>0){
+                //     $bl_reject = true;
+                // }
+
+                // $sql = "select * from acc_temp_sales_file_items where ref_file_id = '$ref_file_id' and is_active = '1' and company_id = '$company_id' 
+                //         and (ship_to_gstin is null or ship_to_gstin = '')";
+                // $command = Yii::$app->db->createCommand($sql);
+                // $reader = $command->query();
+                // $data2 = $reader->readAll();
+                // if(count($data2)>0){
+                //     for($j=0; $j<count($data2); $j++){
+                //         $id = $data2[$j]['id'];
+                //         $ship_to_gstin = $data2[$j]['ship_to_gstin'];
+                //         $ship_to_state = $data2[$j]['ship_to_state'];
+
+                //         if($ship_to_gstin==''){
+                //             $sales_type = 'B2C';
+                //         } else {
+                //             $sales_type = 'B2B';
+
+                //             $highlight_remarks = $this->check_gst_no_format($ship_to_gstin, $ship_to_state);
+                //             if($highlight_remarks!=''){
+                //                 $bl_highlight = true;
+
+                //                 $sql = "update acc_temp_sales_file_items A 
+                //                         set A.highlight_remarks = concat(A.highlight_remarks, '".$highlight_remarks." ') 
+                //                         where A.id = '$id'";
+                //                 $updateCount = Yii::$app->db->createCommand($sql)->execute();
+                //             }
+                //         }
+                //     }
+                // }
+
+                $sql = "update acc_temp_sales_file_items A left join product_master B 
+                        on (A.sku=B.sku_internal_code and A.company_id=B.company_id and A.is_active=B.is_active and 
+                            B.is_latest = '1' and B.is_preferred = '1') 
+                        set A.highlight_remarks = case when A.hsn_code is null then concat(A.highlight_remarks, 'HSN Code is empty. ') 
+                            when B.hsn_code is null then concat(A.highlight_remarks, 'HSN Code not found in Product Master. ') 
+                            when A.hsn_code<>B.hsn_code then concat(A.highlight_remarks, 'HSN Code is different. ') 
+                            else A.highlight_remarks end 
+                        where A.ref_file_id = '$ref_file_id' and A.is_active = '1' and A.company_id = '$company_id'";
+                $updateCount = Yii::$app->db->createCommand($sql)->execute();
+                if($updateCount>0){
+                    $bl_highlight = true;
+                }
+            }
+
+            if($bl_reject==true) {
+                $reject_file = true;
+            }
+            if($bl_highlight==true) {
+                $highlight_file = true;
+            }
+
+            if($reject_file==true) {
+                $r_row = 1;
+                /*$reject_spreadsheet = $objPHPExcel->createSheet(1);*/
+                $objPHPExcel1 = new \PHPExcel();
+                /*$objPHPExcel1->createSheet();*/
+                $reject_sheet = $objPHPExcel1->setActiveSheetIndex(0);
+                $reject_sheet->setCellValue('A'.$r_row, 'Market place');
+                $reject_sheet->setCellValue('B'.$r_row, 'Ship from GSTin');
+                $reject_sheet->setCellValue('C'.$r_row, 'Ship from State');
+                $reject_sheet->setCellValue('D'.$r_row, 'Ship to GSTin');
+                $reject_sheet->setCellValue('E'.$r_row, 'Amazon state');
+                $reject_sheet->setCellValue('F'.$r_row, 'Pin code');
+                $reject_sheet->setCellValue('G'.$r_row, 'Invoice no');
+                $reject_sheet->setCellValue('H'.$r_row, 'Invoice date');
+                $reject_sheet->setCellValue('I'.$r_row, 'Customer name');
+                $reject_sheet->setCellValue('J'.$r_row, 'SKU');
+                $reject_sheet->setCellValue('K'.$r_row, 'Item description');
+                $reject_sheet->setCellValue('L'.$r_row, 'HSN Code');
+                $reject_sheet->setCellValue('M'.$r_row, 'Quantity');
+                $reject_sheet->setCellValue('N'.$r_row, 'Rate');
+                $reject_sheet->setCellValue('O'.$r_row, 'Sales incl GST');
+                $reject_sheet->setCellValue('P'.$r_row, 'Sales excl GST');
+                $reject_sheet->setCellValue('Q'.$r_row, 'Total GST');
+                $reject_sheet->setCellValue('R'.$r_row, 'IGST Rate');
+                $reject_sheet->setCellValue('S'.$r_row, 'IGST Amount');
+                $reject_sheet->setCellValue('T'.$r_row, 'CGST Rate');
+                $reject_sheet->setCellValue('U'.$r_row, 'CGST Amount');
+                $reject_sheet->setCellValue('V'.$r_row, 'SGST Rate');
+                $reject_sheet->setCellValue('W'.$r_row, 'SGST Amount');
+                $reject_sheet->setCellValue('X'.$r_row, 'Flag');
+                $reject_sheet->setCellValue('Y'.$r_row, 'Remarks');
+            }
+            if($highlight_file==true) {
+                $h_row = 1;
+                /*$highlight_spreadsheet = $objPHPExcel->createSheet(2);*/
+                $objPHPExcel2 = new \PHPExcel();
+                /*$objPHPExcel2->createSheet();*/
+                $highlight_sheet = $objPHPExcel2->setActiveSheetIndex(0);
+                $highlight_sheet->setCellValue('A'.$h_row, 'Market place');
+                $highlight_sheet->setCellValue('B'.$h_row, 'Ship from GSTin');
+                $highlight_sheet->setCellValue('C'.$h_row, 'Ship from State');
+                $highlight_sheet->setCellValue('D'.$h_row, 'Ship to GSTin');
+                $highlight_sheet->setCellValue('E'.$h_row, 'Amazon state');
+                $highlight_sheet->setCellValue('F'.$h_row, 'Pin code');
+                $highlight_sheet->setCellValue('G'.$h_row, 'Invoice no');
+                $highlight_sheet->setCellValue('H'.$h_row, 'Invoice date');
+                $highlight_sheet->setCellValue('I'.$h_row, 'Customer name');
+                $highlight_sheet->setCellValue('J'.$h_row, 'SKU');
+                $highlight_sheet->setCellValue('K'.$h_row, 'Item description');
+                $highlight_sheet->setCellValue('L'.$h_row, 'HSN Code');
+                $highlight_sheet->setCellValue('M'.$h_row, 'Quantity');
+                $highlight_sheet->setCellValue('N'.$h_row, 'Rate');
+                $highlight_sheet->setCellValue('O'.$h_row, 'Sales incl GST');
+                $highlight_sheet->setCellValue('P'.$h_row, 'Sales excl GST');
+                $highlight_sheet->setCellValue('Q'.$h_row, 'Total GST');
+                $highlight_sheet->setCellValue('R'.$h_row, 'IGST Rate');
+                $highlight_sheet->setCellValue('S'.$h_row, 'IGST Amount');
+                $highlight_sheet->setCellValue('T'.$h_row, 'CGST Rate');
+                $highlight_sheet->setCellValue('U'.$h_row, 'CGST Amount');
+                $highlight_sheet->setCellValue('V'.$h_row, 'SGST Rate');
+                $highlight_sheet->setCellValue('W'.$h_row, 'SGST Amount');
+                $highlight_sheet->setCellValue('X'.$h_row, 'Flag');
+                $highlight_sheet->setCellValue('Y'.$h_row, 'Remarks');
+            }
+
+            if($reject_file==true || $highlight_file==true) {
+                $sql = "select * from acc_temp_sales_file_items where ref_file_id = '$ref_file_id' and is_active = '1' and company_id = '$company_id'";
                 $command = Yii::$app->db->createCommand($sql);
                 $reader = $command->query();
                 $data2 = $reader->readAll();
                 if(count($data2)>0){
-                    $ship_to_state[$j] = $data2[0]['state_name'];
-                }
-
-                if($ship_to_state[$j]==''){
-                    $sql = "select * from acc_amazon_state_master where is_active = '1' and company_id = '$company_id' 
-                            and erp_state = '".$ship_to_state[$j]."'";
-                    $command = Yii::$app->db->createCommand($sql);
-                    $reader = $command->query();
-                    $data2 = $reader->readAll();
-                    if(count($data2)>0){
-                        $ship_to_state[$j] = $data2[0]['amazon_state'];
-                        if($ship_to_state[$j]!='' && $pin_code[$j]!=''){
-                            $this->insert_pincode($ship_to_state[$j], $pin_code[$j]);
+                    for($j=0; $j<count($data2); $j++){
+                        if($reject_file==true) {
+                            $r_row += 1;
+                            $reject_sheet->setCellValue('A'.$r_row, $data2[$j]['market_place']);
+                            $reject_sheet->setCellValue('B'.$r_row, $data2[$j]['ship_from_gstin']);
+                            $reject_sheet->setCellValue('C'.$r_row, $data2[$j]['ship_from_state']);
+                            $reject_sheet->setCellValue('D'.$r_row, $data2[$j]['ship_to_gstin']);
+                            $reject_sheet->setCellValue('E'.$r_row, $data2[$j]['amazon_state']);
+                            $reject_sheet->setCellValue('F'.$r_row, $data2[$j]['pin_code']);
+                            $reject_sheet->setCellValue('G'.$r_row, $data2[$j]['invoice_no']);
+                            $reject_sheet->setCellValue('H'.$r_row, $data2[$j]['invoice_date']);
+                            $reject_sheet->setCellValue('I'.$r_row, $data2[$j]['customer_name']);
+                            $reject_sheet->setCellValue('J'.$r_row, $data2[$j]['sku']);
+                            $reject_sheet->setCellValue('K'.$r_row, $data2[$j]['item_desc']);
+                            $reject_sheet->setCellValue('L'.$r_row, $data2[$j]['hsn_code']);
+                            $reject_sheet->setCellValue('M'.$r_row, $data2[$j]['quantity']);
+                            $reject_sheet->setCellValue('N'.$r_row, $data2[$j]['rate']);
+                            $reject_sheet->setCellValue('O'.$r_row, $data2[$j]['sales_incl_gst']);
+                            $reject_sheet->setCellValue('P'.$r_row, $data2[$j]['sales_excl_gst']);
+                            $reject_sheet->setCellValue('Q'.$r_row, $data2[$j]['total_gst']);
+                            $reject_sheet->setCellValue('R'.$r_row, $data2[$j]['igst_rate']);
+                            $reject_sheet->setCellValue('S'.$r_row, $data2[$j]['igst_amount']);
+                            $reject_sheet->setCellValue('T'.$r_row, $data2[$j]['cgst_rate']);
+                            $reject_sheet->setCellValue('U'.$r_row, $data2[$j]['cgst_amount']);
+                            $reject_sheet->setCellValue('V'.$r_row, $data2[$j]['sgst_rate']);
+                            $reject_sheet->setCellValue('W'.$r_row, $data2[$j]['sgst_amount']);
+                            $reject_sheet->setCellValue('X'.$r_row, $data2[$j]['flag']);
+                            $reject_sheet->setCellValue('Y'.$r_row, $data2[$j]['reject_remarks']);
+                        }
+                        
+                        if($highlight_file==true) {
+                            $h_row += 1;
+                            $highlight_sheet->setCellValue('A'.$h_row, $data2[$j]['market_place']);
+                            $highlight_sheet->setCellValue('B'.$h_row, $data2[$j]['ship_from_gstin']);
+                            $highlight_sheet->setCellValue('C'.$h_row, $data2[$j]['ship_from_state']);
+                            $highlight_sheet->setCellValue('D'.$h_row, $data2[$j]['ship_to_gstin']);
+                            $highlight_sheet->setCellValue('E'.$h_row, $data2[$j]['amazon_state']);
+                            $highlight_sheet->setCellValue('F'.$h_row, $data2[$j]['pin_code']);
+                            $highlight_sheet->setCellValue('G'.$h_row, $data2[$j]['invoice_no']);
+                            $highlight_sheet->setCellValue('H'.$h_row, $data2[$j]['invoice_date']);
+                            $highlight_sheet->setCellValue('I'.$h_row, $data2[$j]['customer_name']);
+                            $highlight_sheet->setCellValue('J'.$h_row, $data2[$j]['sku']);
+                            $highlight_sheet->setCellValue('K'.$h_row, $data2[$j]['item_desc']);
+                            $highlight_sheet->setCellValue('L'.$h_row, $data2[$j]['hsn_code']);
+                            $highlight_sheet->setCellValue('M'.$h_row, $data2[$j]['quantity']);
+                            $highlight_sheet->setCellValue('N'.$h_row, $data2[$j]['rate']);
+                            $highlight_sheet->setCellValue('O'.$h_row, $data2[$j]['sales_incl_gst']);
+                            $highlight_sheet->setCellValue('P'.$h_row, $data2[$j]['sales_excl_gst']);
+                            $highlight_sheet->setCellValue('Q'.$h_row, $data2[$j]['total_gst']);
+                            $highlight_sheet->setCellValue('R'.$h_row, $data2[$j]['igst_rate']);
+                            $highlight_sheet->setCellValue('S'.$h_row, $data2[$j]['igst_amount']);
+                            $highlight_sheet->setCellValue('T'.$h_row, $data2[$j]['cgst_rate']);
+                            $highlight_sheet->setCellValue('U'.$h_row, $data2[$j]['cgst_amount']);
+                            $highlight_sheet->setCellValue('V'.$h_row, $data2[$j]['sgst_rate']);
+                            $highlight_sheet->setCellValue('W'.$h_row, $data2[$j]['sgst_amount']);
+                            $highlight_sheet->setCellValue('X'.$h_row, $data2[$j]['flag']);
+                            $highlight_sheet->setCellValue('Y'.$h_row, $data2[$j]['highlight_remarks']);
                         }
                     }
-                }
-
-                if($ship_to_state[$j]==''){
-                    $bl_reject = true;
-                    $remarks[$j] = $remarks[$j] . "Pincode not found. ";
-                }
-
-                if($ship_to_gstin[$j]==''){
-                    $sales_type[$j] = 'B2C';
-                } else {
-                    $sales_type[$j] = 'B2B';
-
-                    $highlight_remarks[$j] = $this->check_gst_no_format($ship_to_gstin[$j], $ship_to_state[$j]);
-                    if($highlight_remarks[$j]!=''){
-                        $bl_highlight = true;
-                    }
-                }
-
-                $new_hsn_code[$j] = '';
-                if($sku[$j]!=''){
-                    $sql = "select * from product_master where is_active = '1' and company_id = '$company_id' 
-                            and sku_internal_code = '".$sku[$j]."'";
-                    $command = Yii::$app->db->createCommand($sql);
-                    $reader = $command->query();
-                    $data2 = $reader->readAll();
-                    if(count($data2)>0){
-                        $new_hsn_code[$j] = $data2[0]['hsn_code'];
-                    }
-                }
-
-                if($hsn_code[$j] == '' || $hsn_code[$j]==null){
-                    $bl_highlight = true;
-                    $highlight_remarks[$j] = $highlight_remarks[$j] . "HSN Code is empty. ";
-                } else if($new_hsn_code[$j] == '' || $new_hsn_code[$j]==null){
-                    $bl_highlight = true;
-                    $highlight_remarks[$j] = $highlight_remarks[$j] . "HSN Code not found in Product Master. ";
-                } else if($new_hsn_code[$j] != $hsn_code[$j]){
-                    $bl_highlight = true;
-                    $highlight_remarks[$j] = $highlight_remarks[$j] . "HSN Code is different. ";
-                }
-
-                if($rate[$j]!=''){
-                    if($this->check_no($rate[$j])==false){
-                        $bl_reject = true;
-                        $remarks[$j] = $remarks[$j] . "Rate is not number. ";
-                    }
-                }
-                if($quantity[$j]!=''){
-                    if($this->check_no($quantity[$j])==false){
-                        $bl_reject = true;
-                        $remarks[$j] = $remarks[$j] . "Quantity is not number. ";
-                    }
-                }
-                if($sales_incl_gst[$j]!=''){
-                    if($this->check_no($sales_incl_gst[$j])==false){
-                        $bl_reject = true;
-                        $remarks[$j] = $remarks[$j] . "Sales Incl GST is not number. ";
-                    }
-                }
-                if($sales_excl_gst[$j]!=''){
-                    if($this->check_no($sales_excl_gst[$j])==false){
-                        $bl_reject = true;
-                        $remarks[$j] = $remarks[$j] . "Sales Excl GST is not number. ";
-                    }
-                }
-                if($total_gst[$j]!=''){
-                    if($this->check_no($total_gst[$j])==false){
-                        $bl_reject = true;
-                        $remarks[$j] = $remarks[$j] . "Total GST is not number. ";
-                    }
-                }
-                if($igst_rate[$j]!=''){
-                    if($this->check_no($igst_rate[$j])==false){
-                        $bl_reject = true;
-                        $remarks[$j] = $remarks[$j] . "IGST Rate is not number. ";
-                    }
-                }
-                if($igst_amount[$j]!=''){
-                    if($this->check_no($igst_amount[$j])==false){
-                        $bl_reject = true;
-                        $remarks[$j] = $remarks[$j] . "IGST Amount is not number. ";
-                    }
-                }
-                if($cgst_rate[$j]!=''){
-                    if($this->check_no($cgst_rate[$j])==false){
-                        $bl_reject = true;
-                        $remarks[$j] = $remarks[$j] . "CGST Rate is not number. ";
-                    }
-                }
-                if($cgst_amount[$j]!=''){
-                    if($this->check_no($cgst_amount[$j])==false){
-                        $bl_reject = true;
-                        $remarks[$j] = $remarks[$j] . "CGST Amount is not number. ";
-                    }
-                }
-                if($sgst_rate[$j]!=''){
-                    if($this->check_no($sgst_rate[$j])==false){
-                        $bl_reject = true;
-                        $remarks[$j] = $remarks[$j] . "SGST Rate is not number. ";
-                    }
-                }
-                if($sgst_amount[$j]!=''){
-                    if($this->check_no($sgst_amount[$j])==false){
-                        $bl_reject = true;
-                        $remarks[$j] = $remarks[$j] . "SGST Amount is not number. ";
-                    }
-                }
-
-                if($flag[$j]!='0' && $flag[$j]!='1'){
-                    $bl_reject = true;
-                    $remarks[$j] = $remarks[$j] . "Flag should be 0 or 1. ";
-                }
-
-                if($bl_reject==true) {
-                    // echo 'rejected';
-                    // echo '<br/>';
-                    // echo $remarks[$j];
-                    // echo '<br/>';
-                    $reject_sheet->setCellValue('Y'.$r_row, $remarks[$j]);
-                    $reject_file = true;
-                }
-                if($bl_highlight==true) {
-                    // echo $highlight_remarks[$j].'<br/>';
-                    $highlight_sheet->setCellValue('Y'.$h_row, $highlight_remarks[$j]);
-                    $highlight_file = true;
                 }
             }
 
             if($reject_file==false) {
-                for($j=0; $j<count($market_place); $j++) {
-                    if($invoice_date[$j]==''){
-                        $invoice_date[$j]=NULL;
-                    } else {
-                        $invoice_date[$j]=$mycomponent->formatdate($invoice_date[$j]);
-                    }
-
-                    $array = array('ref_file_id' => $ref_file_id, 
-                                    'market_place' => $market_place[$j], 
-                                    'marketplace_id' => $marketplace_id[$j], 
-                                    'ship_from_gstin' => $ship_from_gstin[$j], 
-                                    'ship_from_state' => $ship_from_state[$j], 
-                                    'ship_to_gstin' => $ship_to_gstin[$j], 
-                                    'ship_to_state' => $ship_to_state[$j], 
-                                    'amazon_state' => $amazon_state[$j], 
-                                    'pin_code' => $pin_code[$j], 
-                                    'invoice_no' => $invoice_no[$j], 
-                                    'invoice_date' => $invoice_date[$j], 
-                                    'customer_name' => $customer_name[$j], 
-                                    'sku' => $sku[$j], 
-                                    'item_desc' => $item_desc[$j], 
-                                    'hsn_code' => $hsn_code[$j], 
-                                    'quantity' => $mycomponent->format_number($quantity[$j],2), 
-                                    'rate' => $mycomponent->format_number($rate[$j],2),
-                                    'sales_incl_gst' => $mycomponent->format_number($sales_incl_gst[$j],2),
-                                    'sales_excl_gst' => $mycomponent->format_number($sales_excl_gst[$j],2),
-                                    'total_gst' => $mycomponent->format_number($total_gst[$j],2),
-                                    'igst_rate' => $mycomponent->format_number($igst_rate[$j],2),
-                                    'igst_amount' => $mycomponent->format_number($igst_amount[$j],2),
-                                    'cgst_rate' => $mycomponent->format_number($cgst_rate[$j],2),
-                                    'cgst_amount' => $mycomponent->format_number($cgst_amount[$j],2),
-                                    'sgst_rate' => $mycomponent->format_number($sgst_rate[$j],2),
-                                    'sgst_amount' => $mycomponent->format_number($sgst_amount[$j],2),
-                                    'flag' => $flag[$j], 
-                                    'status' => 'pending',
-                                    'is_active' => '1',
-                                    'updated_by'=>$curusr,
-                                    'updated_date'=>$now,
-                                    'approver_comments'=>$remarks[$j],
-                                    'company_id'=>$company_id
-                                );
-
-                    $array['created_by'] = $curusr;
-                    $array['created_date'] = $now;
-                    $count = Yii::$app->db->createCommand()
-                                ->insert("acc_sales_file_items", $array)
-                                ->execute();
-
-                    // echo json_encode($array);
-                    // echo '<br/><br/>';
-                }
+                $sql = "insert into acc_sales_file_items (ref_file_id, market_place, marketplace_id, ship_from_gstin, 
+                        ship_from_state, ship_to_gstin, ship_to_state, amazon_state, pin_code, invoice_no, invoice_date, 
+                        customer_name, sku, item_desc, hsn_code, quantity, rate, sales_incl_gst, sales_excl_gst, total_gst, 
+                        igst_rate, igst_amount, cgst_rate, cgst_amount, sgst_rate, sgst_amount, flag, status, is_active, 
+                        created_by, created_date, updated_by, updated_date, approver_comments, company_id) 
+                        select ref_file_id, market_place, marketplace_id, ship_from_gstin, 
+                        ship_from_state, ship_to_gstin, ship_to_state, amazon_state, pin_code, invoice_no, invoice_date, 
+                        customer_name, sku, item_desc, hsn_code, quantity, rate, sales_incl_gst, sales_excl_gst, total_gst, 
+                        igst_rate, igst_amount, cgst_rate, cgst_amount, sgst_rate, sgst_amount, flag, status, is_active, 
+                        created_by, created_date, updated_by, updated_date, approver_comments, company_id 
+                        from acc_temp_sales_file_items 
+                        where ref_file_id = '$ref_file_id' and is_active = '1' and company_id = '$company_id'";
+                $updateCount = Yii::$app->db->createCommand($sql)->execute();
 
                 $sql = "update acc_sales_files set upload_status = 'uploaded' where id = '$ref_file_id'";
                 $command = Yii::$app->db->createCommand($sql);
@@ -607,12 +1195,11 @@ class SalesUpload extends Model
                 $file_name = $upload_path . '/' . $filename;
                 $file_path = 'uploads/sales/' . $ref_file_id . '/' . $filename;
 
-                $writer = new Xlsx($reject_spreadsheet);
-                $writer->save($file_name);
+                $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel1, 'Excel2007');
+                $objWriter->save($file_name);
 
                 $sql = "update acc_sales_files set error_rejected_file = '$file_path', upload_status = 'rejected', 
-                        updated_by = '$curusr', updated_date = '$now' 
-                        where id = '$ref_file_id'";
+                        updated_by = '$curusr', updated_date = '$now' where id = '$ref_file_id'";
                 $command = Yii::$app->db->createCommand($sql);
                 $count = $command->execute();
             }
@@ -635,14 +1222,131 @@ class SalesUpload extends Model
                 $file_name = $upload_path . '/' . $filename;
                 $file_path = 'uploads/sales/' . $ref_file_id . '/' . $filename;
 
-                $writer = new Xlsx($highlight_spreadsheet);
-                $writer->save($file_name);
+                $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel2, 'Excel2007');
+                $objWriter->save($file_name);
 
-                $sql = "update acc_sales_files set error_highlighted_file = '$file_path' 
-                        where id = '$ref_file_id'";
+                $sql = "update acc_sales_files set error_highlighted_file = '$file_path' where id = '$ref_file_id'";
                 $command = Yii::$app->db->createCommand($sql);
                 $count = $command->execute();
             }
+
+            // echo json_encode($invoice_date);
+
+            // echo count($market_place);
+            // echo '<br/>';
+
+            // if($reject_file==false) {
+            //     for($j=0; $j<count($market_place); $j++) {
+            //         if($invoice_date[$j]==''){
+            //             $invoice_date[$j]=NULL;
+            //         } else {
+            //             // $invoice_date[$j]=$mycomponent->formatdate($invoice_date[$j]);
+            //             $invoice_date[$j] = \PHPExcel_Style_NumberFormat::toFormattedString($invoice_date[$j], 'YYYY-MM-DD');
+            //         }
+
+            //         $array = array('ref_file_id' => $ref_file_id, 
+            //                         'market_place' => $market_place[$j], 
+            //                         'marketplace_id' => $marketplace_id[$j], 
+            //                         'ship_from_gstin' => $ship_from_gstin[$j], 
+            //                         'ship_from_state' => $ship_from_state[$j], 
+            //                         'ship_to_gstin' => $ship_to_gstin[$j], 
+            //                         'ship_to_state' => $ship_to_state[$j], 
+            //                         'amazon_state' => $amazon_state[$j], 
+            //                         'pin_code' => $pin_code[$j], 
+            //                         'invoice_no' => $invoice_no[$j], 
+            //                         'invoice_date' => $invoice_date[$j], 
+            //                         'customer_name' => $customer_name[$j], 
+            //                         'sku' => $sku[$j], 
+            //                         'item_desc' => $item_desc[$j], 
+            //                         'hsn_code' => $hsn_code[$j], 
+            //                         'quantity' => $mycomponent->format_number($quantity[$j],2), 
+            //                         'rate' => $mycomponent->format_number($rate[$j],2),
+            //                         'sales_incl_gst' => $mycomponent->format_number($sales_incl_gst[$j],2),
+            //                         'sales_excl_gst' => $mycomponent->format_number($sales_excl_gst[$j],2),
+            //                         'total_gst' => $mycomponent->format_number($total_gst[$j],2),
+            //                         'igst_rate' => $mycomponent->format_number($igst_rate[$j],2),
+            //                         'igst_amount' => $mycomponent->format_number($igst_amount[$j],2),
+            //                         'cgst_rate' => $mycomponent->format_number($cgst_rate[$j],2),
+            //                         'cgst_amount' => $mycomponent->format_number($cgst_amount[$j],2),
+            //                         'sgst_rate' => $mycomponent->format_number($sgst_rate[$j],2),
+            //                         'sgst_amount' => $mycomponent->format_number($sgst_amount[$j],2),
+            //                         'flag' => $flag[$j], 
+            //                         'status' => 'pending',
+            //                         'is_active' => '1',
+            //                         'updated_by'=>$curusr,
+            //                         'updated_date'=>$now,
+            //                         'approver_comments'=>$remarks[$j],
+            //                         'company_id'=>$company_id
+            //                     );
+
+            //         $array['created_by'] = $curusr;
+            //         $array['created_date'] = $now;
+            //         $count = Yii::$app->db->createCommand()
+            //                     ->insert("acc_sales_file_items", $array)
+            //                     ->execute();
+
+            //         // echo json_encode($array);
+            //         // echo '<br/><br/>';
+            //     }
+
+            //     $sql = "update acc_sales_files set upload_status = 'uploaded' where id = '$ref_file_id'";
+            //     $command = Yii::$app->db->createCommand($sql);
+            //     $count = $command->execute();
+            // } else {
+            //     $filename='sales_rejected_file_'.$ref_file_id.'.xlsx';
+            //     $upload_path = './uploads';
+            //     if(!is_dir($upload_path)) {
+            //         mkdir($upload_path, 0777, TRUE);
+            //     }
+            //     $upload_path = './uploads/sales';
+            //     if(!is_dir($upload_path)) {
+            //         mkdir($upload_path, 0777, TRUE);
+            //     }
+            //     $upload_path = './uploads/sales/'.$ref_file_id;
+            //     if(!is_dir($upload_path)) {
+            //         mkdir($upload_path, 0777, TRUE);
+            //     }
+
+            //     $file_name = $upload_path . '/' . $filename;
+            //     $file_path = 'uploads/sales/' . $ref_file_id . '/' . $filename;
+
+            //     $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel1, 'Excel2007');
+            //     $objWriter->save($file_name);
+
+
+            //     $sql = "update acc_sales_files set error_rejected_file = '$file_path', upload_status = 'rejected', 
+            //             updated_by = '$curusr', updated_date = '$now' 
+            //             where id = '$ref_file_id'";
+            //     $command = Yii::$app->db->createCommand($sql);
+            //     $count = $command->execute();
+            // }
+
+            // if($highlight_file==true){
+            //     $filename='sales_highlighted_file_'.$ref_file_id.'.xlsx';
+            //     $upload_path = './uploads';
+            //     if(!is_dir($upload_path)) {
+            //         mkdir($upload_path, 0777, TRUE);
+            //     }
+            //     $upload_path = './uploads/sales';
+            //     if(!is_dir($upload_path)) {
+            //         mkdir($upload_path, 0777, TRUE);
+            //     }
+            //     $upload_path = './uploads/sales/'.$ref_file_id;
+            //     if(!is_dir($upload_path)) {
+            //         mkdir($upload_path, 0777, TRUE);
+            //     }
+
+            //     $file_name = $upload_path . '/' . $filename;
+            //     $file_path = 'uploads/sales/' . $ref_file_id . '/' . $filename;
+
+            //     $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel2, 'Excel2007');
+            //     $objWriter->save($file_name);
+
+            //     $sql = "update acc_sales_files set error_highlighted_file = '$file_path' 
+            //             where id = '$ref_file_id'";
+            //     $command = Yii::$app->db->createCommand($sql);
+            //     $count = $command->execute();
+            // }
         }
     }
 
@@ -720,7 +1424,7 @@ class SalesUpload extends Model
         $final_data = array();
 
         $marketplace = $this->getFileMarketplaces($id);
-        $invoice = $this->getFileInvoices($id);
+        // $invoice = $this->getFileInvoices($id);
 
         $bl_posted = false;
         $sql = "select * from acc_sales_entries where file_id = '$id'";
@@ -732,8 +1436,10 @@ class SalesUpload extends Model
         }
 
         if($bl_posted==false) {
-            for($k=0; $k<count($invoice); $k++) {
-                $invoice_no = $invoice[$k]['invoice_no'];
+            $k=0;
+
+            // for($k=0; $k<count($invoice); $k++) {
+                // $invoice_no = $invoice[$k]['invoice_no'];
                 $invoice_marketplace = $marketplace;
                 $item_details = array();
                 $a = 0;
@@ -749,8 +1455,11 @@ class SalesUpload extends Model
                 //             cgst_rate, sgst_rate, igst_rate) A 
                 //         order by invoice_no, cgst_rate, sgst_rate, igst_rate, marketplace_id";
                 
-                $sql = "select * from acc_sales_file_items where ref_file_id = '$id' and invoice_no = '$invoice_no' 
-                        order by invoice_no, cgst_rate, sgst_rate, igst_rate, marketplace_id";
+                // $sql = "select * from acc_sales_file_items where ref_file_id = '$id' and invoice_no = '$invoice_no' 
+                //         order by invoice_no, cgst_rate, sgst_rate, igst_rate, marketplace_id";
+
+                $sql = "select * from acc_sales_file_items where ref_file_id = '$id' 
+                        order by cgst_rate, sgst_rate, igst_rate, marketplace_id";
                 $command = Yii::$app->db->createCommand($sql);
                 $reader = $command->query();
                 $result = $reader->readAll();
@@ -780,6 +1489,16 @@ class SalesUpload extends Model
                     $igst_rate = $result[$i]['igst_rate'];
                     $igst_amount = $result[$i]['igst_amount'];
                     $state_name = $result[$i]['ship_to_state'];
+
+                    if($cgst_rate<0){
+                        $cgst_rate = $cgst_rate * -1;
+                    }
+                    if($sgst_rate<0){
+                        $sgst_rate = $sgst_rate * -1;
+                    }
+                    if($igst_rate<0){
+                        $igst_rate = $igst_rate * -1;
+                    }
 
                     $vat_percen = 0;
                     if($tax_type == 'Local') {
@@ -973,8 +1692,11 @@ class SalesUpload extends Model
                     }
                 }
 
+                // echo json_encode($invoice_marketplace);
+                // echo '<br/>';
+
                 for($j=0; $j<count($invoice_marketplace); $j++) {
-                    if($invoice_marketplace[$j]['sales_incl_gst']>0){
+                    if($invoice_marketplace[$j]['sales_incl_gst']!=0){
                         $series = 1;
                         $sql = "select * from acc_series_master where type = 'Voucher' and company_id = '$company_id'";
                         $command = Yii::$app->db->createCommand($sql);
@@ -998,19 +1720,22 @@ class SalesUpload extends Model
                     }
                 }
 
-                $final_data[$k]['invoice_no'] = $invoice[$k]['invoice_no'];
+                // $final_data[$k]['invoice_no'] = $invoice[$k]['invoice_no'];
                 $final_data[$k]['marketplace'] = $invoice_marketplace;
                 $final_data[$k]['item_details'] = $item_details;
-            }
+            // }
         } else {
-            for($k=0; $k<count($invoice); $k++) {
-                $invoice_no = $invoice[$k]['invoice_no'];
+            $k=0;
+
+            // for($k=0; $k<count($invoice); $k++) {
+            //     $invoice_no = $invoice[$k]['invoice_no'];
                 $invoice_marketplace = $marketplace;
                 $item_details = array();
                 $a = 0;
 
-                $sql = "select * from acc_sales_entries where file_id = '$id' and invoice_no = '$invoice_no' 
-                        order by id";
+                // $sql = "select * from acc_sales_entries where file_id = '$id' and invoice_no = '$invoice_no' 
+                //         order by id";
+                $sql = "select * from acc_sales_entries where file_id = '$id' order by id";
                 $command = Yii::$app->db->createCommand($sql);
                 $reader = $command->query();
                 $result = $reader->readAll();
@@ -1066,10 +1791,10 @@ class SalesUpload extends Model
                     }
                 }
 
-                $final_data[$k]['invoice_no'] = $invoice[$k]['invoice_no'];
+                // $final_data[$k]['invoice_no'] = $invoice[$k]['invoice_no'];
                 $final_data[$k]['marketplace'] = $invoice_marketplace;
                 $final_data[$k]['item_details'] = $item_details;
-            }
+            // }
         }
         
         return $final_data;
@@ -1098,7 +1823,8 @@ class SalesUpload extends Model
         $x = 0;
 
         for($k=0; $k<$no_of_invoices; $k++) {
-            $invoice_no=$request->post('invoice_no_'.$k);
+            // $invoice_no=$request->post('invoice_no_'.$k);
+            $invoice_no='';
             $particular=$request->post('particular_'.$k);
             $acc_id=$request->post('acc_id_'.$k);
             $ledger_name=$request->post('ledger_name_'.$k);
@@ -1140,6 +1866,14 @@ class SalesUpload extends Model
                                             'marketplace_id'=>$marketplace[$j]['acc_id']
                                         ];
 
+                        $amount = $mycomponent->format_number($marketplace[$j]['amount'][$i],4);
+                        if($amount<0){
+                            $amount = $amount * -1;
+                            $type = 'Debit';
+                        } else {
+                            $type = 'Credit';
+                        }
+                        
                         $ledgerArray[$x]=[
                                         'ref_id'=>$file_id,
                                         'ref_type'=>'sales_upload',
@@ -1150,8 +1884,8 @@ class SalesUpload extends Model
                                         'ledger_code'=>$ledger_code[$i],
                                         'voucher_id'=>$marketplace[$j]['voucher_id'],
                                         'ledger_type'=>'Sub Entry',
-                                        'type'=>'Credit',
-                                        'amount'=>$mycomponent->format_number($marketplace[$j]['amount'][$i],4),
+                                        'type'=>$type,
+                                        'amount'=>$amount,
                                         'status'=>'approved',
                                         'is_active'=>'1',
                                         'updated_by'=>$session['session_id'],
@@ -1185,6 +1919,14 @@ class SalesUpload extends Model
                                         'marketplace_id'=>$marketplace[$j]['acc_id']
                                     ];
 
+                    $total_amount = $mycomponent->format_number($marketplace[$j]['total_amount'],4);
+                    if($total_amount<0){
+                        $total_amount = $total_amount * -1;
+                        $type = 'Credit';
+                    } else {
+                        $type = 'Debit';
+                    }
+                    
                     $ledgerArray[$x]=[
                                         'ref_id'=>$file_id,
                                         'ref_type'=>'sales_upload',
@@ -1195,8 +1937,8 @@ class SalesUpload extends Model
                                         'ledger_code'=>$marketplace[$j]['acc_code'],
                                         'voucher_id'=>$marketplace[$j]['voucher_id'],
                                         'ledger_type'=>'Main Entry',
-                                        'type'=>'Debit',
-                                        'amount'=>$mycomponent->format_number($marketplace[$j]['total_amount'],4),
+                                        'type'=>$type,
+                                        'amount'=>$total_amount,
                                         'status'=>'approved',
                                         'is_active'=>'1',
                                         'updated_by'=>$session['session_id'],

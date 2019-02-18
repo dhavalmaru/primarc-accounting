@@ -119,7 +119,7 @@
                     <?php if(isset($vendor_details[0]['state_name'])) echo $vendor_details[0]['state_name']; ?> (<?php if(isset($vendor_details[0]['state_code'])) echo $vendor_details[0]['state_code']; ?>), &nbsp;
                 </p>
             </td>
-            <td width="22%" style="border:none; vertical-align:top;"><p>Warehouse</p></td>
+            <td width="22%" style="border:none; vertical-align:top;"><p>Location</p></td>
             <td width="4%" style="border:none; vertical-align:top;">:</td>
             <td width="14%" style="border:none; vertical-align:top;">
                 <p>
@@ -132,13 +132,27 @@
         <tr style="border:none;">
             <td width="17%" style="border:none;"><p> Party's GSTIN</p></td>
             <td width="3%" style="border:none;">:</td>
-            <td width="40%" style="border:none;"><p><b> <?php if(isset($vendor_details[0]['gst_id'])) echo $debit_note[0]['gst_id']; ?> </b></p></td>
-            <td width="22%" style="border:none;"><p>Warehouse GSTIN</p></td>
+            <td width="40%" style="border:none;"><p><b> <?php if(isset($vendor_details[0]['gst_id'])) echo $vendor_details[0]['gst_id']; ?> </b></p></td>
+            <td width="22%" style="border:none;"><p>GSTIN</p></td>
             <td width="4%" style="border:none;">:</td>
             <td width="14%" style="border:none;">
                 <p>
                     <b> 
                         <?php if(isset($grn_details[0]['gst_id'])) echo $grn_details[0]['gst_id']; ?>
+                    </b>
+                </p>
+            </td>
+        </tr>
+        <tr style="border:none;">
+            <td width="17%" style="border:none;"><p> Party's State</p></td>
+            <td width="3%" style="border:none;">:</td>
+            <td width="40%" style="border:none;"><p><b> <?php if(isset($vendor_details[0]['state_name'])) echo $vendor_details[0]['state_name']; ?> </b></p></td>
+            <td width="22%" style="border:none;"><p>State</p></td>
+            <td width="4%" style="border:none;">:</td>
+            <td width="14%" style="border:none;">
+                <p>
+                    <b> 
+                        <?php if(isset($grn_details[0]['state_name'])) echo $grn_details[0]['state_name']; ?>
                     </b>
                 </p>
             </td>
@@ -160,35 +174,32 @@
                 </p>
             </td>
             <!-- <td colspan="3" align="center" valign="top" style="border-right:none;"><p><b>Rs.<?php //if(isset($debit_note[0]['total_deduction'])) echo $mycomponent->format_money($debit_note[0]['total_deduction'],2); ?></b></p></td> -->
-            <td rowspan="3" colspan="3" valign="top" style="border-right:none;">
-                <p align="right" style="width: 60%;">
-                    <?php if(isset($debit_note[0]['total_without_tax'])) echo $mycomponent->format_money($debit_note[0]['total_without_tax'],2); ?><br/>
-                    <?php if(isset($debit_note[0]['total_cgst'])) echo $mycomponent->format_money($debit_note[0]['total_cgst'],2); ?><br/>
-                    <?php if(isset($debit_note[0]['total_sgst'])) echo $mycomponent->format_money($debit_note[0]['total_sgst'],2); ?><br/>
-                    <?php if(isset($debit_note[0]['total_igst'])) echo $mycomponent->format_money($debit_note[0]['total_igst'],2); ?><br/>
-                    <?php if(isset($debit_note[0]['total_deduction'])) echo $mycomponent->format_money($debit_note[0]['total_deduction'],2); ?><br/>
-                </p>
+            <td colspan="3" valign="top" style="border:none;">
+                <p><?php if(isset($debit_note[0]['total_deduction'])) echo $mycomponent->format_money($debit_note[0]['total_deduction'],2); ?><br/></p>
+                <!-- <p align="left" style="width: 60%;">
+                    <?php //if(isset($debit_note[0]['total_without_tax'])) echo $mycomponent->format_money($debit_note[0]['total_without_tax'],2); ?><br/>
+                    <?php //if(isset($debit_note[0]['total_cgst'])) echo $mycomponent->format_money($debit_note[0]['total_cgst'],2); ?><br/>
+                    <?php //if(isset($debit_note[0]['total_sgst'])) echo $mycomponent->format_money($debit_note[0]['total_sgst'],2); ?><br/>
+                    <?php //if(isset($debit_note[0]['total_igst'])) echo $mycomponent->format_money($debit_note[0]['total_igst'],2); ?><br/>
+                    <?php //if(isset($debit_note[0]['total_deduction'])) echo $mycomponent->format_money($debit_note[0]['total_deduction'],2); ?>
+                </p> -->
             </td>
         </tr>
         <tr>
-            <td  style="border:none; border-right:1px solid #999;" colspan="3"><p><b> Amount (in words) </b></p></td>
-            <!-- <td colspan="3" style="border:none; border-left:1px solid #999;"></td> -->
-        </tr>
-        <tr>
-            <td height="40" colspan="3" valign="top" style="border:none; border-bottom:1px solid #999; border-right:1px solid #999;"> 
+            <td  style="border:none; border-right:1px solid #999; border-bottom:1px solid #999;" colspan="3"><p><b> Amount (in words) </b></p></td>
+            <td colspan="3" style="border:none; border-left:1px solid #999; border-bottom:1px solid #999;">
                 <p><?php if(isset($debit_note[0]['total_deduction'])) echo $mycomponent->convert_number_to_words(round($debit_note[0]['total_deduction'],2)); ?></p>
             </td>
-            <!-- <td colspan="3" style="border:none; border-left:1px solid #999; border-bottom:1px solid #999;"></td> -->
         </tr>
         <!-- <tr valign="bottom" >
             <td colspan="6" style="border:none;">&nbsp;   </td>
             <td colspan="3" style="border:none;"></td>
         </tr> -->
-        <tr valign="bottom" >
+        <!-- <tr valign="bottom" >
             <td colspan="6" style="border:none;"><p style="text-align: center;">This is a computer generated debit note. No signature required. &nbsp;</p></td>
-            <!-- <td colspan="2" style="border:none;"> &nbsp; </td>
-            <td valign="bottom" colspan="2" style="border:none; text-align:center "><p> <b>Authorised Signatory</b></p></td> -->
-        </tr>
+            <td colspan="2" style="border:none;"> &nbsp; </td>
+            <td valign="bottom" colspan="2" style="border:none; text-align:center "><p> <b>Authorised Signatory</b></p></td>
+        </tr> -->
         <!-- <tr valign="bottom" >
             <td colspan="6" style="border:none;">&nbsp;   </td>
         </tr> -->
@@ -230,17 +241,17 @@
                     <td>' . $deduction_details[$i]['qty'] . '</td>
                     <td>' . $mycomponent->format_money($deduction_details[$i]['box_price'],0) . '</td>
                     <td>' . $mycomponent->format_money($deduction_details[$i]['cost_excl_vat_per_unit'],0) . '</td>
-                    <td>' . $mycomponent->format_money($deduction_details[$i]['cgst_per_unit'],0) . '</td>
-                    <td>' . $mycomponent->format_money($deduction_details[$i]['sgst_per_unit'],0) . '</td>
-                    <td>' . $mycomponent->format_money($deduction_details[$i]['igst_per_unit'],0) . '</td>
-                    <td>' . $mycomponent->format_money($deduction_details[$i]['tax_per_unit'],0) . '</td>
+                    <td style="display: none;">' . $mycomponent->format_money($deduction_details[$i]['cgst_per_unit'],0) . '</td>
+                    <td style="display: none;">' . $mycomponent->format_money($deduction_details[$i]['sgst_per_unit'],0) . '</td>
+                    <td style="display: none;">' . $mycomponent->format_money($deduction_details[$i]['igst_per_unit'],0) . '</td>
+                    <td style="display: none;">' . $mycomponent->format_money($deduction_details[$i]['tax_per_unit'],0) . '</td>
                     <td>' . $mycomponent->format_money($deduction_details[$i]['total_per_unit'],0) . '</td>
-                    <td>' . $mycomponent->format_money($deduction_details[$i]['cost_excl_vat'],0) . '</td>
-                    <td>' . $mycomponent->format_money($deduction_details[$i]['cgst'],0) . '</td>
-                    <td>' . $mycomponent->format_money($deduction_details[$i]['sgst'],0) . '</td>
-                    <td>' . $mycomponent->format_money($deduction_details[$i]['igst'],0) . '</td>
-                    <td>' . $mycomponent->format_money($deduction_details[$i]['tax'],0) . '</td>
-                    <td>' . $mycomponent->format_money($deduction_details[$i]['total'],0) . '</td>' . 
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['cost_excl_vat'],2) . '</td>
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['cgst'],2) . '</td>
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['sgst'],2) . '</td>
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['igst'],2) . '</td>
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['tax'],2) . '</td>
+                    <td>' . $mycomponent->format_money($deduction_details[$i]['total'],2) . '</td>' . 
                     (($ded_type=='expiry')?
                     '<td style="'.$expiry_style.'">' . 
                                 (($deduction_details[$i]['expiry_date']!=null && $deduction_details[$i]['expiry_date']!='')?
@@ -258,12 +269,12 @@
                     <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['po_igst'],0) . '</td>
                     <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['po_tax'],0) . '</td>
                     <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['po_total'],0) . '</td>
-                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['margin_diff_excl_tax'],0) . '</td>
-                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['margin_diff_cgst'],0) . '</td>
-                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['margin_diff_sgst'],0) . '</td>
-                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['margin_diff_igst'],0) . '</td>
-                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['margin_diff_tax'],0) . '</td>
-                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['margin_diff_total'],0) . '</td>':'') . 
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['margin_diff_excl_tax'],2) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['margin_diff_cgst'],2) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['margin_diff_sgst'],2) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['margin_diff_igst'],2) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['margin_diff_tax'],2) . '</td>
+                    <td style="'.$margindiff_style.'">' . $mycomponent->format_money($deduction_details[$i]['margin_diff_total'],2) . '</td>':'') . 
                     '<td style="word-break: break-all;">' . $deduction_details[$i]['remarks'] . '</td>
                 </tr>';
 
@@ -285,7 +296,7 @@
                                 <tr>
                                     <th colspan="5" style="text-align:center;">SKU Details</th>
                                     <th colspan="2" style="text-align:center;">Quantity Deducted</th>
-                                    <th colspan="6" style="text-align:center;">Amount Deducted (Per Unit)</th>
+                                    <th colspan="2" style="text-align:center;">Amount Deducted (Per Unit)</th>
                                     <th colspan="6" style="text-align:center;">Amount Deducted (Total)</th>' . 
                                     (($ded_type=='expiry')?
                                     '<th colspan="2" style="'.$expiry_style.'text-align:center;">Expiry Dates</th>':'') . 
@@ -303,10 +314,10 @@
                                     <th>Quantity</th>
                                     <th>MRP</th>
                                     <th>Cost Excl Tax</th>
-                                    <th>CGST</th>
-                                    <th>SGST</th>
-                                    <th>IGST</th>
-                                    <th>Tax</th>
+                                    <th style="display: none;">CGST</th>
+                                    <th style="display: none;">SGST</th>
+                                    <th style="display: none;">IGST</th>
+                                    <th style="display: none;">Tax</th>
                                     <th>Total</th>
                                     <th>Cost Excl Tax</th>
                                     <th>CGST</th>
@@ -344,6 +355,53 @@
     } 
 ?>
 
- 
+
+
+<div class="modal-body-inside">
+    <h1 style="text-align:left"><b>Summary</b></h1>
+    <table class="table table-bordered" style="width:500px">
+        <thead>
+            <tr>
+                <th style="text-align:center;">Rate</th>
+                <th>Purchase excl. GST</th>
+                <th>CGST</th>
+                <th>SGST</th>
+                <th>IGST</th>
+                <th>Total GST </th>
+                <th>Purchase incl. GST </th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php for($i=0; $i<count($summary); $i++) { ?>
+            <tr>
+                <td style="text-align: center;"><?php echo $summary[$i]['vat_percen']; ?>% </td>
+                <td style="text-align: center;"><?php echo $mycomponent->format_money($summary[$i]['total_without_tax'], 2); ?></td>
+                <td style="text-align: center;"><?php echo $mycomponent->format_money($summary[$i]['total_cgst'], 2); ?></td>
+                <td style="text-align: center;"><?php echo $mycomponent->format_money($summary[$i]['total_sgst'], 2); ?></td>
+                <td style="text-align: center;"><?php echo $mycomponent->format_money($summary[$i]['total_igst'], 2); ?></td>
+                <td style="text-align: center;"><?php echo $mycomponent->format_money($summary[$i]['total_tax'], 2); ?></td>
+                <td style="word-break: break-all; text-align: center;"><?php echo $mycomponent->format_money($summary[$i]['total_deduction'], 2); ?></td>
+            </tr>
+            <?php } ?>
+            <?php if(isset($deductions)) { ?>
+            <tr>
+                <th>Total</th>
+                <th><?php echo $mycomponent->format_money($deductions[0]['total_without_tax'], 2); ?></th>
+                <th><?php echo $mycomponent->format_money($deductions[0]['total_cgst'], 2); ?></th>
+                <th><?php echo $mycomponent->format_money($deductions[0]['total_sgst'], 2); ?></th>
+                <th><?php echo $mycomponent->format_money($deductions[0]['total_igst'], 2); ?></th>
+                <th><?php echo $mycomponent->format_money($deductions[0]['total_tax'], 2); ?></th>
+                <th style="word-break: break-all;"><?php echo $mycomponent->format_money($deductions[0]['total_deduction'], 2); ?></th>
+            </tr>
+            <?php } ?>
+        </tbody>
+    </table>
+</div>
+<div class="modal-body-inside">
+    <p style="text-align:center">In case we do not receive any communication within 5 working days, the debit note will be treated as confirmed / accepted. <br/>As provided u/s Section 34(1) of the CGST Act, 2017 kindly provide us the credit note for the above transaction. <br/>This is a computer generated debit note. No signature required</p>
+</div>
+
+
+
 </body>
 </html>

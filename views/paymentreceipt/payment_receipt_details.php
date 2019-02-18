@@ -32,7 +32,7 @@ $mycomponent = Yii::$app->mycomponent;
 	.bold-text {    background-color: #f1f1f1; text-align:right;}
 	.bold-text th {text-align:right!important;}
 	.ad_hock{display:none;}
-	#knock_off{display:none;} 
+	.knock_off{display:none;} 
 	.form-horizontal .control-label {font-size: 12px; letter-spacing: .5px; margin-top:5px; }
 	.form-devident { margin-top: 10px; }
 	.form-devident h4 { border-bottom: 1px dashed #ddd; padding-bottom: 10px; }
@@ -70,6 +70,7 @@ $mycomponent = Yii::$app->mycomponent;
 								<?php } ?>
 							</select>
 							<input class="form-control" type="hidden" name="legal_name" id="legal_name" value="<?php if(isset($data[0])) { echo $data[0]['account_name']; } ?>" />
+							<input type="hidden" id="temp_acc_id" value="<?php if(isset($data[0])) { echo $data[0]['account_id']; } ?>" />
         				</div>
 					</div>
 				</div>
@@ -83,7 +84,6 @@ $mycomponent = Yii::$app->mycomponent;
 				</div>
 			</div>
 			<div class="form-group">
-			
 				<div class="col-md-3 col-sm-12 col-xs-12">
 					<label class="control-label">Payment Date</label>
 					<div class="">
@@ -129,7 +129,6 @@ $mycomponent = Yii::$app->mycomponent;
 						</div>
 					</div>
 				</div>
-			
 			</div>
 			<div class="form-group">
 				<div class="col-md-3 col-sm-12 col-xs-12 ad_hock">
@@ -157,10 +156,17 @@ $mycomponent = Yii::$app->mycomponent;
 					</div>
 				</div>
 			</div>
+			<div class="form-group knock_off">
+				<br/>
+				<div class="col-md-9 col-sm-12 col-xs-12 text-center">
+					<input type="button" class="btn btn-success btn-sm" id="btn_get_details" name="btn_get_details" value="Get Details" />
+				</div>
+			</div>
+
 
 			<br/>
 
-			<div id="knock_off">
+			<div class="knock_off">
 				<div class="table-container "> 
 					<table class="stripe table table-bordered" id="tab_logic">
 						<thead>

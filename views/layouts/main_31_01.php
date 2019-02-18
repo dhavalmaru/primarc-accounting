@@ -252,17 +252,6 @@ $session = Yii::$app->session;
                     <!-- <li><a href="<?php //echo Url::base(); ?>index.php?r=accreport%2Freconsile"><i class="fa fa-circle-o"></i> Reconciliation Report </a></li> -->
                 </ul>
             </li>
-            <li class="treeview" style="display:none;">
-                <a href="#">
-                    <i class="fa fa-bug"></i> <span>Scraping</span>
-                    <span class="pull-right-container">
-                        <i class="fa fa-angle-left pull-right"></i>
-                    </span>
-                </a>
-                <ul class="treeview-menu">
-                    <li class="active"><a href="<?php echo Url::base(); ?>index.php?r=uploadscraping%2Fredirectscraping"><i class="fa fa-circle-o"></i> Log</a></li>
-                </ul>
-            </li>
         </ul>
     </section>
     <!-- /.sidebar -->

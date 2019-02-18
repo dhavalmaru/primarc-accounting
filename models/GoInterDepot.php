@@ -77,7 +77,7 @@ class GoInterDepot extends Model
                 left join grn C on (B.grn_no=C.gi_id) 
                 left join acc_grn_sku_entries D on (C.grn_id=D.grn_id and B.psku=D.psku) 
                 where A.is_active = '1' and A.company_id='$company_id' and A.warehouse_state<>A.idt_warehouse_state and 
-                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01') and 
+                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2018-03-31') and 
                     A.type_outward = 'INTER-DEPOT' and D.id is null) A 
                 left join 
                 (select distinct gi_go_id from acc_go_debit_entries) B 
@@ -122,7 +122,7 @@ class GoInterDepot extends Model
                 left join grn C on (B.grn_no=C.gi_id) 
                 left join acc_grn_sku_entries D on (C.grn_id=D.grn_id and B.psku=D.psku) 
                 where A.is_active = '1' and A.company_id='$company_id' and A.warehouse_state<>A.idt_warehouse_state and 
-                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01') and 
+                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2018-03-31') and 
                     A.type_outward = 'INTER-DEPOT' and D.id is null) A 
                 left join 
                 (select distinct gi_go_id from acc_go_debit_entries) B 
@@ -180,7 +180,7 @@ class GoInterDepot extends Model
                 left join acc_grn_sku_entries D on (C.grn_id=D.grn_id and B.psku=D.psku) 
                 left join user E on(A.updated_by = E.id) 
                 where A.is_active = '1' and A.company_id='$company_id' and A.warehouse_state<>A.idt_warehouse_state and 
-                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01') and 
+                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2018-03-31') and 
                     A.type_outward = 'INTER-DEPOT' and D.id is null) A 
                 left join 
                 (select distinct gi_go_id from acc_go_debit_entries) B 
@@ -248,7 +248,7 @@ class GoInterDepot extends Model
                 left join acc_grn_sku_entries D on (C.grn_id=D.grn_id and B.psku=D.psku) 
                 left join user E on(A.updated_by = E.id) 
                 where A.is_active = '1' and A.company_id='$company_id' and A.warehouse_state<>A.idt_warehouse_state and 
-                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01') and 
+                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2018-03-31') and 
                     A.type_outward = 'INTER-DEPOT' and D.id is null) A 
                 left join 
                 (select distinct gi_go_id from acc_go_debit_entries) B 
@@ -311,7 +311,7 @@ class GoInterDepot extends Model
                 left join acc_grn_sku_entries D on (C.grn_id=D.grn_id and B.psku=D.psku) 
                 left join user E on(A.updated_by = E.id) 
                 where A.is_active = '1' and A.company_id='$company_id' and A.warehouse_state<>A.idt_warehouse_state and 
-                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01') and 
+                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2018-03-31') and 
                     A.type_outward = 'INTER-DEPOT' and D.id is null) A 
                 left join 
                 (select distinct gi_go_id from acc_go_debit_entries) B 
@@ -367,7 +367,7 @@ class GoInterDepot extends Model
                 left join acc_grn_sku_entries D on (C.grn_id=D.grn_id and B.psku=D.psku) 
                 left join user E on(A.updated_by = E.id) 
                 where A.is_active = '1' and A.company_id='$company_id' and A.warehouse_state<>A.idt_warehouse_state and 
-                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01') and 
+                    A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2018-03-31') and 
                     A.type_outward = 'INTER-DEPOT' and D.id is null) A 
                 left join 
                 (select distinct gi_go_id from acc_go_debit_entries) B 
@@ -1524,7 +1524,7 @@ class GoInterDepot extends Model
                 left join 
                 (select distinct warehouse_name as idt_warehouse,id as warehouse_id, warehouse_code from internal_warehouse_master) E 
                 on (A.idt_warehouse_code = E.warehouse_code) 
-                where date(A.gi_go_date_time) > date('2017-07-01') and A.warehouse_state<>A.idt_warehouse_state and 
+                where date(A.gi_go_date_time) > date('2018-03-31') and A.warehouse_state<>A.idt_warehouse_state and 
                     A.company_id='$company_id' and A.inward_outward = 'outward' and A.type_outward = 'INTER-DEPOT') A 
                 left join 
                 (select * from acc_go_debit_entries Where gi_go_id='$id' and status = 'approved' and is_active = '1' 
@@ -1559,7 +1559,7 @@ class GoInterDepot extends Model
                 left join 
                 acc_go_debit_entries C on (A.gi_go_id = C.gi_go_id and C.status = 'approved' and C.is_active='1' and 
                 C.particular = 'Total Amount')
-                where  date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id' and 
+                where  date(A.gi_go_date_time) > date('2018-03-31') and A.company_id='$company_id' and 
                     A.warehouse_state<>A.idt_warehouse_state and A.company_id='$company_id' and 
                     A.inward_outward='OUTWARD' and A.type_outward = 'INTER-DEPOT' and A.gi_go_id='$id') A";         
         $command = Yii::$app->db->createCommand($sql);
@@ -1598,7 +1598,7 @@ class GoInterDepot extends Model
             left join acc_grn_sku_entries D on (C.grn_id=D.grn_id and B.psku=D.psku) 
             where A.is_active = '1' and A.company_id='$company_id' and A.gi_go_id='$id' and 
                 A.warehouse_state<>A.idt_warehouse_state and A.inward_outward = 'outward' and 
-                date(A.gi_go_date_time) > date('2017-07-01') and A.type_outward = 'INTER-DEPOT' and D.id is null) AA 
+                date(A.gi_go_date_time) > date('2018-03-31') and A.type_outward = 'INTER-DEPOT' and D.id is null) AA 
             left join 
             (select id, tax_zone_code, tax_zone_name, parent_id, tax_rate, 
                 max(case when child_tax_type_code = 'CGST' then child_tax_rate else 0 end) as cgst_rate, 
@@ -1651,7 +1651,7 @@ class GoInterDepot extends Model
             left join grn C on (B.grn_no=C.gi_id) 
             left join acc_grn_sku_entries D on (C.grn_id=D.grn_id and B.psku=D.psku) 
             where A.is_active = '1' and A.company_id='$company_id' and A.warehouse_state<>A.idt_warehouse_state and 
-                A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2017-07-01') and 
+                A.inward_outward = 'outward' and date(A.gi_go_date_time) > date('2018-03-31') and 
                 A.type_outward = 'INTER-DEPOT' and D.id is null) AA 
             left join
             (select id, tax_zone_code, tax_zone_name, parent_id, tax_rate, 
@@ -1701,7 +1701,7 @@ class GoInterDepot extends Model
                 (select A.* ,B.* from 
                 (select A.*,Case When A.warehouse_state=B.to_state Then 'INTRA' Else 'INTER' end as vat_cst  from goods_inward_outward A 
                     left join (select (Case When type_outward='VENDOR' Then vendor_state When  type_outward='INTER-DEPOT' Then idt_warehouse_state end) as to_state,gi_go_id from  goods_inward_outward ) B on(A.gi_go_id = B.gi_go_id) 
-                where  date(A.gi_go_date_time) > date('2017-07-01') and A.company_id='$company_id'
+                where  date(A.gi_go_date_time) > date('2018-03-31') and A.company_id='$company_id'
                 AND A.inward_outward = 'outward' and A.type_outward = 'INTER-DEPOT') A
                 left join 
                 (select prepare_go_id,from_warehouse_name,destination_warehouse_company_name,total_qty,invoice_number,invoice_created_date from prepare_go Where company_id='$company_id') B 

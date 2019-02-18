@@ -151,7 +151,7 @@ $mycomponent = Yii::$app->mycomponent;
 	</div>
 </div> 
 
-<div class="modal fade" id="myModal" role="dialog" style="">
+		<div class="modal fade" id="myModal" role="dialog" style="">
             <div class="modal-dialog">
                 <!-- Modal content-->
                 <div class="modal-content" style="">
@@ -179,7 +179,7 @@ $mycomponent = Yii::$app->mycomponent;
                     </form>
                 </div>
             </div>
-        	</div> 
+    	</div> 
 
 <script type="text/javascript">
     var BASE_URL="<?php echo Url::base(); ?>";

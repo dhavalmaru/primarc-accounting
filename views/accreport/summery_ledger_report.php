@@ -270,7 +270,7 @@ $mycomponent = Yii::$app->mycomponent;
 						                                    <td style="text-align:right;">'.$mycomponent->format_money($credit_amt,2).'</td>
 						                                    <td style="text-align:right;">'.$mycomponent->format_money($balance_val,2).'</td>
 						                                    <td>'.$balance_type.'</td>
-						                                    <td>'.$data[$i]['group_payemt_ref'].'</td>
+						                                    <td>'.str_replace(',', ' | ', $data[$i]['group_payemt_ref']).'</td>
 						                                   
 					                                  	</tr>';
 									            }

@@ -67,7 +67,7 @@ class GoodsOutward extends Model
                 left join prepare_go_items B on (A.pre_go_ref=B.prepare_go_id) 
                 left join user C on(A.updated_by = C.id) 
                 where A.is_active = '1' and A.company_id='$company_id' and B.is_active = '1' and B.company_id='$company_id' and 
-                    A.inward_outward = 'outward' and date(A.gi_go_final_commit_date) > date('2017-07-01') and 
+                    A.inward_outward = 'outward' and date(A.gi_go_final_commit_date) > date('2018-03-31') and 
                     A.type_outward = 'VENDOR' and A.gi_go_status = 'COMPLETE') AA 
                 left join 
                 (select distinct grn_id, gi_id from grn where status = 'approved' and is_active = '1' and 
@@ -124,7 +124,7 @@ class GoodsOutward extends Model
                 left join prepare_go_items B on (A.pre_go_ref=B.prepare_go_id) 
                 left join user C on(A.updated_by = C.id) 
                 where A.is_active = '1' and A.company_id='$company_id' and B.is_active = '1' and B.company_id='$company_id' and 
-                    A.inward_outward = 'outward' and date(A.gi_go_final_commit_date) > date('2017-07-01') and 
+                    A.inward_outward = 'outward' and date(A.gi_go_final_commit_date) > date('2018-03-31') and 
                     A.type_outward = 'VENDOR' and A.gi_go_status = 'COMPLETE') AA 
                 left join 
                 (select distinct grn_id, gi_id from grn where status = 'approved' and is_active = '1' and 
@@ -188,7 +188,7 @@ class GoodsOutward extends Model
                 left join prepare_go_items B on (A.pre_go_ref=B.prepare_go_id) 
                 left join user C on(A.updated_by = C.id) 
                 where A.is_active = '1' and A.company_id='$company_id' and B.is_active = '1' and B.company_id='$company_id' and 
-                    A.inward_outward = 'outward' and date(A.gi_go_final_commit_date) > date('2017-07-01') and 
+                    A.inward_outward = 'outward' and date(A.gi_go_final_commit_date) > date('2018-03-31') and 
                     A.type_outward = 'VENDOR' and A.gi_go_status = 'COMPLETE') AA 
                 left join 
                 (select distinct grn_id, gi_id from grn where status = 'approved' and is_active = '1' and 
@@ -263,7 +263,7 @@ class GoodsOutward extends Model
                 left join prepare_go_items B on (A.pre_go_ref=B.prepare_go_id) 
                 left join user C on(A.updated_by = C.id) 
                 where A.is_active = '1' and A.company_id='$company_id' and B.is_active = '1' and B.company_id='$company_id' and 
-                    A.inward_outward = 'outward' and date(A.gi_go_final_commit_date) > date('2017-07-01') and 
+                    A.inward_outward = 'outward' and date(A.gi_go_final_commit_date) > date('2018-03-31') and 
                     A.type_outward = 'VENDOR' and A.gi_go_status = 'COMPLETE') AA 
                 left join 
                 (select distinct grn_id, gi_id from grn where status = 'approved' and is_active = '1' and 
@@ -333,7 +333,7 @@ class GoodsOutward extends Model
                 left join prepare_go_items B on (A.pre_go_ref=B.prepare_go_id) 
                 left join user C on(A.updated_by = C.id) 
                 where A.is_active = '1' and A.company_id='$company_id' and B.is_active = '1' and B.company_id='$company_id' and 
-                    A.inward_outward = 'outward' and date(A.gi_go_final_commit_date) > date('2017-07-01') and 
+                    A.inward_outward = 'outward' and date(A.gi_go_final_commit_date) > date('2018-03-31') and 
                     A.type_outward = 'VENDOR' and A.gi_go_status = 'COMPLETE') AA 
                 left join 
                 (select distinct grn_id, gi_id from grn where status = 'approved' and is_active = '1' and 
@@ -395,7 +395,7 @@ class GoodsOutward extends Model
                 left join prepare_go_items B on (A.pre_go_ref=B.prepare_go_id) 
                 left join user C on(A.updated_by = C.id) 
                 where A.is_active = '1' and A.company_id='$company_id' and B.is_active = '1' and B.company_id='$company_id' and 
-                    A.inward_outward = 'outward' and date(A.gi_go_final_commit_date) > date('2017-07-01') and 
+                    A.inward_outward = 'outward' and date(A.gi_go_final_commit_date) > date('2018-03-31') and 
                     A.type_outward = 'VENDOR' and A.gi_go_status = 'COMPLETE') AA 
                 left join 
                 (select distinct grn_id, gi_id from grn where status = 'approved' and is_active = '1' and 
@@ -1495,7 +1495,7 @@ class GoodsOutward extends Model
                 left join 
                 (select distinct warehouse_name as idt_warehouse, id as warehouse_id, warehouse_code from internal_warehouse_master) E 
                 on (A.idt_warehouse_code = E.warehouse_code) 
-                where date(A.gi_go_final_commit_date) > date('2017-07-01') and A.company_id='$company_id' 
+                where date(A.gi_go_final_commit_date) > date('2018-03-31') and A.company_id='$company_id' 
                     and A.inward_outward = 'outward' and A.type_outward = 'VENDOR' and A.gi_go_status = 'COMPLETE') A
                 Left Join
                 (select * from acc_go_debit_entries Where gi_go_id='$id' and status = 'approved' and is_active = '1' 
@@ -1531,7 +1531,7 @@ class GoodsOutward extends Model
                 on (A.idt_warehouse_code = E.warehouse_code)
                 left join acc_go_debit_entries C 
                 on (A.gi_go_id = C.gi_go_id and C.status = 'approved' and C.is_active='1' and C.particular = 'Total Amount')
-                where date(A.gi_go_final_commit_date) > date('2017-07-01') and A.company_id='$company_id' and
+                where date(A.gi_go_final_commit_date) > date('2018-03-31') and A.company_id='$company_id' and
                     A.inward_outward='OUTWARD' and A.type_outward = 'VENDOR' and A.gi_go_status = 'COMPLETE' and 
                     A.company_id='$company_id' and A.gi_go_id=$id ) A";
          
@@ -1575,7 +1575,7 @@ class GoodsOutward extends Model
             left join ".$fromtable." B on (A.pre_go_ref=B.prepare_go_id) 
             left join prepare_go C on(A.pre_go_ref=C.prepare_go_id) 
             where A.is_active = '1' and A.company_id = '$company_id' and A.gi_go_id = '$id' and 
-                A.inward_outward = 'outward' and date(A.gi_go_final_commit_date) > date('2017-07-01') and 
+                A.inward_outward = 'outward' and date(A.gi_go_final_commit_date) > date('2018-03-31') and 
                 A.type_outward = 'VENDOR' and B.is_active = '1' and B.company_id = '$company_id' and 
                 C.is_active = '1' and C.company_id = '$company_id' and A.gi_go_status = 'COMPLETE') AA 
             left join 
@@ -1616,60 +1616,60 @@ class GoodsOutward extends Model
     }
 
     public function getGrnskuDetails($id ,$skuentries){
-            $session = Yii::$app->session;
-            $company_id = $session['company_id'];
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
 
-           
-            if($skuentries)
-                $fromtable = 'acc_go_debit_sku_items';
-            else
-                $fromtable = 'prepare_go_items';
+       
+        if($skuentries)
+            $fromtable = 'acc_go_debit_sku_items';
+        else
+            $fromtable = 'prepare_go_items';
 
-            //ifnull(ROUND(per_unit/(1+(AA.vat_percent/100)),2),0 )
-            $sql="select AA.*,BB.tax_zone_code, BB.tax_zone_name, BB.cgst_rate, BB.sgst_rate, BB.igst_rate, 
-                ifnull(round((value_at_cost),0) ,2)as total_cost,
-                ifnull(round(AA.value_at_cost*AA.vat_percent/100,2),0) as total_tax, 
-                ifnull(round(AA.value_at_cost*BB.cgst_rate/100,2),0) as total_cgst, 
-                ifnull(round(AA.value_at_cost*BB.sgst_rate/100,2),0) as total_sgst, 
-                ifnull(round(AA.value_at_cost*BB.igst_rate/100,2),0) as total_igst, 
-                (ifnull(round(AA.value_at_cost*AA.vat_percent/100,2),0)+value_at_cost) as total_amount, 
-                per_unit as per_unit_exc_tax from 
-                (select A.*, A.vendor_state as to_state, 
-                    Case When A.warehouse_state=A.vendor_state Then 'INTRA' Else 'INTER' end as vat_cst, 
-                    E.prepare_go_id, E.from_warehouse_name, E.destination_warehouse_company_name, E.total_qty, E.invoice_number, 
-                    B.cost as per_unit, B.product_title, B.mrp, B.psku, B.fnsku, B.hsn_code, B.batch_code, B.asin, 
-                    B.expiry_date, B.ean, B.sku_code, B.grn_no, B.shipment_plan_name, B.isa, B.po_no, B.go_no, 
-                    B.grn_entries_id, B.product_id, B.is_combo_items, B.order_qty, B.manual_discount, B.value_at_mrp, 
-                    B.vat_percent, B.quantity as invoice_qty, B.value_at_cost as cost_excl_vat 
-                from goods_inward_outward A 
-                left join prepare_go E on (A.pre_go_ref=E.prepare_go_id)
-                left join ".$fromtable." B on (A.pre_go_ref=B.prepare_go_id) 
-                left join grn C on (B.grn_no=C.gi_id) 
-                left join acc_grn_sku_entries D on (C.grn_id=D.grn_id and B.psku=D.psku) 
-                where A.is_active = '1' and A.company_id='$company_id' and A.gi_go_id='$id' and 
-                    A.inward_outward = 'outward' and date(A.gi_go_final_commit_date) > date('2017-07-01') and 
-                    A.type_outward = 'VENDOR' and D.id is null and A.gi_go_status = 'COMPLETE') AA 
-                left join 
-                (select id, tax_zone_code, tax_zone_name, parent_id, tax_rate, 
-                    max(case when child_tax_type_code = 'CGST' then child_tax_rate else 0 end) as cgst_rate, 
-                    max(case when child_tax_type_code = 'SGST' then child_tax_rate else 0 end) as sgst_rate, 
-                    max(case when child_tax_type_code = 'IGST' then child_tax_rate else 0 end) as igst_rate from 
-                (select A.id, A.tax_zone_code, A.tax_zone_name, B.id as parent_id, B.tax_type_id as parent_tax_type_id, 
-                    B.tax_rate, C.child_id, D.tax_type_id as child_tax_type_id, D.tax_rate as child_tax_rate, 
-                    E.tax_category as child_tax_category, E.tax_type_code as child_tax_type_code, 
-                    E.tax_type_name as child_tax_type_name 
-                from tax_zone_master A 
-                    left join tax_rate_master B on (A.id = B.tax_zone_id) 
-                    left join tax_component C on (B.id = C.parent_id) 
-                    left join tax_rate_master D on (C.child_id = D.id) 
-                    left join tax_type_master E on (D.tax_type_id = E.id)) C 
-                where child_tax_rate != 0 
-                group by id, tax_zone_code, tax_zone_name, parent_id, tax_rate) BB 
-                on (AA.vat_cst COLLATE utf8_unicode_ci = BB.tax_zone_code and round(AA.vat_percent,4)=round(BB.tax_rate,4)) 
-                Where AA.gi_go_id=$id  Order By vat_percent ASC;";
-            $command = Yii::$app->db->createCommand($sql);
-            $reader = $command->query();
-            return $reader->readAll();
+        //ifnull(ROUND(per_unit/(1+(AA.vat_percent/100)),2),0 )
+        $sql="select AA.*,BB.tax_zone_code, BB.tax_zone_name, BB.cgst_rate, BB.sgst_rate, BB.igst_rate, 
+            ifnull(round((value_at_cost),0) ,2)as total_cost,
+            ifnull(round(AA.value_at_cost*AA.vat_percent/100,2),0) as total_tax, 
+            ifnull(round(AA.value_at_cost*BB.cgst_rate/100,2),0) as total_cgst, 
+            ifnull(round(AA.value_at_cost*BB.sgst_rate/100,2),0) as total_sgst, 
+            ifnull(round(AA.value_at_cost*BB.igst_rate/100,2),0) as total_igst, 
+            (ifnull(round(AA.value_at_cost*AA.vat_percent/100,2),0)+value_at_cost) as total_amount, 
+            per_unit as per_unit_exc_tax from 
+            (select A.*, A.vendor_state as to_state, 
+                Case When A.warehouse_state=A.vendor_state Then 'INTRA' Else 'INTER' end as vat_cst, 
+                E.prepare_go_id, E.from_warehouse_name, E.destination_warehouse_company_name, E.total_qty, E.invoice_number, 
+                B.cost as per_unit, B.product_title, B.mrp, B.psku, B.fnsku, B.hsn_code, B.batch_code, B.asin, 
+                B.expiry_date, B.ean, B.sku_code, B.grn_no, B.shipment_plan_name, B.isa, B.po_no, B.go_no, 
+                B.grn_entries_id, B.product_id, B.is_combo_items, B.order_qty, B.manual_discount, B.value_at_mrp, 
+                B.vat_percent, B.quantity as invoice_qty, B.value_at_cost as cost_excl_vat 
+            from goods_inward_outward A 
+            left join prepare_go E on (A.pre_go_ref=E.prepare_go_id)
+            left join ".$fromtable." B on (A.pre_go_ref=B.prepare_go_id) 
+            left join grn C on (B.grn_no=C.gi_id) 
+            left join acc_grn_sku_entries D on (C.grn_id=D.grn_id and B.psku=D.psku) 
+            where A.is_active = '1' and A.company_id='$company_id' and A.gi_go_id='$id' and 
+                A.inward_outward = 'outward' and date(A.gi_go_final_commit_date) > date('2018-03-31') and 
+                A.type_outward = 'VENDOR' and D.id is null and A.gi_go_status = 'COMPLETE') AA 
+            left join 
+            (select id, tax_zone_code, tax_zone_name, parent_id, tax_rate, 
+                max(case when child_tax_type_code = 'CGST' then child_tax_rate else 0 end) as cgst_rate, 
+                max(case when child_tax_type_code = 'SGST' then child_tax_rate else 0 end) as sgst_rate, 
+                max(case when child_tax_type_code = 'IGST' then child_tax_rate else 0 end) as igst_rate from 
+            (select A.id, A.tax_zone_code, A.tax_zone_name, B.id as parent_id, B.tax_type_id as parent_tax_type_id, 
+                B.tax_rate, C.child_id, D.tax_type_id as child_tax_type_id, D.tax_rate as child_tax_rate, 
+                E.tax_category as child_tax_category, E.tax_type_code as child_tax_type_code, 
+                E.tax_type_name as child_tax_type_name 
+            from tax_zone_master A 
+                left join tax_rate_master B on (A.id = B.tax_zone_id) 
+                left join tax_component C on (B.id = C.parent_id) 
+                left join tax_rate_master D on (C.child_id = D.id) 
+                left join tax_type_master E on (D.tax_type_id = E.id)) C 
+            where child_tax_rate != 0 
+            group by id, tax_zone_code, tax_zone_name, parent_id, tax_rate) BB 
+            on (AA.vat_cst COLLATE utf8_unicode_ci = BB.tax_zone_code and round(AA.vat_percent,4)=round(BB.tax_rate,4)) 
+            Where AA.gi_go_id=$id  Order By vat_percent ASC;";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
     }
 
     public function getskugoItems($prepare_go_id) {
@@ -1698,7 +1698,7 @@ class GoodsOutward extends Model
                 (select A.* ,B.* from 
                 (select A.*,Case When A.warehouse_state=B.to_state Then 'INTRA' Else 'INTER' end as vat_cst  from goods_inward_outward A 
                     left join (select (Case When type_outward='VENDOR' Then vendor_state When  type_outward='INTER-DEPOT' Then idt_warehouse_state end) as to_state,gi_go_id from  goods_inward_outward ) B on(A.gi_go_id = B.gi_go_id) 
-                where  date(A.gi_go_final_commit_date) > date('2017-07-01') and A.company_id='$company_id' and 
+                where  date(A.gi_go_final_commit_date) > date('2018-03-31') and A.company_id='$company_id' and 
                     A.inward_outward = 'outward' and A.type_outward='VENDOR' and A.gi_go_status = 'COMPLETE') A
                 left join 
                 (select prepare_go_id,from_warehouse_name,destination_warehouse_company_name,total_qty,invoice_number,invoice_created_date from prepare_go Where company_id='$company_id') B 
