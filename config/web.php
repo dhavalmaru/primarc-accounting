@@ -10,7 +10,7 @@ $config = [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'xNWti-kuzjHZcozK0We7OwddZad6bGYl',
-            'baseUrl' => 'http://localhost/primarc_new_data/primarc_pecan/web/'
+            'baseUrl' => 'http://localhost/primarc_pecan/web/'
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
