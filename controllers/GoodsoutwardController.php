@@ -78,7 +78,7 @@ class GoodsoutwardController extends Controller
         }
 
         for($i=0; $i<count($grn); $i++) { 
-           $row = array(
+            $row = array(
                         $start+1,
                         '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fview&id='.$grn[$i]['gi_go_id'].'" >View </a>'.
                         (($r_edit == 1)?'<a href="'.Url::base() .'index.php?r=goodsoutward%2Fedit&id='.$grn[$i]['gi_go_id'].'" style="'.($grn[$i]['is_paid']=='1'?'display: none;':'').'" >Edit </a>':''),
@@ -87,12 +87,15 @@ class GoodsoutwardController extends Controller
                         ''.$grn[$i]['warehouse_name'].'',
                         ''.$grn[$i]['vendor_name'].'',
                         ''.$mycomponent->format_money($grn[$i]['total_amount'], 2).'',
-                       ''.$grn[$i]['gi_go_final_commit_date'].'',
+                        ''.$grn[$i]['gi_go_final_commit_date'].'',
                         ''.$grn[$i]['username'].'',
-                        '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fledger&id='.$grn[$i]['gi_go_id'].'" target="_new"> <span class="fa fa-file-pdf-o"></span> </a>'
-                        ) ;
-           $grn_data[] = $row;
-           $start = $start+1;
+                        '<a href="'.Url::base() .'index.php?r=goodsoutward%2Fledger&id='.$grn[$i]['gi_go_id'].'" target="_new"> <span class="fa fa-file-pdf-o"></span> </a>',
+                        ''.'<span style="'.(($grn[$i]['debit_note_ref']==null || $grn[$i]['debit_note_ref']=='')?"display: none;":"").'"><a href="'.Url::base() .'index.php?r=goodsoutward%2Fviewdebitnote&id='.$grn[$i]['gi_go_id'].'" target="_blank">View </a> <br/>
+                        <a href="'.Url::base() .'index.php?r=goodsoutward%2Fdownloaddebitnote&id='.$grn[$i]['gi_go_id'].'" target="_blank">Download </a> <br/>
+                        <a href="'.Url::base() .'index.php?r=goodsoutward%2Femaildebitnote&id='.$grn[$i]['gi_go_id'].'" target="_blank">Email </a> <br/></span>'
+                    );
+            $grn_data[] = $row;
+            $start = $start+1;
         }
         $json_data = array(
                         "draw"            => intval($request->post('draw')),   
@@ -509,7 +512,6 @@ class GoodsoutwardController extends Controller
         return $this->render('goods_outward_details', ['data'=>$data, 'acc_master'=>$acc_master, 
                                                         'data_entries'=>$data_entries, 'action'=>$action]);
     }*/
-
 
     public function actionRedirect($action, $id){
         $model = new GoodsOutward();
@@ -1646,8 +1648,6 @@ class GoodsoutwardController extends Controller
         //$this->redirect(array('goodsoutward/index'));
     }*/
 
-
-
     public function actionSave(){
         $request = Yii::$app->request;
         $model = new GoodsOutward();
@@ -1656,14 +1656,11 @@ class GoodsoutwardController extends Controller
         $gi_id = $request->post('gi_go_id');
         $invoice_no = $request->post('invoice_no');
         $goskuentries = $model->set_goskuentries();
-        $data = $model->getGoParticulars();
+        $data = $model->getGoParticulars('save');
 
         $bulkInsertArray = $data['bulkInsertArray'];
         $grnAccEntries = $data['grnAccEntries'];
         $ledgerArray = $data['ledgerArray'];
-
-
-
 
         if(count($bulkInsertArray)>0){
             $sql = "delete from acc_go_debit_entries where gi_go_id = '$gi_id'";
@@ -1686,7 +1683,6 @@ class GoodsoutwardController extends Controller
             // echo 'hii';
         }
 
-
         if(count($ledgerArray)>0){
             $sql = "delete from acc_ledger_entries where ref_id = '$gi_id' and ref_type='go_debit_details'";
             Yii::$app->db->createCommand($sql)->execute();
@@ -1704,8 +1700,334 @@ class GoodsoutwardController extends Controller
 
         }
 
-
         $this->redirect(array('goodsoutward/ledger', 'id'=>$gi_id));
+    }
+
+    public function save(){
+        $request = Yii::$app->request;
+        $mycomponent = Yii::$app->mycomponent;
+        $session = Yii::$app->session;
+
+        $model = new GoodsOutward();
+
+        $company_id = $session['company_id'];
+        $curusr = $session['session_id'];
+        $now = date('Y-m-d H:i:s');
+
+        $id = $request->post('id');
+        $warehouse_id = $request->post('warehouse_id');
+        $gi_go_id = $request->post('gi_go_id');
+        // $voucher_id = $request->post('voucher_id');
+        $vendor_id = $request->post('vendor_id');
+        $invoice_no = $request->post('invoice_no');
+        $gi_date = $request->post('gi_date');
+        if($gi_date==''){
+            $gi_date=NULL;
+        } else {
+            $gi_date=$mycomponent->formatdate($gi_date);
+        }
+        $location_from = $request->post('location_from');
+        $location_to = $request->post('location_to');
+
+        // $taxable_amount = $request->post('taxable_amount');
+        // $invoice_taxable_amount = $request->post('invoice_taxable_amount');
+        // $edited_taxable_amount = $request->post('edited_taxable_amount');
+        // $diff_taxable_amount = $request->post('diff_taxable_amount');
+        // $narration_taxable_amount = $request->post('narration_taxable_amount');
+        // $total_tax = $request->post('total_tax');
+        // $invoice_total_tax = $request->post('invoice_total_tax');
+        // $edited_total_tax = $request->post('edited_total_tax');
+        // $diff_total_tax = $request->post('diff_total_tax');
+        // $narration_total_tax = $request->post('narration_total_tax');
+
+        $vat_cst = $request->post('vat_cst');
+        $vat_percen = $request->post('vat_percen');
+        $sub_particular_cost = $request->post('sub_particular_cost');
+        $sub_particular_tax = $request->post('sub_particular_tax');
+        $sub_particular_cgst = $request->post('sub_particular_cgst');
+        $sub_particular_sgst = $request->post('sub_particular_sgst');
+        $sub_particular_igst = $request->post('sub_particular_igst');
+        $invoice_cost_acc_id = $request->post('invoice_cost_acc_id');
+        $invoice_cost_ledger_name = $request->post('invoice_cost_ledger_name');
+        $invoice_cost_ledger_code = $request->post('invoice_cost_ledger_code');
+        // $invoice_cost_voucher_id = $request->post('invoice_cost_voucher_id');
+        // $invoice_cost_ledger_type = $request->post('invoice_cost_ledger_type');
+        $invoice_tax_acc_id = $request->post('invoice_tax_acc_id');
+        $invoice_tax_ledger_name = $request->post('invoice_tax_ledger_name');
+        $invoice_tax_ledger_code = $request->post('invoice_tax_ledger_code');
+        // $invoice_tax_voucher_id = $request->post('invoice_tax_voucher_id');
+        // $invoice_tax_ledger_type = $request->post('invoice_tax_ledger_type');
+        $invoice_cgst_acc_id = $request->post('invoice_cgst_acc_id');
+        $invoice_cgst_ledger_name = $request->post('invoice_cgst_ledger_name');
+        $invoice_cgst_ledger_code = $request->post('invoice_cgst_ledger_code');
+        // $invoice_cgst_voucher_id = $request->post('invoice_cgst_voucher_id');
+        // $invoice_cgst_ledger_type = $request->post('invoice_cgst_ledger_type');
+        $invoice_sgst_acc_id = $request->post('invoice_sgst_acc_id');
+        $invoice_sgst_ledger_name = $request->post('invoice_sgst_ledger_name');
+        $invoice_sgst_ledger_code = $request->post('invoice_sgst_ledger_code');
+        // $invoice_sgst_voucher_id = $request->post('invoice_sgst_voucher_id');
+        // $invoice_sgst_ledger_type = $request->post('invoice_sgst_ledger_type');
+        $invoice_igst_acc_id = $request->post('invoice_igst_acc_id');
+        $invoice_igst_ledger_name = $request->post('invoice_igst_ledger_name');
+        $invoice_igst_ledger_code = $request->post('invoice_igst_ledger_code');
+        // $invoice_igst_voucher_id = $request->post('invoice_igst_voucher_id');
+        // $invoice_igst_ledger_type = $request->post('invoice_igst_ledger_type');
+     
+
+        for($i=0; $i<count($vat_cst); $i++){
+            $total_cost[$i] = $request->post('total_cost_'.$i);
+            $invoice_cost[$i] = $request->post('invoice_cost_'.$i);
+            $edited_cost[$i] = $request->post('edited_cost_'.$i);
+            $diff_cost[$i] = $request->post('diff_cost_'.$i);
+            $narration_cost[$i] = $request->post('narration_cost_'.$i);
+
+            $total_tax[$i] = $request->post('total_tax_'.$i);
+            $invoice_tax[$i] = $request->post('invoice_tax_'.$i);
+            $edited_tax[$i] = $request->post('edited_tax_'.$i);
+            $diff_tax[$i] = $request->post('diff_tax_'.$i);
+            $narration_tax[$i] = $request->post('narration_tax_'.$i);
+
+            $total_cgst[$i] = $request->post('total_cgst_'.$i);
+            $invoice_cgst[$i] = $request->post('invoice_cgst_'.$i);
+            $edited_cgst[$i] = $request->post('edited_cgst_'.$i);
+            $diff_cgst[$i] = $request->post('diff_cgst_'.$i);
+            $narration_cgst[$i] = $request->post('narration_cgst_'.$i);
+
+            $total_sgst[$i] = $request->post('total_sgst_'.$i);
+            $invoice_sgst[$i] = $request->post('invoice_sgst_'.$i);
+            $edited_sgst[$i] = $request->post('edited_sgst_'.$i);
+            $diff_sgst[$i] = $request->post('diff_sgst_'.$i);
+            $narration_sgst[$i] = $request->post('narration_sgst_'.$i);
+
+            $total_igst[$i] = $request->post('total_igst_'.$i);
+            $invoice_igst[$i] = $request->post('invoice_igst_'.$i);
+            $edited_igst[$i] = $request->post('edited_igst_'.$i);
+            $diff_igst[$i] = $request->post('diff_igst_'.$i);
+            $narration_igst[$i] = $request->post('narration_igst_'.$i);
+        }
+
+
+        $other_charges_acc_id = $request->post('other_charges_acc_id');
+        $other_charges_ledger_name = $request->post('other_charges_ledger_name');
+        $other_charges_ledger_code = $request->post('other_charges_ledger_code');
+        // $other_charges_voucher_id = $request->post('other_charges_voucher_id');
+        // $other_charges_ledger_type = $request->post('other_charges_ledger_type');
+        $other_charges = $request->post('other_charges');
+        $invoice_other_charges = $request->post('invoice_other_charges');
+        $edited_other_charges = $request->post('edited_other_charges');
+        $diff_other_charges = $request->post('diff_other_charges');
+        $narration_other_charges = $request->post('narration_other_charges');
+
+        $total_amount_acc_id = $request->post('total_amount_acc_id');
+        $total_amount_ledger_name = $request->post('total_amount_ledger_name');
+        $total_amount_ledger_code = $request->post('total_amount_ledger_code');
+        $total_amount_voucher_id = $request->post('total_amount_voucher_id');
+        $total_amount_ledger_type = $request->post('total_amount_ledger_type');
+        $total_amount = $request->post('total_amount');
+        $invoice_total_amount = $request->post('invoice_total_amount');
+        $edited_total_amount = $request->post('edited_total_amount');
+        $diff_total_amount = $request->post('diff_total_amount');
+        $narration_total_amount = $request->post('narration_total_amount');
+        $edited_total_payable_amount = $request->post('edited_total_payable_amount');
+
+        
+        $num = 0;
+        $debit_acc = "";
+        $credit_acc = "";
+        $voucher_id = 0;
+
+        for($i=0; $i<count($invoice_no); $i++){
+            for ($j=0; $j<count($vat_cst); $j++){
+                $edited_cost_val = $mycomponent->format_number($edited_cost[$j][$i],2);
+                if($edited_cost_val>0 || $invoice_cost[$j][$i]>0){
+                    $particular[$num] = "Taxable Amount";
+                    $sub_particular_val[$num] = $sub_particular_cost[$j];
+                    $acc_id[$num] = $invoice_cost_acc_id[$j];
+                    $ledger_name[$num] = $invoice_cost_ledger_name[$j];
+                    $ledger_code[$num] = $invoice_cost_ledger_code[$j];
+                    $voucher_id[$num] = $total_amount_voucher_id[$i];
+                    $ledger_type[$num] = 'Sub Entry';
+                    $vat_cst_val[$num] = $vat_cst[$j];
+                    $vat_percen_val[$num] = $vat_percen[$j];
+                    $invoice_no_val[$num] = $invoice_no[$i];
+                    $total_val[$num] = $total_cost[$j];
+                    $invoice_val[$num] = $invoice_cost[$j][$i];
+                    $edited_val[$num] = $edited_cost[$j][$i];
+                    $difference_val[$num] = $diff_cost[$j][$i];
+                    $narration_val[$num] = $narration_cost[$j];
+                    $num = $num + 1;
+                    $credit_acc = $credit_acc . $invoice_cost_ledger_name[$j] . ', ';
+                    $total_credit_amt = $total_credit_amt + $edited_cost[$j][$i];
+
+                    $particular[$num] = "Tax";
+                    $sub_particular_val[$num] = $sub_particular_tax[$j];
+                    $acc_id[$num] = $invoice_tax_acc_id[$j];
+                    $ledger_name[$num] = $invoice_tax_ledger_name[$j];
+                    $ledger_code[$num] = $invoice_tax_ledger_code[$j];
+                    $voucher_id[$num] = $total_amount_voucher_id[$i];
+                    $ledger_type[$num] = 'Sub Entry';
+                    $vat_cst_val[$num] = $vat_cst[$j];
+                    $vat_percen_val[$num] = $vat_percen[$j];
+                    $invoice_no_val[$num] = $invoice_no[$i];
+                    $total_val[$num] = $total_tax[$j];
+                    $invoice_val[$num] = $invoice_tax[$j][$i];
+                    $edited_val[$num] = $edited_tax[$j][$i];
+                    $difference_val[$num] = $diff_tax[$j][$i];
+                    $narration_val[$num] = $narration_tax[$j];
+                    $num = $num + 1;
+                    $credit_acc = $credit_acc . $invoice_tax_ledger_name[$j] . ', ';
+                    $total_credit_amt = $total_credit_amt + $edited_tax[$j][$i];
+
+                    $particular[$num] = "CGST";
+                    $sub_particular_val[$num] = $sub_particular_cgst[$j];
+                    $acc_id[$num] = $invoice_cgst_acc_id[$j];
+                    $ledger_name[$num] = $invoice_cgst_ledger_name[$j];
+                    $ledger_code[$num] = $invoice_cgst_ledger_code[$j];
+                    $voucher_id[$num] = $total_amount_voucher_id[$i];
+                    $ledger_type[$num] = 'Sub Entry';
+                    $vat_cst_val[$num] = $vat_cst[$j];
+                    $vat_percen_val[$num] = $vat_percen[$j];
+                    $invoice_no_val[$num] = $invoice_no[$i];
+                    $total_val[$num] = $total_cgst[$j];
+                    $invoice_val[$num] = $invoice_cgst[$j][$i];
+                    $edited_val[$num] = $edited_cgst[$j][$i];
+                    $difference_val[$num] = $diff_cgst[$j][$i];
+                    $narration_val[$num] = $narration_cgst[$j];
+                    $num = $num + 1;
+                    $credit_acc = $credit_acc . $invoice_cgst_ledger_name[$j] . ', ';
+                    $total_credit_amt = $total_credit_amt + $edited_cgst[$j][$i];
+
+                    $particular[$num] = "SGST";
+                    $sub_particular_val[$num] = $sub_particular_sgst[$j];
+                    $acc_id[$num] = $invoice_sgst_acc_id[$j];
+                    $ledger_name[$num] = $invoice_sgst_ledger_name[$j];
+                    $ledger_code[$num] = $invoice_sgst_ledger_code[$j];
+                    $voucher_id[$num] = $total_amount_voucher_id[$i];
+                    $ledger_type[$num] = 'Sub Entry';
+                    $vat_cst_val[$num] = $vat_cst[$j];
+                    $vat_percen_val[$num] = $vat_percen[$j];
+                    $invoice_no_val[$num] = $invoice_no[$i];
+                    $total_val[$num] = $total_sgst[$j];
+                    $invoice_val[$num] = $invoice_sgst[$j][$i];
+                    $edited_val[$num] = $edited_sgst[$j][$i];
+                    $difference_val[$num] = $diff_sgst[$j][$i];
+                    $narration_val[$num] = $narration_sgst[$j];
+                    $num = $num + 1;
+                    $credit_acc = $credit_acc . $invoice_sgst_ledger_name[$j] . ', ';
+                    $total_credit_amt = $total_credit_amt + $edited_sgst[$j][$i];
+
+                    $particular[$num] = "IGST";
+                    $sub_particular_val[$num] = $sub_particular_igst[$j];
+                    $acc_id[$num] = $invoice_igst_acc_id[$j];
+                    $ledger_name[$num] = $invoice_igst_ledger_name[$j];
+                    $ledger_code[$num] = $invoice_igst_ledger_code[$j];
+                    $voucher_id[$num] = $total_amount_voucher_id[$i];
+                    $ledger_type[$num] = 'Sub Entry';
+                    $vat_cst_val[$num] = $vat_cst[$j];
+                    $vat_percen_val[$num] = $vat_percen[$j];
+                    $invoice_no_val[$num] = $invoice_no[$i];
+                    $total_val[$num] = $total_igst[$j];
+                    $invoice_val[$num] = $invoice_igst[$j][$i];
+                    $edited_val[$num] = $edited_igst[$j][$i];
+                    $difference_val[$num] = $diff_igst[$j][$i];
+                    $narration_val[$num] = $narration_igst[$j];
+                    $num = $num + 1;
+                    $credit_acc = $credit_acc . $invoice_igst_ledger_name[$j] . ', ';
+                    $total_credit_amt = $total_credit_amt + $edited_igst[$j][$i];
+                }
+            }
+
+            $particular[$num] = "Other Charges";
+            $sub_particular_val[$num] = null;
+            $acc_id[$num] = $other_charges_acc_id;
+            $ledger_name[$num] = $other_charges_ledger_name;
+            $ledger_code[$num] = $other_charges_ledger_code;
+            $voucher_id[$num] = $total_amount_voucher_id[$i];
+            $ledger_type[$num] = 'Sub Entry';
+            $vat_cst_val[$num] = null;
+            $vat_percen_val[$num] = null;
+            $invoice_no_val[$num] = $invoice_no[$i];
+            $total_val[$num] = $other_charges;
+            $invoice_val[$num] = $invoice_other_charges[$i];
+            $edited_val[$num] = $edited_other_charges[$i];
+            $difference_val[$num] = $diff_other_charges[$i];
+            $narration_val[$num] = $narration_other_charges;
+            $num = $num + 1;
+            $credit_acc = $credit_acc . $other_charges_ledger_name . ', ';
+            $total_credit_amt = $total_credit_amt + $edited_other_charges[$i];
+
+            $particular[$num] = "Total Amount";
+            $sub_particular_val[$num] = null;
+            $acc_id[$num] = $total_amount_acc_id;
+            $ledger_name[$num] = $total_amount_ledger_name;
+            $ledger_code[$num] = $total_amount_ledger_code;
+            $voucher_id[$num] = $total_amount_voucher_id[$i];
+            $ledger_type[$num] = 'Main Entry';
+            $vat_cst_val[$num] = null;
+            $vat_percen_val[$num] = null;
+            $invoice_no_val[$num] = $invoice_no[$i];
+            $total_val[$num] = $total_amount;
+            $invoice_val[$num] = $invoice_total_amount[$i];
+            $edited_val[$num] = $edited_total_amount[$i];
+            $difference_val[$num] = $diff_total_amount[$i];
+            $narration_val[$num] = $narration_total_amount;
+            $num = $num + 1;
+            $voucher_id = $total_amount_voucher_id[$i];
+            $debit_acc = $debit_acc . $total_amount_ledger_name . ', ';
+            $total_debit_amt = $edited_total_amount[$i];
+        }
+        
+        if(strlen($debit_acc)>0){
+            $debit_acc = substr($debit_acc, 0, strrpos($debit_acc, ', '));
+        }
+        if(strlen($credit_acc)>0){
+            $credit_acc = substr($credit_acc, 0, strrpos($credit_acc, ', '));
+        }
+
+        if(!isset($debit_note_ref) || $debit_note_ref==''){
+            $debit_note_ref = $model->getDebitNoteRef($gi_date, $location_from);
+        }
+        
+        $array = array('gi_go_id' => $gi_go_id, 
+                        'voucher_id' => $voucher_id, 
+                        // 'ledger_type' => $ledger_type, 
+                        // 'reference' => $reference, 
+                        // 'narration' => $narration, 
+                        'debit_acc' => $debit_acc, 
+                        'credit_acc' => $credit_acc, 
+                        'debit_amt' => $mycomponent->format_number($total_debit_amt,2), 
+                        'credit_amt' => $mycomponent->format_number($total_credit_amt,2), 
+                        // 'diff_amt' => $mycomponent->format_number($diff_amt,2),
+                        // 'status' => 'pending',
+                        'status' => 'approved',
+                        'is_active' => '1',
+                        'updated_by'=>$curusr,
+                        'updated_date'=>$now,
+                        'date_of_transaction'=>$gi_date,
+                        // 'approver_comments'=>$remarks,
+                        // 'approver_id'=>$approver_id,
+                        'company_id'=>$company_id,
+                        'debit_note_ref'=>$debit_note_ref
+                        );
+
+        if(count($array)>0){
+            if (isset($id) && $id!=""){
+                $count = Yii::$app->db->createCommand()
+                            ->update("acc_go_debit_details", $array, "id = '".$id."'")
+                            ->execute();
+
+                $this->setLog('go_debit_details', '', 'Update', '', 'Update Goods Outward Debit Details', 'acc_go_debit_details', $id);
+            } else {
+                $array['created_by'] = $curusr;
+                $array['created_date'] = $now;
+                $count = Yii::$app->db->createCommand()
+                            ->insert("acc_go_debit_details", $array)
+                            ->execute();
+                $id = Yii::$app->db->getLastInsertID();
+
+                $this->setLog('go_debit_details', '', 'Save', '', 'Insert Goods Outward Debit Details', 'acc_go_debit_details', $id);
+            }
+        }
     }
 
     public function actionLedger($id){
@@ -1847,9 +2169,7 @@ class GoodsoutwardController extends Controller
 
         $this->layout = false;
         return $this->render('debit_note', ['debit_note' => $data['debit_note'], 'go_details' => $data['go_details'], 
-                                            'total_amt' => $data['total_amt'], 'amt_without_tax' => $data['amt_without_tax'], 
-                                            'cgst_amt' => $data['cgst_amt'], 'sgst_amt' => $data['sgst_amt'], 
-                                            'igst_amt' => $data['igst_amt']]);
+                                            'ledger_details' => $data['ledger_details']]);
     }
 
     public function actionDownloaddebitnote($id){
@@ -1877,9 +2197,7 @@ class GoodsoutwardController extends Controller
         $file = "";
 
         return $this->render('email', ['debit_note' => $data['debit_note'], 'go_details' => $data['go_details'], 
-                                        'total_amt' => $data['total_amt'], 'amt_without_tax' => $data['amt_without_tax'], 
-                                        'cgst_amt' => $data['cgst_amt'], 'sgst_amt' => $data['sgst_amt'], 
-                                        'igst_amt' => $data['igst_amt']]);
+                                        'ledger_details' => $data['ledger_details']]);
     }
 
     public function actionEmail(){

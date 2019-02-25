@@ -746,7 +746,7 @@ class AccountMaster extends Model
         $sql = "delete from acc_categories where acc_id = '$id'";
         Yii::$app->db->createCommand($sql)->execute();
 
-        if ($type=="Vendor Goods"||$type=="Customer"||$type=="Marketplace"){
+        if ($type=="Vendor Goods" || $type=="Customer" || $type=="Marketplace"){
             $acc_categories = array();
             if(count($bus_category)>0){
                 for($i=0; $i<count($bus_category); $i++){

@@ -30,7 +30,7 @@ class GoodsOutward extends Model
         return $reader->readAll();
     }
 
-    public function getNewGoDetails() {
+    public function getNewGoDetails(){
         $request = Yii::$app->request;
         $len= "";
         if($request->post('start')!="" && $request->post('length')!='-1') {
@@ -175,7 +175,7 @@ class GoodsOutward extends Model
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-        $sql = "select KK.*, LL.is_paid from 
+        $sql = "select KK.*, LL.is_paid, MM.debit_note_ref from 
                 (select II.* from 
                 (select HH.* from 
                 (select GG.gi_go_id, GG.gi_go_ref_no, GG.warehouse_name, GG.vendor_name, GG.idt_warehouse_name, GG.gi_go_final_commit_date, GG.updated_by, GG.updated_date, GG.username, sum(GG.total_amount) as total_amount from 
@@ -186,7 +186,7 @@ class GoodsOutward extends Model
                 (select A.gi_go_id, A.gi_go_ref_no, A.warehouse_name, A.vendor_name, A.idt_warehouse_name, A.gi_go_final_commit_date, A.updated_by, A.updated_date, B.psku, B.quantity, B.cost, B.vat_percent, B.grn_no, C.username 
                 from goods_inward_outward A 
                 left join prepare_go_items B on (A.pre_go_ref=B.prepare_go_id) 
-                left join user C on(A.updated_by = C.id) 
+                left join user C on (A.updated_by = C.id) 
                 where A.is_active = '1' and A.company_id='$company_id' and B.is_active = '1' and B.company_id='$company_id' and 
                     A.inward_outward = 'outward' and date(A.gi_go_final_commit_date) > date('2018-03-31') and 
                     A.type_outward = 'VENDOR' and A.gi_go_status = 'COMPLETE') AA 
@@ -211,6 +211,9 @@ class GoodsOutward extends Model
                 (select distinct ref_id, is_paid from acc_ledger_entries 
                     where ref_type = 'go_debit_details' and company_id='$company_id' and is_active = '1' and status = 'Approved' and is_paid = '1') LL 
                 on (KK.gi_go_id = LL.ref_id) 
+                left join 
+                (select distinct gi_go_id, debit_note_ref from acc_go_debit_details where status = 'approved' and is_active = '1' and company_id = '$company_id') MM 
+                on (KK.gi_go_id=MM.gi_go_id) 
                 order by UNIX_TIMESTAMP(KK.updated_date) desc ".$len;
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
@@ -747,18 +750,20 @@ class GoodsOutward extends Model
         return true;
     }
 
-    public function getGoParticulars(){
+    public function getGoParticulars($action=''){
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
         $session = Yii::$app->session;
 
         $company_id = $session['company_id'];
+        $curusr = $session['session_id'];
+        $now = date('Y-m-d H:i:s');
 
+        $id = $request->post('id');
+        $debit_note_ref = $request->post('debit_note_ref');
         $warehouse_id = $request->post('warehouse_id');
-        $gi_id = $request->post('gi_go_id');
+        $gi_go_id = $request->post('gi_go_id');
         $vendor_id = $request->post('vendor_id');
-        $vendor_code = $request->post('vendor_code');
-        $vendor_name = $request->post('vendor_name');
         $invoice_no = $request->post('invoice_no');
         $gi_date = $request->post('gi_date');
         if($gi_date==''){
@@ -766,6 +771,8 @@ class GoodsOutward extends Model
         } else {
             $gi_date=$mycomponent->formatdate($gi_date);
         }
+        $location_from = $request->post('location_from');
+        $location_to = $request->post('location_to');
 
         // $taxable_amount = $request->post('taxable_amount');
         // $invoice_taxable_amount = $request->post('invoice_taxable_amount');
@@ -845,7 +852,6 @@ class GoodsOutward extends Model
         }
 
 
-
         $other_charges_acc_id = $request->post('other_charges_acc_id');
         $other_charges_ledger_name = $request->post('other_charges_ledger_name');
         $other_charges_ledger_code = $request->post('other_charges_ledger_code');
@@ -871,10 +877,13 @@ class GoodsOutward extends Model
 
         
         $num = 0;
+        $debit_acc = "";
+        $credit_acc = "";
+        $tot_amt_voucher_id = 0;
+        $total_credit_amt = 0;
+        $total_debit_amt = 0;
 
         for($i=0; $i<count($invoice_no); $i++){
-           
-
             for ($j=0; $j<count($vat_cst); $j++){
                 $edited_cost_val = $mycomponent->format_number($edited_cost[$j][$i],2);
                 if($edited_cost_val>0 || $invoice_cost[$j][$i]>0){
@@ -894,6 +903,8 @@ class GoodsOutward extends Model
                     $difference_val[$num] = $diff_cost[$j][$i];
                     $narration_val[$num] = $narration_cost[$j];
                     $num = $num + 1;
+                    $credit_acc = $credit_acc . $invoice_cost_ledger_name[$j] . ', ';
+                    $total_credit_amt = $total_credit_amt + $edited_cost[$j][$i];
 
                     $particular[$num] = "Tax";
                     $sub_particular_val[$num] = $sub_particular_tax[$j];
@@ -911,6 +922,8 @@ class GoodsOutward extends Model
                     $difference_val[$num] = $diff_tax[$j][$i];
                     $narration_val[$num] = $narration_tax[$j];
                     $num = $num + 1;
+                    // $credit_acc = $credit_acc . $invoice_tax_ledger_name[$j] . ', ';
+                    // $total_credit_amt = $total_credit_amt + $edited_tax[$j][$i];
 
                     $particular[$num] = "CGST";
                     $sub_particular_val[$num] = $sub_particular_cgst[$j];
@@ -928,6 +941,10 @@ class GoodsOutward extends Model
                     $difference_val[$num] = $diff_cgst[$j][$i];
                     $narration_val[$num] = $narration_cgst[$j];
                     $num = $num + 1;
+                    if($edited_cgst[$j][$i]!='' && $edited_cgst[$j][$i]!='0'){
+                        $credit_acc = $credit_acc . $invoice_cgst_ledger_name[$j] . ', ';
+                        $total_credit_amt = $total_credit_amt + $edited_cgst[$j][$i];
+                    }
 
                     $particular[$num] = "SGST";
                     $sub_particular_val[$num] = $sub_particular_sgst[$j];
@@ -945,6 +962,10 @@ class GoodsOutward extends Model
                     $difference_val[$num] = $diff_sgst[$j][$i];
                     $narration_val[$num] = $narration_sgst[$j];
                     $num = $num + 1;
+                    if($edited_sgst[$j][$i]!='' && $edited_sgst[$j][$i]!='0'){
+                        $credit_acc = $credit_acc . $invoice_sgst_ledger_name[$j] . ', ';
+                        $total_credit_amt = $total_credit_amt + $edited_sgst[$j][$i];
+                    }
 
                     $particular[$num] = "IGST";
                     $sub_particular_val[$num] = $sub_particular_igst[$j];
@@ -962,6 +983,10 @@ class GoodsOutward extends Model
                     $difference_val[$num] = $diff_igst[$j][$i];
                     $narration_val[$num] = $narration_igst[$j];
                     $num = $num + 1;
+                    if($edited_igst[$j][$i]!='' && $edited_igst[$j][$i]!='0'){
+                        $credit_acc = $credit_acc . $invoice_igst_ledger_name[$j] . ', ';
+                        $total_credit_amt = $total_credit_amt + $edited_igst[$j][$i];
+                    }
                 }
             }
 
@@ -981,7 +1006,11 @@ class GoodsOutward extends Model
             $difference_val[$num] = $diff_other_charges[$i];
             $narration_val[$num] = $narration_other_charges;
             $num = $num + 1;
-
+            if($edited_other_charges[$i]!='' && $edited_other_charges[$i]!='0'){
+                $credit_acc = $credit_acc . $other_charges_ledger_name . ', ';
+                $total_credit_amt = $total_credit_amt + $edited_other_charges[$i];
+            }
+            
             $particular[$num] = "Total Amount";
             $sub_particular_val[$num] = null;
             $acc_id[$num] = $total_amount_acc_id;
@@ -992,13 +1021,74 @@ class GoodsOutward extends Model
             $vat_cst_val[$num] = null;
             $vat_percen_val[$num] = null;
             $invoice_no_val[$num] = $invoice_no[$i];
-            $total_val[$num] = $total_amount;
+            $total_val[$num] = $total_amount[$i];
             $invoice_val[$num] = $invoice_total_amount[$i];
             $edited_val[$num] = $edited_total_amount[$i];
             $difference_val[$num] = $diff_total_amount[$i];
             $narration_val[$num] = $narration_total_amount;
             $num = $num + 1;
+            if($edited_total_amount[$i]!='' && $edited_total_amount[$i]!='0'){
+                $debit_acc = $debit_acc . $total_amount_ledger_name . ', ';
+                $total_debit_amt = $edited_total_amount[$i];
+            }
+            $tot_amt_voucher_id = $total_amount_voucher_id[$i];
         }
+
+        if(strlen($debit_acc)>0){
+            $debit_acc = substr($debit_acc, 0, strrpos($debit_acc, ', '));
+        }
+        if(strlen($credit_acc)>0){
+            $credit_acc = substr($credit_acc, 0, strrpos($credit_acc, ', '));
+        }
+
+
+        if($action=='save'){
+            if(!isset($debit_note_ref) || $debit_note_ref==''){
+                $debit_note_ref = $this->getDebitNoteRef($gi_date, $location_from);
+            }
+            
+            $array = array('gi_go_id' => $gi_go_id, 
+                            'voucher_id' => $tot_amt_voucher_id, 
+                            // 'ledger_type' => $ledger_type, 
+                            // 'reference' => $reference, 
+                            // 'narration' => $narration, 
+                            'debit_acc' => $debit_acc, 
+                            'credit_acc' => $credit_acc, 
+                            'debit_amt' => $mycomponent->format_number($total_debit_amt,2), 
+                            'credit_amt' => $mycomponent->format_number($total_credit_amt,2), 
+                            // 'diff_amt' => $mycomponent->format_number($diff_amt,2),
+                            // 'status' => 'pending',
+                            'status' => 'approved',
+                            'is_active' => '1',
+                            'updated_by'=>$curusr,
+                            'updated_date'=>$now,
+                            'date_of_transaction'=>$gi_date,
+                            // 'approver_comments'=>$remarks,
+                            // 'approver_id'=>$approver_id,
+                            'company_id'=>$company_id,
+                            'debit_note_ref'=>$debit_note_ref
+                            );
+
+            if(count($array)>0){
+                if (isset($id) && $id!=""){
+                    $count = Yii::$app->db->createCommand()
+                                ->update("acc_go_debit_details", $array, "id = '".$id."'")
+                                ->execute();
+
+                    $this->setLog('go_debit_details', '', 'Update', '', 'Update Goods Outward Debit Details', 'acc_go_debit_details', $id);
+                } else {
+                    $array['created_by'] = $curusr;
+                    $array['created_date'] = $now;
+                    $count = Yii::$app->db->createCommand()
+                                ->insert("acc_go_debit_details", $array)
+                                ->execute();
+                    $id = Yii::$app->db->getLastInsertID();
+
+                    $this->setLog('go_debit_details', '', 'Save', '', 'Insert Goods Outward Debit Details', 'acc_go_debit_details', $id);
+                }
+            }
+        }
+        
 
         // echo count($particular);
         // echo '<br/>';
@@ -1012,7 +1102,7 @@ class GoodsOutward extends Model
 
         for($i=0; $i<count($particular); $i++){
             $bulkInsertArray[$j]=[
-                'gi_go_id'=>$gi_id,
+                'gi_go_id'=>$gi_go_id,
                 'vendor_id'=>$vendor_id,
                 'particular'=>$particular[$i],
                 'sub_particular'=>$sub_particular_val[$i],
@@ -1087,7 +1177,7 @@ class GoodsOutward extends Model
                 if($ledg_type!="" && $ledg_particular!="Tax"){
                     $bl_flag = true;
                     for($m=0; $m<count($ledgerArray); $m++){
-                        if($ledgerArray[$m]['ref_id']==$gi_id && 
+                        if($ledgerArray[$m]['ref_id']==$gi_go_id && 
                             $ledgerArray[$m]['ref_type']=='Purchase' && 
                             $ledgerArray[$m]['entry_type']==$particular[$i] && 
                             $ledgerArray[$m]['invoice_no']==$invoice_no_val[$i] && 
@@ -1127,7 +1217,7 @@ class GoodsOutward extends Model
                         // echo '<br/>';
                         
                         $ledgerArray[$k]=[
-                                    'ref_id'=>$gi_id,
+                                    'ref_id'=>$gi_go_id,
                                     'ref_type'=>'go_debit_details',
                                     'entry_type'=>$particular[$i],
                                     'invoice_no'=>$invoice_no_val[$i],
@@ -1239,7 +1329,7 @@ class GoodsOutward extends Model
         return $reader->readAll();
     }
 
-    public function getDebitNoteDetails($id){
+    public function getDebitNoteDetailsOld($id){
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
@@ -1247,6 +1337,12 @@ class GoodsOutward extends Model
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         $debit_note = $reader->readAll();
+
+        $total_amt = 0;
+        $amt_without_tax = 0;
+        $cgst_amt = 0;
+        $sgst_amt = 0;
+        $igst_amt = 0;
 
         if(count($debit_note)>0) {
             $to_party = '';
@@ -1322,12 +1418,6 @@ class GoodsOutward extends Model
             $go_details[0]['to_party_gst_no'] = $to_party_gst_no;
             $go_details[0]['to_party_email'] = $to_party_email;
             
-
-            $total_amt = 0;
-            $amt_without_tax = 0;
-            $cgst_amt = 0;
-            $sgst_amt = 0;
-            $igst_amt = 0;
 
             $sql = "select * from acc_go_debit_entries where gi_go_id = '$id' and ledger_type = 'Main Entry' and is_active = '1' and company_id = '$company_id'";
             $command = Yii::$app->db->createCommand($sql);
@@ -1423,6 +1513,212 @@ class GoodsOutward extends Model
         
         return $data;
     }
+
+    public function getDebitNoteDetails($id){
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        $sql = "select * from acc_go_debit_details where gi_go_id = '$id' and is_active = '1' and company_id = '$company_id'";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        $debit_note = $reader->readAll();
+
+        if(count($debit_note)>0) {
+            $sql = "select * from goods_inward_outward where gi_go_id = '$id' and is_active = '1' and company_id = '$company_id'";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $go_details = $reader->readAll();
+
+            // // $trans_type = $debit_note[0]['trans_type'];
+            // $vendor_id = $debit_note[0]['vendor_id'];
+            // $warehouse_id = $debit_note[0]['warehouse_id'];
+            // $vendor_warehouse_id = $debit_note[0]['vendor_warehouse_id'];
+
+            // $sql = "select B.warehouse_name, B.gst_id, B.address_line_1, B.address_line_2, B.address_line_3, 
+            //             B.city_id, B.state_id, B.pincode, C.city_name, D.state_name, D.state_code, E.company_name, 
+            //             E.cin_no 
+            //         from internal_warehouse_master B 
+            //         left join city_master C on (B.city_id = C.id) 
+            //         left join state_master D on (B.state_id = D.id) 
+            //         left join company_master E on (B.company_id = E.id) 
+            //         where B.id = '$warehouse_id' and B.company_id = '$company_id'";
+            // $command = Yii::$app->db->createCommand($sql);
+            // $reader = $command->query();
+            // $warehouse_details = $reader->readAll();
+
+            // $sql = "select B.vendor_warehouse_code, B.gst_id, B.warehouse_address_line_1, B.warehouse_address_line_2, 
+            //             B.warehouse_address_line_3, 
+            //             B.city_id, B.state_id, B.pincode, C.city_name, D.state_name, D.state_code 
+            //         from vendor_warehouse_address B 
+            //         left join city_master C on (B.city_id = C.id) 
+            //         left join state_master D on (B.state_id = D.id) 
+            //         where B.id = '$vendor_warehouse_id'";
+            // $command = Yii::$app->db->createCommand($sql);
+            // $reader = $command->query();
+            // $vendor_warehouse_details = $reader->readAll();
+
+            // // if($trans_type == 'Invoice'){
+            // //     $result = $this->getInvoiceDetails($id, $vendor_id);
+            // //     $invoice_details = $result['invoice_details'];
+            // //     $inv_tax_details = $result['inv_tax_details'];
+            // // } else {
+            // //     $invoice_details = array();
+            // //     $inv_tax_details = array();
+            // // }
+
+            // $invoice_details = array();
+            // $inv_tax_details = array();
+
+            // // $vendor_code = '';
+
+            // // $sql = "select * from acc_other_debit_credit_entries where other_debit_credit_id = '$id' and 
+            // //         transaction = '$trans_type' and is_active = '1' and company_id = '$company_id'";
+            // // $command = Yii::$app->db->createCommand($sql);
+            // // $reader = $command->query();
+            // // $result = $reader->readAll();
+            // // if(count($result)>0){
+            // //     $vendor_code = $result[0]['account_code'];
+            // // }
+
+            // // $vendor_id = '';
+            // // $sql = "select * from vendor_master where vendor_code like '%".$vendor_code."%' and 
+            // //         is_active = '1' and company_id = '$company_id'";
+            // // $command = Yii::$app->db->createCommand($sql);
+            // // $reader = $command->query();
+            // // $result = $reader->readAll();
+            // // if(count($result)>0){
+            // //     $vendor_id = $result[0]['id'];
+            // // }
+
+            // // $sql = "select C.*, D.contact_name, D.contact_email, D.contact_phone, D.contact_mobile, D.contact_fax from 
+            // //         (select A.*, B.* from 
+            // //         (select AA.*, BB.legal_entity_name from vendor_master AA left join legal_entity_type_master BB 
+            // //             on (AA.legal_entity_type_id = BB.id) where AA.id = '$vendor_id' and AA.company_id = '$company_id' and BB.is_active = '1') A 
+            // //         left join 
+            // //         (select AA.vendor_id, AA.office_address_line_1, AA.office_address_line_2, AA.office_address_line_3, 
+            // //                 AA.pincode, BB.city_code, BB.city_name, CC.state_code, CC.state_name, 
+            // //                 DD.country_code, DD.country_name from 
+            // //         vendor_office_address AA left join city_master BB on (AA.city_id = BB.id) left join 
+            // //         state_master CC on (AA.state_id = CC.id) left join country_master DD on (AA.country_id = DD.id) 
+            // //         where AA.vendor_id = '$vendor_id' and AA.is_active = '1' and BB.is_active = '1' 
+            // //                 and CC.is_active = '1' and DD.is_active = '1') B 
+            // //         on (A.id = B.vendor_id)) C 
+            // //         left join 
+            // //         (select * from vendor_contacts where vendor_id = '$vendor_id' and is_active = '1' and 
+            // //             (is_purchase_related = 'yes' or is_accounts_related = 'yes') limit 1) D 
+            // //         on (C.vendor_id = D.vendor_id)";
+            // // $command = Yii::$app->db->createCommand($sql);
+            // // $reader = $command->query();
+            // // $vendor_details = $reader->readAll();
+
+            // $sql = "select C.*, D.contact_name, D.contact_email, D.contact_phone, D.contact_mobile, D.contact_fax from 
+            //         (select A.*, B.* from 
+            //         (select AA.*, BB.legal_entity_name from vendor_master AA left join legal_entity_type_master BB 
+            //             on (AA.legal_entity_type_id = BB.id) where AA.id = '$vendor_id' and AA.company_id = '$company_id' and BB.is_active = '1') A 
+            //         left join 
+            //         (select AA.vendor_id, AA.office_address_line_1, AA.office_address_line_2, AA.office_address_line_3, 
+            //                 AA.pincode, BB.city_code, BB.city_name, CC.state_code, CC.state_name, 
+            //                 DD.country_code, DD.country_name from 
+            //         vendor_office_address AA left join city_master BB on (AA.city_id = BB.id) left join 
+            //         state_master CC on (AA.state_id = CC.id) left join country_master DD on (AA.country_id = DD.id) 
+            //         where AA.vendor_id = '$vendor_id' and AA.is_active = '1' and BB.is_active = '1' 
+            //                 and CC.is_active = '1' and DD.is_active = '1') B 
+            //         on (A.id = B.vendor_id)) C 
+            //         left join 
+            //         (select * from vendor_contacts where vendor_id = '$vendor_id' and is_active = '1' and 
+            //             (is_purchase_related = 'yes' or is_accounts_related = 'yes') limit 1) D 
+            //         on (C.vendor_id = D.vendor_id)";
+            // $command = Yii::$app->db->createCommand($sql);
+            // $reader = $command->query();
+            // $vendor_details = $reader->readAll();
+
+            $vendor_id = '';
+            if(count($go_details)>0){
+                $vendor_id = $go_details[0]['vendor_id'];
+            }
+            $ledger_details = array();
+            $sql = "SELECT * FROM acc_master WHERE vendor_id = '$vendor_id'";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $ledger_dtl = $reader->readAll();
+            if(count($ledger_dtl)>0) {
+                $acc_id_ledger = $ledger_dtl[0]['id'];
+                
+                $sql = "SELECT * FROM acc_go_debit_entries WHERE acc_id!='$acc_id_ledger' and gi_go_id='$id' order by id";
+                $command = Yii::$app->db->createCommand($sql);
+                $reader = $command->query();
+                $ledger_details = $reader->readAll();
+            }
+            
+            $mpdf=new mPDF();
+            // $mpdf->WriteHTML(Yii::$app->controller->renderPartial('debit_note', ['debit_note' => $debit_note, 'vendor_details' => $vendor_details]));
+
+            // if($trans_type == 'Invoice'){
+            //     $mpdf->WriteHTML(Yii::$app->controller->renderPartial('tax_invoice', ['debit_note' => $debit_note, 'vendor_details' => $vendor_details, 
+            //                                 'invoice_details' => $invoice_details, 'inv_tax_details' => $inv_tax_details, 
+            //                                 'warehouse_details' => $warehouse_details, 
+            //                                 'vendor_warehouse_details' => $vendor_warehouse_details]));
+            // } else {
+            //     $mpdf->WriteHTML(Yii::$app->controller->renderPartial('debit_note', ['debit_note' => $debit_note, 
+            //                             'vendor_details' => $vendor_details, 'ledger_details' => $ledger_details, 
+            //                             'warehouse_details' => $warehouse_details, 
+            //                             'vendor_warehouse_details' => $vendor_warehouse_details]));
+            // }
+
+            $mpdf->WriteHTML(Yii::$app->controller->renderPartial('debit_note', ['debit_note' => $debit_note, 
+                                        'go_details' => $go_details, 'ledger_details' => $ledger_details]));
+
+            // if($trans_type=='Invoice') {
+            //     $type = 'invoice';
+            // } else if($trans_type=='Credit') {
+            //     $type = 'credit_note';
+            // } else {
+            //     $type = 'debit_note';
+            // }
+
+            $type = 'debit_note';
+
+            $upload_path = './uploads';
+            if(!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, TRUE);
+            }
+            $upload_path = './uploads/go_rtv_debit_note';
+            if(!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, TRUE);
+            }
+            $upload_path = './uploads/go_rtv_debit_note/'.$id;
+            if(!is_dir($upload_path)) {
+                mkdir($upload_path, 0777, TRUE);
+            }
+
+            $file_name = $upload_path . '/' . $type . '_' . $id . '.pdf';
+            $file_path = 'uploads/go_rtv_debit_note/' . $id . '/' . $type . '_' . $id . '.pdf';
+
+            // $mpdf->Output('MyPDF.pdf', 'D');
+            $mpdf->Output($file_name, 'F');
+            // exit;
+
+            $sql = "update acc_go_debit_details set debit_note_path = '$file_path' where gi_go_id = '$id' and is_active = '1' and company_id = '$company_id'";
+            $command = Yii::$app->db->createCommand($sql);
+            $count = $command->execute();
+
+            $sql = "select * from acc_go_debit_details where gi_go_id = '$id' and is_active = '1' and company_id = '$company_id'";
+            $command = Yii::$app->db->createCommand($sql);
+            $reader = $command->query();
+            $debit_note = $reader->readAll();
+
+        } else {
+            $debit_note = array();
+            $go_details = array();
+            $ledger_details = array();
+        }
+
+        $data['debit_note'] = $debit_note;
+        $data['go_details'] = $go_details;
+        $data['ledger_details'] = $ledger_details;
+        
+        return $data;
+    }
     
     public function setLog($module_name, $sub_module, $action, $vendor_id, $description, $table_name, $table_id) {
         $session = Yii::$app->session;
@@ -1491,17 +1787,17 @@ class GoodsOutward extends Model
                 from goods_inward_outward A 
                 left join 
                 (select (Case When type_outward='VENDOR' Then vendor_state When type_outward='INTER-DEPOT' Then idt_warehouse_state end) as to_state, gi_go_id from goods_inward_outward) B 
-                on(A.gi_go_id = B.gi_go_id) 
+                on (A.gi_go_id = B.gi_go_id) 
                 left join 
                 (select distinct warehouse_name as idt_warehouse, id as warehouse_id, warehouse_code from internal_warehouse_master) E 
                 on (A.idt_warehouse_code = E.warehouse_code) 
                 where date(A.gi_go_final_commit_date) > date('2018-03-31') and A.company_id='$company_id' 
-                    and A.inward_outward = 'outward' and A.type_outward = 'VENDOR' and A.gi_go_status = 'COMPLETE') A
-                Left Join
+                    and A.inward_outward = 'outward' and A.type_outward = 'VENDOR' and A.gi_go_status = 'COMPLETE') A 
+                left join 
                 (select * from acc_go_debit_entries Where gi_go_id='$id' and status = 'approved' and is_active = '1' 
                     order by gi_go_id, invoice_no, id, vat_percen, vat_cst) B 
-                on (A.gi_go_id = B.gi_go_id)
-                where B.id is not null
+                on (A.gi_go_id = B.gi_go_id) 
+                where B.id is not null 
                 order by B.id";
 
         $command = Yii::$app->db->createCommand($sql);
@@ -1517,9 +1813,9 @@ class GoodsOutward extends Model
                 left join acc_grn_entries C on (A.grn_id = C.grn_id and C.status = 'approved' and C.is_active='1' and 
                 C.particular = 'Total Amount') where A.grn_id = '$id' and A.status = 'approved' and A.is_active='1' and A.company_id='$company_id'";*/
         $sql = "select A.* from (
-                select Case When warehouse_state=H.to_state Then 'Same States' Else 'Different States' end as tax_zone_name,
-                    Case When A.warehouse_state=H.to_state Then 'INTRA' Else 'INTER' end as  tax_zone_code, 
-                    A.*, A.vendor_id as vendor_id1, H.to_state, E.idt_warehouse, E.warehouse_id 
+                select Case When A.warehouse_state=H.to_state Then 'Same States' Else 'Different States' end as tax_zone_name, 
+                    Case When A.warehouse_state=H.to_state Then 'INTRA' Else 'INTER' end as tax_zone_code, 
+                    A.*, A.vendor_id as vendor_id1, H.to_state, E.idt_warehouse, E.warehouse_id, C.id, C.debit_note_ref 
                 from goods_inward_outward A 
                 left join 
                 (select (Case When type_outward='VENDOR' Then vendor_state 
@@ -1527,14 +1823,13 @@ class GoodsOutward extends Model
                     gi_go_id from goods_inward_outward) H 
                 on (A.gi_go_id = H.gi_go_id) 
                 left join 
-                (select distinct warehouse_name as idt_warehouse,id as warehouse_id, warehouse_code from internal_warehouse_master) E
-                on (A.idt_warehouse_code = E.warehouse_code)
-                left join acc_go_debit_entries C 
-                on (A.gi_go_id = C.gi_go_id and C.status = 'approved' and C.is_active='1' and C.particular = 'Total Amount')
-                where date(A.gi_go_final_commit_date) > date('2018-03-31') and A.company_id='$company_id' and
+                (select distinct warehouse_name as idt_warehouse,id as warehouse_id, warehouse_code from internal_warehouse_master) E 
+                on (A.idt_warehouse_code = E.warehouse_code) 
+                left join acc_go_debit_details C 
+                on (A.gi_go_id = C.gi_go_id) 
+                where date(A.gi_go_final_commit_date) > date('2018-03-31') and A.company_id='$company_id' and 
                     A.inward_outward='OUTWARD' and A.type_outward = 'VENDOR' and A.gi_go_status = 'COMPLETE' and 
                     A.company_id='$company_id' and A.gi_go_id=$id ) A";
-         
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -1715,50 +2010,50 @@ class GoodsOutward extends Model
     }
 
     public function set_goskuentries(){ 
-       $request = Yii::$app->request;
-       $mycomponent = Yii::$app->mycomponent;
-       $session = Yii::$app->session;
-       $ded_type = 'goodsoutwards';
-       $ean = $request->post($ded_type.'_ean');
-       $hsn_code = $request->post($ded_type.'_hsn_code');
-       $batch_code = $request->post($ded_type.'_batch_code');
-       $psku = $request->post($ded_type.'_psku');
-       $sku_code = $request->post($ded_type.'_sku_code');
-       $asin = $request->post($ded_type.'_asin_code');
-       $fnsku = $request->post($ded_type.'_fnsku');
-       $product_title = $request->post($ded_type.'_product_title');
-       $quantity = $request->post($ded_type.'_qty');
-       $expiry_date = $request->post($ded_type.'_expiry_date');
-       $mrp = $request->post($ded_type.'_mrp');
-       $manual_discount = $request->post($ded_type.'_manual_discount');
-       $value_at_mrp = $request->post($ded_type.'_value_at_mrp');
-       $cost = $request->post($ded_type.'_cost_excl_tax_per_unit');
-       $cost_incl_vat_cst = $request->post($ded_type.'_cost_inc_tax');
-       $value_at_cost = $request->post($ded_type.'_cost_excl_tax');
-       $vat_percent = $request->post($ded_type.'_vat_percen_tax');
-       $grn_no = $request->post($ded_type.'_grn_no');
-       $shipment_id = $request->post($ded_type.'_shipment_id');
-       $shipment_plan_name = $request->post($ded_type.'_shipment_plan_name_id');
-       $isa = $request->post($ded_type.'_isa');
-       $po_no = $request->post($ded_type.'_po_no');
-       $go_no = $request->post($ded_type.'_go_no');
-       $grn_entries_id = $request->post($ded_type.'_grn_entries_id');
-       $product_id = $request->post($ded_type.'_product_id');
-       $bucket_name = $request->post($ded_type.'_bucket_name');
-       $prepare_go_id = $request->post($ded_type.'_prepare_go_id');
-       $company_id = $request->post($ded_type.'_company_id');
-       $created_by = $request->post($ded_type.'_created_by');
-       $updated_by = $request->post($ded_type.'_updated_by');
-       $created_date = $request->post($ded_type.'_created_date');
-       $updated_date = $request->post($ded_type.'_updated_date');
-       $is_active = $request->post($ded_type.'_is_active');
-       $is_combo_items = $request->post($ded_type.'_is_combo_items');
-       $order_qty = $request->post($ded_type.'_order_qty');
-       $order_id = $request->post($ded_type.'_order_id');
-       $bulkInsertArray = array();
+        $request = Yii::$app->request;
+        $mycomponent = Yii::$app->mycomponent;
+        $session = Yii::$app->session;
+        $ded_type = 'goodsoutwards';
+        $ean = $request->post($ded_type.'_ean');
+        $hsn_code = $request->post($ded_type.'_hsn_code');
+        $batch_code = $request->post($ded_type.'_batch_code');
+        $psku = $request->post($ded_type.'_psku');
+        $sku_code = $request->post($ded_type.'_sku_code');
+        $asin = $request->post($ded_type.'_asin_code');
+        $fnsku = $request->post($ded_type.'_fnsku');
+        $product_title = $request->post($ded_type.'_product_title');
+        $quantity = $request->post($ded_type.'_qty');
+        $expiry_date = $request->post($ded_type.'_expiry_date');
+        $mrp = $request->post($ded_type.'_mrp');
+        $manual_discount = $request->post($ded_type.'_manual_discount');
+        $value_at_mrp = $request->post($ded_type.'_value_at_mrp');
+        $cost = $request->post($ded_type.'_cost_excl_tax_per_unit');
+        $cost_incl_vat_cst = $request->post($ded_type.'_cost_inc_tax');
+        $value_at_cost = $request->post($ded_type.'_cost_excl_tax');
+        $vat_percent = $request->post($ded_type.'_vat_percen_tax');
+        $grn_no = $request->post($ded_type.'_grn_no');
+        $shipment_id = $request->post($ded_type.'_shipment_id');
+        $shipment_plan_name = $request->post($ded_type.'_shipment_plan_name_id');
+        $isa = $request->post($ded_type.'_isa');
+        $po_no = $request->post($ded_type.'_po_no');
+        $go_no = $request->post($ded_type.'_go_no');
+        $grn_entries_id = $request->post($ded_type.'_grn_entries_id');
+        $product_id = $request->post($ded_type.'_product_id');
+        $bucket_name = $request->post($ded_type.'_bucket_name');
+        $prepare_go_id = $request->post($ded_type.'_prepare_go_id');
+        $company_id = $request->post($ded_type.'_company_id');
+        $created_by = $request->post($ded_type.'_created_by');
+        $updated_by = $request->post($ded_type.'_updated_by');
+        $created_date = $request->post($ded_type.'_created_date');
+        $updated_date = $request->post($ded_type.'_updated_date');
+        $is_active = $request->post($ded_type.'_is_active');
+        $is_combo_items = $request->post($ded_type.'_is_combo_items');
+        $order_qty = $request->post($ded_type.'_order_qty');
+        $order_id = $request->post($ded_type.'_order_id');
+        $bulkInsertArray = array();
 
-       for($i=0; $i<count($ean); $i++){
-           $bulkInsertArray[$i]=[
+        for($i=0; $i<count($ean); $i++){
+            $bulkInsertArray[$i]=[
                                 'ean'=>$ean[$i],
                                 'hsn_code'=>$hsn_code[$i],
                                 'batch_code'=>$batch_code[$i],
@@ -1795,30 +2090,31 @@ class GoodsOutward extends Model
                                 'order_id'=>$order_id[$i],
                                 ];
         }
-        if(count($bulkInsertArray)>0){
-                $sql = "delete from acc_go_debit_sku_items where prepare_go_id = '".$prepare_go_id[0]."'";
-                Yii::$app->db->createCommand($sql)->execute();
-                
-                $columnNameArray= ['ean','hsn_code','batch_code', 'psku',
-                                    'sku_code', 'asin', 'fnsku','product_title','quantity',
-                                    'expiry_date','mrp', 'manual_discount','value_at_mrp',
-                                    'cost','value_at_cost', 'cost_incl_vat_cst','vat_percent',
-                                    'grn_no','shipment_id','shipment_plan_name','isa','po_no'
-                                    ,'go_no','grn_entries_id','product_id','bucket_name',
-                                    'prepare_go_id','company_id','created_date',
-                                    'updated_date','is_active','is_combo_items','order_qty',
-                                    'order_id'];
-                // below line insert all your record and return number of rows inserted
-                $tableName = "acc_go_debit_sku_items";
-                $insertCount = Yii::$app->db->createCommand()
-                               ->batchInsert(
-                                     $tableName, $columnNameArray, $bulkInsertArray
-                                 )
-                               ->execute();
 
-                // echo $insertCount;
-                // echo '<br/>';
-                // echo 'hii';
+        if(count($bulkInsertArray)>0){
+            $sql = "delete from acc_go_debit_sku_items where prepare_go_id = '".$prepare_go_id[0]."'";
+            Yii::$app->db->createCommand($sql)->execute();
+            
+            $columnNameArray= ['ean','hsn_code','batch_code', 'psku',
+                                'sku_code', 'asin', 'fnsku','product_title','quantity',
+                                'expiry_date','mrp', 'manual_discount','value_at_mrp',
+                                'cost','value_at_cost', 'cost_incl_vat_cst','vat_percent',
+                                'grn_no','shipment_id','shipment_plan_name','isa','po_no'
+                                ,'go_no','grn_entries_id','product_id','bucket_name',
+                                'prepare_go_id','company_id','created_date',
+                                'updated_date','is_active','is_combo_items','order_qty',
+                                'order_id'];
+            // below line insert all your record and return number of rows inserted
+            $tableName = "acc_go_debit_sku_items";
+            $insertCount = Yii::$app->db->createCommand()
+                           ->batchInsert(
+                                 $tableName, $columnNameArray, $bulkInsertArray
+                             )
+                           ->execute();
+
+            // echo $insertCount;
+            // echo '<br/>';
+            // echo 'hii';
         }
     }
 }
@@ -1828,17 +2124,17 @@ class GoodsOutward extends Model
 
 /*
 
-if($type_outward=='VENDOR'){
-                    $to_state = $vendor_state;
-                    $to_party = trim($data[0]['vendor_name']);
-                }
-                if($type_outward=='CUSTOMER'){
-                    $to_state = $customerState;
-                    $to_party = trim($data[0]['customerName']);
-                }
-                if($type_outward=='INTER-DEPOT'){
-                    $to_state = $idt_warehouse_state;
-                    $to_party = trim($data[0]['idt_warehouse_name']);
-                }
+    if($type_outward=='VENDOR'){
+        $to_state = $vendor_state;
+        $to_party = trim($data[0]['vendor_name']);
+    }
+    if($type_outward=='CUSTOMER'){
+        $to_state = $customerState;
+        $to_party = trim($data[0]['customerName']);
+    }
+    if($type_outward=='INTER-DEPOT'){
+        $to_state = $idt_warehouse_state;
+        $to_party = trim($data[0]['idt_warehouse_name']);
+    }
 
 */

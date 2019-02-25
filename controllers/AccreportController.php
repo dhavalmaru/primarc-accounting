@@ -123,8 +123,7 @@ class AccreportController extends Controller
         return $this->render('detail_ledger_report',$data);
     }
 
-
-    public function actionGetdetailledgerreport() {   
+    public function actionGetdetailledgerreport(){
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
         $report = new AccReport();
@@ -465,7 +464,7 @@ class AccreportController extends Controller
         return $this->render('trial_balance_report', ['acc_details' => $acc_details]);
     }
 
-    public function actionGetledger() {   
+    public function actionGetledger(){
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
 
@@ -619,15 +618,19 @@ class AccreportController extends Controller
                 if($data[$i]['type']=='Debit'){
                     $entry_type = 'Dr';
                     $debit_amt = floatval($data[$i]['amount']);
-                    $balance = round($balance - $debit_amt,2);
+                    // $balance = round($balance - $debit_amt,2);
+                    $balance = $balance - $debit_amt;
                     $credit_amt = '';
-                    $cur_total = round($cur_total - $debit_amt,2);
+                    // $cur_total = round($cur_total - $debit_amt,2);
+                    $cur_total = $cur_total - $debit_amt;
                 } else {
                     $entry_type = 'Cr';
                     $credit_amt = floatval($data[$i]['amount']);
-                    $balance = round($balance + $credit_amt,2);
+                    // $balance = round($balance + $credit_amt,2);
+                    $balance = $balance + $credit_amt;
                     $debit_amt = '';
-                    $cur_total = round($cur_total + $credit_amt,2);
+                    // $cur_total = round($cur_total + $credit_amt,2);
+                    $cur_total = $cur_total + $credit_amt;
                 }
                 if($balance<0){
                     $balance_type = 'Dr';
@@ -809,7 +812,7 @@ class AccreportController extends Controller
                                                 'from_date' => $from_date, 'to_date' => $to_date]);
     }
 
-    public function actionGetledgerreport() {   
+    public function actionGetledgerreport(){
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
 
@@ -874,7 +877,7 @@ class AccreportController extends Controller
                                                 'from_date' => $from_date, 'to_date' => $to_date, 'narration' => $narration]);
     }
 
-    public function actionGetsummeryreport() {   
+    public function actionGetsummeryreport(){
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
 
@@ -919,7 +922,7 @@ class AccreportController extends Controller
                                                 'from_date' => $from_date, 'to_date' => $to_date, 'narration' => $narration]);
     }
 
-    public function actionGetledgertotalreport() {   
+    public function actionGetledgertotalreport(){
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
 
@@ -947,7 +950,7 @@ class AccreportController extends Controller
             'from_date' => $from_date, 'to_date' => $to_date]);
     }
 
-    public function actionGettrialbalance() {   
+    public function actionGettrialbalance(){
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
 
@@ -1192,7 +1195,7 @@ class AccreportController extends Controller
         echo json_encode($data);
     }
 
-    public function actionReconsile() {
+    public function actionReconsile(){
        $report = new AccReport();
        $payment_receipt = new PaymentReceipt();
        $acc_details = $report->getVendorname();
@@ -1210,7 +1213,7 @@ class AccreportController extends Controller
        return $this->render('reconsile_report',$data);
     }
 
-    public function actionGetreconsile() {
+    public function actionGetreconsile(){
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
         $report = new AccReport();
@@ -1264,7 +1267,7 @@ class AccreportController extends Controller
         return $this->render('reconsile_report',$data);
     }
 
-    public function actionSave() {
+    public function actionSave(){
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
 
@@ -1313,7 +1316,7 @@ class AccreportController extends Controller
         // return $this->redirect('myCustomAction');
     }
     
-    public function actionGetasperbank() {
+    public function actionGetasperbank(){
        $request = Yii::$app->request;
        $mycomponent = Yii::$app->mycomponent;
        $report = new AccReport();
@@ -1350,17 +1353,26 @@ class AccreportController extends Controller
         echo $asperbank;
     }
 
-    public function actionGetinvoice_detail()
-    {   
-        $report = new Paymentreceipt();
+    public function actionGetinvoice_detail(){
+        $payment_receipt = new Paymentreceipt();
+        $report = new AccReport();
         $model = new GroupMaster();
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
+
         $view = $request->post('view');
         $from_date = $request->post('from_date');
         $to_date = $request->post('to_date');
         $ledger_name = $request->post('ledger_name');
         $group = $request->post('group');
+        $type = $request->post('type');
+
+        // $view = 'Summary';
+        // $from_date = '01/04/2018';
+        // $to_date = '31/03/2019';
+        // $ledger_name = ['953'];
+        // $group = ['ALL'];
+        // $type = 'Pending';
 
         if($from_date==''){
             $from_date=NULL;
@@ -1373,72 +1385,77 @@ class AccreportController extends Controller
         } else {
             $to_date=$mycomponent->formatdate($to_date);
         }
+        
         /*echo "<pre>";
         print_r($ledger_name);
         echo "</pre>";*/
-        $leader_result = array();
 
-        if(in_array('ALL',$group) && in_array('ALL',$ledger_name))
-        {
-            $leader_id = array();
-            $leader_detail = $model->getLedgerDetail();
+        // if(in_array('ALL',$ledger_name)) {
+        //     $leader_detail = $model->getLedgerDetail();
+        //     $leader_result = array();
+        //     for ($i=0; $i <count($leader_detail) ; $i++) {
+        //         $leader_result[] = $leader_detail[$i]['id'];
+        //     }
+        //     $acc_id = implode($leader_result,",");
+        // } else {
+        //     if(in_array('ALL',$ledger_name)) {
+        //         unset( $ledger_name[array_search( 'ALL', $ledger_name )] );
+        //     }
+        //     $acc_id = implode($ledger_name,",");
+        // }
 
-            for ($i=0; $i <count($leader_detail) ; $i++) {
-                $leader_result[] = $leader_detail[$i]['id'];
-            }
-            $acc_id = implode($leader_result,",");
-        }
-        else
-        {
-            if(in_array('ALL',$ledger_name))
-            {
-                 unset( $ledger_name[array_search( 'ALL', $ledger_name )] );
-            }
-            $acc_id = implode($ledger_name,",");
-        }
-
-        $type = $request->post('type');
+        $acc_id = implode($ledger_name,",");
+        
         $j=0;
-        if($view=='Summary')
-        {
-           $acc_details=$report->getInvoicewiseLedger($acc_id,$from_date,$to_date,$type);
-           $start = $request->post('start'); 
-           $invoice_detail = array();
+        if($view=='Summary') {
+            $acc_details=$report->getInvoicewiseLedger($acc_id, $from_date, $to_date, $type);
+            $start = 0;
+
+            $invoice_detail = array();
 
             //$params['start'].", ".$params['length']
             for($i=0; $i<count($acc_details); $i++) { 
-
                 $j = $j+1;
 
-                if($acc_details[$i]['openingtype']=='Credit')
+                // if($acc_details[$i]['openingtype']=='Credit')
+                //     $otype = 'Cr';
+                // else
+                //     $otype = 'Dr';
+
+                // if($acc_details[$i]['type']=='Debit')
+                //     $type = 'Cr';
+                // else
+                //     $type = 'Dr';
+
+                if(round($acc_details[$i]['amount'],0)>=0)
                     $otype = 'Cr';
                 else
                     $otype = 'Dr';
 
-                if($acc_details[$i]['type']=='Debit')
+                if(round($acc_details[$i]['bal_amount'],0)>=0)
                     $type = 'Cr';
                 else
                     $type = 'Dr';
 
                 $invoice_date = '';
-                if($acc_details[$i]['ref_date']!='' || $acc_details[$i]['ref_date']!=null)
-                {
+                if($acc_details[$i]['ref_date']!='' || $acc_details[$i]['ref_date']!=null) {
                     $invoice_date = date('d-F-Y',strtotime($acc_details[$i]['ref_date']));
                 }
 
                 $due_date = '';
-                if($acc_details[$i]['due_date']!='' || $acc_details[$i]['due_date']!=null)
-                {
+                if($acc_details[$i]['due_date']!='' || $acc_details[$i]['due_date']!=null) {
                     $due_date = date('d-F-Y',strtotime($acc_details[$i]['due_date']));
                 }
 
                $row = array(
-                            ''.$acc_details[$i]['invoice_no'].'',
                             ''.$invoice_date.'',
-                            ''.$acc_details[$i]['opening_amount'].' '.$otype,
-                            ''.$mycomponent->format_money($acc_details[$i]['bal_amount'], 2).' '.$type.'',
+                            ''.$acc_details[$i]['invoice_no'].'',
+                            ''.$acc_details[$i]['amount'].'',
+                            ''.$otype.'',
+                            ''.$acc_details[$i]['bal_amount'].'',
+                            ''.$type.'',
                             ''.$due_date.'',
-                            ''.$acc_details[$i]['overdueby'].'',
+                            ''.$acc_details[$i]['overdueby'].''
                             ) ;
                $invoice_detail[] = $row;
                $start = $start+1;
@@ -1451,97 +1468,141 @@ class AccreportController extends Controller
                     );
 
             echo json_encode($json_data);
-        }
-        else
-        {
-         
-           $acc_details=$report->getInvoicewiseLedger($acc_id,$from_date,$to_date,$type);
-           $start = $request->post('start'); 
-           $invoice_detail = array(); 
-           $prev_invo = '';  
+            // echo json_encode($invoice_detail);
+        } else {
+            $acc_details=$report->getInvoicewiseLedgerDetail($acc_id, $from_date, $to_date, $type);
+            $start = $request->post('start'); 
+            $invoice_detail = array(); 
+            $prev_invo = '';  
             //$params['start'].", ".$params['length']
-           $count = 0;
+            $count = 0;
             for($i=0; $i<count($acc_details); $i++) { 
-                if($acc_details[$i]['openingtype']=='Credit')
-                    $otype = 'Cr';
-                else
-                    $otype = 'Dr';
+                $ref_date = '';
+                if($acc_details[$i]['ref_date']!='' || $acc_details[$i]['ref_date']!=null) {
+                    $ref_date = date('d-F-Y',strtotime($acc_details[$i]['ref_date']));
+                }
 
-                if($acc_details[$i]['type']=='Debit')
-                    $type = 'Cr';
-                else
-                    $type = 'Dr';
+                $due_date = '';
+                if($acc_details[$i]['due_date']!='' || $acc_details[$i]['due_date']!=null) {
+                    $due_date = date('d-F-Y',strtotime($acc_details[$i]['due_date']));
+                }
 
-                $j = $j+1;
-                if($prev_invo!=$acc_details[$i]['invoice_no'])
-                {
-                    $invoice_date = '';
-                    if($acc_details[$i]['ref_date']!='' || $acc_details[$i]['ref_date']!=null)
-                    {
-                        $invoice_date = date('d-F-Y',strtotime($acc_details[$i]['ref_date']));
+                // if($acc_details[$i]['type']=='Debit')
+                //     $type = 'Cr';
+                // else
+                //     $type = 'Dr';
+
+                if($prev_invo!=$acc_details[$i]['invoice_no']) {
+                    $row = array(
+                            ''.$ref_date.'',
+                            ''.$acc_details[$i]['invoice_no'].'',
+                            '',
+                            '',
+                            '',
+                            '',
+                            '',
+                            '',
+                            '',
+                            ''.round($acc_details[$i]['amount'],2).'',
+                            ''.round($acc_details[$i]['bal_amount'],2).'',
+                            ''.$due_date.'',
+                            ''.$acc_details[$i]['overdueby'].''
+                        ) ;
+                    $invoice_detail[] = $row;
+
+                    $prev_invo=$acc_details[$i]['invoice_no'];
+                }
+
+                $detail = '';
+                $amount = $acc_details[$i]['amount'];
+                if(strtoupper(trim($acc_details[$i]['ref_type']))=='PURCHASE'){
+                    $detail = 'Purchase';
+                } else if(strtoupper(trim($acc_details[$i]['ref_type']))=='JOURNAL_VOUCHER'){
+                    $detail = 'Journal Voucher';
+                } else if(strtoupper(trim($acc_details[$i]['ref_type']))=='PAYMENT_RECEIPT'){
+                    $detail = 'Payment (Bank)';
+                } else if(strtoupper(trim($acc_details[$i]['ref_type']))=='GO_DEBIT_DETAILS'){
+                    $detail = 'Debit Note';
+                } else if(strtoupper(trim($acc_details[$i]['ref_type']))=='OTHER_DEBIT_CREDIT'){
+                    $detail = 'Other Debit Credit';
+                } else if(strtoupper(trim($acc_details[$i]['ref_type']))=='PROMOTION'){
+                    $detail = 'Promotion';
+                } else if(strtoupper(trim($acc_details[$i]['ref_type']))=='B2B SALES'){
+                    $detail = 'Sales';
+                } else if(strtoupper(trim($acc_details[$i]['ref_type']))=='SALES_UPLOAD'){
+                    $detail = 'Sales';
+                }
+
+                if($detail=='Purchase'){
+                    $row = array(
+                        ''.$ref_date.'',
+                        '',
+                        ''.'Purchase',
+                        ''.$acc_details[$i]['go_no'].'',
+                        ''.$acc_details[$i]['grn_no'].'',
+                        '',
+                        ''.$acc_details[$i]['invoice_no'].'',
+                        '',
+                        ''.round($acc_details[$i]['amount'],2).'',
+                        '',
+                        '',
+                        '',
+                        ''
+                    ) ;
+                    $invoice_detail[] = $row;
+
+                    if($acc_details[$i]['debit_note_ref']!=''){
+                        $row = array(
+                            ''.$ref_date.'',
+                            '',
+                            ''.'Debit Note',
+                            ''.$acc_details[$i]['go_no'].'',
+                            ''.$acc_details[$i]['grn_no'].'',
+                            ''.$acc_details[$i]['debit_note_ref'].'',
+                            '',
+                            '',
+                            ''.round($acc_details[$i]['debit_note_amount'],2).'',
+                            '',
+                            '',
+                            '',
+                            ''
+                        ) ;
+                        $invoice_detail[] = $row;
                     }
+                }
 
-                    $due_date = '';
-                    if($acc_details[$i]['due_date']!='' || $acc_details[$i]['due_date']!=null)
-                    {
-                        $due_date = date('d-F-Y',strtotime($acc_details[$i]['due_date']));
-                    }
-
-                   $prev_invo = $acc_details[$i]['invoice_no'];
-                   $count=$count+1;
-                   $row = array(
-                                ''.$invoice_date.'',
-                                ''.$acc_details[$i]['invoice_no'].'',
-                                'Opening Balance',
+                if($acc_details[$i]['paid_amount']!='' && $acc_details[$i]['paid_amount']!=null && 
+                    $acc_details[$i]['paid_amount']!='0'){
+                        $row = array(
+                                ''.$ref_date.'',
+                                '',
+                                ''.'Payment',
+                                ''.$acc_details[$i]['go_no'].'',
+                                ''.$acc_details[$i]['grn_no'].'',
                                 '',
                                 '',
+                                ''.$acc_details[$i]['ref_no'].'',
+                                ''.round($acc_details[$i]['paid_amount'],2).'',
                                 '',
-                                '',
-                                '',
-                                ''.$acc_details[$i]['opening_amount'].' '.$otype,
                                 '',
                                 '',
                                 ''
                             ) ;
                         $invoice_detail[] = $row;
-                        $debit_note = '';
-                        if($acc_details[$i]['ref_type']=='other_debit_credit')
-                        {
-                            $acc_details[$i]['ref_type'] = 'Debit Note';
-                            $debit_note = $acc_details[$i]['invoice_no'];
-                        }
-
-                        $row = array(
-                                ''.$invoice_date.'',
-                                '',
-                                ''.ucfirst($acc_details[$i]['ref_type']).'',
-                                ''.$acc_details[$i]['gi_id'].'',
-                                ''.$acc_details[$i]['gi_go_ref_no'].'',
-                                ''.$debit_note.'',
-                                ''.$acc_details[$i]['ref_id'].'',
-                                ''.$acc_details[$i]['amount'].''.$type,
-                                ''.$acc_details[$i]['opening_amount'].' '.$otype,
-                                ''.$mycomponent->format_money($acc_details[$i]['bal_amount'], 2).' '.$type.'',
-                                ''.$due_date.'',
-                                ''.$acc_details[$i]['overdueby'].'',
-                            ) ;
-                        $invoice_detail[] = $row;
                 }
-
             }
             $json_data = array(
-                    "draw"            => intval($request->post('draw')),   
-                    "recordsTotal"    => count($acc_details),  
-                    "recordsFiltered" => count($acc_details),
-                    "data"            => $invoice_detail
-                    );
+                            "draw"            => intval($request->post('draw')),   
+                            "recordsTotal"    => count($acc_details),  
+                            "recordsFiltered" => count($acc_details),
+                            "data"            => $invoice_detail
+                            );
 
             echo json_encode($json_data);
         }
     }
 
-     public function actionInvoice_wise()
-    {
+    public function actionInvoice_wise(){
         $model = new GroupMaster();
         $access = $model->getAccess();
         $request = Yii::$app->request;
@@ -1550,51 +1611,48 @@ class AccreportController extends Controller
         
         if(count($access)>0) {
             if($access[0]['r_view']==1) {
-            if($submit=='submit'){
-                $group = $request->post('group');                
-                $view = $request->post('view');
-                $from_date = $request->post('from_date');
-                $to_date = $request->post('to_date');
-                $type = $request->post('type');
-                $group_ids = implode($group, ",");
-                $leder_id = $request->post('ledger_name');
-                $array = '';
-                for ($i=0; $i <count($group) ; $i++) { 
-                    $array = $array . "'" . $group[$i]."', ".
-                    $array = $array . $model->getGroupDetails_ids($group[$i]);
+                if($submit=='submit'){
+                    $group = $request->post('group');                
+                    $view = $request->post('view');
+                    $from_date = $request->post('from_date');
+                    $to_date = $request->post('to_date');
+                    $type = $request->post('type');
+                    $group_ids = implode($group, ",");
+                    $leder_id = $request->post('ledger_name');
+                    $array = '';
+                    for ($i=0; $i <count($group) ; $i++) { 
+                        $array = $array . "'" . $group[$i]."', ".
+                        $array = $array . $model->getGroupDetails_ids($group[$i]);
+                    }
+                    /*$group_ids =  rtrim($array,',');*/
+                    $group_ids = substr($array, 0, -1);
+                    /*echo "<pre>";
+                    print_r($group);
+                    echo "</pre>";*/
+                    $ledername = $model->getLedgerDetail();
+                    $ledger_name = $ledername;
+                    $data['ledger_name']=$ledger_name;
+                    $select = '';
+                    if(in_array('ALL',$group)) { 
+                        $select='selected';
+                    }
+                    $explode_id = implode(",",$group);
+                    $list1 = $model->getGroupDetails_invoice(0,$submit,$explode_id);
+                    $list = '<select class="form-control group" id="account" name="group[]" multiple="multiple" data-error="#accounterror" ><option value="ALL" '.$select.'>ALL</option>'.$list1.'</select>';
+                } else {
+                    $group = '';                
+                    $view = '';
+                    $from_date = '';
+                    $to_date = '';
+                    $type = '';
+                    $ledger_name=[];
+                    $leder_id=[];
+                    
+                    $list1 = $model->getGroupDetails_invoice(0);
+                    $list = '<select class="form-control group" id="account" name="group[]" multiple="multiple" data-error="#accounterror"><option value="ALL">ALL</option>'.$list1.'</select>';
                 }
-                /*$group_ids =  rtrim($array,',');*/
-                $group_ids = substr($array, 0, -1);
-                /*echo "<pre>";
-                print_r($group);
-                echo "</pre>";*/
-                $ledername = $model->getLedgerDetail();
-                $ledger_name = $ledername;
-                $data['ledger_name']=$ledger_name;
-                $select = '';
-                if(in_array('ALL',$group))
-                { 
-                    $select='selected';
-                }
-                $explode_id = implode(",",$group);
-                $list1 = $model->getGroupDetails_invoice(0,$submit,$explode_id);
-                $list = '<select class="form-control group" id="account" name="group[]" multiple="multiple" data-error="#accounterror" ><option value="ALL" '.$select.'>ALL</option>'.$list1.'</select>';
-            }
-            else
-            {
-                $group = '';                
-                $view = '';
-                $from_date = '';
-                $to_date = '';
-                $type = '';
-                $ledger_name=[];
-                $leder_id=[];
-                
-                $list1 = $model->getGroupDetails_invoice(0);
-                $list = '<select class="form-control group" id="account" name="group[]" multiple="multiple" data-error="#accounterror"><option value="ALL">ALL</option>'.$list1.'</select>';
-            }
 
-            $model->setLog('GroupMaster', '', 'View', '', 'View Group Master Details', 'group_master', '');
+                $model->setLog('GroupMaster', '', 'View', '', 'View Group Master Details', 'group_master', '');
                 return $this->render('invoice_wise', ['select' => $list,'from_date'=>$from_date,'to_date'=>$to_date,'view'=>$view,'type'=>$type,'ledger_name'=>$ledger_name,'leder_id'=>$leder_id,'group'=>$group]);
             } else {
                 return $this->render('/message', [
@@ -1606,27 +1664,40 @@ class AccreportController extends Controller
         }
     }
 
-    public function actionGetledger_name()
-    {
+    public function actionGetledger_name(){
         $model = new GroupMaster();
         $access = $model->getAccess();
         $request = Yii::$app->request;
         $mycomponent = Yii::$app->mycomponent;
         $group = $request->post('group');
-        if(in_array('ALL',$group))
-        {
+        if(in_array('ALL', $group)) {
             $ledername = $model->getLedgerDetail();
             echo json_encode($ledername);
-        }
-        else
-        {
+        } else {
             $array = '';
-            for ($i=0; $i <count($group) ; $i++) { 
-                $array = $array . "'" . $group[$i]."', ".
+            $acc_type = "";
+            for ($i=0; $i <count($group); $i++) { 
+                if($group[$i]=='1'){
+                    $acc_type = $acc_type."'Income', ";
+                } else if($group[$i]=='2'){
+                    $acc_type = $acc_type."'Expense', ";
+                } else if($group[$i]=='3'){
+                    $acc_type = $acc_type."'Asset', ";
+                } else if($group[$i]=='4'){
+                    $acc_type = $acc_type."'Liability', ";
+                }
+                $array = $array . "'" . $group[$i]."', ";
                 $array = $array . $model->getGroupDetails_ids($group[$i]);
             }
+
+            if($acc_type!=""){
+                $acc_type = substr($acc_type, 0, strrpos($acc_type, ','));
+            } else {
+                $acc_type = "''";
+            }
             $group_ids = substr($array, 0, -1);
-            $ledername = $model->getLedgerDetail($group_ids);
+            $ledername = $model->getLedgerDetail($group_ids, $acc_type);
+            // echo $acc_type;
             echo json_encode($ledername);
         }
     }

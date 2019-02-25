@@ -331,7 +331,7 @@ class PaymentreceiptController extends Controller
                                         <td class="text-right">
                                             <input type="text" class="form-control text-right" id="credit_amt_'.$i.'" name="credit_amt[]" value="'.$mycomponent->format_money($credit_amt,2).'" readonly />
                                         </td> -->
-                                        <td class="text-right">
+                                        <td>
                                             <input type="text" class="form-control text-right" id="transaction_'.$i.'" name="transaction[]" value="'.$transaction.'" readonly />
                                         </td>
                                         <td class="text-right">

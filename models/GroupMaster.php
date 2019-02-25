@@ -204,7 +204,7 @@ class GroupMaster extends Model
         return $id;
     }
 
-    public function setLog($module_name, $sub_module, $action, $vendor_id, $description, $table_name, $table_id) {
+    public function setLog($module_name, $sub_module, $action, $vendor_id, $description, $table_name, $table_id){
         $session = Yii::$app->session;
         $curusr = $session['session_id'];
         $now = date('Y-m-d H:i:s');
@@ -226,7 +226,6 @@ class GroupMaster extends Model
 
         return true;
     }
-
 
     public function getGroupDetails_invoice($parent_id="",$submit="",$group_ids=''){
         $session = Yii::$app->session;
@@ -258,8 +257,7 @@ class GroupMaster extends Model
         return $final_tree;
     }
 
-    public function getGroupDetails_ids($parent_id="")
-    {
+    public function getGroupDetails_ids($parent_id=""){
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
         $final_tree = '';
@@ -279,22 +277,18 @@ class GroupMaster extends Model
         return $final_tree;
     }
 
-    public function getLedgerDetail($id='')
-    {
+    public function getLedgerDetail($id='', $acc_type=''){
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-        if($id!='')
-        {
+        if($id!='') {
             $id = rtrim($id,",");
-            $sql = "SELECT id,legal_name from acc_master Where id IN ($id) and company_id = '$company_id' and is_active = '1' and status = 'approved'";
+            $sql = "SELECT id, legal_name from acc_master Where (account_type in ($acc_type) or sub_account_type IN ($id)) and company_id = '$company_id' and is_active = '1' and status = 'approved'";
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $data = $reader->readAll(); 
-        }
-        else
-        {
-            $sql = "SELECT Distinct id,legal_name from acc_master Where company_id = '$company_id' and is_active = '1' and status = 'approved'";
+        } else {
+            $sql = "SELECT id, legal_name from acc_master Where company_id = '$company_id' and is_active = '1' and status = 'approved'";
             $command = Yii::$app->db->createCommand($sql);
             $reader = $command->query();
             $data = $reader->readAll(); 

@@ -37,7 +37,7 @@ class AccReport extends Model
 
         $sql = "select acc_id, sum(case when type='Debit' then amount*-1 else amount end) as opening_bal from acc_ledger_entries 
                 where acc_id = '$acc_id' and status = '$status' and company_id = '$company_id' and is_active = '1' and 
-                date(ref_date) < date('$from_date') group by acc_id";
+                date(ref_date) < date('$from_date') and date(ref_date)>=date('2018-03-31') group by acc_id";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -1903,4 +1903,516 @@ class AccReport extends Model
         $reader = $command->query();
         $command->execute();
     }
+
+    public function getInvoicewiseLedger($acc_id, $from_date, $to_date, $type) {
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        if($acc_id=='') $acc_id = 0;
+
+        $cond = '';
+        $cond1 = '';
+        $cond2 = '';
+
+        if($type=='Pending') 
+            $cond = " Where (round(AA.balance_amt,0)<>0)";
+        if($to_date!='') 
+            $cond1 = " and date(A.ref_date)>=date('$from_date') and date(A.ref_date)<=date('$to_date')";
+        if($to_date!='') 
+            $cond2 = " and date(ref_date)>=date('$from_date') and date(ref_date)<=date('$to_date')";
+
+        $sql = "select AA.* from 
+                (select A.*, round(A.bal_amount,0) as balance_amt, 
+                    case when A.due_date is not null then datediff(curdate(), A.due_date) else '' end as overdueby from 
+                (select A.ref_id, A.ref_type, A.invoice_no, A.vendor_id, A.status, A.ref_date, 
+                    A.gi_date, A.invoice_date, A.due_date, A.cp_acc_id, A.cp_ledger_name, A.cp_ledger_code,
+                    group_concat(A.entry_type) as entry_type, group_concat(A.acc_id) as acc_id, 
+                    group_concat(A.ledger_name) as ledger_name, group_concat(A.ledger_code) as ledger_code, 
+                    sum(A.amount) as amount, sum(A.paid_amount) as paid_amount, sum(A.bal_amount) as bal_amount from 
+                (select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, 
+                    A.acc_id, A.ledger_name, A.ledger_code, 
+                    case when A.type='Debit' then A.amount*-1 else A.amount end as amount, 
+                    case when A.type='Debit' then A.paid_amount*-1 else A.paid_amount end as paid_amount, 
+                    case when A.type='Debit' then A.bal_amount*-1 else A.bal_amount end as bal_amount, 
+                    A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, A.voucher_id, 
+                    A.ledger_type, A.narration, A.ref_date, A.gi_date, A.invoice_date, A.due_date, 
+                    A.cp_acc_id, A.cp_ledger_name, A.cp_ledger_code, 
+                    case when (instr(A.ledger_name,'-CGST')!=0 or instr(A.ledger_name,'-SGST')!=0 or 
+                        instr(A.ledger_name,'-IGST')!=0 or instr(A.ledger_name,'Purchase-')!=0 or 
+                        instr(A.ledger_name,'Sales-')!=0) then A.new_ledger_name 
+                        else A.ledger_name end as new_ledger_name from 
+                (select AA.*, (AA.amount-AA.paid_amount) as bal_amount, 
+                    replace(replace(replace(replace(replace(replace(replace(replace(replace(AA.ledger_name,'Input-','Purchase-'),
+                        'Output-','Sales-'),'CGST','Local'),'SGST','Local'),'IGST','Inter State'),'-B2B',''),'-B2C',''),'--',''),
+                        Substring_index(AA.ledger_name, '-', -1),'') as new_ledger_name, 
+                    case when (instr(AA.ledger_name,'-CGST')!=0 or instr(AA.ledger_name,'-SGST')!=0) 
+                    then (2 * Replace(Substring_index(AA.ledger_name, '-', -1),'%', '')) 
+                    else Replace(Substring_index(AA.ledger_name, '-', -1), '%', '') end as percentage from 
+                (
+
+                select A.*, ifnull(C.paid_amount,0) as paid_amount from 
+                    
+                (select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    A.gi_date, A.invoice_date, A.due_date, B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.gi_date, C.invoice_date, D.due_date from acc_ledger_entries A 
+                    left join grn B on(A.ref_id = B.grn_id and A.ref_type = 'purchase') 
+                    left join goods_inward_outward_invoices C on(A.invoice_no = C.invoice_no and A.ref_type = 'purchase' and B.gi_id = C.gi_go_ref_no) 
+                    left join invoice_tracker D on(A.ref_id=D.grn_id and C.gi_go_invoice_id=D.invoice_id) 
+                    where A.status = 'approved' and A.is_active = '1' and B.status = 'Approved' and B.is_active = '1' and date(A.ref_date)>date('2018-04-01') and 
+                        A.ref_type = 'purchase' and A.ledger_type != 'Main Entry' and A.company_id = '$company_id' and B.company_id = '$company_id' ".$cond1.") A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = 'approved' and is_active = '1' and acc_id in ($acc_id) and 
+                    date(ref_date)>date('2018-04-01') and ref_type = 'purchase' and ledger_type = 'Main Entry' and company_id = '$company_id' ".$cond2.") B 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
+                    A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    A.gi_date, A.invoice_date, null as due_date, B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.jv_date as gi_date, C.invoice_date from acc_ledger_entries A 
+                    left join acc_jv_details B on(A.ref_id=B.id and A.ref_type='journal_voucher') 
+                    left join acc_jv_invoices_entries C 
+                    on (A.ref_id=C.jv_details_id and A.sub_ref_id=C.jv_entries_id and A.ref_type='journal_voucher' and A.invoice_no = C.invoice_number and A.amount = C.invoice_amount) 
+                    where A.status = 'approved' and A.is_active = '1' and date(A.ref_date)>date('2018-04-01') and 
+                        A.ref_type = 'journal_voucher' and A.company_id = '$company_id' ".$cond1.") A 
+                left join 
+                (select distinct ref_id, voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = 'approved' and is_active = '1' and 
+                    date(ref_date)>date('2018-04-01') and ref_type = 'journal_voucher' and acc_id in ($acc_id) and company_id = '$company_id' ".$cond2.") B 
+                on (A.ref_id=B.ref_id) 
+                where (A.acc_id<>B.cp_acc_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    null as gi_date, null as invoice_date, null as due_date, B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select * from acc_ledger_entries where status = 'approved' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
+                    ref_type = 'payment_receipt' and ledger_type = 'Sub Entry' and company_id = '$company_id' ".$cond2.") A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = 'approved' and is_active = '1' and acc_id in ($acc_id) and 
+                    date(ref_date)>date('2018-04-01') and ref_type = 'payment_receipt' and ledger_type = 'Main Entry' and company_id = '$company_id' ".$cond2.") B 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, inv_no as invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    A.gi_date, A.invoice_date, A.due_date, B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.gi_go_date_time as gi_date, null as invoice_date, null as due_date, B.gi_go_ref_no as inv_no 
+                    from acc_ledger_entries A 
+                    left join goods_inward_outward B on(A.ref_id = B.gi_go_id and A.ref_type = 'go_debit_details') 
+                    where A.status = 'approved' and A.is_active = '1' and B.is_active = '1' and 
+                        date(A.ref_date)>date('2018-04-01') and A.ref_type = 'go_debit_details' and A.ledger_type != 'Main Entry' and 
+                        A.company_id = '$company_id' and B.company_id = '$company_id' ".$cond1.") A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = 'approved' and is_active = '1' and acc_id in ($acc_id) and 
+                    date(ref_date)>date('2018-04-01') and ref_type = 'go_debit_details' and ledger_type = 'Main Entry' and company_id = '$company_id' ".$cond2.") B 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, inv_no as invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
+                    A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    A.gi_date, A.invoice_date, A.due_date, B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.gi_go_date_time as gi_date, null as invoice_date, null as due_date, B.gi_go_ref_no as inv_no 
+                    from acc_ledger_entries A 
+                    left join goods_inward_outward B on(A.ref_id = B.gi_go_id and A.ref_type = 'go_debit_details') 
+                    where A.status = 'approved' and A.is_active = '1' and B.is_active = '1' and date(A.ref_date)>date('2018-04-01') and 
+                        A.ref_type = 'go_debit_details' and A.ledger_type = 'Main Entry' and 
+                        A.company_id = '$company_id' and B.company_id = '$company_id' and 
+                        A.entry_type in ('Purchase Stock Transfer', 'Sales Stock Transfer') ".$cond1.") A 
+                left join 
+                (select distinct ref_id, voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = 'approved' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
+                    ref_type = 'go_debit_details' and acc_id in ($acc_id) and ledger_type = 'Main Entry' and company_id = '$company_id' and 
+                    entry_type in ('Purchase Stock Transfer', 'Sales Stock Transfer') ".$cond2.") B 
+                on(A.ref_id=B.ref_id) 
+                where (A.acc_id<>B.cp_acc_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
+                    A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    null as gi_date, null as invoice_date, null as due_date, 
+                    B.acc_id as cp_acc_id, B.ledger_name as cp_ledger_name, B.ledger_code as cp_ledger_code from 
+                (select * from acc_ledger_entries where status = 'approved' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
+                    ref_type = 'other_debit_credit' and company_id = '$company_id' ".$cond2.") A 
+                left join 
+                (select * from acc_ledger_entries where status = 'approved' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
+                    ref_type = 'other_debit_credit' and acc_id in ($acc_id) and company_id = '$company_id' ".$cond2.") B 
+                on (A.ref_id=B.ref_id) 
+                where (A.acc_id<>B.acc_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
+                    A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    null as gi_date, null as invoice_date, null as due_date, 
+                    B.acc_id as cp_acc_id, B.ledger_name as cp_ledger_name, B.ledger_code as cp_ledger_code from 
+                (select * from acc_ledger_entries where status = 'approved' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
+                    ref_type = 'promotion' and company_id = '$company_id' ".$cond2.") A 
+                left join 
+                (select * from acc_ledger_entries where status = 'approved' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
+                    ref_type = 'promotion' and acc_id in ($acc_id) and company_id = '$company_id' ".$cond2.") B 
+                on (A.ref_id=B.ref_id) 
+                where (A.acc_id<>B.acc_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    null as gi_date, null as invoice_date, null as due_date, 
+                    B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select * from acc_ledger_entries where status = 'approved' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
+                    ref_type = 'B2B Sales' and ledger_type != 'Main Entry' and company_id = '$company_id' ".$cond2.") A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = 'approved' and is_active = '1' and acc_id in ($acc_id) and 
+                    date(ref_date)>date('2018-04-01') and ref_type = 'B2B Sales' and ledger_type = 'Main Entry' and company_id = '$company_id' ".$cond2.") B 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    A.gi_date, A.invoice_date, A.due_date, B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.date_of_upload as gi_date, C.invoice_date, null as due_date from acc_ledger_entries A 
+                    left join acc_sales_files B on(A.ref_id = B.id and A.ref_type = 'sales_upload') 
+                    left join 
+                    (select distinct ref_file_id, invoice_no, invoice_date from acc_sales_file_items where company_id='$company_id' and is_active='1') C 
+                    on(A.invoice_no = C.invoice_no and A.ref_type = 'sales_upload' and A.ref_id = C.ref_file_id) 
+                    where A.status = 'approved' and A.is_active = '1' and B.status = 'Approved' and B.is_active = '1' and date(A.ref_date)>date('2018-04-01') and 
+                        A.ref_type = 'sales_upload' and A.ledger_type != 'Main Entry' and A.company_id = '$company_id' and B.company_id = '$company_id' ".$cond1.") A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = 'approved' and is_active = '1' and acc_id in ($acc_id) and 
+                    date(ref_date)>date('2018-04-01') and ref_type = 'sales_upload' and ledger_type = 'Main Entry' and company_id = '$company_id' ".$cond2.") B 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, A.type, A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    A.gi_date, A.invoice_date, null as due_date, B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.jv_date as gi_date, C.invoice_date from acc_ledger_entries A 
+                    left join acc_jv_details B on(A.ref_id=B.id and A.ref_type='journal_voucher') 
+                    left join acc_jv_invoices_entries C 
+                    on (A.ref_id=C.jv_details_id and A.ref_type='journal_voucher' and A.invoice_no = C.invoice_number and A.amount = C.invoice_amount) 
+                    where A.status = 'approved' and A.is_active = '1' and date(A.ref_date)<date('2018-04-01') and date(A.ref_date)>date('2018-03-30') and 
+                        A.ref_type = 'journal_voucher' and A.acc_id in ($acc_id) and A.company_id = '$company_id' ".$cond1.") A 
+                left join 
+                (select distinct ref_id, voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = 'approved' and is_active = '1' and 
+                    date(ref_date)<date('2018-04-01') and date(ref_date)>date('2018-03-30') and ref_type = 'journal_voucher' and 
+                    acc_id='716' and company_id = '$company_id' ".$cond2.") B 
+                on (A.ref_id=B.ref_id)) A 
+
+                left join 
+
+                (select sub_ref_id, sum(amount) as paid_amount from acc_ledger_entries 
+                    where status = 'approved' and is_active = '1' and company_id = '$company_id' and sub_ref_id is not null and 
+                        date(ref_date)>date('2018-04-01') and ref_type = 'payment_receipt' and ledger_type = 'Sub Entry' ".$cond2." group by sub_ref_id) C 
+                on (A.id = C.sub_ref_id) 
+
+                ) AA 
+                where (AA.acc_id in ($acc_id) or AA.cp_acc_id in ($acc_id)) and AA.amount!=0 and 
+                        (AA.ref_type!='payment_receipt' or AA.entry_type='Bank Entry' or AA.entry_type='Payment' or AA.entry_type='Receipt')) A) A 
+                group by A.ref_id, A.ref_type, A.invoice_no, A.vendor_id, A.status, A.ref_date, 
+                    A.gi_date, A.invoice_date, A.due_date, A.cp_acc_id, A.cp_ledger_name, A.cp_ledger_code) A) AA ".$cond."
+                order by AA.overdueby desc, AA.ref_date";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
+    public function getInvoicewiseLedgerDetail($acc_id, $from_date, $to_date, $type) {
+        $session = Yii::$app->session;
+        $company_id = $session['company_id'];
+
+        if($acc_id=='') $acc_id = 0;
+
+        $cond = '';
+        $cond1 = '';
+        $cond2 = '';
+
+        if($type=='Pending') 
+            $cond = " Where (round(AA.balance_amt,0)<>0)";
+        if($to_date!='') 
+            $cond1 = " and date(A.ref_date)>=date('$from_date') and date(A.ref_date)<=date('$to_date')";
+        if($to_date!='') 
+            $cond2 = " and date(ref_date)>=date('$from_date') and date(ref_date)<=date('$to_date')";
+
+        $sql = "select AA.* from 
+                (select A.*, round(A.bal_amount,0) as balance_amt, 
+                    case when A.due_date is not null then datediff(curdate(), A.due_date) else '' end as overdueby from 
+                (select A.ref_id, A.ref_type, A.invoice_no, A.vendor_id, A.status, A.ref_date, 
+                    A.grn_no, A.go_no, A.gi_date, A.invoice_date, A.due_date, A.debit_note_ref, A.debit_note_amount, 
+                    A.cp_acc_id, A.cp_ledger_name, A.cp_ledger_code,
+                    group_concat(A.entry_type) as entry_type, group_concat(A.acc_id) as acc_id, 
+                    group_concat(A.ledger_name) as ledger_name, group_concat(A.ledger_code) as ledger_code, 
+                    sum(A.amount) as amount, sum(A.paid_amount) as paid_amount, sum(A.bal_amount) as bal_amount, 
+                    group_concat(distinct ref_no) as ref_no, group_concat(distinct payment_date) as payment_date from 
+                (select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, 
+                    A.acc_id, A.ledger_name, A.ledger_code, 
+                    case when A.type='Debit' then A.amount*-1 else A.amount end as amount, 
+                    case when A.type='Debit' then A.paid_amount*-1 else A.paid_amount end as paid_amount, 
+                    case when A.type='Debit' then A.bal_amount*-1 else A.bal_amount end as bal_amount, 
+                    A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, A.voucher_id, 
+                    A.ledger_type, A.narration, A.ref_date, A.grn_no, A.go_no, A.gi_date, A.invoice_date, 
+                    A.due_date, A.debit_note_ref, A.debit_note_amount, A.cp_acc_id, A.cp_ledger_name, A.cp_ledger_code, 
+                    case when (instr(A.ledger_name,'-CGST')!=0 or instr(A.ledger_name,'-SGST')!=0 or 
+                        instr(A.ledger_name,'-IGST')!=0 or instr(A.ledger_name,'Purchase-')!=0 or 
+                        instr(A.ledger_name,'Sales-')!=0) then A.new_ledger_name 
+                        else A.ledger_name end as new_ledger_name, A.ref_no, A.payment_date from 
+                (select AA.*, round((AA.amount-AA.paid_amount),2) as bal_amount, 
+                    replace(replace(replace(replace(replace(replace(replace(replace(replace(AA.ledger_name,'Input-','Purchase-'),
+                        'Output-','Sales-'),'CGST','Local'),'SGST','Local'),'IGST','Inter State'),'-B2B',''),'-B2C',''),'--',''),
+                        Substring_index(AA.ledger_name, '-', -1),'') as new_ledger_name, 
+                    case when (instr(AA.ledger_name,'-CGST')!=0 or instr(AA.ledger_name,'-SGST')!=0) 
+                    then (2 * Replace(Substring_index(AA.ledger_name, '-', -1),'%', '')) 
+                    else Replace(Substring_index(AA.ledger_name, '-', -1), '%', '') end as percentage from 
+                (
+
+                select A.*, ifnull(C.paid_amount,0) as paid_amount, C.ref_no, C.payment_date from 
+                    
+                (select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    A.grn_no, null as go_no, A.gi_date, A.invoice_date, A.due_date, A.debit_note_ref, A.total_deduction as debit_note_amount, 
+                    B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.grn_no, B.gi_date, C.invoice_date, D.due_date, E.debit_note_ref, E.total_deduction 
+                    from acc_ledger_entries A 
+                    left join grn B on(A.ref_id = B.grn_id and A.ref_type = 'purchase') 
+                    left join goods_inward_outward_invoices C on(A.invoice_no = C.invoice_no and A.ref_type = 'purchase' and B.gi_id = C.gi_go_ref_no) 
+                    left join invoice_tracker D on(A.ref_id=D.grn_id and C.gi_go_invoice_id=D.invoice_id) 
+                    left join acc_grn_debit_notes E on (A.ref_id=E.grn_id and A.invoice_no=E.invoice_no) 
+                    where A.status = 'approved' and A.is_active = '1' and B.status = 'Approved' and B.is_active = '1' and date(A.ref_date)>date('2018-04-01') and 
+                        A.ref_type = 'purchase' and A.ledger_type != 'Main Entry' and A.company_id = '$company_id' and B.company_id = '$company_id' ".$cond1.") A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = 'approved' and is_active = '1' and acc_id in ($acc_id) and 
+                    date(ref_date)>date('2018-04-01') and ref_type = 'purchase' and ledger_type = 'Main Entry' and company_id = '$company_id' ".$cond2.") B 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
+                    A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    null as grn_no, null as go_no, A.gi_date, A.invoice_date, null as due_date, null as debit_note_ref, null as debit_note_amount, 
+                    B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.jv_date as gi_date, C.invoice_date from acc_ledger_entries A 
+                    left join acc_jv_details B on(A.ref_id=B.id and A.ref_type='journal_voucher') 
+                    left join acc_jv_invoices_entries C 
+                    on (A.ref_id=C.jv_details_id and A.sub_ref_id=C.jv_entries_id and A.ref_type='journal_voucher' and A.invoice_no = C.invoice_number and A.amount = C.invoice_amount) 
+                    where A.status = 'approved' and A.is_active = '1' and date(A.ref_date)>date('2018-04-01') and 
+                        A.ref_type = 'journal_voucher' and A.company_id = '$company_id' ".$cond1.") A 
+                left join 
+                (select distinct ref_id, voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = 'approved' and is_active = '1' and 
+                    date(ref_date)>date('2018-04-01') and ref_type = 'journal_voucher' and acc_id in ($acc_id) and company_id = '$company_id' ".$cond2.") B 
+                on (A.ref_id=B.ref_id) 
+                where (A.acc_id<>B.cp_acc_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    null as grn_no, null as go_no, null as gi_date, null as invoice_date, null as due_date, null as debit_note_ref, null as debit_note_amount, 
+                    B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select * from acc_ledger_entries where status = 'approved' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
+                    ref_type = 'payment_receipt' and ledger_type = 'Sub Entry' and company_id = '$company_id' ".$cond2.") A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = 'approved' and is_active = '1' and acc_id in ($acc_id) and 
+                    date(ref_date)>date('2018-04-01') and ref_type = 'payment_receipt' and ledger_type = 'Main Entry' and company_id = '$company_id' ".$cond2.") B 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, inv_no as invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    null as grn_no, A.go_no, A.gi_date, A.invoice_date, A.due_date, A.debit_note_ref, A.debit_amt as debit_note_amount, 
+                    B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.gi_go_ref_no as go_no, B.gi_go_date_time as gi_date, null as invoice_date, null as due_date, 
+                    B.gi_go_ref_no as inv_no, C.debit_note_ref, C.debit_amt 
+                    from acc_ledger_entries A 
+                    left join goods_inward_outward B on(A.ref_id = B.gi_go_id and A.ref_type = 'go_debit_details') 
+                    left join acc_go_debit_details C on(A.ref_id = C.gi_go_id) 
+                    where A.status = 'approved' and A.is_active = '1' and B.is_active = '1' and 
+                        date(A.ref_date)>date('2018-04-01') and A.ref_type = 'go_debit_details' and A.ledger_type != 'Main Entry' and 
+                        A.company_id = '$company_id' and B.company_id = '$company_id' ".$cond1.") A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = 'approved' and is_active = '1' and acc_id in ($acc_id) and 
+                    date(ref_date)>date('2018-04-01') and ref_type = 'go_debit_details' and ledger_type = 'Main Entry' and company_id = '$company_id' ".$cond2.") B 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, inv_no as invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
+                    A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    null as grn_no, A.go_no, A.gi_date, A.invoice_date, A.due_date, null as debit_note_ref, null as debit_note_amount, 
+                    B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.gi_go_ref_no as go_no, B.gi_go_date_time as gi_date, null as invoice_date, null as due_date, 
+                    B.gi_go_ref_no as inv_no 
+                    from acc_ledger_entries A 
+                    left join goods_inward_outward B on(A.ref_id = B.gi_go_id and A.ref_type = 'go_debit_details') 
+                    where A.status = 'approved' and A.is_active = '1' and B.is_active = '1' and date(A.ref_date)>date('2018-04-01') and 
+                        A.ref_type = 'go_debit_details' and A.ledger_type = 'Main Entry' and 
+                        A.company_id = '$company_id' and B.company_id = '$company_id' and 
+                        A.entry_type in ('Purchase Stock Transfer', 'Sales Stock Transfer') ".$cond1.") A 
+                left join 
+                (select distinct ref_id, voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = 'approved' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
+                    ref_type = 'go_debit_details' and acc_id in ($acc_id) and ledger_type = 'Main Entry' and company_id = '$company_id' and 
+                    entry_type in ('Purchase Stock Transfer', 'Sales Stock Transfer') ".$cond2.") B 
+                on(A.ref_id=B.ref_id) 
+                where (A.acc_id<>B.cp_acc_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
+                    A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    null as grn_no, null as go_no, null as gi_date, null as invoice_date, null as due_date, A.debit_credit_note_ref as debit_note_ref, A.debit_amt as debit_note_amount, 
+                    B.acc_id as cp_acc_id, B.ledger_name as cp_ledger_name, B.ledger_code as cp_ledger_code from 
+                (select A.*, B.debit_credit_note_ref, B.debit_amt 
+                    from acc_ledger_entries A left join acc_other_debit_credit_details B on (A.ref_id = B.id) 
+                    where A.status = 'approved' and A.is_active = '1' and date(A.ref_date)>date('2018-04-01') and 
+                    A.ref_type = 'other_debit_credit' and A.company_id = '$company_id' ".$cond1.") A 
+                left join 
+                (select * from acc_ledger_entries where status = 'approved' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
+                    ref_type = 'other_debit_credit' and acc_id in ($acc_id) and company_id = '$company_id' ".$cond2.") B 
+                on (A.ref_id=B.ref_id) 
+                where (A.acc_id<>B.acc_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, A.amount, A.status, 
+                    A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    null as grn_no, null as go_no, null as gi_date, null as invoice_date, null as due_date, A.debit_note_ref, A.debit_amt as debit_note_amount, 
+                    B.acc_id as cp_acc_id, B.ledger_name as cp_ledger_name, B.ledger_code as cp_ledger_code from 
+                (select A.*, B.debit_note_ref, B.debit_amt 
+                    from acc_ledger_entries A left join acc_promotion_details B on (A.ref_id = B.id) 
+                    where A.status = 'approved' and A.is_active = '1' and date(A.ref_date)>date('2018-04-01') and 
+                    A.ref_type = 'promotion' and A.company_id = '$company_id' ".$cond1.") A 
+                left join 
+                (select * from acc_ledger_entries where status = 'approved' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
+                    ref_type = 'promotion' and acc_id in ($acc_id) and company_id = '$company_id' ".$cond2.") B 
+                on (A.ref_id=B.ref_id) 
+                where (A.acc_id<>B.acc_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    null as grn_no, null as go_no, null as gi_date, null as invoice_date, null as due_date, null as debit_note_ref, null as debit_note_amount, 
+                    B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select * from acc_ledger_entries where status = 'approved' and is_active = '1' and date(ref_date)>date('2018-04-01') and 
+                    ref_type = 'B2B Sales' and ledger_type != 'Main Entry' and company_id = '$company_id' ".$cond2.") A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = 'approved' and is_active = '1' and acc_id in ($acc_id) and 
+                    date(ref_date)>date('2018-04-01') and ref_type = 'B2B Sales' and ledger_type = 'Main Entry' and company_id = '$company_id' ".$cond2.") B 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, case when A.type='Debit' then 'Credit' else 'Debit' end as type, 
+                    A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    null as grn_no, null as go_no, A.gi_date, A.invoice_date, A.due_date, null as debit_note_ref, null as debit_note_amount, 
+                    B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.date_of_upload as gi_date, C.invoice_date, null as due_date from acc_ledger_entries A 
+                    left join acc_sales_files B on(A.ref_id = B.id and A.ref_type = 'sales_upload') 
+                    left join 
+                    (select distinct ref_file_id, invoice_no, invoice_date from acc_sales_file_items where company_id='$company_id' and is_active='1') C 
+                    on(A.invoice_no = C.invoice_no and A.ref_type = 'sales_upload' and A.ref_id = C.ref_file_id) 
+                    where A.status = 'approved' and A.is_active = '1' and B.status = 'Approved' and B.is_active = '1' and date(A.ref_date)>date('2018-04-01') and 
+                        A.ref_type = 'sales_upload' and A.ledger_type != 'Main Entry' and A.company_id = '$company_id' and B.company_id = '$company_id' ".$cond1.") A 
+                left join 
+                (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = 'approved' and is_active = '1' and acc_id in ($acc_id) and 
+                    date(ref_date)>date('2018-04-01') and ref_type = 'sales_upload' and ledger_type = 'Main Entry' and company_id = '$company_id' ".$cond2.") B 
+                on (A.voucher_id = B.cp_voucher_id) 
+
+                union all 
+
+                select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, A.acc_id, A.ledger_name, 
+                    A.ledger_code, A.type, A.amount, A.status, A.created_by, A.updated_by, A.created_date, A.updated_date, 
+                    A.is_paid, A.payment_ref, A.voucher_id, A.ledger_type, A.narration, A.ref_date, 
+                    null as grn_no, null as go_no, A.gi_date, A.invoice_date, null as due_date, null as debit_note_ref, null as debit_note_amount, 
+                    B.cp_acc_id, B.cp_ledger_name, B.cp_ledger_code from 
+                (select A.*, B.jv_date as gi_date, C.invoice_date from acc_ledger_entries A 
+                    left join acc_jv_details B on(A.ref_id=B.id and A.ref_type='journal_voucher') 
+                    left join acc_jv_invoices_entries C 
+                    on (A.ref_id=C.jv_details_id and A.ref_type='journal_voucher' and A.invoice_no = C.invoice_number and A.amount = C.invoice_amount) 
+                    where A.status = 'approved' and A.is_active = '1' and date(A.ref_date)<date('2018-04-01') and date(A.ref_date)>date('2018-03-30') and 
+                        A.ref_type = 'journal_voucher' and A.acc_id in ($acc_id) and A.company_id = '$company_id' ".$cond1.") A 
+                left join 
+                (select distinct ref_id, voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
+                    ledger_code as cp_ledger_code from acc_ledger_entries where status = 'approved' and is_active = '1' and 
+                    date(ref_date)<date('2018-04-01') and date(ref_date)>date('2018-03-30') and ref_type = 'journal_voucher' and 
+                    acc_id='716' and company_id = '$company_id' ".$cond2.") B 
+                on (A.ref_id=B.ref_id)) A 
+
+                left join 
+
+                (select A.sub_ref_id, sum(A.amount) as paid_amount, group_concat(distinct B.ref_no) as ref_no, group_concat(distinct B.payment_date) as payment_date 
+                    from acc_ledger_entries A left join acc_payment_receipt B on (A.ref_id=B.id) 
+                    where A.status = 'approved' and A.is_active = '1' and A.company_id = '$company_id' and A.sub_ref_id is not null and 
+                        date(A.ref_date)>date('2018-04-01') and A.ref_type = 'payment_receipt' and A.ledger_type = 'Sub Entry' ".$cond1." group by A.sub_ref_id) C 
+                on (A.id = C.sub_ref_id) 
+
+                ) AA 
+                where (AA.acc_id in ($acc_id) or AA.cp_acc_id in ($acc_id)) and AA.amount!=0 and 
+                        (AA.ref_type!='payment_receipt' or AA.entry_type='Bank Entry' or AA.entry_type='Payment' or AA.entry_type='Receipt')) A) A 
+                group by A.ref_id, A.ref_type, A.invoice_no, A.vendor_id, A.status, A.ref_date, 
+                    A.grn_no, A.go_no, A.gi_date, A.invoice_date, A.due_date, A.debit_note_ref, A.debit_note_amount, A.cp_acc_id, A.cp_ledger_name, A.cp_ledger_code) A) AA ".$cond." 
+                order by AA.overdueby desc, AA.ref_date";
+        $command = Yii::$app->db->createCommand($sql);
+        $reader = $command->query();
+        return $reader->readAll();
+    }
+
 }

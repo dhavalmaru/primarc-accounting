@@ -1504,7 +1504,8 @@ class PaymentReceipt extends Model
                 left join grn B on(A.ref_id = B.grn_id and A.ref_type = 'purchase') 
                 left join goods_inward_outward_invoices C on(A.invoice_no = C.invoice_no and A.ref_type = 'purchase' and B.gi_id = C.gi_go_ref_no) 
                 left join invoice_tracker D on(A.ref_id=D.grn_id and C.gi_go_invoice_id=D.invoice_id) 
-                where A.status = 'Approved' and A.is_active = '1' and B.status = 'Approved' and B.is_active = '1' and date(A.ref_date)>date('2018-04-01') and date(A.ref_date)>'$from_date' and date(A.ref_date)<'$to_date' and 
+                where A.status = 'Approved' and A.is_active = '1' and B.status = 'Approved' and B.is_active = '1' and 
+                    date(A.ref_date)>date('2018-04-01') and date(A.ref_date)>'$from_date' and date(A.ref_date)<'$to_date' and 
                     A.ref_type = 'purchase' and A.ledger_type != 'Main Entry' and A.company_id = '1' and B.company_id = '1') A 
             left join 
             (select distinct voucher_id as cp_voucher_id, acc_id as cp_acc_id, ledger_name as cp_ledger_name, 
@@ -1833,7 +1834,7 @@ class PaymentReceipt extends Model
                 A.status, A.voucher_id, A.ledger_type, A.ref_date, A.gi_date, A.invoice_date, A.due_date, 
                 A.cp_acc_id, A.cp_ledger_name, A.cp_ledger_code,
                 Case When A.due_date IS NOT NULL Then 
-                DATEDIFF('$from_date',A.ref_date) Else '' end as overdueby,A.gi_id,A.gi_go_ref_no from 
+                DATEDIFF('$from_date',A.ref_date) Else '' end as overdueby, A.gi_id, A.gi_go_ref_no from 
             (select A.id, A.ref_id, A.sub_ref_id, A.ref_type, A.entry_type, A.invoice_no, A.vendor_id, 
                 A.acc_id, A.ledger_name, A.ledger_code, A.type, A.amount, A.paid_amount, 
                 A.total_paid_amount, A.bal_amount, A.status, A.created_by, A.updated_by, 
@@ -2042,7 +2043,7 @@ class PaymentReceipt extends Model
             where (AA.acc_id IN ($acc_id) or AA.cp_acc_id IN ($acc_id)) and AA.amount!=0 and 
                     (AA.ref_type!='payment_receipt' or AA.entry_type='Bank Entry' or AA.entry_type='Payment' or AA.entry_type='Receipt')) A) A 
             group by A.ref_id, A.ref_type, A.invoice_no, A.vendor_id, A.type, A.status, A.voucher_id, A.ledger_type, A.ref_date, 
-                A.gi_date, A.invoice_date, A.due_date, A.cp_acc_id, A.cp_ledger_name, A.cp_ledger_code) A 
+                A.gi_date, A.invoice_date, A.due_date, A.cp_acc_id, A.cp_ledger_name, A.cp_ledger_code, A.gi_id, A.gi_go_ref_no) A 
             order by A.ref_date) BB 
 
             on (AA.ref_id=BB.ref_id and AA.invoice_no=BB.invoice_no) " .$cond."

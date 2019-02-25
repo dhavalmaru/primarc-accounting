@@ -73,6 +73,7 @@ $mycomponent = Yii::$app->mycomponent;
 											<th>GO Date</th> 
 											<th>Updated By</th> 
 											<th>Ledger</th> 
+											<th>Debit Note</th> 
 										</tr>  
 									</thead>
 									<tbody> 
