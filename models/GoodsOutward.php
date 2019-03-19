@@ -773,6 +773,7 @@ class GoodsOutward extends Model
         }
         $location_from = $request->post('location_from');
         $location_to = $request->post('location_to');
+        $narration = $request->post('narration');
 
         // $taxable_amount = $request->post('taxable_amount');
         // $invoice_taxable_amount = $request->post('invoice_taxable_amount');
@@ -1066,7 +1067,8 @@ class GoodsOutward extends Model
                             // 'approver_comments'=>$remarks,
                             // 'approver_id'=>$approver_id,
                             'company_id'=>$company_id,
-                            'debit_note_ref'=>$debit_note_ref
+                            'debit_note_ref'=>$debit_note_ref,
+                            'narration'=>$narration
                             );
 
             if(count($array)>0){
@@ -1271,7 +1273,9 @@ class GoodsOutward extends Model
         $dateTime = \DateTime::createFromFormat('Y-m-d', $date_of_transaction);
         $from = $dateTime->format('Y');
         $to = $dateTime->format('Y');
-        if (date('m') > 3) {
+
+        $mon = intval($dateTime->format('m'));
+        if ($mon > 3) {
             $to = (int)($dateTime->format('Y')) +1;
         } else {
             $from = (int)($dateTime->format('Y')) -1;
@@ -1815,7 +1819,7 @@ class GoodsOutward extends Model
         $sql = "select A.* from (
                 select Case When A.warehouse_state=H.to_state Then 'Same States' Else 'Different States' end as tax_zone_name, 
                     Case When A.warehouse_state=H.to_state Then 'INTRA' Else 'INTER' end as tax_zone_code, 
-                    A.*, A.vendor_id as vendor_id1, H.to_state, E.idt_warehouse, E.warehouse_id, C.id, C.debit_note_ref 
+                    A.*, A.vendor_id as vendor_id1, H.to_state, E.idt_warehouse, E.warehouse_id, C.id, C.debit_note_ref, C.narration 
                 from goods_inward_outward A 
                 left join 
                 (select (Case When type_outward='VENDOR' Then vendor_state 

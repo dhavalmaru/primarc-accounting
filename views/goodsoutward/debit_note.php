@@ -140,8 +140,7 @@
             <td colspan="3"   style="border-left:none; border-bottom:none; ">
                 <p>
                     <!-- Being <?php //if(isset($debit_note[0]['trans_type'])) echo $debit_note[0]['trans_type']; ?> note raised -->
-                    <?php //if(isset($debit_note[0]['narration'])) echo $debit_note[0]['narration']; ?>
-                    Being Debit Note Raised
+                    <?php if(isset($debit_note[0]['narration'])) echo $debit_note[0]['narration']; ?>
                 </p>
             </td>
             <td colspan="3" align="center" valign="top" style="border-right:none;border-bottom:none!important;"><p><b><?php if(isset($debit_note[0]['debit_amt'])) echo $mycomponent->format_money($debit_note[0]['debit_amt'],2); ?></b></p></td>
@@ -189,21 +188,17 @@
         <tr>
             <td colspan="3"  style=""><p><b>Total</p></td>
             <td colspan="3" align="center"  style=""><p><b>  <?php echo  $mycomponent->format_money($sum ,2)?></b></p></td>
-        </tr>           
-                        
-     </table>
-     
-        <tr valign="bottom"  style="">
-            <td colspan="6" style="border:none;">
-                <p style="text-align: center;margin-top:60px">
-                    In case we do not receive any communication within 5 working days, the debit note will be treated as confirmed / accepted. 
-                    As provided u/s Section 34(1) of the CGST Act, 2017 kindly provide us the credit note for the above transaction. 
-                    <br/>This is a computer generated debit note. No signature required.  &nbsp;
-                </p>
-            </td>
-            <!-- <td colspan="2" style="border:none;"> &nbsp; </td>
-            <td valign="bottom" colspan="2" style="border:none; text-align:center "><p> <b>Authorised Signatory</b></p></td> -->
         </tr>
+        <!-- <tr valign="bottom"  style="">
+            <td colspan="2" style="border:none;"> &nbsp; </td>
+            <td valign="bottom" colspan="2" style="border:none; text-align:center "><p> <b>Authorised Signatory</b></p></td>
+        </tr> -->
+    </table>
+     
+</div>
+
+<div class="modal-body-inside">
+    <p style="text-align:center">In case we do not receive any communication within 5 working days, the debit note will be treated as confirmed / accepted. <br/>As provided u/s Section 34(1) of the CGST Act, 2017 kindly provide us the credit note for the above transaction. <br/>This is a computer generated debit note. No signature required</p>
 </div>
 
 </body>

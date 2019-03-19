@@ -421,7 +421,9 @@ class OtherDebitCredit extends Model
         $dateTime = \DateTime::createFromFormat('Y-m-d', $date_of_transaction);
         $from = $dateTime->format('Y');
         $to = $dateTime->format('Y');
-        if (date('m') > 3) {
+
+        $mon = intval($dateTime->format('m'));
+        if ($mon > 3) {
             $to = (int)($dateTime->format('Y')) +1;
         } else {
             $from = (int)($dateTime->format('Y')) -1;

@@ -19,7 +19,8 @@ class Login extends Model
     public function getDetails($uname, $upass){
         $sql = "select A.*, B.role_id, B.company_id, C.r_section, C.r_view, C.r_insert, C.r_edit, C.r_delete, C.r_approval, C.r_export 
                 from user A left join acc_user_roles B on (A.id = B.user_id) left join acc_user_role_options C on (B.role_id=C.role_id) 
-                where A.username = '$uname' and A.password_hash = '$upass' and B.role_id = (select min(role_id) from acc_user_roles where id = A.id)";
+                where A.username = '$uname' and A.password_hash = '$upass' and 
+                    B.role_id = (select min(role_id) from acc_user_roles where user_id = A.id)";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();

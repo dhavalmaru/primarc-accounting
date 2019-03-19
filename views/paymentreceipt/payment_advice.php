@@ -239,7 +239,7 @@
                 <p>Thanking You</p></td>
                 <td valign="bottom" colspan="3" style="border:none; text-align:right; ">&nbsp;</td>
             </tr>
-            <tr valign="bottom"  >
+            <!-- <tr valign="bottom"  >
                 <td style="border:none;">&nbsp;</td>
                 <td valign="bottom" colspan="3" style="border:none; text-align:right; ">&nbsp;</td>
             </tr>
@@ -249,6 +249,15 @@
             </tr>
             <tr valign="bottom" >
                 <td colspan="4" style="border:none;">&nbsp;   </td>
+            </tr> -->
+            <tr valign="bottom"  style="">
+                <td colspan="4" style="border:none;">
+                    <p style="text-align: center;">
+                        <br/>This is a computer generated payment advice. No signature required.  &nbsp;
+                    </p>
+                </td>
+                <!-- <td colspan="2" style="border:none;"> &nbsp; </td>
+                <td valign="bottom" colspan="2" style="border:none; text-align:center "><p> <b>Authorised Signatory</b></p></td> -->
             </tr>
         </table>
     </div>

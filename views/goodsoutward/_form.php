@@ -189,6 +189,12 @@ $mycomponent = Yii::$app->mycomponent;
                         <input type="text" class="form-control" name="location_to" id="location_to"   value="<?= $grn_details[0]['to_state'] ?>" readonly />  
                     </div>
                 </div>
+                <div class="col-md-8 col-sm-8 col-xs-6">
+                    <label class=" control-label">Narration </label> 
+                    <div class=" "> 
+                        <input type="text" class="form-control" name="narration" id="narration"   value="<?= $grn_details[0]['narration'] ?>" />  
+                    </div>
+                </div>
     			 <input type="hidden" class="form-control" name="vat_cst" id="vat_cst"   value="<?= $grn_details[0]['tax_zone_code'] ?>" readonly />
             </div>
             <div class="form-group" id="form_errors_group" style="display:none;">

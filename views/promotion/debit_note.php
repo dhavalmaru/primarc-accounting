@@ -124,7 +124,7 @@
             <td colspan="3" style="border:none;"></td>
         </tr> -->
         <tr valign="bottom" >
-            <td colspan="6" style="border:none;"><p style="text-align: center;">This is a computer generated debit note. No signature required. &nbsp;</p></td>
+            <td colspan="6" style="border:none;"><p style="text-align: center;">In case we do not receive any communication within 5 working days, the debit note will be treated as confirmed / accepted. <br/>As provided u/s Section 34(1) of the CGST Act, 2017 kindly provide us the credit note for the above transaction. <br/>This is a computer generated debit note. No signature required &nbsp;</p></td>
             <!-- <td colspan="2" style="border:none;"> &nbsp; </td>
             <td valign="bottom" colspan="2" style="border:none; text-align:center "><p> <b>Authorised Signatory</b></p></td> -->
         </tr>

@@ -141,7 +141,7 @@ class SalesuploadController extends Controller
         $access = $salesupload->getAccess();
         $data = $salesupload->getFileDetails($id);
         if(count($access)>0) {
-            if($access[0]['r_edit']==1 && ($access[0]['session_id']==$data[0]['created_by'] || $access[0]['session_id']==$data[0]['updated_by'])) {
+            if($access[0]['r_edit']==1) {
                 $salesupload->setLog('Salesupload', '', 'Edit', '', 'Edit Sales Upload Details', 'acc_sales_upload', $id);
                 return $this->actionRedirect('edit', $id);
             } else {
@@ -166,7 +166,7 @@ class SalesuploadController extends Controller
         $access = $salesupload->getAccess();
         $data = $salesupload->getFileDetails($id);
         if(count($access)>0) {
-            if($access[0]['r_edit']==1 && ($access[0]['session_id']==$data[0]['created_by'] || $access[0]['session_id']==$data[0]['updated_by'])) {
+            if($access[0]['r_edit']==1) {
                 $salesupload->setLog('Salesupload', '', 'Post', '', 'Post Sales Upload Details', 'acc_sales_upload', $id);
                 return $this->actionRedirect('edit', $id);
             } else {

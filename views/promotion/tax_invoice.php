@@ -41,8 +41,9 @@
         <tr valign="top"  style=" ">
             <td colspan="3"   style="border-left:none; border-bottom:none; ">
                 <p>
-                Primarc Pecan Retail (P) Ltd - Mum(FY 17<?php if(isset($debit_note[0]['date_of_transaction'])) 
+                Primarc Pecan Retail (P) Ltd - Mum(FY <?php if(isset($debit_note[0]['date_of_transaction'])) 
                                             echo $mycomponent->get_financial_year($debit_note[0]['date_of_transaction']); ?>)
+                <br/>
                 210A, 214, Building No 2-B,
                 Mittal Industrial Estate Premises
                 Co-Operative Society Limited, Marol Naka
@@ -118,6 +119,7 @@
             <td colspan="3" style="border-left:none; border-bottom:none;">
                 <p>
                 <?php if(isset($vendor_details[0]['account_holder_name'])) echo $vendor_details[0]['account_holder_name']; ?>
+                <br/>
                 <?php if(isset($vendor_details[0]['office_address_line_1'])) echo $vendor_details[0]['office_address_line_1']; ?> &nbsp;
                 <?php if(isset($vendor_details[0]['office_address_line_2'])) echo $vendor_details[0]['office_address_line_2']; ?> &nbsp;
                 <?php if(isset($vendor_details[0]['office_address_line_3'])) echo $vendor_details[0]['office_address_line_3']; ?> &nbsp;

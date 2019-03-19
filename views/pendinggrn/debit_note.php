@@ -29,18 +29,18 @@
 <?php $mycomponent = Yii::$app->mycomponent; ?>
 
 <?php 
-    $financial_year='';
-    if(isset($invoice_details[0]['gi_date'])) {
-        if($invoice_details[0]['gi_date']!=null && $invoice_details[0]['gi_date']!=''){
-            $month=date('m',strtotime($invoice_details[0]['gi_date']));
-            $year=date('y',strtotime($invoice_details[0]['gi_date']));
-            if($month<=3){
-                $financial_year = '(FY '.($year-1).'-'.$year.')';
-            } else {
-                $financial_year = '(FY '.$year.'-'.($year+1).')';
-            }
-        }
-    }
+    // $financial_year='';
+    // if(isset($invoice_details[0]['gi_date'])) {
+    //     if($invoice_details[0]['gi_date']!=null && $invoice_details[0]['gi_date']!=''){
+    //         $month=date('m',strtotime($invoice_details[0]['gi_date']));
+    //         $year=date('y',strtotime($invoice_details[0]['gi_date']));
+    //         if($month<=3){
+    //             $financial_year = '(FY '.($year-1).'-'.$year.')';
+    //         } else {
+    //             $financial_year = '(FY '.$year.'-'.($year+1).')';
+    //         }
+    //     }
+    // }
 ?>
 
 <body class="hold-transition">

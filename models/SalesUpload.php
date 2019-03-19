@@ -47,7 +47,7 @@ class SalesUpload extends Model
                 left join user C on (A.approved_by = C.id) 
                 where A.is_active = '1'" . $cond . " and A.company_id = '$company_id') A 
                 left join 
-                (select distinct ref_id from acc_ledger_entries) B 
+                (select distinct ref_id from acc_ledger_entries where ref_type = 'sales_upload' and is_active = '1' and status = 'Approved') B 
                 on (A.id = B.ref_id) 
                 left join 
                 (select distinct ref_id, is_paid from acc_ledger_entries 
@@ -573,7 +573,7 @@ class SalesUpload extends Model
                     $ship_to_state = '';
                     $remarks = '';
                     $highlight_remarks = '';
-                    $marketplace_id = '';
+                    $marketplace_id = '0';
 
                     $market_place = $objPHPExcel->getActiveSheet()->getCell('A'.$j)->getValue();
                     $ship_from_gstin = $objPHPExcel->getActiveSheet()->getCell('B'.$j)->getValue();
@@ -932,6 +932,12 @@ class SalesUpload extends Model
                 $updateCount = Yii::$app->db->createCommand($sql)->execute();
                 if($updateCount>0){
                     $bl_reject = true;
+                } else {
+                    $sql = "update acc_temp_sales_file_items A left join acc_master B 
+                            on (A.market_place=B.legal_name and A.company_id=B.company_id and A.is_active=B.is_active and B.type='Marketplace') 
+                            set A.marketplace_id = B.id 
+                            where A.ref_file_id = '$ref_file_id' and A.is_active = '1' and A.company_id = '$company_id'";
+                    Yii::$app->db->createCommand($sql)->execute();
                 }
 
                 // $sql = "update acc_temp_sales_file_items A left join pincode_master B on (A.pin_code=B.pincode) 
@@ -1177,6 +1183,9 @@ class SalesUpload extends Model
                 $sql = "update acc_sales_files set upload_status = 'uploaded' where id = '$ref_file_id'";
                 $command = Yii::$app->db->createCommand($sql);
                 $count = $command->execute();
+
+                $sql = "delete from acc_temp_sales_file_items where ref_file_id = '$ref_file_id'";
+                Yii::$app->db->createCommand($sql)->execute();
             } else {
                 $filename='sales_rejected_file_'.$ref_file_id.'.xlsx';
                 $upload_path = './uploads';
@@ -1517,6 +1526,7 @@ class SalesUpload extends Model
                     $ledger_name = '';
                     $ledger_code = '';
                     $tax_code = 'Sales-'.$state_name.'-'.$tax_type.'-'.$trans_type.'-'.$vat_percen;
+                    $ledger_name = $tax_code;
                     $result2 = $this->getAccountDetails('','',$tax_code);
                     if(count($result2)>0) {
                         $acc_id = $result2[0]['id'];
@@ -1525,7 +1535,7 @@ class SalesUpload extends Model
                     }
                     $bl_flag = false;
                     for($j=0; $j<count($item_details); $j++) {
-                        if($item_details[$j]['acc_id']==$acc_id) {
+                        if($item_details[$j]['ledger_name']==$ledger_name) {
                             $bl_flag = true;
 
                             $item_details[$j][$marketplace_id]+=$sales_excl_gst;
@@ -1562,6 +1572,7 @@ class SalesUpload extends Model
                         $ledger_name = '';
                         $ledger_code = '';
                         $tax_code = 'Output-'.$state_name.'-CGST-'.$cgst_rate;
+                        $ledger_name = $tax_code;
                         $result2 = $this->getAccountDetails('','',$tax_code);
                         if(count($result2)>0) {
                             $acc_id = $result2[0]['id'];
@@ -1570,7 +1581,7 @@ class SalesUpload extends Model
                         }
                         $bl_flag = false;
                         for($j=0; $j<count($item_details); $j++) {
-                            if($item_details[$j]['acc_id']==$acc_id) {
+                            if($item_details[$j]['ledger_name']==$ledger_name) {
                                 $bl_flag = true;
 
                                 $item_details[$j][$marketplace_id]+=$cgst_amount;
@@ -1606,6 +1617,7 @@ class SalesUpload extends Model
                         $ledger_name = '';
                         $ledger_code = '';
                         $tax_code = 'Output-'.$state_name.'-SGST-'.$sgst_rate;
+                        $ledger_name = $tax_code;
                         $result2 = $this->getAccountDetails('','',$tax_code);
                         if(count($result2)>0) {
                             $acc_id = $result2[0]['id'];
@@ -1614,7 +1626,7 @@ class SalesUpload extends Model
                         }
                         $bl_flag = false;
                         for($j=0; $j<count($item_details); $j++) {
-                            if($item_details[$j]['acc_id']==$acc_id) {
+                            if($item_details[$j]['ledger_name']==$ledger_name) {
                                 $bl_flag = true;
 
                                 $item_details[$j][$marketplace_id]+=$sgst_amount;
@@ -1650,6 +1662,7 @@ class SalesUpload extends Model
                         $ledger_name = '';
                         $ledger_code = '';
                         $tax_code = 'Output-'.$state_name.'-IGST-'.$igst_rate;
+                        $ledger_name = $tax_code;
                         $result2 = $this->getAccountDetails('','',$tax_code);
                         if(count($result2)>0) {
                             $acc_id = $result2[0]['id'];
@@ -1658,7 +1671,7 @@ class SalesUpload extends Model
                         }
                         $bl_flag = false;
                         for($j=0; $j<count($item_details); $j++) {
-                            if($item_details[$j]['acc_id']==$acc_id) {
+                            if($item_details[$j]['ledger_name']==$ledger_name) {
                                 $bl_flag = true;
 
                                 $item_details[$j][$marketplace_id]+=$igst_amount;
