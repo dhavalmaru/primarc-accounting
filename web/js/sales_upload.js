@@ -319,6 +319,12 @@ function get_acc_details(elem){
         var acc_id = elem.value;
         var csrfToken = $('meta[name="csrf-token"]').attr("content");
 
+        // console.log(elem_id);
+        // console.log(index1);
+        // console.log(id_substr);
+        // console.log(index2);
+        // console.log(acc_id);
+
         $.ajax({
             url: BASE_URL+'index.php?r=pendinggrn%2Fgetaccdetails',
             type: 'post',
@@ -334,8 +340,13 @@ function get_acc_details(elem){
                     // console.log(data[0].legal_name);
                     // console.log(data[0].code);
                     
-                    $('#ledger_name_'+index1+'_'+index2).val(data[0].legal_name);
-                    $('#ledger_code_'+index1+'_'+index2).val(data[0].code);
+                    $('#ledger_name_'+index2+'_'+index1).val(data[0].legal_name);
+                    $('#ledger_code_'+index2+'_'+index1).val(data[0].code);
+
+                    // console.log('#ledger_name_'+index2+'_'+index1);
+                    // console.log(data[0].legal_name);
+                    // console.log('#ledger_code_'+index2+'_'+index1);
+                    // console.log(data[0].code);
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {

@@ -1473,17 +1473,6 @@ class SalesUpload extends Model
                 $reader = $command->query();
                 $result = $reader->readAll();
                 for($i=0; $i<count($result); $i++) {
-                    if($result[$i]['ship_to_state']==null || $result[$i]['ship_to_state']=='') {
-                        $trans_type = 'B2C';
-                    } else {
-                        $trans_type = 'B2B';
-                    }
-                    if(strtoupper(trim($result[$i]['ship_from_state']))==strtoupper(trim($result[$i]['ship_to_state']))) {
-                        $tax_type = 'Local';
-                    } else {
-                        $tax_type = 'Inter State';
-                    }
-
                     $marketplace_id = $result[$i]['marketplace_id'];
                     $market_place = $result[$i]['market_place'];
                     $invoice_no = $result[$i]['invoice_no'];
@@ -1498,6 +1487,19 @@ class SalesUpload extends Model
                     $igst_rate = $result[$i]['igst_rate'];
                     $igst_amount = $result[$i]['igst_amount'];
                     $state_name = $result[$i]['ship_to_state'];
+                    $ship_from_state = $result[$i]['ship_from_state'];
+                    $ship_to_state = $result[$i]['ship_to_state'];
+
+                    if($ship_to_state==null || $ship_to_state=='') {
+                        $trans_type = 'B2C';
+                    } else {
+                        $trans_type = 'B2B';
+                    }
+                    if(strtoupper(trim($ship_from_state))==strtoupper(trim($ship_to_state))) {
+                        $tax_type = 'Local';
+                    } else {
+                        $tax_type = 'Inter State';
+                    }
 
                     if($cgst_rate<0){
                         $cgst_rate = $cgst_rate * -1;
@@ -1548,6 +1550,8 @@ class SalesUpload extends Model
                         $item_details[$a]['ledger_name'] = $ledger_name;
                         $item_details[$a]['ledger_code'] = $ledger_code;
                         $item_details[$a]['tax_percent'] = $vat_percen;
+                        $item_details[$a]['ship_from_state'] = $ship_from_state;
+                        $item_details[$a]['ship_to_state'] = $ship_to_state;
                         for($j=0; $j<count($invoice_marketplace); $j++) {
                             if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
                                 $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = $sales_excl_gst;
@@ -1594,6 +1598,8 @@ class SalesUpload extends Model
                             $item_details[$a]['ledger_name'] = $ledger_name;
                             $item_details[$a]['ledger_code'] = $ledger_code;
                             $item_details[$a]['tax_percent'] = $cgst_rate;
+                            $item_details[$a]['ship_from_state'] = $ship_from_state;
+                            $item_details[$a]['ship_to_state'] = $ship_to_state;
                             for($j=0; $j<count($invoice_marketplace); $j++) {
                                 if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
                                     $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = $cgst_amount;
@@ -1639,6 +1645,8 @@ class SalesUpload extends Model
                             $item_details[$a]['ledger_name'] = $ledger_name;
                             $item_details[$a]['ledger_code'] = $ledger_code;
                             $item_details[$a]['tax_percent'] = $sgst_rate;
+                            $item_details[$a]['ship_from_state'] = $ship_from_state;
+                            $item_details[$a]['ship_to_state'] = $ship_to_state;
                             for($j=0; $j<count($invoice_marketplace); $j++) {
                                 if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
                                     $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = $sgst_amount;
@@ -1684,6 +1692,8 @@ class SalesUpload extends Model
                             $item_details[$a]['ledger_name'] = $ledger_name;
                             $item_details[$a]['ledger_code'] = $ledger_code;
                             $item_details[$a]['tax_percent'] = $igst_rate;
+                            $item_details[$a]['ship_from_state'] = $ship_from_state;
+                            $item_details[$a]['ship_to_state'] = $ship_to_state;
                             for($j=0; $j<count($invoice_marketplace); $j++) {
                                 if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
                                     $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = $igst_amount;
@@ -1752,6 +1762,9 @@ class SalesUpload extends Model
                 $command = Yii::$app->db->createCommand($sql);
                 $reader = $command->query();
                 $result = $reader->readAll();
+                // echo json_encode($result);
+                // echo '<br/><br/>';
+                
                 for($i=0; $i<count($result); $i++) {
                     $marketplace_id = $result[$i]['marketplace_id'];
 
@@ -1767,9 +1780,9 @@ class SalesUpload extends Model
                         $bl_flag = false;
 
                         for($j=0; $j<count($item_details); $j++) {
-                            if($item_details[$j]['particular']==$result[$i]['particular'] || 
-                                $item_details[$j]['acc_id']==$result[$i]['acc_id'] || 
-                                $item_details[$j]['ledger_name']==$result[$i]['ledger_name'] || 
+                            if($item_details[$j]['particular']==$result[$i]['particular'] && 
+                                $item_details[$j]['acc_id']==$result[$i]['acc_id'] && 
+                                $item_details[$j]['ledger_name']==$result[$i]['ledger_name'] && 
                                 $item_details[$j]['ledger_code']==$result[$i]['ledger_code']) {
 
                                 $item_details[$j][$marketplace_id] += $result[$i]['amount'];
@@ -1792,6 +1805,8 @@ class SalesUpload extends Model
                             $item_details[$a]['ledger_name'] = $result[$i]['ledger_name'];
                             $item_details[$a]['ledger_code'] = $result[$i]['ledger_code'];
                             $item_details[$a]['tax_percent'] = $result[$i]['tax_percent'];
+                            $item_details[$a]['ship_from_state'] = $result[$i]['ship_from_state'];
+                            $item_details[$a]['ship_to_state'] = $result[$i]['ship_to_state'];
                             for($j=0; $j<count($invoice_marketplace); $j++) {
                                 if($invoice_marketplace[$j]['marketplace_id']==$marketplace_id){
                                     $item_details[$a][$marketplace_id] = $result[$i]['amount'];
@@ -1799,7 +1814,7 @@ class SalesUpload extends Model
                                     $item_details[$a][$invoice_marketplace[$j]['marketplace_id']] = 0;
                                 }
                             }
-                            $a += 1;
+                            $a = $a + 1;
                         }
                     }
                 }
@@ -1843,6 +1858,8 @@ class SalesUpload extends Model
             $ledger_name=$request->post('ledger_name_'.$k);
             $ledger_code=$request->post('ledger_code_'.$k);
             $tax_percent=$request->post('tax_percent_'.$k);
+            $ship_from_state=$request->post('ship_from_state_'.$k);
+            $ship_to_state=$request->post('ship_to_state_'.$k);
 
             $marketplace = array();
 
@@ -1876,7 +1893,9 @@ class SalesUpload extends Model
                                             'updated_date'=>date('Y-m-d h:i:s'),
                                             'date_of_upload'=>$date_of_upload,
                                             'company_id'=>$company_id,
-                                            'marketplace_id'=>$marketplace[$j]['acc_id']
+                                            'marketplace_id'=>$marketplace[$j]['acc_id'],
+                                            'ship_from_state'=>$ship_from_state[$i],
+                                            'ship_to_state'=>$ship_to_state[$i]
                                         ];
 
                         $amount = $mycomponent->format_number($marketplace[$j]['amount'][$i],4);
@@ -1929,7 +1948,9 @@ class SalesUpload extends Model
                                         'updated_date'=>date('Y-m-d h:i:s'),
                                         'date_of_upload'=>$date_of_upload,
                                         'company_id'=>$company_id,
-                                        'marketplace_id'=>$marketplace[$j]['acc_id']
+                                        'marketplace_id'=>$marketplace[$j]['acc_id'],
+                                        'ship_from_state'=>null,
+                                        'ship_to_state'=>null
                                     ];
 
                     $total_amount = $mycomponent->format_number($marketplace[$j]['total_amount'],4);

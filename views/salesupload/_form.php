@@ -191,6 +191,8 @@ $mycomponent = Yii::$app->mycomponent;
                     <th class="sticky-cell" style="width: 250px; border: none!important;">Ledger Name</th>
                     <th class="sticky-cell" style="width: 200px; border: none!important;">Ledger Code</th>
                     <th class="sticky-cell" style="width: 25px; border: none!important;">Tax <br/> Percent</th>
+                    <th class="sticky-cell" style="width: 25px; border: none!important;">From State</th>
+                    <th class="sticky-cell" style="width: 25px; border: none!important;">To State</th>
                     <?php for($j=0; $j<count($marketplace); $j++) { ?>
                         <th class="text-center">
                             <?php echo $marketplace[$j]['market_place']; ?>
@@ -225,6 +227,14 @@ $mycomponent = Yii::$app->mycomponent;
                         <input type="hidden" id="tax_percent_<?php echo $k;?>_<?php echo $i;?>" name="tax_percent_<?php echo $k;?>[]" value="<?php echo $item_details[$i]['tax_percent']; ?>" />
                         <?php echo $mycomponent->format_money($item_details[$i]['tax_percent'],2); ?>
                     </td>
+                    <td class="sticky-cell" style="border: none!important;">
+                        <input type="hidden" id="ship_from_state_<?php echo $k;?>_<?php echo $i;?>" name="ship_from_state_<?php echo $k;?>[]" value="<?php echo $item_details[$i]['ship_from_state']; ?>" />
+                        <?php echo $item_details[$i]['ship_from_state']; ?>
+                    </td>
+                    <td class="sticky-cell" style="border: none!important;">
+                        <input type="hidden" id="ship_to_state_<?php echo $k;?>_<?php echo $i;?>" name="ship_to_state_<?php echo $k;?>[]" value="<?php echo $item_details[$i]['ship_to_state']; ?>" />
+                        <?php echo $item_details[$i]['ship_to_state']; ?>
+                    </td>
                     
                     <?php for($j=0; $j<count($marketplace); $j++) { ?>
                         <td class="sticky-cell text-right" style="border: none!important;">
@@ -237,6 +247,8 @@ $mycomponent = Yii::$app->mycomponent;
                 <tr class="bold-text" >
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;">Total Amount</td>
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
+                    <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>
                     <td class="sticky-cell" style="border: none!important; background-color: #f9f9f9;"></td>

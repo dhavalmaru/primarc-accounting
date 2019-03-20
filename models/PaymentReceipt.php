@@ -208,7 +208,8 @@ class PaymentReceipt extends Model
                 (select A.*, case when A.ref_date='2018-03-31' then A.acc_id else A.cp_acc_id end as account_id from 
                 (select group_concat(A.id) as id, A.ref_id, group_concat(A.sub_ref_id) as sub_ref_id, A.ref_type, 
                     group_concat(A.entry_type) as entry_type, A.invoice_no, A.vendor_id, 
-                    group_concat(A.acc_id) as acc_id, group_concat(A.ledger_name) as ledger_name, group_concat(A.ledger_code) as ledger_code, 
+                    group_concat(distinct A.acc_id) as acc_id, group_concat(distinct A.ledger_name) as ledger_name, 
+                    group_concat(distinct A.ledger_code) as ledger_code, 
                     A.type, sum(A.amount) as amount, sum(A.paid_amount) as paid_amount, sum(A.pending_paid_amount) as pending_paid_amount, 
                     sum(A.total_paid_amount) as total_paid_amount, sum(A.amount_to_pay) as amount_to_pay, sum(A.bal_amount) as bal_amount, 
                     A.status, A.voucher_id, A.ledger_type, A.ref_date, A.gi_date, A.invoice_date, A.due_date, 
@@ -2814,7 +2815,7 @@ class PaymentReceipt extends Model
                                 if(count($result)>0) {
                                     $fetched_bal_amount = $result[0]['bal_amount'];
                                     // $actual_amount  = $objPHPExcel->getActiveSheet()->getCell('M'.$k)->getValue();
-                                    if($fetched_bal_amount==NULL || $fetched_bal_amount==0)
+                                    if($fetched_bal_amount==NULL || $fetched_bal_amount=='' || $fetched_bal_amount==0)
                                         $fetched_bal_amount=0;
 
                                     /*$fetched_bal_amount = $actual_amount-$fetched_paid_amount;*/
@@ -3124,12 +3125,10 @@ class PaymentReceipt extends Model
                             $payment_recept_array['random_code'] = $random_code;
 
                             if($objPHPExcel->getActiveSheet()->getCell('P'.$k)->getValue()!='' && 
-                                $objPHPExcel->getActiveSheet()->getCell('Q'.$k)->getValue()!='' &&
-                                $objPHPExcel->getActiveSheet()->getCell('R'.$k)->getValue()!='' &&
-                                $objPHPExcel->getActiveSheet()->getCell('T'.$k)->getValue()!=''
-                                &&
-                                $objPHPExcel->getActiveSheet()->getCell('U'.$k)->getValue()!=''
-                                )
+                                $objPHPExcel->getActiveSheet()->getCell('Q'.$k)->getValue()!='' && 
+                                $objPHPExcel->getActiveSheet()->getCell('R'.$k)->getValue()!='' && 
+                                $objPHPExcel->getActiveSheet()->getCell('T'.$k)->getValue()!='' && 
+                                $objPHPExcel->getActiveSheet()->getCell('U'.$k)->getValue()!='')
                             {
                                 Yii::$app->db->createCommand()->insert("acc_temp_payment_detail", $payment_recept_array)->execute();  
                             }

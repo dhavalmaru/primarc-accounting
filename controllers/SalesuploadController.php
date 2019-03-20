@@ -362,7 +362,8 @@ class SalesuploadController extends Controller
 
             $columnNameArray=['file_id','particular','acc_id','ledger_name','ledger_code','voucher_id','ledger_type',
                                 'tax_percent','invoice_no','amount','status','is_active',
-                                'updated_by','updated_date','date_of_upload','company_id', 'marketplace_id'];
+                                'updated_by','updated_date','date_of_upload','company_id', 'marketplace_id',
+                                'ship_from_state', 'ship_to_state'];
             // below line insert all your record and return number of rows inserted
             $tableName = "acc_sales_entries";
             $insertCount = Yii::$app->db->createCommand()
