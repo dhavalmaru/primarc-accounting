@@ -1288,14 +1288,20 @@ class PendingGrn extends Model
         $session = Yii::$app->session;
         $company_id = $session['company_id'];
 
-        $sql = "select A.grn_id, B.*, B.qty as ".$ded_type."_qty, D.tax_zone_code, D.tax_zone_name, E.invoice_date 
+        $sql = "select C.* from 
+                (select A.*, B.margin_understanding from 
+                (select B.*, B.qty as ".$ded_type."_qty, D.tax_zone_code, D.tax_zone_name, E.invoice_date 
                 from grn A 
                 left join acc_grn_sku_entries B on (A.grn_id = B.grn_id) 
                 left join tax_zone_master D on (A.vat_cst = D.tax_zone_code) 
                 left join goods_inward_outward_invoices E on (A.gi_id = E.gi_go_ref_no and B.invoice_no = E.invoice_no) 
                 where A.grn_id = '$id' and B.grn_id = '$id' and A.is_active = '1' and A.company_id = '$company_id' and B.is_active = '1' and 
-                    D.is_active = '1' and B.invoice_no is not null and B.ded_type = '$ded_type' and B.qty > 0 
-                order by B.invoice_no, B.vat_percen";
+                    D.is_active = '1' and B.invoice_no is not null and B.ded_type = '$ded_type' and B.qty > 0) A 
+                left join 
+                (select distinct sku_internal_code, margin_understanding from product_master 
+                    where is_active = '1' and is_latest = '1' and is_preferred = '1' and company_id = '1') B 
+                on (A.psku = B.sku_internal_code)) C 
+                order by C.invoice_no, C.vat_percen";
         $command = Yii::$app->db->createCommand($sql);
         $reader = $command->query();
         return $reader->readAll();
@@ -2646,7 +2652,7 @@ class PendingGrn extends Model
                                 else truncate((ifnull(A.po_mrp,0)-ifnull(A.po_unit_rate_excl_tax,0)-ifnull((ifnull(A.po_mrp,0)-(ifnull(A.po_mrp,0)/(1+(ifnull(A.po_vat_percen,0)/100)))),0))/ifnull(A.po_mrp,0)*100,2) 
                                 end 
                             else 0 
-                        end as margin_from_po 
+                        end as margin_from_po from 
                 (select A.vat_cst as tx_zn_cd, B.*, D.tax_zone_code, D.tax_zone_name, E.invoice_date, A.gi_date, 
                     date_add(A.gi_date, interval ifnull(min_no_of_months_shelf_life_required,0) month) as earliest_expected_date, 
                     null as cost_acc_id, null as cost_ledger_name, null as cost_ledger_code, 
@@ -2667,7 +2673,11 @@ class PendingGrn extends Model
                 left join purchase_order F on (A.po_no = F.po_no and A.vendor_id = F.vendor_id) 
                 left join purchase_order_items G on (F.purchase_order_id = G.purchase_order_id and B.psku = G.psku) 
                 where A.grn_id = '$grn_id' and B.grn_id = '$grn_id' and B.psku = '$psku' and A.is_active = '1' and A.company_id = '$company_id' and 
-                        B.is_active = '1' and D.is_active = '1' and F.is_active = '1') A) AA 
+                        B.is_active = '1' and D.is_active = '1' and F.is_active = '1') A 
+                left join 
+                (select distinct sku_internal_code, margin_understanding from product_master 
+                    where is_active = '1' and is_latest = '1' and is_preferred = '1' and company_id = '1') B 
+                on (A.psku = B.sku_internal_code)) A) AA 
                 
                 left join 
 

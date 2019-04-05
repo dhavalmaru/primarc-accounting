@@ -14,10 +14,10 @@ $(document).ready(function(){
     //     var id = $(this).attr('id');
     //     getDifference(document.getElementById(id));
     // });
-    $('.edit-sku').each(function(){
-        var id = $(this).attr('id');
-        set_sku_details(document.getElementById(id));
-    });
+    // $('.edit-sku').each(function(){
+    //     var id = $(this).attr('id');
+    //     set_sku_details(document.getElementById(id));
+    // });
 
     set_view();
 });
@@ -450,6 +450,7 @@ function get_sku_details(elem){
                     var po_igst = (po_cost_excl_tax*igst_rate)/100;
                     var po_tax = po_cgst+po_sgst+po_igst;
 
+                    $('#'+ded_type+'_margin_understanding_'+index_val).val(data[0].margin_understanding);
                     $('#'+ded_type+'_product_title_'+index_val).val(data[0].product_title);
                     $('#'+ded_type+'_ean_'+index_val).val(data[0].ean);
                     $('#'+ded_type+'_hsn_code_'+index_val).val(data[0].hsn_code);
@@ -506,6 +507,7 @@ function set_sku_details(elem){
         var index = elem_id.substr(elem_id.lastIndexOf("_")+1);
         var ded_type = elem_id.substr(0, elem_id.indexOf("_"));
 
+        var margin_understanding = $("#"+ded_type+"_margin_understanding_"+index).val();
         var sku_qty = get_number($("#"+ded_type+"_qty_"+index).val(),4);
         var sku_per_unit_cost = get_number($("#"+ded_type+"_cost_excl_tax_per_unit_"+index).val(),4);
         var cgst_rate = get_number($("#"+ded_type+"_cgst_rate_"+index).val(),4);
@@ -597,10 +599,23 @@ function set_sku_details(elem){
         var margin_from_scan = 0;
 
         if(po_mrp!=0){
-            margin_from_po = parseInt(((po_mrp-po_total)/po_mrp*100)*100)/100;
+            if(margin_understanding=='GMP') 
+                margin_from_po = parseInt(((po_mrp-po_cost_excl_tax)/po_mrp*100)*100)/100;
+            else if(margin_understanding=='NMP') 
+                margin_from_po = parseInt(((po_mrp-po_total)/po_mrp*100)*100)/100;
+            else if(margin_understanding=='NMS') 
+                margin_from_po = parseInt(((po_mrp-po_cost_excl_tax-(po_mrp-(po_mrp/(1+(vat_percen/100)))))/po_mrp*100)*100)/100;
+            else margin_from_po = 0;
         }
         if(box_price!=0){
             margin_from_scan = parseInt(((box_price-sku_per_unit_total)/box_price*100)*100)/100;
+            if(margin_understanding=='GMP') 
+                margin_from_scan = parseInt(((box_price-sku_per_unit_cost)/box_price*100)*100)/100;
+            else if(margin_understanding=='NMP') 
+                margin_from_scan = parseInt(((box_price-sku_per_unit_total)/box_price*100)*100)/100;
+            else if(margin_understanding=='NMS') 
+                margin_from_scan = parseInt(((box_price-sku_per_unit_cost-(box_price-(box_price/(1+(vat_percen/100)))))/box_price*100)*100)/100;
+            else margin_from_scan = 0;
         }
 
         // console.log(po_mrp);

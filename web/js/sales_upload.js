@@ -11,7 +11,7 @@ $(document).ready(function(){
 
     $('.select2').select2();
   
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="acc_id[]"]', { required: true });
+    // addMultiInputNamingRules('#form_sale_upload_details', 'select[name="acc_id_0[]"]', { required: true });
 
     set_view();
 });

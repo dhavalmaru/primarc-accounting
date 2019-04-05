@@ -10,7 +10,7 @@ use yii\helpers\Url;
 
 $this->title = 'Sales Upload: ' . $file_details[0]['id'];
 $this->params['breadcrumbs'][] = ['label' => 'Sales Upload', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $file_details[0]['id'], 'url' => ['update', 'id' => $file_details[0]['id']]];
+$this->params['breadcrumbs'][] = ['label' => $file_details[0]['id'], 'url' => ['view', 'id' => $file_details[0]['id']]];
 $this->params['breadcrumbs'][] = 'Ledger';
 $mycomponent = Yii::$app->mycomponent;
 ?>

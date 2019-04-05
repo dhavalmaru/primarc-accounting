@@ -2709,7 +2709,10 @@ class PendinggrnController extends Controller
                 $remarks = $rows[$i]["remarks"];
 
                 $row = '<tr id="'.$ded_type.'_row_'.$i.'">
-                            <td style="text-align: center;"><button type="button" class="btn btn-sm btn-success" id="'.$ded_type.'_delete_row_'.$i.'" onClick="delete_row(this);">-</button></td>
+                            <td style="text-align: center;">
+                                <button type="button" class="btn btn-sm btn-success" id="'.$ded_type.'_delete_row_'.$i.'" onClick="delete_row(this);">-</button>
+                                <input type="hidden" id="'.$ded_type.'_margin_understanding_'.$i.'" name="'.$ded_type.'_margin_understanding[]" value="'.$rows[$i]["margin_understanding"].'" />
+                            </td>
                             <td style="display: none;">' . $sr_no . '</td>
                             <td>
                                 <select class="'.$ded_type.'_psku_'.$sr_no.' select2" id="'.$ded_type.'_psku_'.$i.'" name="'.$ded_type.'_psku[]" onChange="get_sku_details(this)" data-error="#'.$ded_type.'_psku_'.$i.'_error">' . $sku_list . '</select>
@@ -3153,7 +3156,10 @@ class PendinggrnController extends Controller
         }
 
         $row = '<tr id="'.$ded_type.'_row_'.$i.'">
-                    <td style="text-align: center;"><button type="button" class="btn btn-sm btn-success" id="'.$ded_type.'_delete_row_'.$i.'" onClick="delete_row(this);">-</button></td>
+                    <td style="text-align: center;">
+                        <button type="button" class="btn btn-sm btn-success" id="'.$ded_type.'_delete_row_'.$i.'" onClick="delete_row(this);">-</button>
+                        <input type="hidden" id="'.$ded_type.'_margin_understanding_'.$i.'" name="'.$ded_type.'_margin_understanding[]" value="" />
+                    </td>
                     <td style="display: none;">' . $sr_no . '</td>
                     <td>
                         <select class="'.$ded_type.'_psku_'.$sr_no.' select2" id="'.$ded_type.'_psku_'.$i.'" name="'.$ded_type.'_psku[]" onChange="get_sku_details(this)" data-error="#'.$ded_type.'_psku_'.$i.'_error">' . $sku_list . '</select>

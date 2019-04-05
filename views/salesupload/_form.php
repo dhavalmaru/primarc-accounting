@@ -212,7 +212,7 @@ $mycomponent = Yii::$app->mycomponent;
                         <?php echo $item_details[$i]['particular']; ?>
                     </td>
                     <td class="sticky-cell" style="border: none!important;">
-                        <select id="acc_id_<?php echo $k;?>_<?php echo $i;?>" class="form-control acc_id select2" name="acc_id_<?php echo $k;?>[]" onChange="get_acc_details(this)">
+                        <select id="acc_id_<?php echo $k;?>_<?php echo $i;?>" class="form-control acc_id select2" name="acc_id_<?php echo $k;?>[]" onChange="get_acc_details(this)" data-error="#acc_id_<?php echo $k;?>_<?php echo $i;?>_error">
                             <option value="">Select</option>
                             <?php for($j=0; $j<count($acc_master); $j++) { 
                                     if($acc_master[$j]['type']==$item_details[$i]['acc_type']) { 
@@ -221,6 +221,7 @@ $mycomponent = Yii::$app->mycomponent;
                             <?php }} ?>
                         </select>
                         <input type="hidden" id="ledger_name_<?php echo $k;?>_<?php echo $i;?>" name="ledger_name_<?php echo $k;?>[]" value="<?php echo $item_details[$i]['ledger_name']; ?>" />
+                        <span id="acc_id_<?php echo $k;?>_<?php echo $i;?>_error" style="display: block;"></span>
                     </td>
                     <td class="sticky-cell" style="border: none!important;"><input type="text" id="ledger_code_<?php echo $k;?>_<?php echo $i;?>" name="ledger_code_<?php echo $k;?>[]" value="<?php echo $item_details[$i]['ledger_code']; ?>" style="border: none;" readonly /></td>
                     <td class="sticky-cell" style="border: none!important;">

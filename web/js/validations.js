@@ -3010,11 +3010,11 @@ $(function() {
 })
 
 function addMultiInputNamingRules_form_sale_upload_details(){
-    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="acc_id[]"]', { required: true });
+    addMultiInputNamingRules('#form_sale_upload_details', 'select[name="acc_id_0[]"]', { required: true });
 }
 
 function removeMultiInputNamingRules_form_sale_upload_details(){
-    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="acc_id[]"]');
+    removeMultiInputNamingRules('#form_sale_upload_details', 'select[alt="acc_id_0[]"]');
 }
 
 $('#form_sale_upload_details').submit(function() {

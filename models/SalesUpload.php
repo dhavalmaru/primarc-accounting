@@ -1486,7 +1486,7 @@ class SalesUpload extends Model
                     $sgst_amount = $result[$i]['sgst_amount'];
                     $igst_rate = $result[$i]['igst_rate'];
                     $igst_amount = $result[$i]['igst_amount'];
-                    $state_name = $result[$i]['ship_to_state'];
+                    $state_name = $result[$i]['ship_from_state'];
                     $ship_from_state = $result[$i]['ship_from_state'];
                     $ship_to_state = $result[$i]['ship_to_state'];
 
@@ -1500,6 +1500,14 @@ class SalesUpload extends Model
                     } else {
                         $tax_type = 'Inter State';
                     }
+
+                    if($cgst_rate==null || $cgst_rate=='') $cgst_rate=0;
+                    if($sgst_rate==null || $sgst_rate=='') $sgst_rate=0;
+                    if($igst_rate==null || $igst_rate=='') $igst_rate=0;
+
+                    if(!is_numeric($cgst_rate)) $cgst_rate=0; else $cgst_rate=$cgst_rate*100;
+                    if(!is_numeric($sgst_rate)) $sgst_rate=0; else $sgst_rate=$sgst_rate*100;
+                    if(!is_numeric($igst_rate)) $igst_rate=0; else $igst_rate=$igst_rate*100;
 
                     if($cgst_rate<0){
                         $cgst_rate = $cgst_rate * -1;
@@ -1527,9 +1535,11 @@ class SalesUpload extends Model
                     $acc_id = '';
                     $ledger_name = '';
                     $ledger_code = '';
-                    $tax_code = 'Sales-'.$state_name.'-'.$tax_type.'-'.$trans_type.'-'.$vat_percen;
+                    $tax_code = 'Sales-'.$state_name.'-'.$tax_type.'-'.$trans_type.'-'.$vat_percen.'%';
                     $ledger_name = $tax_code;
                     $result2 = $this->getAccountDetails('','',$tax_code);
+                    // echo $tax_code.'<br/>';
+                    // echo count($result2).'<br/><br/>';
                     if(count($result2)>0) {
                         $acc_id = $result2[0]['id'];
                         $ledger_name = $result2[0]['legal_name'];
@@ -1575,9 +1585,11 @@ class SalesUpload extends Model
                         $acc_id = '';
                         $ledger_name = '';
                         $ledger_code = '';
-                        $tax_code = 'Output-'.$state_name.'-CGST-'.$cgst_rate;
+                        $tax_code = 'Output-'.$state_name.'-CGST-'.$cgst_rate.'%';
                         $ledger_name = $tax_code;
                         $result2 = $this->getAccountDetails('','',$tax_code);
+                        // echo $tax_code.'<br/>';
+                        // echo count($result2).'<br/><br/>';
                         if(count($result2)>0) {
                             $acc_id = $result2[0]['id'];
                             $ledger_name = $result2[0]['legal_name'];
@@ -1622,9 +1634,11 @@ class SalesUpload extends Model
                         $acc_id = '';
                         $ledger_name = '';
                         $ledger_code = '';
-                        $tax_code = 'Output-'.$state_name.'-SGST-'.$sgst_rate;
+                        $tax_code = 'Output-'.$state_name.'-SGST-'.$sgst_rate.'%';
                         $ledger_name = $tax_code;
                         $result2 = $this->getAccountDetails('','',$tax_code);
+                        // echo $tax_code.'<br/>';
+                        // echo count($result2).'<br/><br/>';
                         if(count($result2)>0) {
                             $acc_id = $result2[0]['id'];
                             $ledger_name = $result2[0]['legal_name'];
@@ -1669,9 +1683,11 @@ class SalesUpload extends Model
                         $acc_id = '';
                         $ledger_name = '';
                         $ledger_code = '';
-                        $tax_code = 'Output-'.$state_name.'-IGST-'.$igst_rate;
+                        $tax_code = 'Output-'.$state_name.'-IGST-'.$igst_rate.'%';
                         $ledger_name = $tax_code;
                         $result2 = $this->getAccountDetails('','',$tax_code);
+                        // echo $tax_code.'<br/>';
+                        // echo count($result2).'<br/><br/>';
                         if(count($result2)>0) {
                             $acc_id = $result2[0]['id'];
                             $ledger_name = $result2[0]['legal_name'];
