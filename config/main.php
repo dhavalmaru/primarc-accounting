@@ -12,7 +12,7 @@ $db = require(__DIR__ . '/db.php');
     ),
     'db' => $db,
     'request' => array(
-            'baseUrl' => 'http://localhost/primarc_pecan/web/'
+            'baseUrl' => 'http://localhost/git_primarc_accounting/web/'
     ),
     'html2pdf' => array(
             'class' => 'yii2tech\html2pdf\Manager',

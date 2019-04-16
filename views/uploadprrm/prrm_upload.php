@@ -10,9 +10,9 @@ use yii\helpers\Url;
 // 	$this->title = 'Update Payment Receipt: ' . $data[0]['id'];
 // }
 
-$this->title = 'Upload Scraping Report' . (isset($data[0]['id'])?': '.$data[0]['id']:'');
+$this->title = 'Jabong Reconciliation Upload' . (isset($data[0]['id'])?': '.$data[0]['id']:'');
 
-$this->params['breadcrumbs'][] = ['label' => 'Payment Receipt', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Jabong Reconciliation', 'url' => ['index']];
 $this->params['breadcrumbs'][] = 'Upload';//ucfirst($action);
 $mycomponent = Yii::$app->mycomponent;
 ?>
@@ -45,14 +45,25 @@ $mycomponent = Yii::$app->mycomponent;
 	<div class=" col-md-12 ">
 		<div class="btn-container ">
 			<div class="col-md-12">
-			<form id="scraping_upload" class="form-horizontal" action="#" method="post" onkeypress="return event.keyCode != 13;"  enctype="multipart/form-data"> 
+			<form id="prrm_upload" class="form-horizontal" action="#" method="post" onkeypress="return event.keyCode != 13;"  enctype="multipart/form-data"> 
 				<input type="hidden" name="_csrf" value="<?=Yii::$app->request->getCsrfToken()?>" />
 				<div class="form-group">
 					<div class=" col-md-4 col-sm-4 col-xs-4">
-						<label class="control-label">Transaction Type</label>
+						<label class="control-label">Select File Type</label>
+						<div class=" ">
+							<select class="form-control " id="file_type" name="file_type">
+								<option value="">Select</option>
+								<option value="DN">DN</option>
+								<option value="GRN">GRN</option>
+								
+							</select>
+						</div>
+					</div>
+					<div class=" col-md-4 col-sm-4 col-xs-4">
+						<label class="control-label">Upload File</label>
 						<div class=" ">
 							<div class=" "> 
-								<input type="file" class="form-control" name="scraping_file" id="image" placeholder="image" value=""/>
+								<input type="file" class="form-control" name="prrm_file" id="image" placeholder="image" value=""/>
 							</div>
 						</div>
 					</div>
@@ -84,8 +95,4 @@ $mycomponent = Yii::$app->mycomponent;
         '@web/js/datatable.js',
         ['depends' => [\yii\web\JqueryAsset::className()]]
     );
-    /*$this->registerJsFile(
-        '@web/js/scraping.js',
-        ['depends' => [\yii\web\JqueryAsset::className()]]
-    );*/
 ?>

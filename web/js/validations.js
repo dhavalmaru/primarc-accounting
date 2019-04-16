@@ -3028,3 +3028,55 @@ $('#form_sale_upload_details').submit(function() {
         return true;
     } 
 });
+
+$("#prrm_upload").validate({
+    rules: {
+        file_type: {
+            required: true
+        },
+        prrm_file: {
+            required: true
+        }
+    },
+
+    ignore: false,
+
+    errorPlacement: function (error, element) {
+        var placement = $(element).data('error');
+        if (placement) {
+            $(placement).append(error);
+        } else {
+            error.insertAfter(element);
+        }
+    }
+});
+
+$('#prrm_upload').on('submit',function (e) {
+   
+      e.preventDefault();
+      if (!$("#prrm_upload").valid()) {
+            return false;
+        } else {
+               $("#generate").val('Processing.....');
+              var form = $('#prrm_upload')[0];
+              var formData = new FormData(form);
+              $.ajax({
+                type: 'post',
+                enctype: 'multipart/form-data',
+                url: BASE_URL+'index.php?r=uploadprrm%2Fsaveupload',
+                data: formData,
+                processData: false,
+                contentType: false,
+                cache: false,
+                success: function (data) {
+                    if(data!=='success'){
+                        alert(data);
+                    }else{
+                        alert("Uploaded Successfully");
+                    }
+                    
+                    //location.reload();
+                }
+              });
+        }
+});
